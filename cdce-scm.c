@@ -38,22 +38,8 @@
 #include "cdce-scm.h"
 #include "common.h"
 #include "proto.h"
+#include "scm-helpers.h"
 #include "serial.h"
-
-static char *cdce_scm2string(SCM);
-
-static char *
-cdce_scm2string(SCM s)
-{
-    char *buf;
-
-    buf = scm_to_locale_string(s);
-    if (buf == NULL) {
-        (void)printf("scm2string(): Failed to convert scheme-string to C.\n");
-        return NULL;
-    }
-    return buf;
-}
 
 SCM
 cdce_scm_close(UNUSED SCM x)
