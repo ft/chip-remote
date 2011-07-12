@@ -41,6 +41,8 @@
 #include "scm-helpers.h"
 #include "serial.h"
 
+static void cdce_scm_module(UNUSED void *);
+
 SCM
 cdce_scm_close(UNUSED SCM x)
 {
@@ -176,18 +178,20 @@ static struct cdce_scm_proctab {
     { (char *)NULL, NULL, 0, 0, 0 }
 };
 
-void
-cdce_scm_init(void)
+static void
+cdce_scm_module(UNUSED void *data)
 {
     int i;
 
     scm_c_define("cdce/options:trace", SCM_BOOL_F);
+    scm_c_export("cdce/options:trace", NULL);
     for (i = 0; pt[i].name != NULL; ++i) {
         scm_c_define_gsubr(pt[i].name,
                            pt[i].req,
                            pt[i].opt,
                            pt[i].rest,
                            pt[i].cb);
+        scm_c_export(pt[i].name, NULL);
     }
     /*
      * Huh. My procedure-table can't deal with "SCM foo(SCM, SCM)"-type
@@ -195,4 +199,13 @@ cdce_scm_init(void)
      */
     scm_c_define_gsubr("cdce/write-register", 2, 0, 0,
                        cdce_scm_write_reg);
+    scm_c_export("cdce/write-register", NULL);
+}
+
+void
+cdce_scm_init(void)
+{
+    scm_c_define_module("ti cdce-primitives",
+                        cdce_scm_module,
+                        NULL);
 }
