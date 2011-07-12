@@ -99,6 +99,41 @@ cdce_scm_bye(UNUSED SCM x)
     return SCM_BOOL_T;
 }
 
+SCM
+cdce_scm_get_reg(SCM reg)
+{
+    unsigned int r;
+
+    if (!scm_is_unsigned_integer(reg, 0, UINT32_MAX)) {
+        (void)printf(
+            "cdce/get-register: `register must be an unsigned integer.\n");
+        return SCM_BOOL_F;
+    }
+
+    r = scm_to_uint(reg);
+    if (r > 12) {
+        (void)printf(
+            "cdce/read-registers: `register' is only valid from 0..12.\n");
+        return SCM_BOOL_F;
+    }
+    if (!proto_get_reg(r))
+        return SCM_BOOL_F;
+
+    /*
+     * Why "| r" you ask?
+     *
+     * Well, great question. Here's the deal: CDCE72010 devices have a hardware
+     * bug. When you read registers from the device, the least-significant bit
+     * will *always* be `0'. So, if you read all registers, the last nibbles
+     * would come up like this: 0, 0, 2, 2, 4, 4... etc. You get the drift.
+     *
+     * Now the last nibble only contains the register's address, which we
+     * *know* since we're asking for a specific one. And since the bug ties the
+     * bit *down*, ORing will just fix the bug without ill side effects.
+     */
+    return scm_from_uint32(proto_read_integer() | r);
+}
+
 static struct cdce_scm_proctab {
     const char *name;
     SCM (*cb)(SCM);
@@ -108,6 +143,7 @@ static struct cdce_scm_proctab {
 } pt[] = {
     { "cdce/bye", cdce_scm_bye, 0, 0, 0 },
     { "cdce/close", cdce_scm_close, 0, 0, 0 },
+    { "cdce/get-register", cdce_scm_get_reg, 1, 0, 0 },
     { "cdce/hi", cdce_scm_hi, 0, 0, 0 },
     { "cdce/open", cdce_scm_open, 1, 0, 0 },
     { (char *)NULL, NULL, 0, 0, 0 }
