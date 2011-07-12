@@ -6,7 +6,7 @@
 (define (read-registers)
   (let ((a '()))
     (let loop ((i 0))
-      (set! a (append a (list (cdce/get-register i))))
+      (set! a (append a (list (cdce/read-register i))))
       (if (< i 12)
           (loop (+ i 1))))
     a))

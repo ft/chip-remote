@@ -79,7 +79,7 @@ uint32_t
 cdce_scm_to_uint32(SCM value, char *name, int *err)
 {
     if (!scm_is_unsigned_integer(value, 0, UINT32_MAX)) {
-        (void)printf("cdce/get-register: `%s' must be uint32_t.\n", name);
+        (void)printf("scm2uint32: `%s' must be uint32_t.\n", name);
         *err = 1;
         return 0;
     }

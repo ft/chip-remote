@@ -102,7 +102,7 @@ cdce_scm_bye(UNUSED SCM x)
 }
 
 SCM
-cdce_scm_get_reg(SCM reg)
+cdce_scm_read_reg(SCM reg)
 {
     int err;
     uint32_t r;
@@ -172,7 +172,7 @@ static struct cdce_scm_proctab {
 } pt[] = {
     { "cdce/bye", cdce_scm_bye, 0, 0, 0 },
     { "cdce/close", cdce_scm_close, 0, 0, 0 },
-    { "cdce/get-register", cdce_scm_get_reg, 1, 0, 0 },
+    { "cdce/read-register", cdce_scm_read_reg, 1, 0, 0 },
     { "cdce/hi", cdce_scm_hi, 0, 0, 0 },
     { "cdce/open", cdce_scm_open, 1, 0, 0 },
     { (char *)NULL, NULL, 0, 0, 0 }
