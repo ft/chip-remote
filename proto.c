@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <libguile.h>
+
 #include "common.h"
 #include "proto.h"
 #include "serial.h"

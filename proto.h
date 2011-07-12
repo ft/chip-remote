@@ -32,9 +32,11 @@
 #define INC_PROTO_H_
 
 #include <stdint.h>
+
 int proto_bye(void);
 int proto_expect_ok(void);
 int proto_expect_reply(char *);
+int proto_get_reg(unsigned int);
 int proto_hi(void);
 uint32_t proto_read_integer(void);
 int proto_write_reg(unsigned int, uint32_t);
