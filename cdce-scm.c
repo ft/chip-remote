@@ -208,4 +208,5 @@ cdce_scm_init(void)
     scm_c_define_module("ti cdce-primitives",
                         cdce_scm_module,
                         NULL);
+    scm_c_use_module("ti cdce-primitives");
 }
