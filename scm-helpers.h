@@ -34,5 +34,7 @@
 #include <libguile.h>
 
 char *cdce_scm2string(SCM);
+int cdce_scm_bool_var(char *);
+int cdce_scm_variable_exists(char *);
 
 #endif /* INC_SCM_HELPERS_H_ */

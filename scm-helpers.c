@@ -44,3 +44,33 @@ cdce_scm2string(SCM s)
     }
     return buf;
 }
+
+int
+cdce_scm_variable_exists(char *name)
+{
+    if (name == NULL)
+        return 0;
+
+    return
+        (scm_sym2var(scm_from_locale_symbol(name),
+                     scm_current_module_lookup_closure(),
+                     SCM_BOOL_F)
+         != SCM_BOOL_F)
+        ? 1
+        : 0;
+}
+
+int
+cdce_scm_bool_var(char *name)
+{
+    SCM obj;
+
+    if (!cdce_scm_variable_exists(name))
+        return 0;
+
+    obj = scm_variable_ref(scm_c_lookup(name));
+    if (!scm_is_bool(obj) || scm_is_false(obj))
+        return 0;
+
+    return 1;
+}

@@ -59,16 +59,16 @@
  * An example session could look like this:
  *
  * @code
- *     < HI
- *     > Hi there, stranger.
- *     < VERSION
- *     > v0.1
- *     < READ 0
- *     > 683c0ed0
- *     < WRITE 0 ea3c0ed0
- *     > OK
- *     < BYE
- *     > Have a nice day.
+ *     << HI
+ *     >> Hi there, stranger.
+ *     << VERSION
+ *     >> v0.1
+ *     << READ 0
+ *     >> 683c0ed0
+ *     << WRITE 0 ea3c0ed0
+ *     >> OK
+ *     << BYE
+ *     >> Have a nice day.
  * @endcode
  *
  * Normally, you don't write raw commands to the device but use the appropriate

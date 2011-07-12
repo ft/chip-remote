@@ -42,6 +42,7 @@
 
 #include "common.h"
 #include "serial.h"
+#include "scm-helpers.h"
 
 static int cdce_serial_non_open(void);
 static int really_read(int, char *);
@@ -90,7 +91,9 @@ really_read(int fd, char *buf)
     if (err) {
         (void)printf("\n");
         return 0;
-    }
+    } else if (cdce_scm_bool_var("cdce/options:trace"))
+        (void)fprintf(stderr, " >> %s\n", buf);
+
     return 1;
 }
 
@@ -191,7 +194,9 @@ serial_write(char *buf)
     if (sofar < 0) {
         (void)printf("write(): %s\n", strerror(errno));
         return 0;
-    }
+    } else if (cdce_scm_bool_var("cdce/options:trace"))
+        (void)fprintf(stderr, " << %s\n", buf);
+
     return 1;
 }
 

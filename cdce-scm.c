@@ -118,6 +118,7 @@ cdce_scm_init(void)
 {
     int i;
 
+    scm_c_define("cdce/options:trace", SCM_BOOL_F);
     for (i = 0; pt[i].name != NULL; ++i) {
         scm_c_define_gsubr(pt[i].name,
                            pt[i].req,
