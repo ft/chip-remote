@@ -102,15 +102,12 @@ cdce_scm_bye(UNUSED SCM x)
 SCM
 cdce_scm_get_reg(SCM reg)
 {
-    unsigned int r;
+    int err;
+    uint32_t r;
 
-    if (!scm_is_unsigned_integer(reg, 0, UINT32_MAX)) {
-        (void)printf(
-            "cdce/get-register: `register must be an unsigned integer.\n");
+    r = cdce_scm_to_uint32(reg, "register", &err);
+    if (err)
         return SCM_BOOL_F;
-    }
-
-    r = scm_to_uint(reg);
     if (r > 12) {
         (void)printf(
             "cdce/read-registers: `register' is only valid from 0..12.\n");
@@ -132,6 +129,36 @@ cdce_scm_get_reg(SCM reg)
      * bit *down*, ORing will just fix the bug without ill side effects.
      */
     return scm_from_uint32(proto_read_integer() | r);
+}
+
+SCM
+cdce_scm_write_reg(SCM reg, SCM value)
+{
+    int err;
+    uint32_t r, v;
+
+    r = cdce_scm_to_uint32(reg, "register", &err);
+    if (err)
+        return SCM_BOOL_F;
+    if (r > 12) {
+        (void)printf(
+            "cdce/read-registers: `register' is only valid from 0..12.\n");
+        return SCM_BOOL_F;
+    }
+    v = cdce_scm_to_uint32(value, "value", &err);
+    if (err)
+        return SCM_BOOL_F;
+
+    v &= ~(0x0ful);
+    v |= r;
+
+    if (!proto_write_reg(r, v))
+        return SCM_BOOL_F;
+
+    if (!proto_expect_reply("OK"))
+        return SCM_BOOL_F;
+
+    return SCM_BOOL_T;
 }
 
 static struct cdce_scm_proctab {
@@ -162,4 +189,10 @@ cdce_scm_init(void)
                            pt[i].rest,
                            pt[i].cb);
     }
+    /*
+     * Huh. My procedure-table can't deal with "SCM foo(SCM, SCM)"-type
+     * signatures... Oh well.
+     */
+    scm_c_define_gsubr("cdce/write-register", 2, 0, 0,
+                       cdce_scm_write_reg);
 }
