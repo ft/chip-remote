@@ -1,0 +1,11 @@
+To build the program:
+
+    % make all
+
+The result will be in "./build/cdce-remote".
+
+To generate the source-code documentation:
+
+    % make apidocs
+
+The result will be in "./apidocs/index.html".
