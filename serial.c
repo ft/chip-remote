@@ -195,6 +195,8 @@ serial_write(char *buf)
         else
             sofar = rc;
     }
+    if (sofar >= 0)
+        sofar = write(cdce_serial_fd, "\n", 1);
     if (sofar < 0) {
         (void)printf("write(): %s\n", strerror(errno));
         return 0;
