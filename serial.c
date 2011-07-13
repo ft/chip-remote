@@ -169,7 +169,7 @@ serial_read(char *buf)
 int
 serial_write(char *buf)
 {
-    ssize_t sofar, len;
+    ssize_t sofar, len, rc;
 
     if (cdce_serial_non_open())
         return 0;
@@ -181,7 +181,7 @@ serial_write(char *buf)
         (void)printf("serial_write(): was: \"%s\"\n", buf);
         return 0;
     }
-    sofar = 0;
+    rc = sofar = 0;
     while (sofar >= 0 && sofar != len) {
         if (sofar > 0)
             /*
@@ -189,7 +189,11 @@ serial_write(char *buf)
              * This should probably be shorter. `nanosleep()'?
              */
             sleep(1);
-        sofar += write(cdce_serial_fd, buf + sofar, len - sofar);
+        rc = write(cdce_serial_fd, buf + sofar, len - sofar);
+        if (rc >= 0)
+            sofar += rc;
+        else
+            sofar = rc;
     }
     if (sofar < 0) {
         (void)printf("write(): %s\n", strerror(errno));
