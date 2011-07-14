@@ -235,6 +235,8 @@ cdce_scm_module(UNUSED void *data)
 
     scm_c_define("cdce/options:trace", SCM_BOOL_F);
     scm_c_export("cdce/options:trace", NULL);
+    scm_c_define("cdce/last-reply", scm_from_locale_string(""));
+    scm_c_export("cdce/last-reply", NULL);
     for (i = 0; pt[i].name != NULL; ++i) {
         scm_c_define_gsubr(pt[i].name,
                            pt[i].req,

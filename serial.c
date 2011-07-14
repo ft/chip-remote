@@ -91,8 +91,11 @@ really_read(int fd, char *buf)
     if (err) {
         (void)printf("\n");
         return 0;
-    } else if (cdce_scm_bool_var("cdce/options:trace"))
-        (void)fprintf(stderr, " >> %s\n", buf);
+    } else {
+        if (cdce_scm_bool_var("cdce/options:trace"))
+            (void)fprintf(stderr, " >> %s\n", buf);
+        scm_c_define("cdce/last-reply", scm_from_locale_string(buf));
+    }
 
     return 1;
 }
