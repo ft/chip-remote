@@ -40,4 +40,10 @@ SCM cdce_scm_open(SCM);
 
 void cdce_scm_init(void);
 
+SCM cdce_scm_read_reg(SCM);
+SCM cdce_scm_write_eeprom(SCM);
+SCM cdce_scm_write_eeprom_locked(SCM);
+SCM cdce_scm_write_raw(SCM);
+SCM cdce_scm_write_reg(SCM, SCM);
+
 #endif /* INC_CDCE_SCM_H_ */
