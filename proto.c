@@ -68,6 +68,18 @@ proto_bye(void)
 }
 
 int
+proto_write_eeprom(void)
+{
+    return serial_write("WRITE-EEPROM");
+}
+
+int
+proto_write_eeprom_locked(void)
+{
+    return serial_write("WRITE-EEPROM-LOCKED");
+}
+
+int
 proto_get_reg(unsigned int reg)
 {
     int rc;

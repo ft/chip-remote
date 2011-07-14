@@ -102,6 +102,28 @@ cdce_scm_bye(UNUSED SCM x)
 }
 
 SCM
+cdce_scm_write_eeprom(UNUSED SCM x)
+{
+    if (!proto_write_eeprom())
+        return SCM_BOOL_F;
+    if (!proto_expect_reply("OK"))
+        return SCM_BOOL_F;
+
+    return SCM_BOOL_T;
+}
+
+SCM
+cdce_scm_write_eeprom_locked(UNUSED SCM x)
+{
+    if (!proto_write_eeprom_locked())
+        return SCM_BOOL_F;
+    if (!proto_expect_reply("REALLY?"))
+        return SCM_BOOL_F;
+
+    return SCM_BOOL_T;
+}
+
+SCM
 cdce_scm_read_reg(SCM reg)
 {
     int err;
@@ -175,6 +197,8 @@ static struct cdce_scm_proctab {
     { "cdce/read-register", cdce_scm_read_reg, 1, 0, 0 },
     { "cdce/hi", cdce_scm_hi, 0, 0, 0 },
     { "cdce/open", cdce_scm_open, 1, 0, 0 },
+    { "cdce/write-eeprom", cdce_scm_write_eeprom, 0, 0, 0 },
+    { "cdce/write-eeprom-locked", cdce_scm_write_eeprom_locked, 0, 0, 0 },
     { (char *)NULL, NULL, 0, 0, 0 }
 };
 
