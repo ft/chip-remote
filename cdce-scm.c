@@ -257,8 +257,17 @@ cdce_scm_module(UNUSED void *data)
 void
 cdce_scm_init(void)
 {
+    SCM lp;
+
     scm_c_define_module("ti cdce-primitives",
                         cdce_scm_module,
                         NULL);
     scm_c_use_module("ti cdce-primitives");
+    lp = scm_c_lookup("%load-path");
+    scm_variable_set_x(
+        lp,
+        scm_append(
+            scm_list_2(scm_list_1(scm_from_locale_string(
+                                      CDCE_REMOTE_LOAD_PATH)),
+                       scm_variable_ref(lp))));
 }
