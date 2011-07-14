@@ -16,4 +16,12 @@ tags:
 	ctags *.c *.h
 	ctags -e *.c *.h
 
+install:
+	@if [ -f build/cdce-remote ]; then \
+	  cd build; \
+	  $(MAKE) install; \
+	else \
+	  printf 'Project not build yet.\n'; \
+	fi;
+
 .PHONY: all apidocs tags

@@ -15,3 +15,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-multichar -Wold-style-definition -Wunus
 find_package(Guile 2.0 REQUIRED)
 INCLUDE_DIRECTORIES(${GUILE_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(cdce-remote ${GUILE_LIBRARIES})
+
+install(TARGETS cdce-remote
+  DESTINATION bin)
+install(DIRECTORY scheme/ti
+  DESTINATION share/cdce-remote)
