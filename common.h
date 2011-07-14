@@ -35,7 +35,7 @@
 #define UNUSED __attribute__((unused))
 
 /** How long before timing out, when reading from serial? */
-#define SERIAL_TIMEOUT 60
+#define SERIAL_TIMEOUT 2
 
 /**
  * Maximum length of one transmission in the serial protocol.
