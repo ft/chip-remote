@@ -156,6 +156,31 @@ cdce_scm_read_reg(SCM reg)
 }
 
 SCM
+cdce_scm_write_raw(SCM data)
+{
+    char *buf;
+    SCM rc = SCM_BOOL_F;
+
+    buf = NULL;
+    if (scm_string_p(data) == SCM_BOOL_F) {
+        (void)printf("cdce/open: `data' must be a string.\n");
+        goto done;
+    }
+    buf = cdce_scm2string(data);
+
+    if (buf == NULL)
+        goto done;
+    if (!proto_write_raw(buf))
+        goto done;
+
+    rc = SCM_BOOL_T;
+
+done:
+    free(buf);
+    return rc;
+}
+
+SCM
 cdce_scm_write_reg(SCM reg, SCM value)
 {
     int err;
@@ -199,6 +224,7 @@ static struct cdce_scm_proctab {
     { "cdce/open", cdce_scm_open, 1, 0, 0 },
     { "cdce/write-eeprom", cdce_scm_write_eeprom, 0, 0, 0 },
     { "cdce/write-eeprom-locked", cdce_scm_write_eeprom_locked, 0, 0, 0 },
+    { "cdce/write-raw", cdce_scm_write_raw, 1, 0, 0 },
     { (char *)NULL, NULL, 0, 0, 0 }
 };
 

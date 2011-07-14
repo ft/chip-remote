@@ -41,6 +41,7 @@ int proto_hi(void);
 uint32_t proto_read_integer(void);
 int proto_write_eeprom(void);
 int proto_write_eeprom_locked(void);
+int proto_write_raw(char *);
 int proto_write_reg(unsigned int, uint32_t);
 
 #endif /* INC_PROTO_H_ */

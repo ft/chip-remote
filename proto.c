@@ -80,6 +80,16 @@ proto_write_eeprom_locked(void)
 }
 
 int
+proto_write_raw(char *buf)
+{
+    char reply[SERIAL_BUF_MAX + 1];
+
+    if (!serial_write(buf))
+        return 0;
+    return serial_read(reply);
+}
+
+int
 proto_get_reg(unsigned int reg)
 {
     int rc;
