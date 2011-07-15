@@ -20,3 +20,7 @@ install(TARGETS cdce-remote
   DESTINATION bin)
 install(DIRECTORY scheme/ti
   DESTINATION share/cdce-remote)
+
+file(GLOB scm scheme/*.scm)
+install(FILES ${scm}
+  DESTINATION share/cdce-remote)
