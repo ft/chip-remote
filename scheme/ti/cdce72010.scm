@@ -32,6 +32,7 @@
 
 (define-module (ti cdce72010)
   :export (read-registers
+           set-feedback-divider
            set-output-divider
            toggle-trace))
 
@@ -60,6 +61,12 @@
     (set! cdce/options:trace #t)))
   (display "abling serial communication trace.")
   (newline))
+
+(define (set-feedback-divider val)
+  (let ((fbdivreg 11))
+    (cdce/write-register fbdivreg (set-bits-fbdiv
+                                   (cdce/read-register fbdivreg)
+                                   val)))
 
 (define (set-output-divider div val)
   ;; There are ten outputs but only eight dividers. Outputs 0,1 and 8,9 each

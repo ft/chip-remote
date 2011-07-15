@@ -23,10 +23,14 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (define-module (ti cdce72010-prg)
-  :export (set-bits-odiv))
+  :export (set-bits-fbdiv
+          (set-bits-odiv))
 
 (use-modules (bitops)
              (ti cdce72010-tables))
 
 (define (set-bits-odiv regval divval)
   (or-bits regval (get-bits-for-divider divval) 17))
+
+(define (set-bits-fbdiv regval divval)
+  (or-bits regval (get-bits-for-divider divval) 9))
