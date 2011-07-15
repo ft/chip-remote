@@ -22,17 +22,11 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(define-module (bitops)
-  :export (one-bits
-           or-bits
-           set-bits))
+(define-module (ti cdce72010-prg)
+  :export (set-bits-odiv))
 
-(define (one-bits width)
-  (1- (ash 1 width)))
+(use-modules (bitops)
+             (ti cdce72010-tables))
 
-(define (clear-bits oldval width shifts)
-  (logand (lognot (ash (one-bits width) shifts)) oldval))
-
-(define (or-bits value bits shift)
-  (let ((rv (clear-bits value 7 shift)))
-    (logior rv (ash bits shift))))
+(define (set-bits-odiv regval divval)
+  (or-bits regval (get-bits-for-divider divval) 17))

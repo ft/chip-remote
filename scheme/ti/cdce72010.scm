@@ -32,9 +32,14 @@
 
 (define-module (ti cdce72010)
   :export (read-registers
+           set-output-divider
            toggle-trace))
 
-(use-modules (ti cdce-primitives))
+(use-modules (bitops)
+             (ti cdce-primitives)
+             (ti cdce72010-messages)
+             (ti cdce72010-prg)
+             (ti cdce72010-validate))
 
 (define (read-registers)
   (let ((a '()))
@@ -55,3 +60,22 @@
     (set! cdce/options:trace #t)))
   (display "abling serial communication trace.")
   (newline))
+
+(define (set-output-divider div val)
+  ;; There are ten outputs but only eight dividers. Outputs 0,1 and 8,9 each
+  ;; share one divider. Unlike the outputs, the dividers are numbered starting
+  ;; at `1'. Thus the outputs 0 and 1 share the divider number 1.
+  ;;
+  ;; Unfortunately, you can't just set a divider to `4' and expect the divider
+  ;; to be set to 4 (or 5 - which would be way more sensible). No, we need to
+  ;; look up the right bit settings in a table.
+  ;;
+  ;; There is something good, still: All dividers are configured in the same
+  ;; position in registers 1..8, one divider per register.
+
+  (if (not (divider? div))
+      (error-divider div)
+      (cdce/write-register div
+                           (set-bits-odiv
+                            (cdce/read-register div)
+                            val))))
