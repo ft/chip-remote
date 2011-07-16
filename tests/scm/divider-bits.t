@@ -16,17 +16,18 @@
   (cond ((null? c)
          (quit 0))
         (else
-         (cond
-          ((not (= (cadar c)
-                     (get-bits-for-divider (caar c))))
+         (let ((got (get-bits-for-divider (caar c)))
+               (exp (cadar c))
+               (div (caar c)))
+           (cond
+            ((not (= exp got))
              (begin
                (display (format "div(~d), exp: ~s, got: ~s.\n"
-                                (caar c)
-                                (number->string (cadar c) 2)
-                                (number->string
-                                 (get-bits-for-divider (caar c)) 2)))
+                                div
+                                (number->string exp 2)
+                                (number->string got 2)))
                (quit 1)))
-          (else
-             (next (cdr c)))))))
+            (else
+             (next (cdr c))))))))
 
 (quit 0)
