@@ -10,7 +10,7 @@ all:
 	fi;
 
 apidocs:
-	@doxygen
+	doxygen
 
 tags:
 	ctags *.c *.h
