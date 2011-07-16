@@ -21,12 +21,11 @@
                (div (caar c)))
            (cond
             ((not (= exp got))
-             (begin
-               (display (format "div(~d), exp: ~s, got: ~s.\n"
-                                div
-                                (number->string exp 2)
-                                (number->string got 2)))
-               (quit 1)))
+             (display (format "div(~d), exp: ~s, got: ~s.\n"
+                              div
+                              (number->string exp 2)
+                              (number->string got 2)))
+             (quit 1))
             (else
              (next (cdr c))))))))
 
