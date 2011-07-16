@@ -10,6 +10,10 @@ To generate the source-code documentation:
 
 The result will be in "./apidocs/index.html".
 
+To run the project's test-suite:
+
+    % make test
+
 To install the program and all scheme modules to `/usr/local', run
 the following with appropriate access (probably root):
 

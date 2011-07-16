@@ -25,3 +25,6 @@ install(DIRECTORY scheme/ti
 file(GLOB scm scheme/*.scm)
 install(FILES ${scm}
   DESTINATION share/cdce-remote)
+
+enable_testing()
+add_subdirectory(tests)

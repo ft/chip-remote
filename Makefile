@@ -24,4 +24,12 @@ install:
 	  printf 'Project not build yet.\n'; \
 	fi;
 
-.PHONY: all apidocs tags
+test:
+	@if [ -f build/cdce-remote ]; then \
+	  cd build; \
+	  $(MAKE) test; \
+	else \
+	  printf 'Project not build yet.\n'; \
+	fi;
+
+.PHONY: all apidocs install tags test

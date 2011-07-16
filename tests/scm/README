@@ -1,0 +1,6 @@
+Each file from this directory, which matches "*.t" is automatically added as a
+test case and run by "make test".
+
+Specifically, the code from these files is fed to an appropriate interpreter
+with `%load-path' aimed at the `scheme/' sub-directory of the project's source
+tree. Guile's automatic compilation is turned off for all test-suite scripts.
