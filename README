@@ -18,3 +18,13 @@ To install the program and all scheme modules to `/usr/local', run
 the following with appropriate access (probably root):
 
     # make install
+
+
+If you do not want to install the program, but use it from its build
+directory, you can do that. There is a helper target that will generate
+a simple shell script `cdce-remote-wrapper', that you can use instead
+of the real program. It takes care of setting everything up so that will
+work without problems. To generate the script do:
+
+    % cd build
+    % make inbuildexecscript

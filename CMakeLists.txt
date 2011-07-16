@@ -28,3 +28,7 @@ install(FILES ${scm}
 
 enable_testing()
 add_subdirectory(tests)
+
+add_custom_target(
+  inbuildexecscript
+  sh ${CMAKE_SOURCE_DIR}/mibes ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
