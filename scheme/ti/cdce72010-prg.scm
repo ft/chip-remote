@@ -24,7 +24,7 @@
 
 (define-module (ti cdce72010-prg)
   :export (set-bits-fbdiv
-          (set-bits-odiv))
+           set-bits-odiv))
 
 (use-modules (bitops)
              (ti cdce72010-tables))
