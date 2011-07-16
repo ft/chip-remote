@@ -50,13 +50,15 @@
 
 (define (test-output div val got bits exp)
   (display (format
+            #f
             "set divider in ~d:\n\n  from ~s, ~s\n    to ~s, ~s\n\n"
             div
             (number->string val 2)
             (number->string val 16)
             (number->string got 2)
             (number->string got 16)))
-  (display (format "     got ~s,\nexpected ~s\n"
+  (display (format #f
+                   "     got ~s,\nexpected ~s\n"
                    (number->string bits 2)
                    (number->string exp 2))))
 

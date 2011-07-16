@@ -77,7 +77,7 @@
   (let next((v divider-table))
     (cond
      ((null? v)
-      (display (format "Invalid divider `~d'. Falling back to 80.\n" value))
+      (display (format #f "Invalid divider `~d'. Falling back to 80.\n" value))
       #b0011111)
      (else
       (if (= value (caar v))

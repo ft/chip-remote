@@ -27,4 +27,4 @@
 
 (define (error-divider x)
   (display "`divider' needs to be an integer 1..8.\n")
-  (display (format "Was: ~d\n" x)))
+  (display (format #f "Was: ~d\n" x)))

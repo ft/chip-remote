@@ -35,7 +35,8 @@
                (div (caar c)))
            (cond
             ((not (= exp got))
-             (display (format "div(~d), exp: ~s, got: ~s.\n"
+             (display (format #f
+                              "div(~d), exp: ~s, got: ~s.\n"
                               div
                               (number->string exp 2)
                               (number->string got 2)))
