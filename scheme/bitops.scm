@@ -23,8 +23,8 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (define-module (bitops)
-  :export (one-bits
-           or-bits
+  :export (clear-bits
+           one-bits
            set-bits))
 
 (define (one-bits width)
@@ -33,6 +33,6 @@
 (define (clear-bits oldval width shifts)
   (logand (lognot (ash (one-bits width) shifts)) oldval))
 
-(define (or-bits value bits shift)
+(define (set-bits value bits shift)
   (let ((rv (clear-bits value 7 shift)))
     (logior rv (ash bits shift))))
