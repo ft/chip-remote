@@ -33,6 +33,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+
 #include <libguile.h>
 
 #include "cdce-scm.h"
@@ -263,11 +265,22 @@ cdce_scm_init(void)
                         cdce_scm_module,
                         NULL);
     scm_c_use_module("ti cdce-primitives");
-    lp = scm_c_lookup("%load-path");
-    scm_variable_set_x(
-        lp,
-        scm_append(
-            scm_list_2(scm_list_1(scm_from_locale_string(
-                                      CDCE_REMOTE_LOAD_PATH)),
-                       scm_variable_ref(lp))));
+    /*
+     * Add an additional `%load-path' entry for our own modules.
+     *
+     * We *only* set this if the environment variable `$GUILE_LOAD_PATH' is not
+     * set, because it should be able to overrule our compile-time choice. In
+     * particular, our test-suite sets that variable to the source tree's
+     * `scheme/' directory, so that during tests the modules from the source
+     * tree are used instead of the ones that might be installed system-wide.
+     */
+    if (getenv("GUILE_LOAD_PATH") == NULL) {
+        lp = scm_c_lookup("%load-path");
+        scm_variable_set_x(
+            lp,
+            scm_append(
+                scm_list_2(scm_list_1(scm_from_locale_string(
+                                          CDCE_REMOTE_LOAD_PATH)),
+                           scm_variable_ref(lp))));
+    }
 }
