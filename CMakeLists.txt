@@ -19,7 +19,8 @@ TARGET_LINK_LIBRARIES(cdce-remote ${GUILE_LIBRARIES})
 install(TARGETS cdce-remote
   DESTINATION bin)
 install(DIRECTORY scheme/ti
-  DESTINATION share/cdce-remote)
+  DESTINATION share/cdce-remote
+  FILES_MATCHING PATTERN "*.scm")
 
 file(GLOB scm scheme/*.scm)
 install(FILES ${scm}
