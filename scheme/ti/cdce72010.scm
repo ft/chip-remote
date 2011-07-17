@@ -33,7 +33,9 @@
 (define-module (ti cdce72010)
   :export (disable-output-divider
            enable-output-divider
+           power-down-device
            power-down-pll
+           power-up-device
            power-up-pll
            read-registers
            set-feedback-divider
@@ -128,3 +130,14 @@
 
 (define (power-up-pll)
   (change-power-down-pll clear-pll-power-down-bit))
+
+(define (change-power-down-device with-what)
+  (let ((device-pd-reg 10))
+    (cdce/write-register device-pd-reg
+                         (with-what (cdce/read-register device-pd-reg)))))
+
+(define (power-down-device)
+  (change-power-down-device clear-device-power-down-bit))
+
+(define (power-up-device)
+  (change-power-down-device set-device-power-down-bit))
