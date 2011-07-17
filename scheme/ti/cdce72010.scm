@@ -70,7 +70,7 @@
   (let ((fbdivreg 11))
     (cdce/write-register fbdivreg (set-bits-fbdiv
                                    (cdce/read-register fbdivreg)
-                                   val)))
+                                   val))))
 
 (define (set-output-divider div val)
   ;; There are ten outputs but only eight dividers. Outputs 0,1 and 8,9 each
