@@ -22,42 +22,45 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(define-module (ti cdce72010-prg)
-  :export (clear-odiv-enable-bit
-           clear-pll-power-down-bit
-           set-bits-fbdiv
-           set-bits-mdiv
-           set-bits-ndiv
-           set-bits-odiv
-           set-odiv-enable-bit
-           set-pll-power-down-bit))
+(use-modules (ice-9 format)
+             (ti cdce72010-prg))
 
-(use-modules (bitops)
-             (ti cdce72010-tables))
+;; Since the `set-div-bits' test already checks against non-trivial bit
+;; patterns, we'll assume that the involved bit operations work properly.
 
-(define (set-bits-odiv regval divval)
-  (set-bits regval (get-bits-for-divider divval) 17))
+(define values '(#b000000000000001
+                 #b100000000000000
+                 #b011111111111111
+                 #b010101010101010
+                 #b001010101010101
+                 #b011001100110011
+                 #b000110011001100))
 
-(define (set-bits-fbdiv regval divval)
-  (set-bits regval (get-bits-for-divider divval) 9))
+(define value-width 14)
 
-;; The M and N dividers are way simpler to set than the fb/output ones. You
-;; just need to substract 1 off of the `divval' value and put the resulting
-;; bits into the right position.
-(define (set-bits-mdiv regval divval)
-  (set-bits regval (1- divval) 4))
+(define (run-check fcn shifts)
+  (let nextval ((v values))
+    (cond
+     ((null? v) #t)
+     (else
+      (let* ((exp (car v))
+             (result (fcn #xffffffff exp))
+             ;; Read the bits from the result and add 1, because the bits
+             ;; store the configured divider value minus 1.
+             (got (1+ (bit-extract result shifts (+ shifts value-width)))))
+        (cond
+         ((not (= exp got))
+          (display
+           (format #f
+                   "expected: ~s\n     got: ~s\nresult was ~s"
+                   (number->string exp 2)
+                   (number->string got 2)
+                   (number->string result 16)))
+          (quit 1))
+         (else
+          (nextval (cdr v)))))))))
 
-(define (set-bits-ndiv regval divval)
-  (set-bits regval (1- divval) 18))
+(run-check set-bits-mdiv 4)
+(run-check set-bits-ndiv 18)
 
-(define (set-odiv-enable-bit regval)
-  (logior regval (ash 1 24)))
-
-(define (clear-odiv-enable-bit regval)
-  (clear-bits regval 1 24))
-
-(define (set-pll-power-down-bit regval)
-  (logior regval (ash 1 23)))
-
-(define (clear-pll-power-down-bit regval)
-  (clear-bits regval 1 23))
+(quit 0)
