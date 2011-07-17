@@ -34,5 +34,5 @@
   (logand (lognot (ash (one-bits width) shifts)) oldval))
 
 (define (set-bits value bits shift)
-  (let ((rv (clear-bits value 7 shift)))
+  (let ((rv (clear-bits value (integer-length value) shift)))
     (logior rv (ash bits shift))))
