@@ -22,6 +22,7 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (use-modules (ice-9 format)
+             (bitops)
              (ti cdce72010-prg))
 
 ;; Set this to `#t' to get output for succeeded tests, too.
@@ -64,7 +65,7 @@
 
 (define (test-setter fnc sh val div exp)
   (let* ((got (fnc val div))
-         (bits (bit-extract got sh (+ bit-width sh))))
+         (bits (bit-extract-width got sh bit-width)))
     (cond
      ((not (= bits exp))
       (test-output div val got bits exp)

@@ -23,6 +23,7 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (use-modules (ice-9 format)
+             (bitops)
              (ti cdce72010-prg))
 
 ;; Since the `set-div-bits' test already checks against non-trivial bit
@@ -47,7 +48,7 @@
              (result (fcn #xffffffff exp))
              ;; Read the bits from the result and add 1, because the bits
              ;; store the configured divider value minus 1.
-             (got (1+ (bit-extract result shifts (+ shifts value-width)))))
+             (got (1+ (bit-extract-width result shifts value-width))))
         (cond
          ((not (= exp got))
           (display

@@ -23,7 +23,8 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (define-module (bitops)
-  :export (clear-bits
+  :export (bit-extract-width
+           clear-bits
            one-bits
            set-bits))
 
@@ -36,3 +37,6 @@
 (define (set-bits value bits shift)
   (let ((rv (clear-bits value (integer-length value) shift)))
     (logior rv (ash bits shift))))
+
+(define (bit-extract-width value start width)
+  (bit-extract value start (+ start width)))
