@@ -33,6 +33,7 @@
 (define-module (ti cdce72010)
   :export (disable-output-divider
            enable-output-divider
+           export-registers
            power-down-device
            power-down-pll
            power-up-device
@@ -58,6 +59,76 @@
       (if (< i 12)
           (loop (+ i 1))))
     a))
+
+(define (export-registers-c-array registers)
+  (display "/* for `uint32_t' */\n#include <stdint.h>\n\n")
+  (display "uint32_t\nregs[] = {\n")
+  (let nr ((r registers))
+    (cond
+     ((null? r) #t)
+     (else
+      (format #t "    0x~8,'0x" (car r))
+      (if (null? (cdr r))
+          (newline)
+          (display ",\n"))
+      (nr (cdr r)))))
+  (display "};\n"))
+
+(define (export-registers-scheme-script registers)
+  (display "(use-modules ((ti cdce72010)\n")
+  (display "              #:renamer (symbol-prefix-proc 'cdce/)))\n\n")
+  (display "(cdce/open \"/dev/ttyUSB0\") ;; or whatever device file...\n")
+  (display "(cdce/hi)\n\n")
+  (let nr ((i 0)
+           (r registers))
+    (cond
+     ((null? r) #t)
+     (else
+      (format #t "(cdce/write-register ~2d #x~8,'0x)\n" i (car r))
+      (nr (1+ i) (cdr r)))))
+  (display "\n(cdce/bye)\n")
+  (display "(cdce/close)\n"))
+
+(define (export-registers-scheme-list registers type)
+  (display "(define registers\n  '(")
+  (let ((fmt (cond
+              ((equal? type 'hex)    "0x~8,'0x")
+              ((equal? type 'binary) "0x~32,'0b")
+              (else "Unknown scheme-list export type ~d"))))
+    (let nr ((r registers))
+      (cond
+       ((null? r)
+        (display "))\n")
+        #t)
+       (else
+        (format #t fmt (car r))
+        (if (not (null? (cdr r)))
+            (display "\n    "))
+        (nr (cdr r)))))))
+
+(define (export-registers registers . mode)
+  (let ((argc (length mode)))
+    (cond
+     ((and (not (= argc 1))
+           (not (= argc 0)))
+      (format #t "usage: (export-registers <register-list> [mode])\n")
+      #f)
+     (else
+      (let ((m (if (= argc 1)
+                   (car mode)
+                   'c-array)))
+        (cond
+         ((equal? m 'c-array)
+          (export-registers-c-array registers))
+         ((equal? m 'scheme-script)
+          (export-registers-scheme-script registers))
+         ((equal? m 'scheme-list-hex)
+          (export-registers-scheme-list registers 'hex))
+         ((equal? m 'scheme-list-binary)
+          (export-registers-scheme-list registers 'binary))
+         (else
+          (format #t "Unknown export mode: `~a'\n" (symbol->string m))
+          #f)))))))
 
 (define (toggle-trace)
   (display "-!- ")
