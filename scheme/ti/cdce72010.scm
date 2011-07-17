@@ -33,6 +33,8 @@
 (define-module (ti cdce72010)
   :export (disable-output-divider
            enable-output-divider
+           power-down-pll
+           power-up-pll
            read-registers
            set-feedback-divider
            set-output-divider
@@ -99,3 +101,14 @@
 
 (define (enable-output-divider div)
   (change-output-divider set-odiv-enable-bit div))
+
+(define (change-power-down-pll with-what)
+  (let ((pll-pd-reg 11))
+    (cdce/write-register pll-pd-reg
+                         (with-what (cdce/read-register pll-pd-reg)))))
+
+(define (power-down-pll)
+  (change-power-down-pll set-pll-power-down-bit))
+
+(define (power-up-pll)
+  (change-power-down-pll clear-pll-power-down-bit))

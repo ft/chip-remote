@@ -25,10 +25,10 @@
 (use-modules (ice-9 format)
              (ti cdce72010-prg))
 
-(if (not (logbit? 23 (set-pll-enable-bit #x00000000)))
+(if (not (logbit? 23 (set-pll-power-down-bit #x00000000)))
     (quit 1))
 
-(if (logbit? 23 (clear-pll-enable-bit #xffffffff))
+(if (logbit? 23 (clear-pll-power-down-bit #xffffffff))
     (quit 1))
 
 (quit 0)

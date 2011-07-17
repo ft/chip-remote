@@ -24,11 +24,11 @@
 
 (define-module (ti cdce72010-prg)
   :export (clear-odiv-enable-bit
-           clear-pll-enable-bit
+           clear-pll-power-down-bit
            set-bits-fbdiv
            set-bits-odiv
            set-odiv-enable-bit
-           set-pll-enable-bit))
+           set-pll-power-down-bit))
 
 (use-modules (bitops)
              (ti cdce72010-tables))
@@ -45,8 +45,8 @@
 (define (clear-odiv-enable-bit regval)
   (clear-bits regval 1 24))
 
-(define (set-pll-enable-bit regval)
+(define (set-pll-power-down-bit regval)
   (logior regval (ash 1 23)))
 
-(define (clear-pll-enable-bit regval)
+(define (clear-pll-power-down-bit regval)
   (clear-bits regval 1 23))
