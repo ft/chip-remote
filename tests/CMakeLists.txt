@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.0)
 
 file(GLOB TESTS scm/*.t)
+list(SORT TESTS ${TESTS})
 foreach (test ${TESTS})
   get_filename_component(test_name ${test} NAME_WE)
   add_test(
