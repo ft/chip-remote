@@ -23,8 +23,14 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (define-module (ti cdce72010-validate)
-  :export (divider?))
+  :export (divider?
+           mn-divider-value?))
 
 (define (divider? idx)
   (and (> idx 0)
        (< idx 9)))
+
+(define (mn-divider-value? value)
+  (and (> value 0)
+       ;; max. value is 14 bits set to `1' plus 1.
+       (<= value 0b100000000000000)))

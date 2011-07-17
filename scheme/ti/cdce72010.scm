@@ -37,6 +37,8 @@
            power-up-pll
            read-registers
            set-feedback-divider
+           set-m-divider
+           set-n-divider
            set-output-divider
            toggle-trace))
 
@@ -101,6 +103,20 @@
 
 (define (enable-output-divider div)
   (change-output-divider set-odiv-enable-bit div))
+
+(define (change-mn-divider with-what value)
+  (if (not (mn-divider-value? value))
+      (error-mn-divider-value value)
+      (let ((mn-div-reg 10))
+        (cdce/write-register mn-div-reg
+                             (with-what (cdce/read-register mn-div-reg)
+                                        value)))))
+
+(define (set-n-divider value)
+  (change-mn-divider set-bits-ndiv value))
+
+(define (set-m-divider value)
+  (change-mn-divider set-bits-mdiv value))
 
 (define (change-power-down-pll with-what)
   (let ((pll-pd-reg 11))
