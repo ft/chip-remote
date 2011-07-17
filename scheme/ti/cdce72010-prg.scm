@@ -39,22 +39,22 @@
              (ti cdce72010-tables))
 
 (define (set-bits-odiv regval divval)
-  (set-bits regval (get-bits-for-divider divval) 17))
+  (set-bits regval (get-bits-for-divider divval) 7 17))
 
 (define (set-bits-fbdiv regval divval)
-  (set-bits regval (get-bits-for-divider divval) 9))
+  (set-bits regval (get-bits-for-divider divval) 7 9))
 
 ;; The M and N dividers are way simpler to set than the fb/output ones. You
 ;; just need to substract 1 off of the `divval' value and put the resulting
 ;; bits into the right position.
 (define (set-bits-mdiv regval divval)
-  (set-bits regval (1- divval) 4))
+  (set-bits regval (1- divval) 14 4))
 
 (define (set-bits-ndiv regval divval)
-  (set-bits regval (1- divval) 18))
+  (set-bits regval (1- divval) 14 18))
 
 (define (set-bits-output-mode regval mode)
-  (set-bits regval (get-bits-for-output-mode mode) 25))
+  (set-bits regval (get-bits-for-output-mode mode) 7 25))
 
 (define (set-odiv-enable-bit regval)
   (logior regval (ash 1 24)))

@@ -34,8 +34,8 @@
 (define (clear-bits oldval width shifts)
   (logand (lognot (ash (one-bits width) shifts)) oldval))
 
-(define (set-bits value bits shift)
-  (let ((rv (clear-bits value (integer-length value) shift)))
+(define (set-bits value bits width shift)
+  (let ((rv (clear-bits value width shift)))
     (logior rv (ash bits shift))))
 
 (define (bit-extract-width value start width)
