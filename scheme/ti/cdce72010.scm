@@ -92,8 +92,8 @@
 (define (export-registers-scheme-list registers type)
   (display "(define registers\n  '(")
   (let ((fmt (cond
-              ((equal? type 'hex)    "0x~8,'0x")
-              ((equal? type 'binary) "0x~32,'0b")
+              ((equal? type 'hex)    "#x~8,'0x")
+              ((equal? type 'binary) "#b~32,'0b")
               (else "Unknown scheme-list export type ~d"))))
     (let nr ((r registers))
       (cond
