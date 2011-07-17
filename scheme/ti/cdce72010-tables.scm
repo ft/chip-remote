@@ -24,9 +24,25 @@
 
 (define-module (ti cdce72010-tables)
   :export (divider-table
+           factory-defaults
            get-bits-for-divider
            get-bits-for-output-mode
            output-modes))
+
+(define factory-defaults
+  '(#x002c0040
+    #x83840051
+    #x83400002
+    #x83400003
+    #x81800004
+    #x81800005
+    #xeb040006
+    #xeb040717
+    #x010c0158
+    #x01000049
+    #x0bfc07ca
+    #x0000058b
+    #x61e09c0c))
 
 (define divider-table
   ;; We need these to configure each output divider and the feedback divider.
