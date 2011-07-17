@@ -23,12 +23,14 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (define-module (ti cdce72010-prg)
-  :export (clear-odiv-enable-bit
+  :export (clear-device-power-down-bit
+           clear-odiv-enable-bit
            clear-pll-power-down-bit
            set-bits-fbdiv
            set-bits-mdiv
            set-bits-ndiv
            set-bits-odiv
+           set-device-power-down-bit
            set-odiv-enable-bit
            set-pll-power-down-bit))
 
@@ -61,3 +63,9 @@
 
 (define (clear-pll-power-down-bit regval)
   (clear-bits regval 1 23))
+
+(define (set-device-power-down-bit regval)
+  (logior regval (ash 1 11)))
+
+(define (clear-device-power-down-bit regval)
+  (clear-bits regval 1 11))
