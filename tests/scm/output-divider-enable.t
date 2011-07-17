@@ -22,23 +22,13 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(define-module (ti cdce72010-prg)
-  :export (clear-odiv-enable-bit
-           set-bits-fbdiv
-           set-bits-odiv
-           set-odiv-enable-bit))
+(use-modules (ice-9 format)
+             (ti cdce72010-prg))
 
-(use-modules (bitops)
-             (ti cdce72010-tables))
+(if (not (logbit? 24 (set-odiv-enable-bit #x00000000)))
+    (quit 1))
 
-(define (set-bits-odiv regval divval)
-  (set-bits regval (get-bits-for-divider divval) 17))
+(if (logbit? 24 (clear-odiv-enable-bit #xffffffff))
+    (quit 1))
 
-(define (set-bits-fbdiv regval divval)
-  (set-bits regval (get-bits-for-divider divval) 9))
-
-(define (set-odiv-enable-bit regval)
-  (logior regval (ash 1 24)))
-
-(define (clear-odiv-enable-bit regval)
-  (clear-bits regval 1 24))
+(quit 0)
