@@ -42,6 +42,7 @@
            set-m-divider
            set-n-divider
            set-output-divider
+           set-output-mode
            toggle-trace))
 
 (use-modules (bitops)
@@ -94,6 +95,14 @@
                            (set-bits-odiv
                             (cdce/read-register div)
                             val))))
+
+(define (set-output-mode output mode)
+  (if (not (output-index? output))
+      (error-output-index)
+      (cdce/write-register output
+                           (set-bits-output-mode
+                            (cdce/read-register output)
+                            mode))))
 
 (define (change-output-divider with-what div)
   (if (not (divider? div))
