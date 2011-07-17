@@ -31,7 +31,9 @@
 ;        #:renamer (symbol-prefix-proc 'cdce/)))
 
 (define-module (ti cdce72010)
-  :export (read-registers
+  :export (disable-output-divider
+           enable-output-divider
+           read-registers
            set-feedback-divider
            set-output-divider
            toggle-trace))
@@ -86,3 +88,14 @@
                            (set-bits-odiv
                             (cdce/read-register div)
                             val))))
+
+(define (change-output-divider with-what div)
+  (if (not (divider? div))
+      (error-divider div)
+      (cdce/write-register div (with-what (cdce/read-register div)))))
+
+(define (disable-output-divider div)
+  (change-output-divider clear-odiv-enable-bit div))
+
+(define (enable-output-divider div)
+  (change-output-divider set-odiv-enable-bit div))
