@@ -30,6 +30,7 @@
            set-bits-mdiv
            set-bits-ndiv
            set-bits-odiv
+           set-bits-output-mode
            set-device-power-down-bit
            set-odiv-enable-bit
            set-pll-power-down-bit))
@@ -51,6 +52,9 @@
 
 (define (set-bits-ndiv regval divval)
   (set-bits regval (1- divval) 18))
+
+(define (set-bits-output-mode regval mode)
+  (set-bits regval (get-bits-for-output-mode mode) 25))
 
 (define (set-odiv-enable-bit regval)
   (logior regval (ash 1 24)))

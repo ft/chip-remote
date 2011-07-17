@@ -24,7 +24,9 @@
 
 (define-module (ti cdce72010-tables)
   :export (divider-table
-           get-bits-for-divider))
+           get-bits-for-divider
+           get-bits-for-output-mode
+           output-modes))
 
 (define divider-table
   ;; We need these to configure each output divider and the feedback divider.
@@ -83,3 +85,41 @@
       (if (= value (caar v))
           (cadar v)
           (next (cdr v)))))))
+
+(define output-modes
+  '((off           #b0110100)
+    ;; for completeness, both pins can be low or 3-stated
+    (both-3-state  #b0010100)
+    (both-low      #b0001010)
+
+    ;; the -high versions are the same mode, just with increased output swing
+    (lvpecl        #b1000000)
+    (lvpecl-high   #b1000001)
+
+    (lvds          #b1110100)
+    (lvds-high     #b1110101)
+
+    ;; with -p/-n the opposing pin is 3-stated
+    (lvcmos-p      #b0010010)
+    (lvcmos-n      #b0001100)
+    ;; p active (n driven low)
+    (lvcmos-p-n0   #b0000010)
+    ;; n active (p driven low)
+    (lvcmos-n-p0   #b0001000)
+    ;; both pins active, (synchronously)
+    (lvcmos-p+n    #b0001010)
+    ;; both pins active (180 degrees phase difference)
+    (lvcmos-diff   #b0011010)))
+
+(define (get-bits-for-output-mode mode)
+  (let next ((m output-modes))
+    (cond
+     ((null? m)
+      (display (format #f "Invalid mode specifier ~s.\n"
+                       (symbol->string mode)))
+      (display "Falling back to 'off.\n")
+      #b0110100)
+     (else
+      (if (equal? mode (caar m))
+          (cadar m)
+          (next (cdr m)))))))
