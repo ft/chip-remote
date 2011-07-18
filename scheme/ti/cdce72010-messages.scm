@@ -31,7 +31,7 @@
   (display "`divider' needs to be an integer 1..8.\n")
   (display (format #f "Was: ~d\n" x)))
 
-(define (error-mn-divider-value)
+(define (error-mn-divider-value value)
   (display (format #f "The M and N dividers need to be set from 1 to ~d.\n"
                    (#b100000000000000)))
   (display (format #f "You tried to set: ~d\n" value)))
