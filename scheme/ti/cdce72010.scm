@@ -22,13 +22,21 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-; This is the level cdce72010 manipulation module. It is intended to make
-; changing settings of the device as straight forward as possible. If you
-; prefer the symbols from this module to have a `cdce/' prefix, use:
-;
-;      (use-modules
-;       ((ti cdce72010)
-;        #:renamer (symbol-prefix-proc 'cdce/)))
+;; This is the top level cdce72010 manipulation module. It is intended to
+;; make changing settings of the device as straight forward as possible. If
+;; you prefer the symbols from this module to have a `cdce/' prefix, use:
+;;
+;;      (use-modules
+;;       ((ti cdce72010)
+;;        #:renamer (symbol-prefix-proc 'cdce/)))
+;;
+;; Note, that the code in this module assumes that the serial connection to
+;; the microcontroller is stable. If you need this for unattended control in
+;; unstable environments, you may want to use the backend code directly.
+;;
+;; This code concentrates on sanitising procedure parameters to avoid
+;; problems during interactive use. For example, trying to change divider 9
+;; will cause an error, because divider 9 does not exist on the device.
 
 (define-module (ti cdce72010)
   :export (disable-output-divider
