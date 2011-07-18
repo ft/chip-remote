@@ -217,7 +217,7 @@
                          (with-what (cdce/read-register device-pd-reg)))))
 
 (define (power-down-device)
-  (change-power-down-device clear-device-power-down-bit))
+  (change-power-down-device set-device-power-down-bit))
 
 (define (power-up-device)
-  (change-power-down-device set-device-power-down-bit))
+  (change-power-down-device clear-device-power-down-bit))
