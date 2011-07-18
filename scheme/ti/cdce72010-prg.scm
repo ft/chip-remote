@@ -31,6 +31,7 @@
            set-bits-ndiv
            set-bits-odiv
            set-bits-output-mode
+           set-bits-rdiv
            set-device-power-down-bit
            set-odiv-enable-bit
            set-pll-power-down-bit))
@@ -73,3 +74,12 @@
 
 (define (clear-device-power-down-bit regval)
   (clear-bits regval 1 11))
+
+(define (set-bits-rdiv regval type state)
+  (let ((bitnum (cond
+                 ((equal? type 'primary) 4)
+                 ((equal? type 'secondary) 5))))
+    (cond (state
+           (logior regval (ash 1 bitnum)))
+          (else
+           (clear-bits regval 1 bitnum)))))
