@@ -25,7 +25,8 @@
 (define-module (ti cdce72010-validate)
   :export (divider?
            mn-divider-value?
-           output-index?))
+           output-index?
+           r-divider?))
 
 (define (divider? idx)
   (and (> idx 0)
@@ -39,3 +40,8 @@
 (define (output-index? idx)
   (and (>= idx 0)
        (<= idx 9)))
+
+(define (r-divider? type)
+  (and (symbol? type)
+       (or (equal? type 'primary)
+           (equal? type 'secondary))))

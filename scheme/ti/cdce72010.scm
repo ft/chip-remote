@@ -44,6 +44,7 @@
            set-n-divider
            set-output-divider
            set-output-mode
+           set-reference-divider
            toggle-trace))
 
 (use-modules (bitops)
@@ -199,6 +200,21 @@
 
 (define (set-m-divider value)
   (change-mn-divider set-bits-mdiv value))
+
+(define (set-reference-divider type state)
+  (cond
+   ((not (r-divider? type))
+    (error-invalid-r-divider)
+    #f)
+   ((not (boolean? state))
+    (error-not-boolean "r divider state")
+    #f)
+   (else
+    (let ((rdiv-reg 11))
+      (cdce/write-register rdiv-reg
+                           (set-bits-rdiv
+                            (cdce/read-register rdiv-reg)
+                            type state))))))
 
 (define (change-power-down-pll with-what)
   (let ((pll-pd-reg 11))
