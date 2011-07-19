@@ -26,7 +26,8 @@
   :export (divider?
            mn-divider-value?
            output-index?
-           r-divider?))
+           r-divider?
+           register-index?))
 
 (define (divider? idx)
   (and (> idx 0)
@@ -45,3 +46,7 @@
   (and (symbol? type)
        (or (equal? type 'primary)
            (equal? type 'secondary))))
+
+(define (register-index? idx)
+  (and (>= idx 0)
+       (<= idx 12)))
