@@ -25,6 +25,7 @@
 (define-module (ti cdce72010-messages)
   :export (error-divider
            error-invalid-r-divider
+           error-invalid-reg-index
            error-mn-divider
            error-not-boolean
            error-output-index))
@@ -43,6 +44,9 @@
 
 (define (error-invalid-r-divider)
   (display "r-divider type needs to be either 'primary or 'secondary.\n"))
+
+(define (error-invalid-reg-index idx)
+  (format #t "Register index (~d) out of range. [0..12]\n" idx))
 
 (define (error-not-boolean what)
   (format #t "~a needs to be a boolean value.\n" what))
