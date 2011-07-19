@@ -23,7 +23,23 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (define-module (ti cdce72010-decode)
-  :export (pll-lock?))
+  :export (pll-lock?
+           signal-exists?))
 
 (define (pll-lock? regval)
   (logbit? 10 regval))
+
+(define (signal-exists? which regval)
+  (cond
+   ((not (symbol? which))
+    (display "Signal-type needs to be a symbol.\n"))
+   ((equal? which 'primary-reference)
+    (logbit? 29 regval))
+   ((equal? which 'secondary-reference)
+    (logbit? 30 regval))
+   ((equal? which 'aux-in-clk)
+    (logbit? 8 regval))
+   ((equal? which 'vcxo-clk)
+    (logbit? 9 regval))
+   (else
+    (format #t "Unknown signal-type `~a'.\n" (symbol->string which)))))
