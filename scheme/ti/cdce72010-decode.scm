@@ -74,8 +74,8 @@
    (else
     (display "\n  ,------------------------------------------------------.\n")
     (format #t "  | Decoding bits \"~32,'0b\"...   |\n" regval)
-    (format #t "  | ...as register ~2d:                                    |\n"
-            idx)
+    (format #t "  | ...as register ~2d:                hex: ~8,'0x       |\n"
+            idx regval)
     (display "  `------------------------------------------------------´\n\n")
     (let nextfield ((rest (get-register-description idx))
                     (start 0))
