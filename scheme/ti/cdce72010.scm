@@ -39,7 +39,9 @@
 ;; will cause an error, because divider 9 does not exist on the device.
 
 (define-module (ti cdce72010)
-  :export (disable-output-divider
+  :export (decode-device
+           decode-register
+           disable-output-divider
            enable-output-divider
            export-registers
            power-down-device
@@ -57,6 +59,7 @@
 
 (use-modules (bitops)
              (ti cdce-primitives)
+             (ti cdce72010-decode)
              (ti cdce72010-messages)
              (ti cdce72010-prg)
              (ti cdce72010-validate))
@@ -245,3 +248,17 @@
 
 (define (power-up-device)
   (change-power-down-device clear-device-power-down-bit))
+
+(define (decode-register idx)
+  (cond
+   ((not (register-index? idx))
+    (error-invalid-reg-index idx))
+   (else
+    (decode-register-by-value (cdce/read-register idx)))))
+
+(define (decode-device)
+  (let nextreg ((reg (read-registers)))
+    (cond ((null? reg) (display "Done.\n"))
+          (else
+           (decode-register-by-value (car reg))
+           (nextreg (cdr reg))))))
