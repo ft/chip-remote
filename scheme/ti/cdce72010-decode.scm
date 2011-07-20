@@ -102,7 +102,7 @@
   (cond
    ((equal? type 'm-divider) (display "M"))
    (else (display "N")))
-  (format #t "-Divider value: ~5d (binary: ~14,'0b)\n" bits bits))
+  (format #t "-Divider value: ~5d (binary: ~14,'0b plus 1)\n" (1+ bits) bits))
 
 (define decoder-table
   `((address . ,decode/address)
