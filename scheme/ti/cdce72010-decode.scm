@@ -23,8 +23,8 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (define-module (ti cdce72010-decode)
-  :export (decode-register
-           decode-specific-register
+  :export (decode-register-by-value
+           decode-specific-register-by-value
            pll-lock?
            signal-exists?))
 
@@ -51,8 +51,8 @@
    (else
     (format #t "Unknown signal-type `~a'.\n" (symbol->string which)))))
 
-(define (decode-register regval)
-  (decode-specific-register (bit-extract regval 0 4) regval))
+(define (decode-register-by-value regval)
+  (decode-specific-register-by-value (bit-extract regval 0 4) regval))
 
 (define (get-register-description idx)
   (let next ((rc register-content-table)
@@ -67,7 +67,7 @@
           ((equal? type (caar d)) (cdar d))
           (else (next (cdr d))))))
 
-(define (decode-specific-register idx regval)
+(define (decode-specific-register-by-value idx regval)
   (cond
    ((not (register-index? idx))
     (error-invalid-reg-index idx))
