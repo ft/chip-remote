@@ -95,7 +95,7 @@
           (symbol->string type) x width))
 
 (define (decode/address bits width type)
-  (format #t "Register bits: \"~4,'0b\", looks like register `~d'.\n\n"
+  (format #t "Address bits: \"~4,'0b\", looks like register `~d'.\n\n"
           bits bits))
 
 (define (decode/mn-divider bits width type)
