@@ -25,6 +25,7 @@
 (define-module (ti cdce72010-decode)
   :export (decode-register-by-value
            decode-specific-register-by-value
+           fuzz-register
            pll-lock?
            signal-exists?))
 
@@ -50,6 +51,13 @@
     (logbit? 9 regval))
    (else
     (format #t "Unknown signal-type `~a'.\n" (symbol->string which)))))
+
+(define (fuzz-register idx)
+  (cond
+   ((not (register-index? idx))
+    (error-invalid-reg-index idx))
+   (else
+    (logior idx (ash (random (ash 1 28)) 4)))))
 
 (define (decode-register-by-value regval)
   (decode-specific-register-by-value (bit-extract regval 0 4) regval))
