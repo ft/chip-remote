@@ -162,7 +162,8 @@
     (m-divider . ,decode/mn-divider)
     (n-divider . ,decode/mn-divider)
     (pri-sec-sel . ,decode/simple-string)
-    (ref-sel-ctrl . ,decode/simple-string)))
+    (ref-sel-ctrl . ,decode/simple-string)
+    (vcxo-sel . ,decode/simple-string)))
 
 (define decode-string-table
   '((pri-sec-sel
@@ -172,4 +173,7 @@
         (3 . "Auto Reference Select (PRI then SEC).")))
     (ref-sel-ctrl
      . ((0 . "REG0:6+7 ignored. REF_SEL pin selects reference input.")
-        (1 . "REF_SEL pin disabled. REG0:6+7 are used to select ref-in.")))))
+        (1 . "REF_SEL pin disabled. REG0:6+7 are used to select ref-in.")))
+    (vcxo-sel
+     . ((0 . "Divider-sync: PRI/SEC-ref according to REG0:6+7.")
+        (1 . "Divider-sync: VCXO/AUX selected.")))))
