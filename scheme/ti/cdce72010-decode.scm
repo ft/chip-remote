@@ -161,9 +161,15 @@
     (in-buf-sel . ,decode/inbufsel)
     (m-divider . ,decode/mn-divider)
     (n-divider . ,decode/mn-divider)
+    (pri-sec-sel . ,decode/simple-string)
     (ref-sel-ctrl . ,decode/simple-string)))
 
 (define decode-string-table
-  '((ref-sel-ctrl
+  '((pri-sec-sel
+     . ((0 . "No input buffer is selected/active.")
+        (1 . "PRI_BUF is selected, SEC_BUF is powered down.")
+        (2 . "SEC_BUF is selected, PRI_BUF is powered down.")
+        (3 . "Auto Reference Select (PRI then SEC).")))
+    (ref-sel-ctrl
      . ((0 . "REF_SEL pin disabled. REG0:6+7 are used to select ref-in.")
         (1 . "REG0:6+7 ignored. REF_SEL pin selects reference input.")))))

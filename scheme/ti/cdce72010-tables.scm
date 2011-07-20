@@ -148,8 +148,7 @@
   ;; #0
   '(((4 . address)
      (2 . in-buf-sel)
-     (1 . pri-sel)
-     (1 . sec-sel)
+     (2 . pri-sec-sel)
      (1 . vcxo-sel)
      (1 . ref-sel-ctrl)
      (2 . delay-pfd)
