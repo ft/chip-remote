@@ -171,5 +171,5 @@
         (2 . "SEC_BUF is selected, PRI_BUF is powered down.")
         (3 . "Auto Reference Select (PRI then SEC).")))
     (ref-sel-ctrl
-     . ((0 . "REF_SEL pin disabled. REG0:6+7 are used to select ref-in.")
-        (1 . "REG0:6+7 ignored. REF_SEL pin selects reference input.")))))
+     . ((0 . "REG0:6+7 ignored. REF_SEL pin selects reference input.")
+        (1 . "REF_SEL pin disabled. REG0:6+7 are used to select ref-in.")))))
