@@ -120,8 +120,50 @@
    (else (display "N")))
   (format #t "-Divider value: ~5d (binary: ~14,'0b plus 1)\n" (1+ bits) bits))
 
+(define (simple-string-print str bits width)
+  (let ((fmt (string-join (list "~a (bit"
+                                (if (> width 1) "s" "")
+                                ": ~"
+                                (number->string width 10)
+                                ",'0b)\n")
+                          "")))
+    (format #t fmt str bits)))
+
+(define (decode/simple-string bits width type)
+  ;; If the bits to decode don't need special attention, but basically
+  ;; just require a string to be printed depending on the bit-field's
+  ;; value, then this one can be used. The strings to display are looked
+  ;; up in `decode-string-table'.
+  (let nextstr ((dst decode-string-table))
+    (cond
+     ((null? dst)
+      (simple-string-print "Missing string for `~a'.\n"
+                           (symbol->string type)
+                           bits
+                           width))
+     ((equal? type (caar dst))
+      (let nextval ((v (cdar dst)))
+        (cond
+         ((null? v)
+          (simple-string-print (format #f "Invalid value for `~a'."
+                                       (symbol->string type))
+                               bits
+                               width))
+         ((= bits (caar v))
+          (simple-string-print (cdar v) bits width))
+         (else
+          (nextval (cdr v))))))
+     (else
+      (nextstr (cdr dst))))))
+
 (define decoder-table
   `((address . ,decode/address)
     (in-buf-sel . ,decode/inbufsel)
     (m-divider . ,decode/mn-divider)
-    (n-divider . ,decode/mn-divider)))
+    (n-divider . ,decode/mn-divider)
+    (ref-sel-ctrl . ,decode/simple-string)))
+
+(define decode-string-table
+  '((ref-sel-ctrl
+     . ((0 . "REF_SEL pin disabled. REG0:6+7 are used to select ref-in.")
+        (1 . "REG0:6+7 ignored. REF_SEL pin selects reference input.")))))
