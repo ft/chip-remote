@@ -106,6 +106,14 @@
   (format #t "Address bits: \"~4,'0b\", looks like register `~d'.\n\n"
           bits bits))
 
+(define (decode/inbufsel bits width type)
+  (format #t "Primary and secondary input buffer type: `~a' (bits: ~2,'0b)\n"
+          (cond ((= bits #b01) "LVPECL")
+                ((= bits #b11) "LVDS")
+                ((= bits #b00) "LVCMOS")
+                (else "INVALID"))
+          bits))
+
 (define (decode/mn-divider bits width type)
   (cond
    ((equal? type 'm-divider) (display "M"))
@@ -114,5 +122,6 @@
 
 (define decoder-table
   `((address . ,decode/address)
+    (in-buf-sel . ,decode/inbufsel)
     (m-divider . ,decode/mn-divider)
     (n-divider . ,decode/mn-divider)))
