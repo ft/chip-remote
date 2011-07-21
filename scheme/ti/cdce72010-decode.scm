@@ -146,6 +146,16 @@
               (else
                (nextval (cdr val)))))))))
 
+(define (decode/reserved-bits bits width type)
+  (format #t
+          (string-join
+           (list "~d reserved bit"
+                 (if (> width 1) "s" "")
+                 ": ~"
+                 (number->string width 10)
+                 ",'0b\n") "")
+          width bits))
+
 (define (simple-string-print str bits width)
   (let ((fmt (string-join (list "~a (bit"
                                 (if (> width 1) "s" "")
@@ -197,6 +207,7 @@
     (n-divider . ,decode/mn-divider)
     (pri-sec-sel . ,decode/simple-string)
     (ref-sel-ctrl . ,decode/simple-string)
+    (reserved . ,decode/reserved-bits)
     (vcxo-sel . ,decode/simple-string)))
 
 (define decode-string-table
