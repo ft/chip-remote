@@ -156,11 +156,23 @@
                  ",'0b\n") "")
           width bits))
 
+(define (is-output-mode? type bits)
+  (let ((val (cadar type)))
+    (cond
+     ((not (list? val))
+      (= bits val))
+     (else
+      (let nextval ((v val))
+        (cond
+         ((null? v) #f)
+         ((= bits (car v)) #t)
+         (else (nextval (cdr v)))))))))
+
 (define (decode/output-mode bits width type)
   (display "Output Mode: ")
   (let nexttype ((type output-modes))
     (cond ((null? type) (display "Invalid setting"))
-          ((= bits (cadar type))
+          ((is-output-mode? type bits)
            (display (string-upcase (symbol->string (caar type)))))
           (else
            (nexttype (cdr type)))))

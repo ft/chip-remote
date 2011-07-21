@@ -34,7 +34,9 @@
    ((null? m) #t)
    (else
     (let* ((mode (caar m))
-           (exp (cadar m))
+           (exp (if (list? (cadar m))
+                    (caadar m)
+                    (cadar m)))
            (result (set-bits-output-mode #xffffffff mode))
            (got (bit-extract-width result 25 value-width)))
       (cond

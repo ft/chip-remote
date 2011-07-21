@@ -105,29 +105,59 @@
           (next (cdr v)))))))
 
 (define output-modes
-  '((off           #b0110100)
+  '((off             (#b0110100
+                      #b0110101))
     ;; for completeness, both pins can be low or 3-stated
-    (both-3-state  #b0010100)
-    (both-low      #b0001010)
+    (both-3-state    (#b0010100
+                      #b0010101))
+    (both-low        (#b0001010
+                      #b0001011))
 
     ;; the -high versions are the same mode, just with increased output swing
-    (lvpecl        #b1000000)
-    (lvpecl-high   #b1000001)
+    (lvpecl           #b1000000)
+    (lvpecl-high      #b1000001)
 
-    (lvds          #b1110100)
-    (lvds-high     #b1110101)
+    (lvds             #b1110100)
+    (lvds-high        #b1110101)
 
     ;; with -p/-n the opposing pin is 3-stated
-    (lvcmos-p      #b0010010)
-    (lvcmos-n      #b0001100)
+    (lvcmos-p        (#b0010000
+                      #b0010001))
+    (lvcmos-n        (#b0000100
+                      #b0000101))
+    ;; same, but the active pin inverted
+    (lvcmos-p-inv    (#b0010010
+                      #b0010011))
+    (lvcmos-n-inv    (#b0001100
+                      #b0001101))
     ;; p active (n driven low)
-    (lvcmos-p-n0   #b0000010)
+    (lvcmos-p-n0     (#b0011000
+                      #b0011001))
     ;; n active (p driven low)
-    (lvcmos-n-p0   #b0001000)
+    (lvcmos-n-p0     (#b0000110
+                      #b0000111))
+    ;; ...and invert again
+    (lvcmos-p-n0-inv (#b0011010
+                      #b0011011))
+    (lvcmos-n-p0-inv (#b0001110
+                      #b0001111))
     ;; both pins active, (synchronously)
-    (lvcmos-p+n    #b0001010)
+    (lvcmos-p+n      (#b0000000
+                      #b0000001))
+    ;; sync-invert
+    (lvcmos-p+n-inv  (#b0001010
+                      #b0001011))
     ;; both pins active (180 degrees phase difference)
-    (lvcmos-diff   #b0011010)))
+    (lvcmos-diff     (#b0011010
+                      #b0011011))
+    ;; and the other way round
+    (lvcmos-diff-inv (#b0001110
+                      #b0001111))
+    ;; Some of these are rather rediculous.
+    (lvcmos-p3-n0    (#b0011100
+                      #b0011101))
+    (lvcmos-p0-n3    (#b0010110
+                      #b0010111))))
 
 (define (get-bits-for-output-mode mode)
   (let next ((m output-modes))
@@ -138,9 +168,14 @@
       (display "Falling back to 'off.\n")
       #b0110100)
      (else
-      (if (equal? mode (caar m))
-          (cadar m)
-          (next (cdr m)))))))
+      (cond
+       ((equal? mode (caar m))
+        (let ((val (cadar m)))
+          (if (list? val)
+              (car val)
+              val)))
+       (else
+        (next (cdr m))))))))
 
 (define charge-pump-current-table
   '((#b0000 0.0 "(3-State)")
