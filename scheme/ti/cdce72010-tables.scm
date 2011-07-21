@@ -23,7 +23,8 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (define-module (ti cdce72010-tables)
-  :export (divider-table
+  :export (charge-pump-current-table
+           divider-table
            factory-defaults
            get-bits-for-divider
            get-bits-for-output-mode
@@ -140,6 +141,24 @@
       (if (equal? mode (caar m))
           (cadar m)
           (next (cdr m)))))))
+
+(define charge-pump-current-table
+  '((#b0000 0.0 "(3-State)")
+    (#b0001 0.2)
+    (#b0010 0.4)
+    (#b0011 0.6)
+    (#b0100 0.8)
+    (#b0101 1.0)
+    (#b0110 1.2)
+    (#b0111 1.4)
+    (#b1000 1.6)
+    (#b1001 1.8)
+    (#b1010 2.0)
+    (#b1011 2.2 "(Default)")
+    (#b1100 2.4)
+    (#b1101 2.6)
+    (#b1110 2.8)
+    (#b1111 3.0)))
 
 ;; The following describes all register contents of the CDCE72010 device. The
 ;; first integer is the width of a bit-set. So all bit-set-widths of a register

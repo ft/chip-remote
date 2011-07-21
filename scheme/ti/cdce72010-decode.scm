@@ -128,6 +128,24 @@
    (else (display "N")))
   (format #t "-Divider value: ~5d (binary: ~14,'0b plus 1)\n" (1+ bits) bits))
 
+(define (decode/cp-current bits width type)
+  (let nextval ((val charge-pump-current-table))
+    (cond ((null? val)
+           (display "decode/cp-current, BUG: This shouldn't happen.")
+           (display "What register value did this happen with?\n"))
+          (else
+           (let ((b (caar val))
+                 (amps (cadar val))
+                 (remark (cddar val)))
+             (cond
+              ((= bits b)
+               (format #t "CP-Current: ~f mA" amps)
+               (if (not (null? remark))
+                   (format #t " ~a" (car remark)))
+               (format #t " (bits: ~4,'0b)\n" bits))
+              (else
+               (nextval (cdr val)))))))))
+
 (define (simple-string-print str bits width)
   (let ((fmt (string-join (list "~a (bit"
                                 (if (> width 1) "s" "")
@@ -166,6 +184,13 @@
 
 (define decoder-table
   `((address . ,decode/address)
+    (cp-current . ,decode/cp-current)
+    (cp-direction . ,decode/simple-string)
+    (cp-mode . ,decode/simple-string)
+    (cp-op-amp . ,decode/simple-string)
+    (cp-preset-output-voltage . ,decode/simple-string)
+    (cp-sink . ,decode/simple-string)
+    (cp-src . ,decode/simple-string)
     (delay-pfd . ,decode/delay-pfd)
     (in-buf-sel . ,decode/inbufsel)
     (m-divider . ,decode/mn-divider)
@@ -175,7 +200,25 @@
     (vcxo-sel . ,decode/simple-string)))
 
 (define decode-string-table
-  '((pri-sec-sel
+  '((cp-direction
+     . ((0 . "CP-Direction: positive")
+        (1 . "CP-Direction: negative")))
+    (cp-mode
+     . ((0 . "CP-Mode: 3V")
+        (1 . "CP-Mode: 5V")))
+    (cp-op-amp
+     . ((0 . "CP-OpAmp: on (Test-GTME)")
+        (1 . "CP-OpAmp: off (Test-GTME)")))
+    (cp-preset-output-voltage
+     . ((0 . "CP-Preset-Voltage: off")
+        (1 . "CP-Preset-Voltage: on")))
+    (cp-sink
+     . ((0 . "CP-Current-Sink: off (Test-GTME)")
+        (1 . "CP-Current-Sink: on (Test-GTME)")))
+    (cp-src
+     . ((0 . "CP-Current-Source: off (Test-GTME)")
+        (1 . "CP-Current-Source: on (Test-GTME)")))
+    (pri-sec-sel
      . ((0 . "No input buffer is selected/active.")
         (1 . "PRI_BUF is selected, SEC_BUF is powered down.")
         (2 . "SEC_BUF is selected, PRI_BUF is powered down.")
