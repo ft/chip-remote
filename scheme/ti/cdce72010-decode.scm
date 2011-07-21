@@ -114,6 +114,14 @@
                 (else "INVALID"))
           bits))
 
+(define (decode/delay-pfd bits width type)
+  (format #t "PFD Pulse Width Delay: ~a (bits: ~2,'0b)\n"
+          (cond ((= bits #b00) "1.5ns")
+                ((= bits #b01) "3.0ns")
+                ((= bits #b10) "4.5ns")
+                (else "6.0ns"))
+          bits))
+
 (define (decode/mn-divider bits width type)
   (cond
    ((equal? type 'm-divider) (display "M"))
@@ -158,6 +166,7 @@
 
 (define decoder-table
   `((address . ,decode/address)
+    (delay-pfd . ,decode/delay-pfd)
     (in-buf-sel . ,decode/inbufsel)
     (m-divider . ,decode/mn-divider)
     (n-divider . ,decode/mn-divider)
