@@ -156,6 +156,16 @@
                  ",'0b\n") "")
           width bits))
 
+(define (decode/output-mode bits width type)
+  (display "Output Mode: ")
+  (let nexttype ((type output-modes))
+    (cond ((null? type) (display "Invalid setting"))
+          ((= bits (cadar type))
+           (display (string-upcase (symbol->string (caar type)))))
+          (else
+           (nexttype (cdr type)))))
+  (format #t " (bits: ~7,'0b)\n" bits))
+
 (define (simple-string-print str bits width)
   (let ((fmt (string-join (list "~a (bit"
                                 (if (> width 1) "s" "")
@@ -206,6 +216,7 @@
     (in-buf-sel . ,decode/inbufsel)
     (m-divider . ,decode/mn-divider)
     (n-divider . ,decode/mn-divider)
+    (output-mode . ,decode/output-mode)
     (pri-sec-sel . ,decode/simple-string)
     (ref-sel-ctrl . ,decode/simple-string)
     (reserved . ,decode/reserved-bits)
