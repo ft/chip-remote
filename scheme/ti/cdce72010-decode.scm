@@ -202,6 +202,7 @@
     (cp-sink . ,decode/simple-string)
     (cp-src . ,decode/simple-string)
     (delay-pfd . ,decode/delay-pfd)
+    (i-ref-pull-down . ,decode/simple-string)
     (in-buf-sel . ,decode/inbufsel)
     (m-divider . ,decode/mn-divider)
     (n-divider . ,decode/mn-divider)
@@ -229,6 +230,9 @@
     (cp-src
      . ((0 . "CP-Current-Source: off (Test-GTME)")
         (1 . "CP-Current-Source: on (Test-GTME)")))
+    (i-ref-pull-down
+     . ((0 . "I_REF_CP pull-down res: disabled (Test-GTME)")
+        (1 . "I_REF_CP pull-down res: enabled (Test-GTME)")))
     (pri-sec-sel
      . ((0 . "No input buffer is selected/active.")
         (1 . "PRI_BUF is selected, SEC_BUF is powered down.")
