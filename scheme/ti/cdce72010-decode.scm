@@ -245,6 +245,7 @@
     (cp-sink . ,decode/simple-string)
     (cp-src . ,decode/simple-string)
     (delay-pfd . ,decode/delay-pfd)
+    (divider-enable . ,decode/simple-string)
     (fb-divider . ,decode/divider)
     (i-ref-pull-down . ,decode/simple-string)
     (in-buf-sel . ,decode/inbufsel)
@@ -276,6 +277,9 @@
     (cp-src
      . ((0 . "CP-Current-Source: off (Test-GTME)")
         (1 . "CP-Current-Source: on (Test-GTME)")))
+    (divider-enable
+     . ((0 . "Output divider disabled.")
+        (1 . "Output divider enabled.")))
     (i-ref-pull-down
      . ((0 . "I_REF_CP pull-down res: disabled (Test-GTME)")
         (1 . "I_REF_CP pull-down res: enabled (Test-GTME)")))
