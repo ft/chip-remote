@@ -315,6 +315,7 @@
     ;; #6
     ((4 . address)
      (1 . fb-freqdetect-connected-to-lockdetect)
+     (1 . reserved)
      (1 . fb-determ-div-sel)
      (1 . fb-determ-div2-disable)
      (1 . fb-start-bypass)
