@@ -178,6 +178,11 @@
            (nexttype (cdr type)))))
   (format #t " (bits: ~7,'0b)\n" bits))
 
+(define (decode/coarse bits width type)
+  (format #t
+          "Coarse-Phase-Adjust bits are undocumented, but: ~7,'0b\n"
+          bits))
+
 (define (simple-string-print str bits width)
   (let ((fmt (string-join (list "~a (bit"
                                 (if (> width 1) "s" "")
@@ -216,6 +221,7 @@
 
 (define decoder-table
   `((address . ,decode/address)
+    (coarse-phase-adjust . ,decode/coarse)
     (cp-current . ,decode/cp-current)
     (cp-direction . ,decode/simple-string)
     (cp-mode . ,decode/simple-string)
