@@ -30,6 +30,7 @@
            get-bits-for-output-mode
            mn-phase-delay-table
            lock-detect-window-table
+           lock-event-count-table
            output-modes
            register-content-table))
 
@@ -226,6 +227,12 @@
     (#b1101 19.3)
     (#b1110 28.6)
     (#b1111 'reserved)))
+
+(define lock-event-count-table
+  '((#b00 1)
+    (#b01 16)
+    (#b10 64 "(Default)")
+    (#b11 256)))
 
 ;; The following describes all register contents of the CDCE72010 device. The
 ;; first integer is the width of a bit-set. So all bit-set-widths of a register
