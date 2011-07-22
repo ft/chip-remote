@@ -183,6 +183,21 @@
           "Coarse-Phase-Adjust bits are undocumented, but: ~7,'0b\n"
           bits))
 
+(define (decode/divider bits width type)
+  (format
+   #t
+   "~a: ~a (bits: ~7,'0b)\n"
+   (cond
+    ((equal? type 'output-divider) "Output divider")
+    ((equal? type 'fb-divider) "Feedback divider")
+    (else (format #f "Invalid divider type: `~a'"
+                  (symbol->string type))))
+   (let ((val (get-divider-value-by-bits bits)))
+     (if (equal? val 'invalid)
+         "Invalid setting"
+         (number->string val 10)))
+   bits))
+
 (define (simple-string-print str bits width)
   (let ((fmt (string-join (list "~a (bit"
                                 (if (> width 1) "s" "")
@@ -230,10 +245,12 @@
     (cp-sink . ,decode/simple-string)
     (cp-src . ,decode/simple-string)
     (delay-pfd . ,decode/delay-pfd)
+    (fb-divider . ,decode/divider)
     (i-ref-pull-down . ,decode/simple-string)
     (in-buf-sel . ,decode/inbufsel)
     (m-divider . ,decode/mn-divider)
     (n-divider . ,decode/mn-divider)
+    (output-divider . ,decode/divider)
     (output-mode . ,decode/output-mode)
     (pri-sec-sel . ,decode/simple-string)
     (ref-sel-ctrl . ,decode/simple-string)

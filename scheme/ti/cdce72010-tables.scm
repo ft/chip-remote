@@ -28,6 +28,7 @@
            factory-defaults
            get-bits-for-divider
            get-bits-for-output-mode
+           get-divider-value-by-bits
            mn-phase-delay-table
            lock-detect-window-table
            lock-event-count-table
@@ -106,6 +107,14 @@
       (if (= value (caar v))
           (cadar v)
           (next (cdr v)))))))
+
+(define (get-divider-value-by-bits bits)
+  (let next ((v divider-table))
+    (cond ((null? v) 'invalid)
+          (else
+           (if (= bits (cadar v))
+               (caar v)
+               (next (cdr v)))))))
 
 (define output-modes
   '((off             (#b0110100
