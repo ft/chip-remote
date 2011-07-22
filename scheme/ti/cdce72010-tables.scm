@@ -28,6 +28,7 @@
            factory-defaults
            get-bits-for-divider
            get-bits-for-output-mode
+           mn-phase-delay-table
            output-modes
            register-content-table))
 
@@ -194,6 +195,17 @@
     (#b1101 2.6)
     (#b1110 2.8)
     (#b1111 3.0)))
+
+(define mn-phase-delay-table
+  ;; Typical phase delay in nsecs
+  '((#b000 0.0 "(Default)")
+    (#b001 0.16)
+    (#b010 0.32)
+    (#b011 0.48)
+    (#b100 0.83)
+    (#b101 1.13)
+    (#b110 1.45)
+    (#b111 1.75)))
 
 ;; The following describes all register contents of the CDCE72010 device. The
 ;; first integer is the width of a bit-set. So all bit-set-widths of a register
