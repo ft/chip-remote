@@ -29,6 +29,7 @@
            get-bits-for-divider
            get-bits-for-output-mode
            mn-phase-delay-table
+           lock-detect-window-table
            output-modes
            register-content-table))
 
@@ -206,6 +207,25 @@
     (#b101 1.13)
     (#b110 1.45)
     (#b111 1.75)))
+
+(define lock-detect-window-table
+  ;; Typical phase delay in nsecs
+  '((#b0000 1.5)
+    (#b0001 5.8 "(Default)")
+    (#b0010 15.1)
+    (#b0011 'reserved)
+    (#b0100 3.4)
+    (#b0101 7.7)
+    (#b0110 17.0)
+    (#b0111 'reserved)
+    (#b1000 5.4)
+    (#b1001 9.7)
+    (#b1010 19.0)
+    (#b1011 'reserved)
+    (#b1100 15.0)
+    (#b1101 19.3)
+    (#b1110 28.6)
+    (#b1111 'reserved)))
 
 ;; The following describes all register contents of the CDCE72010 device. The
 ;; first integer is the width of a bit-set. So all bit-set-widths of a register
