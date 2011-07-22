@@ -32,4 +32,11 @@ test:
 	  printf 'Project not build yet.\n'; \
 	fi;
 
-.PHONY: all apidocs install tags test
+happiness:
+	$(MAKE) tags
+	$(MAKE) all
+	(cd build; $(MAKE) inbuildexecscript;)
+	$(MAKE) apidocs
+	$(MAKE) test
+
+.PHONY: all apidocs happiness install tags test
