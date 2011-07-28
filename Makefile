@@ -24,6 +24,14 @@ install:
 	  printf 'Project not build yet.\n'; \
 	fi;
 
+uninstall:
+	@if [ -f build/cdce-remote ]; then \
+	  cd build; \
+	  $(MAKE) uninstall; \
+	else \
+	  printf 'Project not build yet.\n'; \
+	fi;
+
 test:
 	@if [ -f build/cdce-remote ]; then \
 	  cd build; \
@@ -39,4 +47,4 @@ happiness:
 	$(MAKE) apidocs
 	$(MAKE) test
 
-.PHONY: all apidocs happiness install tags test
+.PHONY: all apidocs happiness install tags test uninstall
