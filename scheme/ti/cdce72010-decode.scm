@@ -29,7 +29,8 @@
            pll-lock?
            signal-exists?))
 
-(use-modules (bitops)
+(use-modules (ice-9 format)
+             (bitops)
              (ti cdce72010-messages)
              (ti cdce72010-tables)
              (ti cdce72010-validate))
