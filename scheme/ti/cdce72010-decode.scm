@@ -216,8 +216,8 @@
   (let nextstr ((dst decode-string-table))
     (cond
      ((null? dst)
-      (simple-string-print "Missing string for `~a'.\n"
-                           (symbol->string type)
+      (simple-string-print (format #f "Missing string for `~a'.\n"
+                                   (symbol->string type))
                            bits
                            width))
      ((equal? type (caar dst))
