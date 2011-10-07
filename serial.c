@@ -38,6 +38,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include "common.h"
@@ -213,20 +214,55 @@ serial_write(char *buf)
 int
 serial_open(char *dev)
 {
+    struct termios ti;
     int rc;
 
     if (cdce_serial_fd >= 0) {
         (void)printf("serial_open(): Serial device already opened.\n");
-        return 0;
+        goto error;
     }
 
     rc = open(dev, O_RDWR);
     if (rc < 0) {
         (void)printf("open(): %s: %s\n", dev, strerror(errno));
-        return 0;
+        goto error;
     }
     cdce_serial_fd = rc;
+    rc = tcgetattr(cdce_serial_fd, &ti);
+    if (rc < 0) {
+        (void)printf("tcgetattr(): Could not get attributes: %s\n",
+                     strerror(errno));
+        goto error;
+    }
+    rc = cfsetispeed(&ti, B19200);
+    if (!(rc < 0))
+        rc = tcsetattr(cdce_serial_fd, TCSANOW, &ti);
+    if (rc < 0) {
+        (void)printf("cfsetispeed(): Could not set speed: %s\n",
+                     strerror(errno));
+        goto error;
+    }
+    rc = cfsetospeed(&ti, B19200);
+    if (!(rc < 0))
+        rc = tcsetattr(cdce_serial_fd, TCSANOW, &ti);
+    if (rc < 0) {
+        (void)printf("cfsetospeed(): Could not set speed: %s\n",
+                     strerror(errno));
+        goto error;
+    }
+    ti.c_cflag = CS8|CREAD|CLOCAL;
+    rc = tcsetattr(cdce_serial_fd, TCSANOW, &ti);
+    if (rc < 0) {
+        (void)printf("tcsetattr(): Could not set 8N1: %s\n",
+                     strerror(errno));
+        goto error;
+    }
+    /* phew... all went well. */
     return 1;
+
+error:
+    cdce_serial_fd = -1;
+    return 0;
 }
 
 int
