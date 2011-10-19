@@ -34,7 +34,18 @@
 /** Macro to mark unused parameters. */
 #define UNUSED __attribute__((unused))
 
-/** How long before timing out, when reading from serial? */
+/**
+ * How long before timing out, when reading from serial?
+ *
+ * This is the default value. It may be changed at runtime by accessing the
+ * `cdce/options:serial-timeout' variable. That should be done by using the
+ * `cdce/serial-timeout' API function from the `cdce-primitives' module:
+ *
+ * @code
+ *   ;; Set serial read-timeout to a minute
+ *   (cdce/serial-timeout 60)
+ * @endcode
+ */
 #define SERIAL_TIMEOUT 2
 
 /**

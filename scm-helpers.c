@@ -75,6 +75,21 @@ cdce_scm_bool_var(char *name)
     return 1;
 }
 
+unsigned long int
+cdce_scm_ulong_var(char *name, unsigned long int defval)
+{
+    SCM obj;
+
+    if (!cdce_scm_variable_exists(name))
+        return defval;
+
+    obj = scm_variable_ref(scm_c_lookup(name));
+    if (!scm_is_integer(obj))
+        return defval;
+
+    return scm_to_ulong(obj);
+}
+
 uint32_t
 cdce_scm_to_uint32(SCM value, char *name, int *err)
 {

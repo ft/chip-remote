@@ -136,23 +136,25 @@ int
 serial_read(char *buf)
 {
     int rc;
+    unsigned long int to;
     fd_set fds;
     struct timeval t;
 
     if (cdce_serial_non_open())
         return -2;
 
+    to = cdce_scm_ulong_var("cdce/options:serial-timeout", SERIAL_TIMEOUT);
     FD_ZERO(&fds);
     FD_SET(cdce_serial_fd, &fds);
-    t.tv_sec = SERIAL_TIMEOUT;
+    t.tv_sec = to;
     t.tv_usec = 0;
 
     rc = select(cdce_serial_fd + 1, &fds, NULL, NULL, &t);
     if (rc == -1)
         (void)printf("select(): %s\n", strerror(errno));
     else if (rc == 0)
-        (void)printf("Reading from serial device timed out (%d seconds).\n",
-                     SERIAL_TIMEOUT);
+        (void)printf("Reading from serial device timed out (%lu seconds).\n",
+                     to);
     else
         rc = really_read(cdce_serial_fd, buf);
 

@@ -35,6 +35,7 @@
 
 char *cdce_scm2string(SCM);
 int cdce_scm_bool_var(char *);
+unsigned long int cdce_scm_ulong_var(char *, unsigned long int);
 int cdce_scm_variable_exists(char *);
 uint32_t cdce_scm_to_uint32(SCM, char *, int *);
 
