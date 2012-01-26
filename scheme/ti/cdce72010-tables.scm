@@ -117,13 +117,21 @@
                (next (cdr v)))))))
 
 (define output-modes
+  ;; Taken from SCAS858B (august 2011 update), page 24.
+  ;;
+  ;; what?   27....22 23   AB: negative pin
+  ;; lvpecl   100000  HL   CD: positive pin
+  ;; lvds     111010  HL   00  active
+  ;; lvcmos   00ABCD  HL   01  inverting
+  ;; disabled 011010  HL   10  3-state
+  ;;                       11  low        HL: HighLevel Swing if `1'.
   '((off             (#b0110100
                       #b0110101))
     ;; for completeness, both pins can be low or 3-stated
     (both-3-state    (#b0010100
                       #b0010101))
-    (both-low        (#b0001010
-                      #b0001011))
+    (both-low        (#b0011110
+                      #b0011111))
 
     ;; the -high versions are the same mode, just with increased output swing
     (lvpecl           #b1000000)
@@ -160,11 +168,11 @@
     (lvcmos-p+n-inv  (#b0001010
                       #b0001011))
     ;; both pins active (180 degrees phase difference)
-    (lvcmos-diff     (#b0011010
-                      #b0011011))
+    (lvcmos-diff     (#b0001000
+                      #b0001001))
     ;; and the other way round
-    (lvcmos-diff-inv (#b0001110
-                      #b0001111))
+    (lvcmos-diff-inv (#b0000010
+                      #b0000011))
     ;; Some of these are rather rediculous.
     (lvcmos-p3-n0    (#b0011100
                       #b0011101))
