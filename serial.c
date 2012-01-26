@@ -123,7 +123,7 @@ cdce_serial_non_open(void)
 /**
  * Read a response from the serial device behind `#cdce_serial_fd'.
  *
- * Timeout if a response takes too long. The input sanitisation is delegated to
+ * Timeout of a response takes too long. The input sanitisation is delegated to
  * `#really_read()'.
  *
  * @param buf      Pointer to a character buffer to copy the response to.
