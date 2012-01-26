@@ -183,8 +183,9 @@ serial_write(char *buf)
 
     len = strlen(buf);
     if (len > SERIAL_BUF_MAX) {
-        (void)printf("serial_write(): Input length exceeds limits (%d > %d).\n",
-                     len, SERIAL_BUF_MAX);
+        (void)printf(
+            "serial_write(): Input length exceeds limits (%ld > %ld).\n",
+            len, SERIAL_BUF_MAX);
         (void)printf("serial_write(): was: \"%s\"\n", buf);
         return 0;
     }

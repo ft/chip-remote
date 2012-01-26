@@ -55,7 +55,7 @@
  * which would require (32/4)*13+12 = 116 bytes. All other replies should be
  * way shorter. So, the following should suffice easily.
  */
-#define SERIAL_BUF_MAX 127
+#define SERIAL_BUF_MAX 127l
 
 /** An additional `%load-path' entry for our modules. */
 #define CDCE_REMOTE_LOAD_PATH "/usr/local/share/cdce-remote"
