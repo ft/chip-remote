@@ -230,6 +230,7 @@ serial_open(char *dev)
         (void)printf("open(): %s: %s\n", dev, strerror(errno));
         goto error;
     }
+
     cdce_serial_fd = rc;
     rc = tcgetattr(cdce_serial_fd, &ti);
     if (rc < 0) {
@@ -237,6 +238,7 @@ serial_open(char *dev)
                      strerror(errno));
         goto error;
     }
+
     rc = cfsetispeed(&ti, B19200);
     if (!(rc < 0))
         rc = tcsetattr(cdce_serial_fd, TCSANOW, &ti);
@@ -245,6 +247,7 @@ serial_open(char *dev)
                      strerror(errno));
         goto error;
     }
+
     rc = cfsetospeed(&ti, B19200);
     if (!(rc < 0))
         rc = tcsetattr(cdce_serial_fd, TCSANOW, &ti);
@@ -253,13 +256,22 @@ serial_open(char *dev)
                      strerror(errno));
         goto error;
     }
-    ti.c_cflag = CS8|CREAD|CLOCAL;
+
+    ti.c_cflag = CS8|CREAD|CLOCAL|HUPCL;
+    ti.c_cflag &= ~(CRTSCTS | IXON | IXOFF | IXANY);
+    ti.c_iflag |= IGNBRK;
+    ti.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL);
+    ti.c_oflag &= ~(OPOST | ONLCR | OCRNL);
+    ti.c_cc[VMIN] = 1;
+    ti.c_cc[VTIME] = 0;
+
     rc = tcsetattr(cdce_serial_fd, TCSANOW, &ti);
     if (rc < 0) {
         (void)printf("tcsetattr(): Could not set 8N1: %s\n",
                      strerror(errno));
         goto error;
     }
+
     /* phew... all went well. */
     return 1;
 
