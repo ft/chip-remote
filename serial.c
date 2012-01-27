@@ -45,11 +45,11 @@
 #include "serial.h"
 #include "scm-helpers.h"
 
-static int cdce_serial_non_open(void);
+static int cr_serial_non_open(void);
 static int really_read(int, char *);
 
-/** Global file descriptor of the serial device opened by `cdce/open'. */
-static int cdce_serial_fd = -1;
+/** Global file descriptor of the serial device opened by `cr/open'. */
+static int cr_serial_fd = -1;
 
 /**
  * Perform sane reads from a serial device.
@@ -93,9 +93,9 @@ really_read(int fd, char *buf)
         (void)printf("\n");
         return 0;
     } else {
-        if (cr_scm_bool_var("cdce/options:trace"))
+        if (cr_scm_bool_var("cr/options:trace"))
             (void)fprintf(stderr, " >> %s\n", buf);
-        scm_variable_set_x(scm_c_lookup("cdce/last-reply"),
+        scm_variable_set_x(scm_c_lookup("cr/last-reply"),
                            scm_from_locale_string(buf));
     }
 
@@ -103,7 +103,7 @@ really_read(int fd, char *buf)
 }
 
 /**
- * Check if `#cdce_serial_fd' has a sensible value.
+ * Check if `#cr_serial_fd' has a sensible value.
  *
  * That is, it's different from its initial value (which is a negative
  * integer).
@@ -111,17 +111,17 @@ really_read(int fd, char *buf)
  * @return `1' in case of a problem; `0' otherwise.
  */
 static int
-cdce_serial_non_open(void)
+cr_serial_non_open(void)
 {
-    if (cdce_serial_fd < 0) {
-        (void)printf("Serial device not opened. Forgot `cdce/open'?\n");
+    if (cr_serial_fd < 0) {
+        (void)printf("Serial device not opened. Forgot `cr/open'?\n");
         return 1;
     }
     return 0;
 }
 
 /**
- * Read a response from the serial device behind `#cdce_serial_fd'.
+ * Read a response from the serial device behind `#cr_serial_fd'.
  *
  * Timeout of a response takes too long. The input sanitisation is delegated to
  * `#really_read()'.
@@ -140,29 +140,29 @@ serial_read(char *buf)
     fd_set fds;
     struct timeval t;
 
-    if (cdce_serial_non_open())
+    if (cr_serial_non_open())
         return -2;
 
-    to = cr_scm_ulong_var("cdce/options:serial-timeout", SERIAL_TIMEOUT);
+    to = cr_scm_ulong_var("cr/options:serial-timeout", SERIAL_TIMEOUT);
     FD_ZERO(&fds);
-    FD_SET(cdce_serial_fd, &fds);
+    FD_SET(cr_serial_fd, &fds);
     t.tv_sec = to;
     t.tv_usec = 0;
 
-    rc = select(cdce_serial_fd + 1, &fds, NULL, NULL, &t);
+    rc = select(cr_serial_fd + 1, &fds, NULL, NULL, &t);
     if (rc == -1)
         (void)printf("select(): %s\n", strerror(errno));
     else if (rc == 0)
         (void)printf("Reading from serial device timed out (%lu seconds).\n",
                      to);
     else
-        rc = really_read(cdce_serial_fd, buf);
+        rc = really_read(cr_serial_fd, buf);
 
     return rc;
 }
 
 /**
- * Write a buffer to `#cdce_serial_fd' entirely.
+ * Write a buffer to `#cr_serial_fd' entirely.
  *
  * Only give up if an error occurs. Also, throttle the transmission if it takes
  * more than one `write()' to bang the whole buffer out to the serial device.
@@ -178,7 +178,7 @@ serial_write(char *buf)
 {
     ssize_t sofar, len, rc;
 
-    if (cdce_serial_non_open())
+    if (cr_serial_non_open())
         return 0;
 
     len = strlen(buf);
@@ -197,18 +197,18 @@ serial_write(char *buf)
              * This should probably be shorter. `nanosleep()'?
              */
             sleep(1);
-        rc = write(cdce_serial_fd, buf + sofar, len - sofar);
+        rc = write(cr_serial_fd, buf + sofar, len - sofar);
         if (rc >= 0)
             sofar += rc;
         else
             sofar = rc;
     }
     if (sofar >= 0)
-        sofar = write(cdce_serial_fd, "\n", 1);
+        sofar = write(cr_serial_fd, "\n", 1);
     if (sofar < 0) {
         (void)printf("write(): %s\n", strerror(errno));
         return 0;
-    } else if (cr_scm_bool_var("cdce/options:trace"))
+    } else if (cr_scm_bool_var("cr/options:trace"))
         (void)fprintf(stderr, " << %s\n", buf);
 
     return 1;
@@ -220,7 +220,7 @@ serial_open(char *dev)
     struct termios ti;
     int rc;
 
-    if (cdce_serial_fd >= 0) {
+    if (cr_serial_fd >= 0) {
         (void)printf("serial_open(): Serial device already opened.\n");
         goto error;
     }
@@ -231,8 +231,8 @@ serial_open(char *dev)
         goto error;
     }
 
-    cdce_serial_fd = rc;
-    rc = tcgetattr(cdce_serial_fd, &ti);
+    cr_serial_fd = rc;
+    rc = tcgetattr(cr_serial_fd, &ti);
     if (rc < 0) {
         (void)printf("tcgetattr(): Could not get attributes: %s\n",
                      strerror(errno));
@@ -241,7 +241,7 @@ serial_open(char *dev)
 
     rc = cfsetispeed(&ti, B19200);
     if (!(rc < 0))
-        rc = tcsetattr(cdce_serial_fd, TCSANOW, &ti);
+        rc = tcsetattr(cr_serial_fd, TCSANOW, &ti);
     if (rc < 0) {
         (void)printf("cfsetispeed(): Could not set speed: %s\n",
                      strerror(errno));
@@ -250,7 +250,7 @@ serial_open(char *dev)
 
     rc = cfsetospeed(&ti, B19200);
     if (!(rc < 0))
-        rc = tcsetattr(cdce_serial_fd, TCSANOW, &ti);
+        rc = tcsetattr(cr_serial_fd, TCSANOW, &ti);
     if (rc < 0) {
         (void)printf("cfsetospeed(): Could not set speed: %s\n",
                      strerror(errno));
@@ -265,7 +265,7 @@ serial_open(char *dev)
     ti.c_cc[VMIN] = 1;
     ti.c_cc[VTIME] = 0;
 
-    rc = tcsetattr(cdce_serial_fd, TCSANOW, &ti);
+    rc = tcsetattr(cr_serial_fd, TCSANOW, &ti);
     if (rc < 0) {
         (void)printf("tcsetattr(): Could not set 8N1: %s\n",
                      strerror(errno));
@@ -276,7 +276,7 @@ serial_open(char *dev)
     return 1;
 
 error:
-    cdce_serial_fd = -1;
+    cr_serial_fd = -1;
     return 0;
 }
 
@@ -285,11 +285,11 @@ serial_close(void)
 {
     int rc;
 
-    if (cdce_serial_non_open())
+    if (cr_serial_non_open())
         return 0;
 
-    rc = close(cdce_serial_fd);
-    cdce_serial_fd = -1;
+    rc = close(cr_serial_fd);
+    cr_serial_fd = -1;
     if (rc < 0) {
         (void)printf("close(): %s\n", strerror(errno));
         return 0;

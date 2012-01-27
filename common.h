@@ -38,12 +38,12 @@
  * How long before timing out, when reading from serial?
  *
  * This is the default value. It may be changed at runtime by accessing the
- * `cdce/options:serial-timeout' variable. That should be done by using the
- * `cdce/serial-timeout' API function from the `cdce-primitives' module:
+ * `cr/options:serial-timeout' variable. That should be done by using the
+ * `cr/serial-timeout' API function from the `chip-remote-primitives' module:
  *
  * @code
  *   ;; Set serial read-timeout to a minute
- *   (cdce/serial-timeout 60)
+ *   (cr/serial-timeout 60)
  * @endcode
  */
 #define SERIAL_TIMEOUT 2
