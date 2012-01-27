@@ -46,7 +46,7 @@
 static void cdce_scm_module(UNUSED void *);
 
 SCM
-cdce_scm_close(UNUSED SCM x)
+cr_scm_close(UNUSED SCM x)
 {
     if (!serial_close()) {
         return SCM_BOOL_F;
@@ -220,7 +220,7 @@ static struct cdce_scm_proctab {
     int rest;
 } pt[] = {
     { "cdce/bye", cdce_scm_bye, 0, 0, 0 },
-    { "cdce/close", cdce_scm_close, 0, 0, 0 },
+    { "cdce/close", cr_scm_close, 0, 0, 0 },
     { "cdce/read-register", cdce_scm_read_reg, 1, 0, 0 },
     { "cdce/hi", cdce_scm_hi, 0, 0, 0 },
     { "cr/open", cr_scm_open, 1, 0, 0 },
