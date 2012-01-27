@@ -22,7 +22,7 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (use-modules (ice-9 format)
-             (ti cdce72010-prg))
+             (ti cdce72010 prg))
 
 (if (not (logbit? 11 (set-device-power-down-bit #x00000000)))
     (quit 1))

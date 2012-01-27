@@ -24,8 +24,8 @@
 
 (use-modules (ice-9 format)
              (bitops)
-             (ti cdce72010-tables)
-             (ti cdce72010-prg))
+             (ti cdce72010 tables)
+             (ti cdce72010 prg))
 
 (define value-width 7)
 

@@ -24,7 +24,7 @@
 
 (use-modules (ice-9 format)
              (bitops)
-             (ti cdce72010-prg))
+             (ti cdce72010 prg))
 
 ;; Since the `set-div-bits' test already checks against non-trivial bit
 ;; patterns, we'll assume that the involved bit operations work properly.

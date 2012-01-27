@@ -22,31 +22,31 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(define-module (ti cdce72010-validate)
-  :export (divider?
-           mn-divider-value?
-           output-index?
-           r-divider?
-           register-index?))
+(define-module (ti cdce72010 messages)
+  :export (error-divider
+           error-invalid-r-divider
+           error-invalid-reg-index
+           error-mn-divider
+           error-not-boolean
+           error-output-index))
 
-(define (divider? idx)
-  (and (> idx 0)
-       (< idx 9)))
+(define (error-divider x)
+  (display "`divider' needs to be an integer 1..8.\n")
+  (display (format #f "Was: ~d\n" x)))
 
-(define (mn-divider-value? value)
-  (and (> value 0)
-       ;; max. value is 14 bits set to `1' plus 1.
-       (<= value 0b100000000000000)))
+(define (error-mn-divider-value value)
+  (display (format #f "The M and N dividers need to be set from 1 to ~d.\n"
+                   (#b100000000000000)))
+  (display (format #f "You tried to set: ~d\n" value)))
 
-(define (output-index? idx)
-  (and (>= idx 0)
-       (<= idx 9)))
+(define (error-output-index)
+  (display "Output index out of range (0..9)\n"))
 
-(define (r-divider? type)
-  (and (symbol? type)
-       (or (equal? type 'primary)
-           (equal? type 'secondary))))
+(define (error-invalid-r-divider)
+  (display "r-divider type needs to be either 'primary or 'secondary.\n"))
 
-(define (register-index? idx)
-  (and (>= idx 0)
-       (<= idx 12)))
+(define (error-invalid-reg-index idx)
+  (format #t "Register index (~d) out of range. [0..12]\n" idx))
+
+(define (error-not-boolean what)
+  (format #t "~a needs to be a boolean value.\n" what))

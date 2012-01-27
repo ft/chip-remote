@@ -22,7 +22,7 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(define-module (ti cdce72010-tables)
+(define-module (ti cdce72010 tables)
   :export (charge-pump-current-table
            divider-table
            factory-defaults

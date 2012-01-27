@@ -23,7 +23,7 @@
 
 (use-modules (ice-9 format)
              (bitops)
-             (ti cdce72010-prg))
+             (ti cdce72010 prg))
 
 ;; Set this to `#t' to get output for succeeded tests, too.
 (define test-verbose #f)

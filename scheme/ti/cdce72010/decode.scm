@@ -22,7 +22,7 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(define-module (ti cdce72010-decode)
+(define-module (ti cdce72010 decode)
   :export (decode-register-by-value
            decode-specific-register-by-value
            fuzz-register
@@ -31,9 +31,9 @@
 
 (use-modules (ice-9 format)
              (bitops)
-             (ti cdce72010-messages)
-             (ti cdce72010-tables)
-             (ti cdce72010-validate))
+             (ti cdce72010 messages)
+             (ti cdce72010 tables)
+             (ti cdce72010 validate))
 
 (define (pll-lock? regval)
   (logbit? 10 regval))

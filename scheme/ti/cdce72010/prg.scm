@@ -22,7 +22,7 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(define-module (ti cdce72010-prg)
+(define-module (ti cdce72010 prg)
   :export (clear-device-power-down-bit
            clear-odiv-enable-bit
            clear-pll-power-down-bit
@@ -37,7 +37,7 @@
            set-pll-power-down-bit))
 
 (use-modules (bitops)
-             (ti cdce72010-tables))
+             (ti cdce72010 tables))
 
 (define (set-bits-odiv regval divval)
   (set-bits regval (get-bits-for-divider divval) 7 17))

@@ -59,10 +59,10 @@
 
 (use-modules (bitops)
              (ti cdce-primitives)
-             (ti cdce72010-decode)
-             (ti cdce72010-messages)
-             (ti cdce72010-prg)
-             (ti cdce72010-validate))
+             (ti cdce72010 decode)
+             (ti cdce72010 messages)
+             (ti cdce72010 prg)
+             (ti cdce72010 validate))
 
 (define (read-registers)
   (let ((a '()))
