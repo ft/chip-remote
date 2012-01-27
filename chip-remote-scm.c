@@ -27,8 +27,8 @@
  * @file chip-remote-scm.c
  * @brief Scheme API for chip-remote
  *
- * The basic procedures are `cr/open', `cdce/close', which open/close the
- * serial device file, `cdce/hi' and `cdce/bye', which initiate and terminate a
+ * The basic procedures are `cr/open', `cr/close', which open/close the serial
+ * device file, `cr/hi' and `cr/bye', which initiate and terminate a
  * conversation with the serial device.
  */
 
@@ -219,10 +219,10 @@ static struct cdce_scm_proctab {
     int opt;
     int rest;
 } pt[] = {
-    { "cdce/bye", cr_scm_bye, 0, 0, 0 },
-    { "cdce/close", cr_scm_close, 0, 0, 0 },
+    { "cr/bye", cr_scm_bye, 0, 0, 0 },
+    { "cr/close", cr_scm_close, 0, 0, 0 },
     { "cdce/read-register", cdce_scm_read_reg, 1, 0, 0 },
-    { "cdce/hi", cr_scm_hi, 0, 0, 0 },
+    { "cr/hi", cr_scm_hi, 0, 0, 0 },
     { "cr/open", cr_scm_open, 1, 0, 0 },
     { "cdce/write-eeprom", cdce_scm_write_eeprom, 0, 0, 0 },
     { "cdce/write-eeprom-locked", cdce_scm_write_eeprom_locked, 0, 0, 0 },
