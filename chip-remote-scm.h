@@ -36,7 +36,7 @@
 SCM cdce_scm_bye(SCM);
 SCM cdce_scm_close(SCM);
 SCM cdce_scm_hi(SCM);
-SCM cdce_scm_open(SCM);
+SCM cr_scm_open(SCM);
 
 void cdce_scm_init(void);
 

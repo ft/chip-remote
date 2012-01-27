@@ -27,7 +27,7 @@
  * @file chip-remote-scm.c
  * @brief Scheme API for chip-remote
  *
- * The basic procedures are `cdce/open', `cdce/close', which open/close the
+ * The basic procedures are `cr/open', `cdce/close', which open/close the
  * serial device file, `cdce/hi' and `cdce/bye', which initiate and terminate a
  * conversation with the serial device.
  */
@@ -55,16 +55,16 @@ cdce_scm_close(UNUSED SCM x)
 }
 
 SCM
-cdce_scm_open(SCM device)
+cr_scm_open(SCM device)
 {
     char *buf;
     SCM rc = SCM_BOOL_F;
 
     if (scm_string_p(device) == SCM_BOOL_F) {
-        (void)printf("cdce/open: `device' must be a string.\n");
+        (void)printf("cr/open: `device' must be a string.\n");
         return SCM_BOOL_F;
     } else if (scm_string_null_p(device) == SCM_BOOL_T) {
-        (void)printf("cdce/open: `device' must be non-empty.\n");
+        (void)printf("cr/open: `device' must be non-empty.\n");
         return SCM_BOOL_F;
     }
 
@@ -223,7 +223,7 @@ static struct cdce_scm_proctab {
     { "cdce/close", cdce_scm_close, 0, 0, 0 },
     { "cdce/read-register", cdce_scm_read_reg, 1, 0, 0 },
     { "cdce/hi", cdce_scm_hi, 0, 0, 0 },
-    { "cdce/open", cdce_scm_open, 1, 0, 0 },
+    { "cr/open", cr_scm_open, 1, 0, 0 },
     { "cdce/write-eeprom", cdce_scm_write_eeprom, 0, 0, 0 },
     { "cdce/write-eeprom-locked", cdce_scm_write_eeprom_locked, 0, 0, 0 },
     { "cdce/write-raw", cdce_scm_write_raw, 1, 0, 0 },
