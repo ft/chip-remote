@@ -43,7 +43,7 @@
 #include "scm-helpers.h"
 #include "serial.h"
 
-static void cdce_scm_module(UNUSED void *);
+static void cr_scm_module(UNUSED void *);
 
 SCM
 cr_scm_close(UNUSED SCM x)
@@ -212,7 +212,7 @@ cdce_scm_write_reg(SCM reg, SCM value)
     return SCM_BOOL_T;
 }
 
-static struct cdce_scm_proctab {
+static struct cr_scm_proctab {
     const char *name;
     SCM (*cb)(SCM);
     int req;
@@ -231,16 +231,16 @@ static struct cdce_scm_proctab {
 };
 
 static void
-cdce_scm_module(UNUSED void *data)
+cr_scm_module(UNUSED void *data)
 {
     int i;
 
-    scm_c_define("cdce/options:trace", SCM_BOOL_F);
-    scm_c_export("cdce/options:trace", NULL);
-    scm_c_define("cdce/options:serial-timeout", scm_from_ulong(SERIAL_TIMEOUT));
-    scm_c_export("cdce/options:serial-timeout", NULL);
-    scm_c_define("cdce/last-reply", scm_from_locale_string(""));
-    scm_c_export("cdce/last-reply", NULL);
+    scm_c_define("cr/options:trace", SCM_BOOL_F);
+    scm_c_export("cr/options:trace", NULL);
+    scm_c_define("cr/options:serial-timeout", scm_from_ulong(SERIAL_TIMEOUT));
+    scm_c_export("cr/options:serial-timeout", NULL);
+    scm_c_define("cr/last-reply", scm_from_locale_string(""));
+    scm_c_export("cr/last-reply", NULL);
     for (i = 0; pt[i].name != NULL; ++i) {
         scm_c_define_gsubr(pt[i].name,
                            pt[i].req,
@@ -259,14 +259,14 @@ cdce_scm_module(UNUSED void *data)
 }
 
 void
-cdce_scm_init(void)
+cr_scm_init(void)
 {
     SCM lp;
 
-    scm_c_define_module("ti cdce-primitives",
-                        cdce_scm_module,
+    scm_c_define_module("chip-remote-primitives",
+                        cr_scm_module,
                         NULL);
-    scm_c_use_module("ti cdce-primitives");
+    scm_c_use_module("chip-remote-primitives");
     /*
      * Add an additional `%load-path' entry for our own modules.
      *

@@ -38,8 +38,9 @@ SCM cr_scm_close(SCM);
 SCM cr_scm_hi(SCM);
 SCM cr_scm_open(SCM);
 
-void cdce_scm_init(void);
+void cr_scm_init(void);
 
+/** @TODO The following functions need to be moved to scheme code */
 SCM cdce_scm_read_reg(SCM);
 SCM cdce_scm_write_eeprom(SCM);
 SCM cdce_scm_write_eeprom_locked(SCM);

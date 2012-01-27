@@ -105,7 +105,7 @@ int main(int, char **);
 static void
 real_main(UNUSED void *data, int argc, char **argv)
 {
-    cdce_scm_init();
+    cr_scm_init();
     scm_shell(argc, argv);
 }
 
