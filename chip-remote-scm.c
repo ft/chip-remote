@@ -24,7 +24,7 @@
  */
 
 /**
- * @file cdce-scm.c
+ * @file chip-remote-scm.c
  * @brief Scheme API for chip-remote
  *
  * The basic procedures are `cdce/open', `cdce/close', which open/close the
@@ -37,7 +37,7 @@
 
 #include <libguile.h>
 
-#include "cdce-scm.h"
+#include "chip-remote-scm.h"
 #include "common.h"
 #include "proto.h"
 #include "scm-helpers.h"

@@ -96,7 +96,7 @@
 
 #include <libguile.h>
 
-#include "cdce-scm.h"
+#include "chip-remote-scm.h"
 #include "common.h"
 
 static void real_main(void *, int, char **);
