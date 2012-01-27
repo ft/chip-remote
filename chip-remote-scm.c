@@ -82,7 +82,7 @@ done:
 }
 
 SCM
-cdce_scm_hi(UNUSED SCM x)
+cr_scm_hi(UNUSED SCM x)
 {
     if (!proto_hi())
         return SCM_BOOL_F;
@@ -222,7 +222,7 @@ static struct cdce_scm_proctab {
     { "cdce/bye", cr_scm_bye, 0, 0, 0 },
     { "cdce/close", cr_scm_close, 0, 0, 0 },
     { "cdce/read-register", cdce_scm_read_reg, 1, 0, 0 },
-    { "cdce/hi", cdce_scm_hi, 0, 0, 0 },
+    { "cdce/hi", cr_scm_hi, 0, 0, 0 },
     { "cr/open", cr_scm_open, 1, 0, 0 },
     { "cdce/write-eeprom", cdce_scm_write_eeprom, 0, 0, 0 },
     { "cdce/write-eeprom-locked", cdce_scm_write_eeprom_locked, 0, 0, 0 },
