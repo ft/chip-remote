@@ -1,3 +1,6 @@
+CFLAGS ?=
+CC ?= cc
+
 all:
 	@if [ -d build ]; then \
 	  cd build; \
@@ -5,7 +8,7 @@ all:
 	else \
 	  mkdir build; \
 	  cd build; \
-	  cmake ..; \
+	  cmake CMAKE_C_COMPILER=$(CC) CMAKE_C_FLAGS=$(CFLAGS) ..; \
 	  $(MAKE); \
 	fi;
 
