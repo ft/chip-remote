@@ -24,7 +24,7 @@
  */
 
 /**
- * @file cdce-remote.c
+ * @file chip-remote.c
  * @brief Remote-control for CDCE72010 clock distribution chips
  *
  * This program communicates with a serial device which reads and writes data
@@ -76,7 +76,7 @@
  * like. Here's a minimal example:
  *
  * @code
- *     #!/usr/local/bin/cdce-remote -s
+ *     #!/usr/local/bin/chip-remote -s
  *     !#
  *     (cdce/open "/dev/ttyS0")
  *     (cdce/hi)

@@ -25,7 +25,7 @@
 
 /**
  * @file cdce-scm.h
- * @brief Scheme API for cdce-remote - header file
+ * @brief Scheme API for chip-remote - header file
  */
 
 #ifndef INC_CDCE_SCM_H_

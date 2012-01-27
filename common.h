@@ -58,6 +58,6 @@
 #define SERIAL_BUF_MAX 127l
 
 /** An additional `%load-path' entry for our modules. */
-#define CDCE_REMOTE_LOAD_PATH "/usr/local/share/cdce-remote"
+#define CHIP_REMOTE_LOAD_PATH "/usr/local/share/chip-remote"
 
 #endif /* INC_COMMON_H_ */

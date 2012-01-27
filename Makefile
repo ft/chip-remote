@@ -20,7 +20,7 @@ tags:
 	ctags -e *.c *.h
 
 install:
-	@if [ -f build/cdce-remote ]; then \
+	@if [ -f build/chip-remote ]; then \
 	  cd build; \
 	  $(MAKE) install; \
 	else \
@@ -28,7 +28,7 @@ install:
 	fi;
 
 uninstall:
-	@if [ -f build/cdce-remote ]; then \
+	@if [ -f build/chip-remote ]; then \
 	  cd build; \
 	  $(MAKE) uninstall; \
 	else \
@@ -36,7 +36,7 @@ uninstall:
 	fi;
 
 test:
-	@if [ -f build/cdce-remote ]; then \
+	@if [ -f build/chip-remote ]; then \
 	  cd build; \
 	  $(MAKE) test; \
 	else \

@@ -25,7 +25,7 @@
 
 /**
  * @file cdce-scm.c
- * @brief Scheme API for cdce-remote
+ * @brief Scheme API for chip-remote
  *
  * The basic procedures are `cdce/open', `cdce/close', which open/close the
  * serial device file, `cdce/hi' and `cdce/bye', which initiate and terminate a
@@ -282,7 +282,7 @@ cdce_scm_init(void)
             lp,
             scm_append(
                 scm_list_2(scm_list_1(scm_from_locale_string(
-                                          CDCE_REMOTE_LOAD_PATH)),
+                                          CHIP_REMOTE_LOAD_PATH)),
                            scm_variable_ref(lp))));
     }
 }

@@ -1,8 +1,8 @@
-project(cdce-remote)
+project(chip-remote)
 cmake_minimum_required(VERSION 2.8.0)
 
 file(GLOB SOURCES *.c)
-add_executable(cdce-remote ${SOURCES})
+add_executable(chip-remote ${SOURCES})
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -14,17 +14,17 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-multichar -Wold-style-definition -Wunus
 
 find_package(Guile 2.0 REQUIRED)
 INCLUDE_DIRECTORIES(${GUILE_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(cdce-remote ${GUILE_LIBRARIES})
+TARGET_LINK_LIBRARIES(chip-remote ${GUILE_LIBRARIES})
 
-install(TARGETS cdce-remote
+install(TARGETS chip-remote
   DESTINATION bin)
 install(DIRECTORY scheme/ti
-  DESTINATION share/cdce-remote
+  DESTINATION share/chip-remote
   FILES_MATCHING PATTERN "*.scm")
 
 file(GLOB scm scheme/*.scm)
 install(FILES ${scm}
-  DESTINATION share/cdce-remote)
+  DESTINATION share/chip-remote)
 
 enable_testing()
 add_subdirectory(tests)
