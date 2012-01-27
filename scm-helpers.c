@@ -33,7 +33,7 @@
 #include "scm-helpers.h"
 
 char *
-cdce_scm2string(SCM s)
+cr_scm2string(SCM s)
 {
     char *buf;
 
@@ -46,7 +46,7 @@ cdce_scm2string(SCM s)
 }
 
 int
-cdce_scm_variable_exists(char *name)
+cr_scm_variable_exists(char *name)
 {
     if (name == NULL)
         return 0;
@@ -61,11 +61,11 @@ cdce_scm_variable_exists(char *name)
 }
 
 int
-cdce_scm_bool_var(char *name)
+cr_scm_bool_var(char *name)
 {
     SCM obj;
 
-    if (!cdce_scm_variable_exists(name))
+    if (!cr_scm_variable_exists(name))
         return 0;
 
     obj = scm_variable_ref(scm_c_lookup(name));
@@ -76,11 +76,11 @@ cdce_scm_bool_var(char *name)
 }
 
 unsigned long int
-cdce_scm_ulong_var(char *name, unsigned long int defval)
+cr_scm_ulong_var(char *name, unsigned long int defval)
 {
     SCM obj;
 
-    if (!cdce_scm_variable_exists(name))
+    if (!cr_scm_variable_exists(name))
         return defval;
 
     obj = scm_variable_ref(scm_c_lookup(name));
@@ -91,7 +91,7 @@ cdce_scm_ulong_var(char *name, unsigned long int defval)
 }
 
 uint32_t
-cdce_scm_to_uint32(SCM value, char *name, int *err)
+cr_scm_to_uint32(SCM value, char *name, int *err)
 {
     if (!scm_is_unsigned_integer(value, 0, UINT32_MAX)) {
         (void)printf("scm2uint32: `%s' must be uint32_t.\n", name);

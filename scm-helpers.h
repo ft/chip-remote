@@ -33,10 +33,10 @@
 
 #include <libguile.h>
 
-char *cdce_scm2string(SCM);
-int cdce_scm_bool_var(char *);
-unsigned long int cdce_scm_ulong_var(char *, unsigned long int);
-int cdce_scm_variable_exists(char *);
-uint32_t cdce_scm_to_uint32(SCM, char *, int *);
+char *cr_scm2string(SCM);
+int cr_scm_bool_var(char *);
+unsigned long int cr_scm_ulong_var(char *, unsigned long int);
+int cr_scm_variable_exists(char *);
+uint32_t cr_scm_to_uint32(SCM, char *, int *);
 
 #endif /* INC_SCM_HELPERS_H_ */

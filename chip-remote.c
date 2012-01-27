@@ -25,7 +25,7 @@
 
 /**
  * @file chip-remote.c
- * @brief Remote-control for CDCE72010 clock distribution chips
+ * @brief Remote-control for configurable chips
  *
  * This program communicates with a serial device which reads and writes data
  * according to a certain protocol. This protocol works as follows:
@@ -78,12 +78,11 @@
  * @code
  *     #!/usr/local/bin/chip-remote -s
  *     !#
- *     (cdce/open "/dev/ttyS0")
- *     (cdce/hi)
- *     (define REMOTE_VERSION (cdce/get-version))
- *     (cdce/bye)
- *     (message "Remote version: ")
- *     (message REMOTE_VERSION)
+ *     (cr/open "/dev/ttyS0")
+ *     (cr/hi)
+ *     (define REMOTE_VERSION (cr/get-version))
+ *     (cr/bye)
+ *     (format #t "Remote version: ~a\n" REMOTE_VERSION)
  *     (newline)
  * @endcode
  *

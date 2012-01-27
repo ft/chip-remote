@@ -68,7 +68,7 @@ cr_scm_open(SCM device)
         return SCM_BOOL_F;
     }
 
-    buf = cdce_scm2string(device);
+    buf = cr_scm2string(device);
     if (buf == NULL)
         goto done;
     if (!serial_open(buf))
@@ -131,7 +131,7 @@ cdce_scm_read_reg(SCM reg)
     int err;
     uint32_t r;
 
-    r = cdce_scm_to_uint32(reg, "register", &err);
+    r = cr_scm_to_uint32(reg, "register", &err);
     if (err)
         return SCM_BOOL_F;
     if (r > 12) {
@@ -168,7 +168,7 @@ cdce_scm_write_raw(SCM data)
         (void)printf("cdce/open: `data' must be a string.\n");
         goto done;
     }
-    buf = cdce_scm2string(data);
+    buf = cr_scm2string(data);
 
     if (buf == NULL)
         goto done;
@@ -188,7 +188,7 @@ cdce_scm_write_reg(SCM reg, SCM value)
     int err;
     uint32_t r, v;
 
-    r = cdce_scm_to_uint32(reg, "register", &err);
+    r = cr_scm_to_uint32(reg, "register", &err);
     if (err)
         return SCM_BOOL_F;
     if (r > 12) {
@@ -196,7 +196,7 @@ cdce_scm_write_reg(SCM reg, SCM value)
             "cdce/read-registers: `register' is only valid from 0..12.\n");
         return SCM_BOOL_F;
     }
-    v = cdce_scm_to_uint32(value, "value", &err);
+    v = cr_scm_to_uint32(value, "value", &err);
     if (err)
         return SCM_BOOL_F;
 

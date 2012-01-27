@@ -93,7 +93,7 @@ really_read(int fd, char *buf)
         (void)printf("\n");
         return 0;
     } else {
-        if (cdce_scm_bool_var("cdce/options:trace"))
+        if (cr_scm_bool_var("cdce/options:trace"))
             (void)fprintf(stderr, " >> %s\n", buf);
         scm_variable_set_x(scm_c_lookup("cdce/last-reply"),
                            scm_from_locale_string(buf));
@@ -143,7 +143,7 @@ serial_read(char *buf)
     if (cdce_serial_non_open())
         return -2;
 
-    to = cdce_scm_ulong_var("cdce/options:serial-timeout", SERIAL_TIMEOUT);
+    to = cr_scm_ulong_var("cdce/options:serial-timeout", SERIAL_TIMEOUT);
     FD_ZERO(&fds);
     FD_SET(cdce_serial_fd, &fds);
     t.tv_sec = to;
@@ -208,7 +208,7 @@ serial_write(char *buf)
     if (sofar < 0) {
         (void)printf("write(): %s\n", strerror(errno));
         return 0;
-    } else if (cdce_scm_bool_var("cdce/options:trace"))
+    } else if (cr_scm_bool_var("cdce/options:trace"))
         (void)fprintf(stderr, " << %s\n", buf);
 
     return 1;
