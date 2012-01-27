@@ -33,7 +33,7 @@
 
 #include <libguile.h>
 
-SCM cdce_scm_bye(SCM);
+SCM cr_scm_bye(SCM);
 SCM cr_scm_close(SCM);
 SCM cdce_scm_hi(SCM);
 SCM cr_scm_open(SCM);

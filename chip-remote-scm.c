@@ -93,7 +93,7 @@ cdce_scm_hi(UNUSED SCM x)
 }
 
 SCM
-cdce_scm_bye(UNUSED SCM x)
+cr_scm_bye(UNUSED SCM x)
 {
     if (!proto_bye())
         return SCM_BOOL_F;
@@ -219,7 +219,7 @@ static struct cdce_scm_proctab {
     int opt;
     int rest;
 } pt[] = {
-    { "cdce/bye", cdce_scm_bye, 0, 0, 0 },
+    { "cdce/bye", cr_scm_bye, 0, 0, 0 },
     { "cdce/close", cr_scm_close, 0, 0, 0 },
     { "cdce/read-register", cdce_scm_read_reg, 1, 0, 0 },
     { "cdce/hi", cdce_scm_hi, 0, 0, 0 },
