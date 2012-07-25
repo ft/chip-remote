@@ -58,7 +58,7 @@
            toggle-trace))
 
 (use-modules (bitops)
-             (ti cdce-primitives)
+             (chip-remote-primitives)
              (ti cdce72010 decode)
              (ti cdce72010 messages)
              (ti cdce72010 prg)
