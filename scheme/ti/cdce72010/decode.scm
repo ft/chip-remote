@@ -81,11 +81,11 @@
    ((not (register-index? idx))
     (error-invalid-reg-index idx))
    (else
-    (display "\n  ,------------------------------------------------------.\n")
-    (format #t "  | Decoding bits \"~32,'0b\"...   |\n" regval)
-    (format #t "  | ...as register ~2d:                hex: ~8,'0x       |\n"
+    (display "\n   ------------------------------------------------------\n")
+    (format #t "  | Decoding bits \"~32,'0b\"...  |\n" regval)
+    (format #t "  | ...as register ~2d:                hex: ~8,'0x      |\n"
             idx regval)
-    (display "  `------------------------------------------------------´\n\n")
+    (display "   ------------------------------------------------------\n\n")
     (let nextfield ((rest (get-register-description idx))
                     (start 0))
       (cond
