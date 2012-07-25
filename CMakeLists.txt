@@ -6,7 +6,8 @@ add_executable(chip-remote ${SOURCES})
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wall -Wextra -Wdeclaration-after-statement")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wall -Wextra -Wdeclaration-after-statement")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wdeclaration-after-statement")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wformat -Wformat-nonliteral -Wformat-security")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wformat-y2k -Wmissing-braces -Wmissing-declarations")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-field-initializers -Wmissing-prototypes")
