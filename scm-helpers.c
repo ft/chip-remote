@@ -51,11 +51,7 @@ cr_scm_variable_exists(char *name)
     if (name == NULL)
         return 0;
 
-    return
-        (scm_sym2var(scm_from_locale_symbol(name),
-                     scm_current_module_lookup_closure(),
-                     SCM_BOOL_F)
-         != SCM_BOOL_F)
+    return (scm_c_public_variable("chip-remote-primitives", name) != SCM_BOOL_F)
         ? 1
         : 0;
 }
