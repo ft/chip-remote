@@ -149,7 +149,7 @@ RR: while (my $input = <$pty>) {
         my $ret = $f->{code}->(\@cmd) if ($state eq $f->{state});
         board_tx($pty, (defined $ret) ? $ret : q{WTF});
     } else {
-        warn "-!- Unhandled input: ($input)\n";
+        board_tx($pty, q{UNKNOWN-COMMAND});
     }
 
     if ($done) {
