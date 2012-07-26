@@ -68,6 +68,7 @@ do {
 };
 
 my ($fh, $dev, $pty);
+my ($VERSION) = (qw{BOARDSIMU-2012-07-26});
 
 sub board_rx {
     my ($input) = @_;
@@ -123,6 +124,8 @@ RR: while (my $input = <$pty>) {
             sleep 1;
             last RR;
         }
+    } elsif ($input eq 'VERSION') {
+        board_tx($pty, $VERSION);
     } else {
         warn "-!- Unhandled input: ($input)\n";
     }
