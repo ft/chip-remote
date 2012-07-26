@@ -37,15 +37,20 @@ use POSIX qw{ :termios_h };
 use IO::Pty;
 
 my ($NAME, $VERSION) = (q{boardsimu}, q{BOARDSIMU-2012-07-26});
-my (%cb, %cnf, $done);
+my (%cb, %cnf, $done, $state);
 
 ### Callbacks #################################################################
 
 %cb = (
-    'HI'      => sub { return "Hi there, stranger." },
-    'VERSION' => sub { return $VERSION },
-    'BYE'     => sub { $done = 1 unless ($cnf{endless});
-                       return "Have a nice day." }
+    'HI'      => { state => q{init},
+                   code  => sub { $state = q{main};
+                                  return "Hi there, stranger." } },
+    'VERSION' => { state => q{main},
+                   code  => sub { return $VERSION } },
+    'BYE'     => { state => q{main},
+                   code  => sub { $done = 1 unless ($cnf{endless});
+                                  $state = q{init};
+                                  return "Have a nice day." } }
 );
 
 ###############################################################################
@@ -132,6 +137,7 @@ $dev->setattr(fileno($fh), TCSANOW) or die "Could not set attributes: $ERRNO\n";
 
 # Read-Reply loop
 $done = 0;
+$state = q{init};
 RR: while (my $input = <$pty>) {
     my (@cmd, $f);
 
@@ -139,9 +145,9 @@ RR: while (my $input = <$pty>) {
     @cmd = split /\s+/, $input;
     $f = $cb{$cmd[0]};
 
-    if (defined $f and ref($f) eq q{CODE}) {
-        my $ret = $f->(\@cmd);
-        board_tx($pty, $ret) unless (not defined $ret);
+    if (defined $f->{code} and ref($f->{code}) eq q{CODE}) {
+        my $ret = $f->{code}->(\@cmd) if ($state eq $f->{state});
+        board_tx($pty, (defined $ret) ? $ret : q{WTF});
     } else {
         warn "-!- Unhandled input: ($input)\n";
     }
