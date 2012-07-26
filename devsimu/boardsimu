@@ -51,6 +51,7 @@ my (%cb, %cnf, $done);
 ###############################################################################
 
 %cnf = (
+    delay => 0,
     endless => 0
 );
 
@@ -60,6 +61,7 @@ do {
  Usage: boardsimu [OPTION(s)]
 
   --help, -h             Display this help text.
+  --delay, -d <N>        Sleep for N seconds after reading intput.
   --endless, -e          Do not quit after "BYE".
 
 };
@@ -73,6 +75,7 @@ do {
         'no_ignore_case', 'bundling');
 
     $rc = GetOptions ( "help|h" => sub { usage; exit 0 },
+                       "delay|d=i" => sub { $cnf{delay} = $_[1] },
                        "endless|e", => sub { $cnf{endless} = 1 } );
 
     if (!$rc) {
@@ -87,6 +90,7 @@ sub board_rx {
     my ($input) = @_;
     $input =~ s/[\r\n]+//;
     print " >>> " . $input . "\n";
+    sleep $cnf{delay} if ($cnf{delay} > 0);
     return $input;
 }
 
