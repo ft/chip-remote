@@ -36,7 +36,21 @@ use English qw{ -no_match_vars };
 use POSIX qw{ :termios_h };
 use IO::Pty;
 
-my %cnf = (
+my ($NAME, $VERSION) = (q{boardsimu}, q{BOARDSIMU-2012-07-26});
+my (%cb, %cnf, $done);
+
+### Callbacks #################################################################
+
+%cb = (
+    'HI'      => sub { return "Hi there, stranger." },
+    'VERSION' => sub { return $VERSION },
+    'BYE'     => sub { $done = 1 unless ($cnf{endless});
+                       return "Have a nice day." }
+);
+
+###############################################################################
+
+%cnf = (
     endless => 0
 );
 
@@ -68,7 +82,6 @@ do {
 };
 
 my ($fh, $dev, $pty);
-my ($VERSION) = (qw{BOARDSIMU-2012-07-26});
 
 sub board_rx {
     my ($input) = @_;
@@ -114,20 +127,24 @@ $dev->setcc(VTIME, 0);
 $dev->setattr(fileno($fh), TCSANOW) or die "Could not set attributes: $ERRNO\n";
 
 # Read-Reply loop
+$done = 0;
 RR: while (my $input = <$pty>) {
+    my (@cmd, $f);
+
     $input = board_rx($input);
-    if ($input eq 'HI') {
-        board_tx($pty, "Hi there, stranger.");
-    } elsif ($input eq 'BYE') {
-        board_tx($pty, "Have a nice day.");
-        unless ($cnf{endless}) {
-            sleep 1;
-            last RR;
-        }
-    } elsif ($input eq 'VERSION') {
-        board_tx($pty, $VERSION);
+    @cmd = split /\s+/, $input;
+    $f = $cb{$cmd[0]};
+
+    if (defined $f and ref($f) eq q{CODE}) {
+        my $ret = $f->(\@cmd);
+        board_tx($pty, $ret) unless (not defined $ret);
     } else {
         warn "-!- Unhandled input: ($input)\n";
+    }
+
+    if ($done) {
+        sleep 1;
+        last RR;
     }
 }
 
