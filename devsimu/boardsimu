@@ -152,10 +152,8 @@ RR: while (my $input = <$pty>) {
         board_tx($pty, q{UNKNOWN-COMMAND});
     }
 
-    if ($done) {
-        sleep 1;
-        last RR;
-    }
+    last RR if ($done);
 }
 
+sleep 1;
 close $fh;
