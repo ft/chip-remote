@@ -41,17 +41,53 @@ my (%cb, %cnf, $done, $state);
 
 ### Callbacks #################################################################
 
+sub cb_features;
+sub cb_more;
+
 %cb = (
     'HI' => { state => q{init},
               code  => sub { $state = q{main};
                              return "Hi there, stranger." } },
     'VERSION' => { state => q{main},
                    code  => sub { return $VERSION } },
+    'FEATURES' => { state => q{main},
+                    code  => sub { $state = q{features};
+                                   return cb_features(@_) } },
+    'MORE' => { state => [ qw{ features } ],
+                code  => \&cb_more },
     'BYE' => { state => q{main},
                code  => sub { $done = 1 unless ($cnf{endless});
                               $state = q{init};
                               return "Have a nice day." } }
 );
+
+my $features_cnt;
+sub cb_features {
+    my ($cmd) = @_;
+    my @f = ( qw{ SPI SINGLE } );
+
+    return "MALFORMED-COMMAND" if ($#_ != 0);
+
+    if ($cmd eq 'FEATURES') {
+        $features_cnt = 0;
+    } else {
+        $features_cnt++;
+    }
+
+    if ($features_cnt > $#f) {
+        $state = q{main};
+        return "DONE";
+    }
+
+    return $f[$features_cnt];
+}
+
+sub cb_more {
+    my ($cmd) = @_;
+
+    return cb_features($cmd) if ($state eq q{features});
+    return "BUG-SHOULD-NOT-BE-REACHED";
+}
 
 ###############################################################################
 
