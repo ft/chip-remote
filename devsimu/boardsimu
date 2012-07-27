@@ -61,25 +61,30 @@ sub cb_more;
                               return "Have a nice day." } }
 );
 
-my $features_cnt;
-sub cb_features {
-    my ($cmd) = @_;
-    my @f = ( qw{ SPI SINGLE } );
+my $__list_cnt;
+sub __cb_list_more {
+    my ($l, $c, $p, $cmd) = @_;
+    shift; shift; shift;
 
     return "MALFORMED-COMMAND" if ($#_ != 0);
 
-    if ($cmd eq 'FEATURES') {
-        $features_cnt = 0;
+    if ($cmd eq $c) {
+        $__list_cnt = 0;
     } else {
-        $features_cnt++;
+        $__list_cnt++;
     }
 
-    if ($features_cnt > $#f) {
-        $state = q{main};
+    if ($__list_cnt > $#{ $l }) {
+        $state = $p;
         return "DONE";
     }
 
-    return $f[$features_cnt];
+    return $l->[$__list_cnt];
+}
+
+sub cb_features {
+    my @f = ( qw{ SPI SINGLE } );
+    return __cb_list_more(\@f, 'FEATURES', 'main', @_);
 }
 
 sub cb_more {
