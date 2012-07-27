@@ -42,15 +42,15 @@ my (%cb, %cnf, $done, $state);
 ### Callbacks #################################################################
 
 %cb = (
-    'HI'      => { state => q{init},
-                   code  => sub { $state = q{main};
-                                  return "Hi there, stranger." } },
+    'HI' => { state => q{init},
+              code  => sub { $state = q{main};
+                             return "Hi there, stranger." } },
     'VERSION' => { state => q{main},
                    code  => sub { return $VERSION } },
-    'BYE'     => { state => q{main},
-                   code  => sub { $done = 1 unless ($cnf{endless});
-                                  $state = q{init};
-                                  return "Have a nice day." } }
+    'BYE' => { state => q{main},
+               code  => sub { $done = 1 unless ($cnf{endless});
+                              $state = q{init};
+                              return "Have a nice day." } }
 );
 
 ###############################################################################
