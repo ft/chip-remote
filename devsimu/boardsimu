@@ -135,6 +135,20 @@ $dev->setcc(VTIME, 0);
 
 $dev->setattr(fileno($fh), TCSANOW) or die "Could not set attributes: $ERRNO\n";
 
+sub allowed_state {
+    my ($state, $allowed) = @_;
+
+    if (ref $allowed eq 'ARRAY') {
+        for my $i (@{ $allowed}) {
+            return 1 if ($state eq $i);
+        }
+    } else {
+        return 1 if ($state eq $allowed);
+    }
+
+    return 0;
+}
+
 # Read-Reply loop
 $done = 0;
 $state = q{init};
@@ -147,7 +161,7 @@ RR: while (my $input = <$pty>) {
     $f = $cb{$cmd[0]};
 
     if (defined $f->{code} and ref($f->{code}) eq q{CODE}) {
-        my $ret = $f->{code}->(\@cmd) if ($state eq $f->{state});
+        my $ret = $f->{code}->(\@cmd) if (allowed_state($state, $f->{state}));
         board_tx($pty, (defined $ret) ? $ret : q{WTF});
     } else {
         board_tx($pty, q{UNKNOWN-COMMAND});
