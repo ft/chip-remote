@@ -51,6 +51,8 @@ sub cb_more;
                              return "Hi there, stranger." } },
     'VERSION' => { state => q{main},
                    code  => sub { return $VERSION } },
+    'FOCUS' => { state => q{main},
+                 code  => \&cb_focus },
     'FEATURES' => { state => q{main},
                     code  => sub { $state = q{features};
                                    return cb_features(@_) } },
@@ -64,6 +66,29 @@ sub cb_more;
                               $state = q{init};
                               return "Have a nice day." } }
 );
+
+sub __hexstring2num {
+    my ($s, $f) = @_;
+    my ($n, $neg, $pos, %v);
+
+    $neg = 1;
+    $neg = -1 if ($s =~ s/^-//);
+
+    foreach my $k (0 .. 9) { $v{"$k"} = $k }
+    $v{a} = 10; $v{b} = 11; $v{c} = 12;
+    $v{d} = 13; $v{e} = 14; $v{f} = 15;
+
+    ${ $f } = $pos = $n = 0;
+    foreach my $digit (reverse split //, $s) {
+        if (!defined $v{lc $digit}) {
+            ${ $f } = 1;
+            return $neg * $n;
+        }
+        $n += $v{lc $digit} * (16 ** $pos);
+    }
+
+    return $neg * $n;
+}
 
 my $__list_cnt;
 sub __cb_list_more {
@@ -102,6 +127,20 @@ sub cb_more {
     return cb_features($cmd) if ($state eq q{features});
     return cb_outputs($cmd) if ($state eq q{outputs});
     return "BUG-SHOULD-NOT-BE-REACHED";
+}
+
+sub cb_focus {
+    my ($cmd, $s) = @_;
+    my ($max, $num, $fail);
+
+    return "MALFORMED-COMMAND" if ($#_ != 1);
+
+    $max = 0;
+    $num = __hexstring2num($s, \$fail);
+
+    return "BROKEN-VALUE $s" if ($fail);
+    return "VALUE-OUT-OF-RANGE $s" if ($num < 0 || $num > $max);
+    return "OK";
 }
 
 ###############################################################################
