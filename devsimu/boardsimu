@@ -139,8 +139,9 @@ $dev->setattr(fileno($fh), TCSANOW) or die "Could not set attributes: $ERRNO\n";
 $done = 0;
 $state = q{init};
 RR: while (my $input = <$pty>) {
-    my (@cmd, $f);
+    my (@cmd, $f, $pstate);
 
+    $pstate = $state;
     $input = board_rx($input);
     @cmd = split /\s+/, $input;
     $f = $cb{$cmd[0]};
@@ -152,6 +153,7 @@ RR: while (my $input = <$pty>) {
         board_tx($pty, q{UNKNOWN-COMMAND});
     }
 
+    print " -!- Changed state: $pstate -> $state\n" if ($pstate ne $state);
     last RR if ($done);
 }
 
