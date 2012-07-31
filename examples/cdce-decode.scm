@@ -1,7 +1,8 @@
 (use-modules
- ((ti cdce72010)
+ ((chip-remote devices ti cdce72010)
   #:renamer (symbol-prefix-proc 'cdce/))
- ((ti cdce72010 decode)))
+ ((chip-remote devices ti cdce72010 decode)
+  #:renamer (symbol-prefix-proc 'cdce/)))
 
 (define foo '(#x683c0ed0
               #x68000051
@@ -21,5 +22,5 @@
   (cond ((null? reg)
          (quit 0))
         (else
-         (decode-register-by-value (car reg))
+         (cdce/decode-register-by-value (car reg))
          (next (cdr reg)))))

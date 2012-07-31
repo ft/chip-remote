@@ -22,7 +22,7 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (use-modules (ice-9 format)
-             (ti cdce72010 tables))
+             (chip-remote devices ti cdce72010 tables))
 
 (load "divider-samples.scm")
 

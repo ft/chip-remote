@@ -23,7 +23,7 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (use-modules (ice-9 format)
-             (ti cdce72010 prg))
+             (chip-remote devices ti cdce72010 prg))
 
 (if (not (logbit? 24 (set-odiv-enable-bit #x00000000)))
     (quit 1))

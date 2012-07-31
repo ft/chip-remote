@@ -27,7 +27,7 @@
 ;; you prefer the symbols from this module to have a `cdce/' prefix, use:
 ;;
 ;;      (use-modules
-;;       ((ti cdce72010)
+;;       ((chip-remote devices ti cdce72010)
 ;;        #:renamer (symbol-prefix-proc 'cdce/)))
 ;;
 ;; Note, that the code in this module assumes that the serial connection to
@@ -38,7 +38,7 @@
 ;; problems during interactive use. For example, trying to change divider 9
 ;; will cause an error, because divider 9 does not exist on the device.
 
-(define-module (ti cdce72010)
+(define-module (chip-remote devices ti cdce72010)
   :export (decode-device
            decode-register
            disable-output-divider
@@ -59,10 +59,10 @@
 
 (use-modules (bitops)
              (chip-remote-primitives)
-             (ti cdce72010 decode)
-             (ti cdce72010 messages)
-             (ti cdce72010 prg)
-             (ti cdce72010 validate))
+             (chip-remote devices ti cdce72010 decode)
+             (chip-remote devices ti cdce72010 messages)
+             (chip-remote devices ti cdce72010 prg)
+             (chip-remote devices ti cdce72010 validate))
 
 (define (read-registers)
   (let ((a '()))
@@ -87,7 +87,7 @@
   (display "};\n"))
 
 (define (export-registers-scheme-script registers)
-  (display "(use-modules ((ti cdce72010)\n")
+  (display "(use-modules ((chip-remote devices ti cdce72010)\n")
   (display "              #:renamer (symbol-prefix-proc 'cdce/)))\n\n")
   (display "(cdce/open \"/dev/ttyUSB0\") ;; or whatever device file...\n")
   (display "(cdce/hi)\n\n")
