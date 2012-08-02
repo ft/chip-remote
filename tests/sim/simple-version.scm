@@ -6,13 +6,18 @@
 (define device (getenv "CR_BOARD_DEVICE"))
 
 ;; Open it, say hello, query the protocol version, say bye, close up and exit.
-(cr/open device)
-(hi)
+(or (cr/open device)
+    (throw 'open-failed))
+(or (hi)
+    (throw 'hi-failed))
 
 (let ((v (version)))
   (or v
       (throw 'version-failed `(version ,v))))
 
-(bye)
-(cr/close)
+(or (bye)
+    (throw 'bye-failed))
+(or (cr/close)
+    (throw 'close-failed))
+
 (quit 0)
