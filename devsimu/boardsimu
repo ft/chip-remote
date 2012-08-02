@@ -37,7 +37,7 @@ use POSIX qw{ :sys_wait_h
               :termios_h };
 use IO::Pty;
 
-my ($NAME, $VERSION) = (q{boardsimu}, q{BOARDSIMU-2012-07-26});
+my $VERSION = q{VERSION 2 0 0};
 my (%cb, %cnf, $done, $retval, $cpid, $state);
 
 ### Callbacks #################################################################
