@@ -8,7 +8,11 @@
 ;; Open it, say hello, query the protocol version, say bye, close up and exit.
 (cr/open device)
 (hi)
-(version)
+
+(let ((v (version)))
+  (or v
+      (throw 'version-failed `(version ,v))))
+
 (bye)
 (cr/close)
 (quit 0)
