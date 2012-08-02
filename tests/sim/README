@@ -1,0 +1,8 @@
+Every *.scm file in here is a scheme script that is run by the chip-remote
+interpreter which itself is called be the board simulation program boardsimu,
+located in the devsimu subdirectory of the project.
+
+The idea is to have a software-simulated control board, to which we can connect
+and try stuff out. Perfect for automated tests.
+
+See the `simple-version.scm' script for a brief idea about how to do that.

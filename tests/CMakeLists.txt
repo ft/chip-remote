@@ -11,3 +11,16 @@ foreach (test ${TESTS})
     TEST ${test_name}
     PROPERTY ENVIRONMENT GUILE_LOAD_PATH=${CMAKE_SOURCE_DIR}/scheme)
 endforeach()
+
+file(GLOB TESTS sim/*.scm)
+list(SORT TESTS ${TESTS})
+foreach (test ${TESTS})
+  get_filename_component(test_name ${test} NAME_WE)
+  add_test(
+    NAME "sim-${test_name}"
+    COMMAND perl ${CMAKE_SOURCE_DIR}/devsimu/boardsimu -f
+            ${CMAKE_BINARY_DIR}/chip-remote --no-auto-compile -s ${test})
+  set_property(
+    TEST "sim-${test_name}"
+    PROPERTY ENVIRONMENT GUILE_LOAD_PATH=${CMAKE_SOURCE_DIR}/scheme)
+endforeach()
