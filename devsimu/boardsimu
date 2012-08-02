@@ -260,10 +260,10 @@ sub allowed_state {
 sub handle_sigchld {
     my $p;
     while (($p = waitpid(-1, &WNOHANG)) > 0) {
-        print " -!- Child process exited: $p (return: ${^CHILD_ERROR_NATIVE})\n";
         $retval = ${^CHILD_ERROR_NATIVE};
+        print " -!- Child process exited: $p (return: $retval)\n";
         close $fh;
-        exit $retval;
+        exit ($retval > 0) ? 1 : 0;
     }
     $SIG{CHLD} = \&handle_sigchld;
 }
@@ -316,4 +316,4 @@ if ($cnf{fork}) {
 }
 
 close $fh;
-exit $retval;
+exit ($retval > 0) ? 1 : 0;
