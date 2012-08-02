@@ -39,7 +39,6 @@
 
 #include "chip-remote-scm.h"
 #include "common.h"
-#include "proto.h"
 #include "scm-helpers.h"
 #include "serial.h"
 
@@ -82,83 +81,18 @@ done:
 }
 
 SCM
-cr_scm_hi(UNUSED SCM x)
+cr_scm_read_raw(UNUSED SCM x)
 {
-    if (!proto_hi())
-        return SCM_BOOL_F;
-    if (!proto_expect_reply("Hi there, stranger."))
+    char reply[SERIAL_BUF_MAX + 1];
+
+    if (!serial_read(reply))
         return SCM_BOOL_F;
 
-    return SCM_BOOL_T;
+    return scm_from_locale_string(reply);
 }
 
 SCM
-cr_scm_bye(UNUSED SCM x)
-{
-    if (!proto_bye())
-        return SCM_BOOL_F;
-    if (!proto_expect_reply("Have a nice day."))
-        return SCM_BOOL_F;
-
-    return SCM_BOOL_T;
-}
-
-SCM
-cdce_scm_write_eeprom(UNUSED SCM x)
-{
-    if (!proto_write_eeprom())
-        return SCM_BOOL_F;
-    if (!proto_expect_reply("OK"))
-        return SCM_BOOL_F;
-
-    return SCM_BOOL_T;
-}
-
-SCM
-cdce_scm_write_eeprom_locked(UNUSED SCM x)
-{
-    if (!proto_write_eeprom_locked())
-        return SCM_BOOL_F;
-    if (!proto_expect_reply("REALLY?"))
-        return SCM_BOOL_F;
-
-    return SCM_BOOL_T;
-}
-
-SCM
-cdce_scm_read_reg(SCM reg)
-{
-    int err;
-    uint32_t r;
-
-    r = cr_scm_to_uint32(reg, "register", &err);
-    if (err)
-        return SCM_BOOL_F;
-    if (r > 12) {
-        (void)printf(
-            "cdce/read-registers: `register' is only valid from 0..12.\n");
-        return SCM_BOOL_F;
-    }
-    if (!proto_get_reg(r))
-        return SCM_BOOL_F;
-
-    /*
-     * Why "| r" you ask?
-     *
-     * Well, great question. Here's the deal: CDCE72010 devices have a hardware
-     * bug. When you read registers from the device, the least-significant bit
-     * will *always* be `0'. So, if you read all registers, the last nibbles
-     * would come up like this: 0, 0, 2, 2, 4, 4... etc. You get the drift.
-     *
-     * Now the last nibble only contains the register's address, which we
-     * *know* since we're asking for a specific one. And since the bug ties the
-     * bit *down*, ORing will just fix the bug without ill side effects.
-     */
-    return scm_from_uint32(proto_read_integer() | r);
-}
-
-SCM
-cdce_scm_write_raw(SCM data)
+cr_scm_write_raw(SCM data)
 {
     char *buf;
     SCM rc = SCM_BOOL_F;
@@ -172,7 +106,7 @@ cdce_scm_write_raw(SCM data)
 
     if (buf == NULL)
         goto done;
-    if (!proto_write_raw(buf))
+    if (!serial_write(buf))
         goto done;
 
     rc = SCM_BOOL_T;
@@ -182,36 +116,6 @@ done:
     return rc;
 }
 
-SCM
-cdce_scm_write_reg(SCM reg, SCM value)
-{
-    int err;
-    uint32_t r, v;
-
-    r = cr_scm_to_uint32(reg, "register", &err);
-    if (err)
-        return SCM_BOOL_F;
-    if (r > 12) {
-        (void)printf(
-            "cdce/read-registers: `register' is only valid from 0..12.\n");
-        return SCM_BOOL_F;
-    }
-    v = cr_scm_to_uint32(value, "value", &err);
-    if (err)
-        return SCM_BOOL_F;
-
-    v &= ~(0x0ful);
-    v |= r;
-
-    if (!proto_write_reg(r, v))
-        return SCM_BOOL_F;
-
-    if (!proto_expect_reply("OK"))
-        return SCM_BOOL_F;
-
-    return SCM_BOOL_T;
-}
-
 static struct cr_scm_proctab {
     const char *name;
     SCM (*cb)(SCM);
@@ -219,14 +123,10 @@ static struct cr_scm_proctab {
     int opt;
     int rest;
 } pt[] = {
-    { "cr/bye", cr_scm_bye, 0, 0, 0 },
     { "cr/close", cr_scm_close, 0, 0, 0 },
-    { "cdce/read-register", cdce_scm_read_reg, 1, 0, 0 },
-    { "cr/hi", cr_scm_hi, 0, 0, 0 },
     { "cr/open", cr_scm_open, 1, 0, 0 },
-    { "cdce/write-eeprom", cdce_scm_write_eeprom, 0, 0, 0 },
-    { "cdce/write-eeprom-locked", cdce_scm_write_eeprom_locked, 0, 0, 0 },
-    { "cdce/write-raw", cdce_scm_write_raw, 1, 0, 0 },
+    { "cr/read-raw", cr_scm_read_raw, 0, 0, 0 },
+    { "cr/write-raw", cr_scm_write_raw, 1, 0, 0 },
     { (char *)NULL, NULL, 0, 0, 0 }
 };
 
@@ -249,13 +149,6 @@ cr_scm_module(UNUSED void *data)
                            pt[i].cb);
         scm_c_export(pt[i].name, NULL);
     }
-    /*
-     * Huh. My procedure-table can't deal with "SCM foo(SCM, SCM)"-type
-     * signatures... Oh well.
-     */
-    scm_c_define_gsubr("cdce/write-register", 2, 0, 0,
-                       cdce_scm_write_reg);
-    scm_c_export("cdce/write-register", NULL);
 }
 
 void

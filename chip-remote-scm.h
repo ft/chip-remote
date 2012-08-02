@@ -33,18 +33,11 @@
 
 #include <libguile.h>
 
-SCM cr_scm_bye(SCM);
 SCM cr_scm_close(SCM);
-SCM cr_scm_hi(SCM);
 SCM cr_scm_open(SCM);
+SCM cr_scm_read_raw(SCM);
+SCM cr_scm_write_raw(SCM);
 
 void cr_scm_init(void);
-
-/** @TODO The following functions need to be moved to scheme code */
-SCM cdce_scm_read_reg(SCM);
-SCM cdce_scm_write_eeprom(SCM);
-SCM cdce_scm_write_eeprom_locked(SCM);
-SCM cdce_scm_write_raw(SCM);
-SCM cdce_scm_write_reg(SCM, SCM);
 
 #endif /* INC_CDCE_SCM_H_ */
