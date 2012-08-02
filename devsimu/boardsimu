@@ -33,11 +33,12 @@ use warnings;
 use diagnostics;
 
 use English qw{ -no_match_vars };
-use POSIX qw{ :termios_h };
+use POSIX qw{ :sys_wait_h
+              :termios_h };
 use IO::Pty;
 
 my ($NAME, $VERSION) = (q{boardsimu}, q{BOARDSIMU-2012-07-26});
-my (%cb, %cnf, $done, $state);
+my (%cb, %cnf, $done, $retval, $cpid, $state);
 
 ### Callbacks #################################################################
 
@@ -147,7 +148,8 @@ sub cb_focus {
 
 %cnf = (
     delay => 0,
-    endless => 0
+    endless => 0,
+    fork => 0
 );
 
 do {
@@ -157,9 +159,17 @@ do {
 
   --help, -h             Display this help text.
   --delay, -d <N>        Sleep for N seconds after reading intput.
+  --fork, -f             Fork a command right after terminal dev. is set up
   --endless, -e          Do not quit after "BYE".
 
+If `--fork' is used, the command-line arguments that remain after option
+handling will be used as the command that is being run within the child
+process. Also, the this script will use the child's return value as its own.
+That way this script can be used to imitate a physical board in the project's
+test suite.
+
 };
+
     }
 
     use Getopt::Long;
@@ -171,9 +181,16 @@ do {
 
     $rc = GetOptions ( "help|h" => sub { usage; exit 0 },
                        "delay|d=i" => sub { $cnf{delay} = $_[1] },
-                       "endless|e", => sub { $cnf{endless} = 1 } );
+                       "endless|e", => sub { $cnf{endless} = 1 },
+                       "fork|f", => sub { $cnf{fork} = 1 } );
 
     if (!$rc) {
+        usage;
+        exit 1;
+    }
+
+    if (!$cnf{fork} && $#ARGV >= 0) {
+        print "\nRemaining arguments without `--fork'?\n";
         usage;
         exit 1;
     }
@@ -200,6 +217,7 @@ $pty = IO::Pty->new;
 $fh = $pty->slave;
 
 print "Connecting to device `" . $fh->ttyname . "'...\n";
+$ENV{CR_BOARD_DEVICE} = $fh->ttyname;
 
 # Setup serial device...
 $dev->getattr(fileno($fh)) or die "Could not get attributes: $ERRNO\n";
@@ -239,6 +257,29 @@ sub allowed_state {
     return 0;
 }
 
+sub handle_sigchld {
+    my $p;
+    while (($p = waitpid(-1, &WNOHANG)) > 0) {
+        print " -!- Child process exited: $p (return: ${^CHILD_ERROR_NATIVE})\n";
+        $retval = ${^CHILD_ERROR_NATIVE};
+        close $fh;
+        exit $retval;
+    }
+    $SIG{CHLD} = \&handle_sigchld;
+}
+
+$SIG{CHLD} = \&handle_sigchld;
+
+$retval = 0;
+
+if ($cnf{fork}) {
+    if ($cpid = fork) {
+        print " -!- Forked process: $cpid\n";
+    } else {
+        exec(@ARGV);
+    }
+}
+
 # Read-Reply loop
 $done = 0;
 $state = q{init};
@@ -261,5 +302,18 @@ RR: while (my $input = <$pty>) {
     last RR if ($done);
 }
 
-sleep 1;
+if ($cnf{fork}) {
+    my $pid;
+    if (($pid = wait) >= 0) {
+        $retval = ${^CHILD_ERROR_NATIVE};
+        print " -!- Collecting child process $pid (return: $retval)\n";
+        if ($pid != $cpid) {
+            print " -!- Warning: $cpid != $pid! (this shouldn't happen)\n";
+        }
+    }
+} else {
+    sleep 1;
+}
+
 close $fh;
+exit $retval;
