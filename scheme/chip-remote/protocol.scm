@@ -151,19 +151,33 @@
 
 ;; Read a raw string from the device.
 (define (read-raw)
-  (cr/write-raw))
+  (cr/read-raw))
+
+;; Read from the device, save the reply and run code in case the read was
+;; successful. Return `#f' otherwise.
+(define-syntax with-read-raw-string
+  (lambda (x)
+    (syntax-case x ()
+      ((_ (r) code ...)
+       #'(let ((r (read-raw)))
+           (if (not (string? r))
+               #f
+               (begin code ...)))))))
 
 ;; Initiate communication channel to the device.
 (define (hi)
   (write-raw "HI")
-  (string=? (read-raw) "Hi there, stranger."))
+  (with-read-raw-string (reply)
+    (string=? reply "Hi there, stranger.")))
 
 ;; Close down communication channel to the device.
 (define (bye)
   (write-raw "BYE")
-  (string=? (read-raw) "Have a nice day."))
+  (with-read-raw-string (reply)
+    (string=? reply "Have a nice day.")))
 
 ;; Query protocol version from the board.
 (define (version)
   (write-raw "VERSION")
-  (expect-read (read-raw) '("VERSION" int int int) cdr))
+  (with-read-raw-string (reply)
+    (expect-read reply '("VERSION" int int int) cdr)))
