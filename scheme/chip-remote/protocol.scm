@@ -61,7 +61,7 @@
            read-raw
            bye
            hi
-           version))
+           protocol-version))
 
 ;; Words in the protocol may contain letters and digits from ASCII.
 (define protocol-char-set
@@ -177,7 +177,7 @@
     (string=? reply "Have a nice day.")))
 
 ;; Query protocol version from the board.
-(define (version)
+(define (protocol-version)
   (write-raw "VERSION")
   (with-read-raw-string (reply)
     (expect-read reply '("VERSION" int int int) cdr)))
