@@ -61,6 +61,7 @@
            read-raw
            bye
            hi
+           features
            protocol-version))
 
 ;; Words in the protocol may contain letters and digits from ASCII.
@@ -181,3 +182,33 @@
   (write-raw "VERSION")
   (with-read-raw-string (reply)
     (expect-read reply '("VERSION" int int int) cdr)))
+
+;; A set of commands return more than one reply. The host triggers the 2nd to
+;; the N-th reply by saying "MORE". The board will reply with DONE when there
+;; is nothing more to say. This function does exactly that and returns a list
+;; of replies for further processing.
+(define (list-more-done item)
+  (write-raw item)
+  (let next ((f '())
+             (reply (read-raw)))
+    (cond ((eq? reply #f) #f)
+          ((string=? reply "DONE") f)
+          (else
+           (write-raw "MORE")
+           (next (append f (list reply))
+                 (read-raw))))))
+
+;; Check if the second argument (`list') to the function is a list, if not
+;; return it unchanged. If it is, map `proc' over and return the result.
+(define (list-and-map proc list)
+  (cond ((not (list? list)) list)
+        (else (map proc list))))
+
+;; Turns a string into a lower-cased symbol: "FOO" => foo
+(define (feature->symbol s)
+  (string->symbol (string-downcase s)))
+
+;; Queries the board's feature list and returns a list of according symbols.
+(define (features)
+  (list-and-map feature->symbol
+                (list-more-done "FEATURES")))
