@@ -43,7 +43,7 @@ my (%cb, %cnf, $done, $retval, $cpid, $state);
 ### Callbacks #################################################################
 
 sub cb_features;
-sub cb_outputs;
+sub cb_ports;
 sub cb_more;
 
 %cb = (
@@ -57,10 +57,10 @@ sub cb_more;
     'FEATURES' => { state => q{main},
                     code  => sub { $state = q{features};
                                    return cb_features(@_) } },
-    'OUTPUTS' => { state => q{main},
-                   code  => sub { $state = q{outputs};
-                                  return cb_outputs(@_) } },
-    'MORE' => { state => [ qw{ features outputs } ],
+    'PORTS' => { state => q{main},
+                 code  => sub { $state = q{ports};
+                                  return cb_ports(@_) } },
+    'MORE' => { state => [ qw{ features ports } ],
                 code  => \&cb_more },
     'BYE' => { state => q{main},
                code  => sub { $done = 1 unless ($cnf{endless});
@@ -117,16 +117,16 @@ sub cb_features {
     return __cb_list_more(\@f, 'FEATURES', 'main', @_);
 }
 
-sub cb_outputs {
+sub cb_ports {
     my @o = ( q{0 SPI FIXED CONFIGURABLE} );
-    return __cb_list_more(\@o, 'OUTPUTS', 'main', @_);
+    return __cb_list_more(\@o, 'PORTS', 'main', @_);
 }
 
 sub cb_more {
     my ($cmd) = @_;
 
     return cb_features($cmd) if ($state eq q{features});
-    return cb_outputs($cmd) if ($state eq q{outputs});
+    return cb_ports($cmd) if ($state eq q{ports});
     return "BUG-SHOULD-NOT-BE-REACHED";
 }
 
