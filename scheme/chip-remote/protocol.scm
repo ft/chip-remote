@@ -62,6 +62,7 @@
            bye
            hi
            features
+           ports
            protocol-version))
 
 ;; Words in the protocol may contain letters and digits from ASCII.
@@ -92,6 +93,8 @@
                   (success (integer? val)))
              (list success
                    (if success val got))))
+          ((eq? want 'string)
+           (list #t got))
           (else
            (list #f got)))))
 
@@ -212,3 +215,27 @@
 (define (features)
   (list-and-map feature->symbol
                 (list-more-done "FEATURES")))
+
+;; Given a PORTS reply like "0 SPI FIXED STATIC", this returns an alist like
+;; this:
+;;
+;;  ((number       . 0)
+;;   (type         . spi)
+;;   (changable    . fixed)
+;;   (configurable . static))
+;;
+;; It is used by the `ports' function to return a list of alists.
+(define (port->pair s)
+  (let ((l (expect-read s '(int string string string))))
+    (cond ((not (list? l)) l)
+          (else
+           (cons (cons 'number (car l))
+                 (map (lambda (a b)
+                        (cons a b))
+                      '(type changable configurable)
+                      (map feature->symbol (cdr l))))))))
+
+;; Queries the board for its ports and returns a list of alists.
+(define (ports)
+  (list-and-map port->pair
+                (list-more-done "PORTS")))
