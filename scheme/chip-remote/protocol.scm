@@ -55,11 +55,9 @@
 ;;---------------------------------------------------------------
 
 (define-module (chip-remote protocol)
-  :use-module (chip-remote-primitives)
+  :use-module (chip-remote io)
   :use-module (srfi srfi-1) ;; Implements `fold' and `zip'.
-  :export (write-raw
-           read-raw
-           bye
+  :export (bye
            hi
            features
            ports
@@ -149,57 +147,49 @@
             (postproc (cdr results))
             #f))))))
 
-;; Write a raw string to the device.
-(define (write-raw message)
-  (cr/write-raw message))
-
-;; Read a raw string from the device.
-(define (read-raw)
-  (cr/read-raw))
-
 ;; Read from the device, save the reply and run code in case the read was
 ;; successful. Return `#f' otherwise.
 (define-syntax with-read-raw-string
   (lambda (x)
     (syntax-case x ()
-      ((_ (r) code ...)
-       #'(let ((r (read-raw)))
+      ((_ (c r) code ...)
+       #'(let ((r (io-read c)))
            (if (not (string? r))
                #f
                (begin code ...)))))))
 
 ;; Initiate communication channel to the device.
-(define (hi)
-  (write-raw "HI")
-  (with-read-raw-string (reply)
+(define (hi conn)
+  (io-write conn "HI")
+  (with-read-raw-string (conn reply)
     (string=? reply "Hi there, stranger.")))
 
 ;; Close down communication channel to the device.
-(define (bye)
-  (write-raw "BYE")
-  (with-read-raw-string (reply)
+(define (bye conn)
+  (io-write conn "BYE")
+  (with-read-raw-string (conn reply)
     (string=? reply "Have a nice day.")))
 
 ;; Query protocol version from the board.
-(define (protocol-version)
-  (write-raw "VERSION")
-  (with-read-raw-string (reply)
+(define (protocol-version conn)
+  (io-write conn "VERSION")
+  (with-read-raw-string (conn reply)
     (expect-read reply '("VERSION" int int int) cdr)))
 
 ;; A set of commands return more than one reply. The host triggers the 2nd to
 ;; the N-th reply by saying "MORE". The board will reply with DONE when there
 ;; is nothing more to say. This function does exactly that and returns a list
 ;; of replies for further processing.
-(define (list-more-done item)
-  (write-raw item)
+(define (list-more-done conn item)
+  (io-write conn item)
   (let next ((f '())
-             (reply (read-raw)))
+             (reply (io-read conn)))
     (cond ((eq? reply #f) #f)
           ((string=? reply "DONE") f)
           (else
-           (write-raw "MORE")
+           (io-write conn "MORE")
            (next (append f (list reply))
-                 (read-raw))))))
+                 (io-read conn))))))
 
 ;; Check if the second argument (`list') to the function is a list, if not
 ;; return it unchanged. If it is, map `proc' over and return the result.
@@ -212,9 +202,9 @@
   (string->symbol (string-downcase s)))
 
 ;; Queries the board's feature list and returns a list of according symbols.
-(define (features)
+(define (features conn)
   (list-and-map feature->symbol
-                (list-more-done "FEATURES")))
+                (list-more-done conn "FEATURES")))
 
 ;; Given a PORTS reply like "0 SPI FIXED STATIC", this returns an alist like
 ;; this:
@@ -236,6 +226,6 @@
                       (map feature->symbol (cdr l))))))))
 
 ;; Queries the board for its ports and returns a list of alists.
-(define (ports)
+(define (ports conn)
   (list-and-map port->pair
-                (list-more-done "PORTS")))
+                (list-more-done conn "PORTS")))
