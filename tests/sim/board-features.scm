@@ -1,21 +1,23 @@
-(use-modules (chip-remote protocol)
+(use-modules (chip-remote io)
+             (chip-remote protocol)
              (ice-9 pretty-print))
 
 (define device (getenv "CR_BOARD_DEVICE"))
+(define connection (make-cr-connection device))
 
-(or (cr/open device)
+(or (io-open connection)
     (throw 'open-failed))
-(or (hi)
+(or (hi connection)
     (throw 'hi-failed))
 
-(let ((f (features)))
+(let ((f (features connection)))
   (or f
       (throw 'features-failed `(features ,f)))
   (pretty-print f))
 
-(or (bye)
+(or (bye connection)
     (throw 'bye-failed))
-(or (cr/close)
+(or (io-close connection)
     (throw 'close-failed))
 
 (quit 0)
