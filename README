@@ -1,30 +1,33 @@
-To build the program:
+  chip-remote: A protocol for remote controlling runtime-configurable chips
 
-    % make all
+Many powerful and flexible electronic parts, are configurable at runtime via
+simple interfaces like SPI or I2C. In prototyping, revising and testing, it is
+useful to be able to control these chips from a computer, preferably via a high
+level programming language.
 
-The result will be in "./build/chip-remote".
+With SPI, I2C and so on, you don't have readily available interfaces to general
+personal computers. That is why `chip-remote' actually defines an ASCII protocol
+of which the remote part can be implemented in low-cost micro-controllers, that
+can be equipped with cheap USB/UART converters. That way you can talk to the
+micro-controller, that looks like a serial device to your OS. You will be able
+to open and write to that device almost as if you are writing to a file (except
+for serial-line setup like baud-rate, parity generation, word width, number of
+stop-bits and all that).
 
-To generate the source-code documentation:
+The protocol design attempts to support multiple configurable chips on different
+interfaces on a single USB/micro-controller connection. Much of the protocol is
+supposed to be optional for micro-controllers to implement, to be able to the
+most low-cost micro-controllers available.
 
-    % make apidocs
+The reference client implementation is done in Guile scheme. Scheme is a very
+high-level programming language of the Lisp variety, that has (even though it is
+one of the oldest programming languages available) a host of very powerful
+features. Guile scheme is a free software implementation of the language, with a
+lot of extensions, that is readily available on many platforms.
 
-The result will be in "./apidocs/index.html".
+The remote-board implemenation has been done in C in the past; and a more
+featureful reference implemenation is in the planning phase. The target language
+is going to be ANSI C, with as little micro-controller dependent code as
+possible.
 
-To run the project's test-suite:
-
-    % make test
-
-To install the program and all scheme modules to `/usr/local', run
-the following with appropriate access (probably root):
-
-    # make install
-
-
-If you do not want to install the program, but use it from its build
-directory, you can do that. There is a helper target that will generate
-a simple shell script `chip-remote-wrapper', that you can use instead
-of the real program. It takes care of setting everything up so that will
-work without problems. To generate the script do:
-
-    % cd build
-    % make inbuildexecscript
+All of this is still VERY MUCH work in progress.
