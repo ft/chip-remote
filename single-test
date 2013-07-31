@@ -1,0 +1,15 @@
+#!/bin/sh
+
+SOURCE_DIR="$PWD"
+BINARY_DIR="$PWD"
+DISPATCH_ROOT="$SOURCE_DIR/tests"
+DISPATCH_BIN_ROOT="$DISPATCH_ROOT"
+
+for i in SOURCE_DIR \
+         BINARY_DIR \
+         DISPATCH_ROOT \
+         DISPATCH_BIN_ROOT; do
+    export "$i"
+done
+
+exec dispatch-test "$1"
