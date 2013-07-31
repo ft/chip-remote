@@ -1,5 +1,5 @@
-;;;;
-;; Copyright 2011 Frank Terbeck <ft@bewatermyfriend.org>, All rights reserved.
+;; Copyright 2011-2013 Frank Terbeck <ft@bewatermyfriend.org>, All
+;; rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
 ;; modification, are permitted provided that the following conditions
@@ -23,45 +23,28 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (use-modules (ice-9 format)
+             (test tap)
              (bitops)
+             (chip-remote devices ti cdce72010 tables)
              (chip-remote devices ti cdce72010 prg))
 
-;; Since the `set-div-bits' test already checks against non-trivial bit
-;; patterns, we'll assume that the involved bit operations work properly.
+(define value-width 7)
 
-(define values '(#b000000000000001
-                 #b100000000000000
-                 #b011111111111111
-                 #b010101010101010
-                 #b001010101010101
-                 #b011001100110011
-                 #b000110011001100))
-
-(define value-width 14)
-
-(define (run-check fcn shifts)
-  (let nextval ((v values))
-    (cond
-     ((null? v) #t)
-     (else
-      (let* ((exp (car v))
-             (result (fcn #xffffffff exp))
-             ;; Read the bits from the result and add 1, because the bits
-             ;; store the configured divider value minus 1.
-             (got (1+ (bit-extract-width result shifts value-width))))
-        (cond
-         ((not (= exp got))
-          (display
-           (format #f
-                   "expected: ~s\n     got: ~s\nresult was ~s"
-                   (number->string exp 2)
-                   (number->string got 2)
-                   (number->string result 16)))
-          (quit 1))
-         (else
-          (nextval (cdr v)))))))))
-
-(run-check set-bits-mdiv 4)
-(run-check set-bits-ndiv 18)
-
-(quit 0)
+(with-fs-test-bundle
+ (plan (length output-modes))
+ (let nextval ((m output-modes))
+   (cond
+    ((null? m) #t)
+    (else
+     (let* ((mode (caar m))
+            (exp (if (list? (cadar m))
+                     (caadar m)
+                     (cadar m)))
+            (result (set-bits-output-mode #xffffffff mode))
+            (got (bit-extract-width result 25 value-width)))
+       (define-test (format #f
+                            "mode(~a): expect: ~s"
+                            (symbol->string mode)
+                            (number->string exp 2))
+         (pass-if-= exp got))
+       (nextval (cdr m)))))))

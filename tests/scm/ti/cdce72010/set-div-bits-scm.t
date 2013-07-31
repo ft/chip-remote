@@ -1,4 +1,5 @@
-;; Copyright 2011 Frank Terbeck <ft@bewatermyfriend.org>, All rights reserved.
+;; Copyright 2011-2013 Frank Terbeck <ft@bewatermyfriend.org>, All
+;; rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
 ;; modification, are permitted provided that the following conditions
@@ -22,11 +23,10 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (use-modules (ice-9 format)
+             (test tap)
              (bitops)
              (chip-remote devices ti cdce72010 prg))
-
-;; Set this to `#t' to get output for succeeded tests, too.
-(define test-verbose #f)
+(primitive-load "tests/test-tap-cfg.scm")
 
 (load "divider-samples.scm")
 
@@ -43,37 +43,22 @@
     #xcccccccc
     #xaaaaaaaa))
 
-;; Here is what's going on: for each function in `setters', this is
-;; applying each divider from `divider-samples' to all values from
-;; `target-register-values'. From that result the target bits are
-;; extracted again and compared to the expected register value from
-;; `divider-samples'. Each such comparison should succeed.
+;; The CDCE72010 uses the complex divider settings for output- and feedback-
+;; dividers. They use the same bits but in different places.
+(define functions `((,set-bits-fbdiv . 9)
+                    (,set-bits-odiv . 17)))
 
-(define (test-output div val got bits exp)
-  (display (format
-            #f
-            "set divider in ~d:\n\n  from ~s, ~s\n    to ~s, ~s\n\n"
-            div
-            (number->string val 2)
-            (number->string val 16)
-            (number->string got 2)
-            (number->string got 16)))
-  (display (format #f
-                   "     got ~s,\nexpected ~s\n"
-                   (number->string bits 2)
-                   (number->string exp 2))))
-
-(define (test-setter fnc sh val div exp)
+(define (test-gen fnc sh val div exp)
   (let* ((got (fnc val div))
          (bits (bit-extract-width got sh bit-width)))
-    (cond
-     ((not (= bits exp))
-      (test-output div val got bits exp)
-      #f)
-     (else
-      (if test-verbose
-          (test-output div val got bits exp))
-      #t))))
+    (define-test (format #f
+                         "div(~d@~d), regval: ~s, exp: ~s, got: ~s"
+                         div
+                         sh
+                         (number->string got 16)
+                         (number->string exp 2)
+                         (number->string bits 2))
+      (pass-if-= bits exp))))
 
 (define (loop-over-values fnc shifts)
   ;; loop over register value list
@@ -89,18 +74,16 @@
            (else
             (let ((div (caar divlist))
                   (expected (cadar divlist)))
-              (if (not (test-setter fnc
-                                    shifts
-                                    value
-                                    div
-                                    expected))
+              (if (not (test-gen fnc shifts value div expected))
                   (quit 1))
               (nextdiv (cdr divlist)))))))
       (nextregval (cdr values))))))
 
-;; The CDCE72010 uses the complex divider settings for output- and feedback-
-;; dividers. They use the same bits but in different places.
-(loop-over-values set-bits-fbdiv 9)
-(loop-over-values set-bits-odiv 17)
-
-(quit 0)
+(with-fs-test-bundle
+ (plan (* (length functions)
+          (length divider-samples)
+          (length target-register-values)))
+ (for-each (lambda (x)
+             (loop-over-values (car x)
+                               (cdr x)))
+           functions))

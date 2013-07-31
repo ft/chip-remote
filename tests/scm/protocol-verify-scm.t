@@ -1,4 +1,5 @@
-;; Copyright 2011 Frank Terbeck <ft@bewatermyfriend.org>, All rights reserved.
+;; Copyright 2012-2013 Frank Terbeck <ft@bewatermyfriend.org>, All
+;; rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
 ;; modification, are permitted provided that the following conditions
@@ -21,27 +22,24 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(use-modules (ice-9 format)
-             (chip-remote devices ti cdce72010 tables))
+(use-modules (test tap)
+             (srfi srfi-1))
+(primitive-load "tests/test-tap-cfg.scm")
 
-(load "divider-samples.scm")
+(define v (@@ (chip-remote protocol) verify))
 
-(let next ((c divider-samples))
-  (cond ((null? c)
-         (quit 0))
-        (else
-         (let ((got (get-bits-for-divider (caar c)))
-               (exp (cadar c))
-               (div (caar c)))
-           (cond
-            ((not (= exp got))
-             (display (format #f
-                              "div(~d), exp: ~s, got: ~s.\n"
-                              div
-                              (number->string exp 2)
-                              (number->string got 2)))
-             (quit 1))
-            (else
-             (next (cdr c))))))))
+(define a '(("VERBOSE" "VERBOSE")
+            ("ca" int)
+            ("cat" int)))
 
-(quit 0)
+(define b '((#t "VERBOSE")
+            (#t 202)
+            (#f "cat")))
+
+(with-fs-test-bundle
+ (plan (length a))
+ (map (lambda (x y) (define-test (format #f "verify ~a != ~a" x y)
+                      (pass-if-equal? x y)))
+      (fold (lambda (x y)
+              (append y (list (v x)))) '() a)
+      b))

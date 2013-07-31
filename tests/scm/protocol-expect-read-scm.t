@@ -1,4 +1,5 @@
-;; Copyright 2012 Frank Terbeck <ft@bewatermyfriend.org>, All rights reserved.
+;; Copyright 2012-2013 Frank Terbeck <ft@bewatermyfriend.org>, All
+;; rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
 ;; modification, are permitted provided that the following conditions
@@ -21,27 +22,22 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(use-modules (srfi srfi-1)) ;; Implements `fold' and multi-list `map'.
+(use-modules (test tap))
+(primitive-load "tests/test-tap-cfg.scm")
 
-;; `verify' is not exported, so get it out by scalpel.
-(define v (@@ (chip-remote protocol) verify))
+(define er (@@ (chip-remote protocol) expect-read))
 
-(define a '(("VERBOSE" "VERBOSE")
-            ("ca" int)
-            ("cat" int)))
+(with-fs-test-bundle
+ (define syntax '("VERSION" int int int))
+ (define input "VERSION 2 7 ca")
+ (define expected '("VERSION" 2 7 202))
 
-(define b '((#t "VERBOSE")
-            (#t 202)
-            (#f "cat")))
+ (plan 2)
 
-(map
- (lambda (x y) (or (equal? x y)
-                   (throw 'unexpected-test-result
-                          `(x ,x) `(y ,y))))
- (fold ;; Apply `verify' to `a'. Should result in `b', which is tested for by
-       ;; the surrounding `map'.
-  (lambda (x y)
-    (append y (list (v x)))) '() a)
- b)
+ (define-test "expect-read with \"VERSION\" 2 7 ca) => '(\"VERSION\" 2 7 202)"
+   (pass-if-equal? (er input syntax)
+                   expected))
 
-(quit 0)
+ (define-test "expect-read with cdr post-proc => '(2 7 202)"
+   (pass-if-equal? (er input syntax cdr)
+                   (cdr expected))))

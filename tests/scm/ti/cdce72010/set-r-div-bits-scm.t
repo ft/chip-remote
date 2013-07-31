@@ -22,12 +22,20 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (use-modules (ice-9 format)
+             (test tap)
              (chip-remote devices ti cdce72010 prg))
+(primitive-load "tests/test-tap-cfg.scm")
 
-(if (not (logbit? 11 (set-device-power-down-bit #x00000000)))
-    (quit 1))
+(with-fs-test-bundle
+ (plan 4)
+ (define-test "set-bits-rdiv primary: set"
+   (pass-if-true (logbit? 4 (set-bits-rdiv #x00000000 'primary #t))))
 
-(if (logbit? 11 (clear-device-power-down-bit #xffffffff))
-    (quit 1))
+ (define-test "set-bits-rdiv secondary: set"
+   (pass-if-true (logbit? 5 (set-bits-rdiv #x00000000 'secondary #t))))
 
-(quit 0)
+ (define-test "set-bits-rdiv primary: unset"
+   (pass-if-false (logbit? 4 (set-bits-rdiv #xffffffff 'primary #f))))
+
+ (define-test "set-bits-rdiv secondary: unset"
+   (pass-if-false (logbit? 5 (set-bits-rdiv #xffffffff 'secondary #f)))))

@@ -1,4 +1,5 @@
-;; Copyright 2012 Frank Terbeck <ft@bewatermyfriend.org>, All rights reserved.
+;; Copyright 2011-2013 Frank Terbeck <ft@bewatermyfriend.org>, All
+;; rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
 ;; modification, are permitted provided that the following conditions
@@ -21,21 +22,26 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(define er (@@ (chip-remote protocol) expect-read))
+(use-modules (ice-9 format)
+             (test tap)
+             (chip-remote devices ti cdce72010 tables))
+(primitive-load "tests/test-tap-cfg.scm")
 
-(define syntax '("VERSION" int int int))
-(define input "VERSION 2 7 ca")
-(define expected '("VERSION" 2 7 202))
+(load "divider-samples.scm")
 
-(let ((got (er input syntax)))
-  (or (equal? got expected)
-      (throw 'unexpected-test-result
-             `(got ,got) `(expected ,expected))))
-
-(let ((got (er input syntax cdr))
-      (expected (cdr expected)))
-  (or (equal? got expected)
-      (throw 'unexpected-test-result
-             `(got ,got) `(expected ,expected))))
-
-(quit 0)
+(with-fs-test-bundle
+ (plan (length divider-samples))
+ (let next ((c divider-samples))
+   (cond ((null? c)
+          (quit 0))
+         (else
+          (let ((got (get-bits-for-divider (caar c)))
+                (exp (cadar c))
+                (div (caar c)))
+            (define-test (format #f
+                                 "div(~d), exp: ~s, got: ~s."
+                                 div
+                                 (number->string exp 2)
+                                 (number->string got 2))
+              (pass-if-= exp got))
+            (next (cdr c)))))))

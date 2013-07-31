@@ -1,0 +1,5 @@
+(let ((root (format #f "~a/tests" (getcwd))))
+  ;(format #t "# fs-root: [~a]~%" root)
+  (tap/set-option 'fs-root root))
+(tap/set-option 'fs-suffix "-scm.t")
+(tap/set-option 'fs-prefix "")

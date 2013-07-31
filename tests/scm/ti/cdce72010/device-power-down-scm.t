@@ -1,4 +1,5 @@
-;; Copyright 2011 Frank Terbeck <ft@bewatermyfriend.org>, All rights reserved.
+;; Copyright 2011-2013 Frank Terbeck <ft@bewatermyfriend.org>, All
+;; rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
 ;; modification, are permitted provided that the following conditions
@@ -22,18 +23,13 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (use-modules (ice-9 format)
+             (test tap)
              (chip-remote devices ti cdce72010 prg))
+(primitive-load "tests/test-tap-cfg.scm")
 
-(if (not (logbit? 4 (set-bits-rdiv #x00000000 'primary #t)))
-    (quit 1))
-
-(if (not (logbit? 5 (set-bits-rdiv #x00000000 'secondary #t)))
-    (quit 1))
-
-(if (logbit? 4 (set-bits-rdiv #xffffffff 'primary #f))
-    (quit 1))
-
-(if (logbit? 5 (set-bits-rdiv #xffffffff 'secondary #f))
-    (quit 1))
-
-(quit 0)
+(with-fs-test-bundle
+ (plan 2)
+ (define-test "set-device-power-down-bit"
+   (pass-if-true (logbit? 11 (set-device-power-down-bit #x00000000))))
+ (define-test "clear-device-power-down-bit"
+   (pass-if-false (logbit? 11 (clear-device-power-down-bit #xffffffff)))))
