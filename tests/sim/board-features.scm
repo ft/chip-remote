@@ -13,7 +13,8 @@
 (let ((f (features connection)))
   (or f
       (throw 'features-failed `(features ,f)))
-  (pretty-print f))
+  (pretty-print f
+                #:per-line-prefix "# "))
 
 (or (bye connection)
     (throw 'bye-failed))

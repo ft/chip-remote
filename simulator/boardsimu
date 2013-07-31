@@ -201,14 +201,14 @@ my ($fh, $dev, $pty);
 sub board_rx {
     my ($input) = @_;
     $input =~ s/[\r\n]+//;
-    print " >>> " . $input . "\n";
+    print "# >>> " . $input . "\n";
     sleep $cnf{delay} if ($cnf{delay} > 0);
     return $input;
 }
 
 sub board_tx {
     my ($dev, $output) = @_;
-    print " <<< " . $output . "\n";
+    print "# <<< " . $output . "\n";
     print $dev "$output\n";
 }
 
@@ -216,7 +216,7 @@ $dev = POSIX::Termios->new;
 $pty = IO::Pty->new;
 $fh = $pty->slave;
 
-print "Connecting to device `" . $fh->ttyname . "'...\n";
+print "# Connecting to device `" . $fh->ttyname . "'...\n";
 $ENV{CR_BOARD_DEVICE} = $fh->ttyname;
 
 # Setup serial device...
@@ -261,7 +261,7 @@ sub handle_sigchld {
     my $p;
     while (($p = waitpid(-1, &WNOHANG)) > 0) {
         $retval = ${^CHILD_ERROR_NATIVE};
-        print " -!- Child process exited: $p (return: $retval)\n";
+        print "# -!- Child process exited: $p (return: $retval)\n";
         close $fh;
         exit ($retval > 0) ? 1 : 0;
     }
@@ -274,7 +274,7 @@ $retval = 0;
 
 if ($cnf{fork}) {
     if ($cpid = fork) {
-        print " -!- Forked process: $cpid\n";
+        print "# -!- Forked process: $cpid\n";
     } else {
         exec(@ARGV);
     }
@@ -298,7 +298,7 @@ RR: while (my $input = <$pty>) {
         board_tx($pty, q{UNKNOWN-COMMAND});
     }
 
-    print " -!- Changed state: $pstate -> $state\n" if ($pstate ne $state);
+    print "# -!- Changed state: $pstate -> $state\n" if ($pstate ne $state);
     last RR if ($done);
 }
 
@@ -306,9 +306,9 @@ if ($cnf{fork}) {
     my $pid;
     if (($pid = wait) >= 0) {
         $retval = ${^CHILD_ERROR_NATIVE};
-        print " -!- Collecting child process $pid (return: $retval)\n";
+        print "# -!- Collecting child process $pid (return: $retval)\n";
         if ($pid != $cpid) {
-            print " -!- Warning: $cpid != $pid! (this shouldn't happen)\n";
+            print "# -!- Warning: $cpid != $pid! (this shouldn't happen)\n";
         }
     }
 } else {

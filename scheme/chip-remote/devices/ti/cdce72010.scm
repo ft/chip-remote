@@ -1,5 +1,5 @@
-;;;;
-;; Copyright 2011 Frank Terbeck <ft@bewatermyfriend.org>, All rights reserved.
+;; Copyright 2011-2013 Frank Terbeck <ft@bewatermyfriend.org>, All
+;; rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
 ;; modification, are permitted provided that the following conditions
@@ -58,7 +58,6 @@
            toggle-trace))
 
 (use-modules (bitops)
-             (chip-remote-primitives)
              (chip-remote devices ti cdce72010 decode)
              (chip-remote devices ti cdce72010 messages)
              (chip-remote devices ti cdce72010 prg)
