@@ -95,6 +95,7 @@ static int cr_multi_line_process(struct cr_words *);
 static int cr_is_multi_line(struct cr_words *);
 static int cr_in_conv_process(void);
 static int cr_no_conv_process(void);
+static int cr_check_args(enum cr_requests, struct cr_words *);
 
 static int cr_ml_handle_features(struct cr_words *);
 static int cr_ml_handle_lines(struct cr_words *);
@@ -110,6 +111,30 @@ static const cr_ml_jump_table ml_jump_table[CR_ML_NONE] = {
     [CR_ML_MODES] = cr_ml_handle_modes,
     [CR_ML_PORTS] = cr_ml_handle_ports
 };
+
+static struct cr_args cr_arg_defs[MAX_REQUEST] = {
+    [REQUEST_HI] = { 0, 0 },
+    [REQUEST_BYE] = { 0, 0 }
+};
+
+static int
+cr_check_args(enum cr_requests req, struct cr_words *words)
+{
+    size_t argc;
+
+    argc = words->count - 1;
+    if (argc < cr_arg_defs[req].min) {
+        cr_fail("Too few arguments");
+        return 0;
+    }
+    if (cr_arg_defs[req].max < 0)
+        return 1;
+    if (argc > cr_arg_defs[req].max) {
+        cr_fail("Too many arguments");
+        return 0;
+    }
+    return 1;
+}
 
 int
 cr_ml_handle_features(struct cr_words *words)
@@ -191,6 +216,8 @@ cr_in_conv_process(void)
     case CR_SINGLE_LINE:
         cr_split_request(rxbuf, &words);
         if (cr_word_eq(&words, 0, "BYE")) {
+            if (!cr_check_args(REQUEST_BYE, &words))
+                return 0;
             xcr_send_host(BYE_REPLY);
             xcr_post_bye();
             return 1;
@@ -217,10 +244,8 @@ cr_no_conv_process(void)
     cr_split_request(rxbuf, &words);
     /* The no-conversation state has no sub-states. */
     if (cr_word_eq(&words, 0, "HI")) {
-        if (words.count > 1) {
-            cr_fail("Too many arguments");
+        if (!cr_check_args(REQUEST_HI, &words))
             return 0;
-        }
         xcr_send_host(HI_REPLY);
         return 1;
     }

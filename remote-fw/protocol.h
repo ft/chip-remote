@@ -12,6 +12,18 @@
 #define OK_REPLY "OK"
 #define WTF_REPLY "WTF"
 
+enum cr_requests {
+    REQUEST_HI = 0,
+    REQUEST_BYE,
+    MAX_REQUEST
+};
+
+struct cr_args {
+    size_t min;
+    /** If -1, there is no maximum */
+    ssize_t max;
+};
+
 struct cr_word {
     char *start;
     size_t length;
