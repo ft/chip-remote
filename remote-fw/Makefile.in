@@ -1,0 +1,53 @@
+CC = @@CC@@
+CFLAGS = @@CFLAGS@@ @@CMCU@@ @@CTARGETFLAGS@@ @@COPTIM@@ @@CDEBUG@@
+DEPCFLAGS = @@CFLAGS@@ @@COPTIM@@ @@CDEBUG@@
+
+STRIP = @@STRIP@@
+SIZE = @@SIZE@@
+OBJCOPY = @@OBJCOPY@@
+OBJDUMP = @@OBJDUMP@@
+
+OBJFMT = @@OBJFMT@@
+OBJEXT = @@OBJEXT@@
+
+OBJECTS = @@OBJECTS@@
+SOURCES = @@SOURCES@@
+
+MSPGCC_LOCATION = @@MSPGCC_LOCATION@@
+CONFIG_H = @@CONFIG_H@@
+
+NAME = remote-fw
+
+all: @@ALLTARGETS@@
+
+clean:
+	rm -f *.p *.o *.s *.elf *.$(OBJEXT) *.lst arch/*.o
+	rm -f .depend
+	rm -f *~ arch/*~
+
+distclean: clean
+	rm -f Makefile platform.h $(CONFIG_H)
+
+depend:
+	mkdep $(DEPCFLAGS) -I$(MSPGCC_LOCATION)/msp430/include $(SOURCES)
+
+.c.p:
+	$(CC) $(CFLAGS) -E -o $@ -c $<
+
+.c.s:
+	$(CC) $(CFLAGS) -S -o $@ -c $<
+
+.c.o:
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(NAME).elf: $(OBJECTS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS)
+
+$(NAME).$(OBJEXT): $(NAME).elf
+	$(OBJCOPY) -O $(OBJFMT) $< $@
+
+$(NAME).lst: $(NAME).elf
+	$(OBJDUMP) -dSt $< > $@
+
+-include .depend
+.PHONY: all depend clean distclean

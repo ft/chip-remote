@@ -1,0 +1,18 @@
+#ifndef INC_PLATFORM_H
+#define INC_PLATFORM_H
+
+#include "protocol.h"
+
+#define @@ARCH@@
+
+#ifdef CR_MSP430
+#include "config.msp430.h"
+#endif
+
+void xcr_send_host(char *);
+void xcr_pre_top_level(void);
+void xcr_post_bye(void);
+
+extern char rxbuf[CR_MAX_LINE + 1];
+
+#endif /* INC_PLATFORM_H */

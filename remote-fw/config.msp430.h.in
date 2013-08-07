@@ -1,0 +1,10 @@
+#ifndef INC_CONFIG_MSP430_H
+#define INC_CONFIG_MSP430_H
+
+#define @@TARGET@@
+
+#ifdef CR_MSP430F1481
+#include <msp430f1481.h>
+#endif
+
+#endif /* INC_CONFIG_MSP430_H */

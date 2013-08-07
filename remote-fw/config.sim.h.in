@@ -1,0 +1,6 @@
+#ifndef INC_CONFIG_SIM_H_IN
+#define INC_CONFIG_SIM_H_IN
+
+#define @@TARGET@@
+
+#endif /* INC_CONFIG_SIM_H_IN */
