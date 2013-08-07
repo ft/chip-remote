@@ -227,14 +227,15 @@ cr_in_conv_process(void)
                 return 0;
             xcr_send_host(VERSION_REPLY);
         } else if (cr_is_multi_line(&words)) {
-            cr_multi_line_process(&words);
-            state = CR_MULTI_LINE;
+            if (!cr_multi_line_process(&words))
+                state = CR_MULTI_LINE;
         } else {
             cr_fail("Unknown request");
         }
         break;
     case CR_MULTI_LINE:
-        cr_multi_line_process(&words);
+        if (cr_multi_line_process(&words))
+            state = CR_SINGLE_LINE;
         break;
     }
 
