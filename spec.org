@@ -1,0 +1,459 @@
+#+TITLE: Remote Control for Configurable Electronic Parts (RCCEP)
+#+AUTHOR: Frank Terbeck
+#+EMAIL: ft@bewatermyfriend.org
+#+OPTIONS: num:t toc:3
+#+ATTR_ASCII: width 79
+
+#+BEGIN_ABSTRACT
+This documents specifies the text protocol for communication between a client
+(commonly a personal computer) and a remote controller, for the purpose of
+interfacing configurable electronic parts such as analog digital converters or
+clock distribution blocks with connections such as SPI or I2C via much more
+common personal computer interfaces (in particular the universal serial bus). A
+more colloquial term for the project, this specification is part of, is
+`chip-remote'.
+#+END_ABSTRACT
+
+* RCCEP Model
+
+** Basic Structure
+
+   A RCCEP system consists of a controlling client, a remote controller and one
+   or more ports to which slave devices are attached. The client talks to the
+   controller using the protocol described herein.
+
+*** Controlling Client
+
+    The Controlling Client is one of the subscribers of a RCCEP communication.
+    It is a logic connected to the Remote Controller, that sends requests and
+    processes replies.
+
+*** Remote Controller
+
+    The Remote Controller is the second subscriber of a RCCEP communication. It
+    is a logic the Controlling Client can connect to. It receives requests and
+    emits replies.
+
+    It is equipped with a number of ports it uses to turn client requests into
+    electronic signaling to control electronic parts attached to the port as a
+    slave.
+
+*** Slave Device
+
+    A Slave Device is an electronic part with a configuration interface, that
+    is connected to a port of the Remote Controller.
+
+*** Ports
+
+    A Port is an interface between the Remote Controller and a Slave Device.
+    Ports consist of one or more lines and are set to a Mode that specifies its
+    specific operation.
+
+*** Modes
+
+    Modes specify how a Port communicates with a Slave Device. Possible Modes
+    are documented in section [[sec:port-modes]].
+
+*** Lines
+
+    A Line is a single electronic signaling device, that represents a logical
+    value. In microcontroller terms a line is often called a "pin". Every line
+    is assigned a Role.
+
+*** Roles
+
+    Roles are specific to Modes. A Role specifies which part of a Mode a given
+    Line implements. One common Role is the clock signal of any given
+    communication scheme, commonly called CLK.
+
+    If a Role is made up of multiple lines, then lines are indexed in the
+    following format:
+
+      - "<line-name>:<int>": <line-name> is the name specifing the base role a
+        line uses. <int> is the role index of the specific line. Indexing
+        starts at zero. Examples would be "DATA:0", "DATA:1" etc.; in this case
+        "DATA" and "DATA:0" are equivalent.
+
+** Protocol Basics <<sec:proto-basics>>
+
+   The RCCEP protocol itself is of line-based design. Communication is done in
+   seven bit ASCII strings, that end in an ASCII line-feed (hex: 0x0a). The
+   maximum length of any such line is limited to 127 bytes.
+
+   The remote controller of the system is never engages communication with the
+   client[fn:listen-extension]. Every transmission in one direction must be met
+   with a reply in the opposite direction. In case a request does not trigger a
+   meaningful response value, the string "OK" shall be used.
+
+   Requests that trigger multiline replies shall only transmit the first line
+   of the reply and only transmit with subsequent lines when requested using
+   the "MORE" request. In case there are no more lines in a multiline response,
+   the final response shall be "DONE".
+
+   The protocol uses these data types:
+
+     - strings
+     - integers
+
+   Strings are used as literal requests, responses and symbolic values.
+   Integers represent numeric values within the protocol. They are transmitted
+   in strings of hexadecimal digits. The "a-f" range of a hexadecimal digit may
+   be represented in upper or lower case and may also be mixed.
+
+   Lines of the protocol consist of multiple tokens. A line is split into
+   tokens if one or more consecutive ASCII space bytes (hex: 0x20) are
+   encountered. Other ASCII whitespace bytes are NOT considered for
+   tokenisation.
+
+   The protocol operates in the following set of basic states:
+
+     - Idle State
+     - Active State
+     - Multiline State
+
+* Footnotes
+
+[fn:listen-extension] It is possible, that later versions of the protocol
+  introduce a listen-mode for the client. Even in that case, the client will
+  initialise that mode, never the controller.
+
+* Protocol Details
+
+  The very basics of the protocol are specified in section [[sec:proto-basics]].
+  They always apply. This section specifies all requests and replies the
+  protocol can exchange.
+
+** Mandatory Requests
+
+   The protocol defines the following requests as mandatory for every
+   controller implementation to implement:
+
+     - HI
+     - BYE
+     - TRANSMIT
+     - VERSION
+     - FEATURES
+
+   All other requests are optional. A list of optional features a remote
+   controller implements can be queried using the "FEATURES" request.
+
+** Types of Replies
+
+   These are the generic replies of the protocol:
+
+     - "OK": It is used whenever a request does not prompt another more
+       meaningful reply.
+
+     - "WTF [reason]": Like "OK", but used whenever the request in question
+       could not be carried out. The reason the request was rejected may be
+       returned as the second token of the reply's line. Returning a reason is
+       optional.
+
+     - "MALFORMED-COMMAND": Used in case the last command could not be
+       processed.
+
+     - "BROKEN-VALUE [value]": Used if an unexpected value was encountered. The
+       broken value may be retured as the second token of the reply's line.
+       Returning the offending value is optional.
+
+     - "VALUE-OUT-OF-RANGE <value>": Used if a numeric value was encountered,
+       but its value does not fall into the valid range for the request in
+       question. The invalid value may be retured as the second token of the
+       reply's line. Returning the offending value is optional.
+
+     - "DONE": Used as the final reply at the end of a multiline reply.
+
+   Other replies are request-dependent. Their format is documented with the
+   specific request.
+
+** Idle State
+
+   Idle State is the state the remote controller is in directly after boot.
+
+*** HI Request
+
+    This request take no argument.
+
+    The "HI" request puts the remote controller into Active State. The reply to
+    this request shall be:
+
+      - "Hi there, stranger."
+
+** Active State
+
+   The Active State is the remote controller's most basic state during
+   operation. All controlling requests will be processed in this state.
+
+*** BYE Request
+
+    This request take no argument.
+
+    This reply puts the remote controller back into Idle State. The remote
+    controller's reply to this request shall be:
+
+      - "Have a nice day."
+
+*** VERSION Request
+
+    This request take no argument.
+
+    This request returns the protocol version the remote controller implements.
+    The reply shall be formatted like this:
+
+      - "VERSION <int> <int> <int>"
+
+    Where the three integers describe major, minor and micro version of the
+    implemented protocol in the order specified.
+
+*** FEATURES Request
+
+    This request take no argument.
+
+    The FEATURES request returns a multiline reply. Each line names one
+    optional protocol feature the remote controller implements.
+
+*** MODES Request
+
+    This request take no argument.
+
+    The MODES request returns a multiline reply. Each line names one mode the
+    remote controller's ports may be set to dynamically (in case the port's
+    mode is configurable) or statically (in case the port's mode is fixed).
+
+    Possible modes are documented in section [[sec:port-modes]].
+
+*** TRANSMIT Request
+
+    The TRANSMIT request takes one non-optional argument: The value to transmit
+    to the currently focused port. The value has to be an integer. In case the
+    given integer is larger than the frame-length configured for the port's
+    current mode, it is truncated to that size. In case it is smaller, the
+    value is padded with zeros towards the most-significant bit.
+
+    The request returns an integer, which contains a possible reply from the
+    attached slave device. If no meaningful reply is received, the return value
+    shall be set to 0.
+
+*** FOCUS Request
+
+    The FOCUS request takes one non-optional argument: The index of the port to
+    focus. Focussing a port means that subsequent data transmissions are
+    carried out by using the specified port.
+
+    Default focus is implementation defined.
+
+*** PORTS Request
+
+    The PORTS request returns a multiline reply. The lines shall contain the
+    following:
+
+      - "PORTS <int>": Where <int> indicates the number of ports available on
+        the remote controller.
+
+      - "FOCUS <int>": Where <int> indicates the currently focused port.
+
+*** PORT Request
+
+    The PORT request takes one non-optional argument: The index of the port to
+    query information about.
+
+    This request returns a multiline reply. The lines contain key-value pairs
+    of properties for the port in question. These are the generic properties
+    that may be returned:
+
+      - "PROPERTIES <CONFIGURABLE|FIXED>": If CONFIGURABLE is returned,
+        properties for this port are configurable unless otherwise noted. FIXED
+        in turn indicates, that all properties are fixed values and cannot be
+        changed.
+
+      - "LINES <int> [FIXED]": <int> defines the number of lines the port has
+        access to.
+
+      - "MODE <mode-string> [FIXED]": Indicates the mode the port is currently
+        running in.
+
+      - "RATE <DEFAULT|int> [FIXED]": Indicates the symbol-rate with which the
+        port operates. DEFAULT indicates an implementation-defined default
+        symbol-rate.
+
+    All properties that return a "FIXED" as their last argument are read-only
+    values even if the port itself indicated, it is configurable by returning
+    CONFIGURABLE with the PROPERTIES line.
+
+    The request may return other mode-specific properties.
+
+*** LINES Request
+
+    The LINES request takes one non-optional argument: In index if the port to
+    query information about.
+
+    This request returns a multiline reply. Each line shows to which role the
+    line of a given index assigned to:
+
+      - "<int> <role-string> [FIXED]"
+
+    Roles are specific to modes. The default role assignment of a port is
+    implementation defined. If FIXED is specified, the role assignment of that
+    line cannot be changed.
+
+*** LINE Request
+
+    The LINE request takes three non-optional arguments:
+
+      - "LINE <port:int> <line:int> <role>"
+
+    <port:int> specifies the index of the port to configure. <line:int>
+    specifies the index of the line within the port to configure. <role>
+    describes the role within the active mode the line is to be set to.
+
+*** SET Request
+
+    The SET request takes three non-optional arguments:
+
+      - "SET <int> <key> <value>"
+
+    <int> is the index of the port to configure. <key> is the property's name
+    to set. <value> is the new value for the property.
+
+*** INIT Request
+
+    The INIT request takes one non-optional argument: The index of the port to
+    initialise. This request is required initially for configurable ports and
+    then after any changes with the port's properties.
+
+** Multiline State
+
+   Whenever a request specifies to return a multiline reply, this mode is
+   entered. The format of the actual lines is specific to the request and is
+   specified alongside it. The request's initial reply will be the first line
+   of the multiline reply. Subsequent replies must be requested using the
+   "MORE" request.
+
+*** MORE Request
+
+    This request take no argument.
+
+    This request causes the next line of a multiline reply to be returned. When
+    there are no more lines left in the multiline reply, the request will return
+    a "DONE" reply and the remote controller will return to its previous state.
+
+* Port Modes <<sec:port-modes>>
+
+** SPI
+
+*** SPI Specific Properties
+
+    What follows is a list of properties the PORT request may return with ports
+    configured for SPI mode.
+
+      - "FRAME-LENGTH <int>": Indicates the number of bits that are used per
+        transmission.
+
+      - "CS-LINES <int>": Indicates the number of chip-select lines the port
+        offers.
+
+      - "CS-POLARITY <ACTIVE-HIGH|ACTIVE-LOW>": Indicates whether the
+        chip-select lines operate as active-high or active-low pins.
+
+      - "CLK-POLARITY <IDLE-HIGH|IDLE-LOW>": Indicates whether or not the clock
+        line idles in high or low state.
+
+      - "CLK-PHASE-DELAY <0|1>": A value of "1" indicates that phase delay is
+        used on the clock line. A value if "0" indicates that it is not used.
+
+      - "BIT-ORDER <MSB-FIRST|LSB-FIRST>": Indicates whether serial data
+        transmission is done starting that the most-significant bit or at the
+        least-significant bit.
+
+*** SPI Line Roles
+
+    - CLK: Clock signal of the SPI bus
+
+    - CS: Chip-Select; this may be a multi-line role.
+
+    - MOSI: Master-Out-Slave-In, the unidirectional SPI line from master to
+      slave.
+
+    - MISO: Master-In-Slave-Out, the unidirectional SPI line from slave to
+      master.
+
+* Version
+
+  This documents specifies version 2.0.0 of the protocol. The VERSION request
+  would therefore cause a "VERSION 2 0 0" reply with remote controllers, that
+  implement this version of the protocol. In detail that means:
+
+    - Major Version: 2
+    - Minor Version: 0
+    - Micro Version: 0
+
+** Major Version Number
+
+   A mismatch in the major version number indicates differences in the
+   protocol's basics as described in section [[sec:proto-basics]]. Communication
+   should not be attempted under any circumstances.
+
+** Minor Version Number
+
+   Changes in the minor version number indicate changes in previously existing
+   features or the list of mandatory implemented features. Communication might
+   be possible, depending on the client-side protocol implementation. Using a
+   client-side implementation of the correct minor version number is
+   recommended in any case.
+
+** Micro Version Number
+
+   Changes in the micro version number indicate the addition of new optional
+   features within the protocol or changes in the specification that do not
+   require changes in the protocols in the implementation. Communication with
+   client-side protocol implementations of a lower micro version number should
+   work. With higher micro version number on the client side, there will be
+   issues with the newly added features should they be used without querying
+   for their availability first.
+
+   For best interoperability, the client-side's protocol version and the remote
+   controller's protocol version should match in all three parts of the version
+   number.
+
+** Version History
+
+   There is no version history at this point.
+
+** Major Version Numer One
+
+   The protocol's major version number starts at version "2" in this
+   specification. The reason for that is that version "1" was a previous
+   protocol, that was never specified. That version used to use a lot more
+   device-specific logic in the remote controller.
+
+   In order to make the protocol more generic and to reduce the complexity of
+   the remote controller's firmware, any device-specific operation was shifted
+   onto the controlling client.
+
+   The basic operation of that historic version was quite similar to that of
+   version number two, but the shift in the operational paradigm made it
+   impossible to keep the new protocol backwards compatible in any way. Thus,
+   this specification starts out at major version number "2".
+
+* Full Copyright Statement
+
+   Copyright (c) 2013 Frank Terbeck <ft@bewatermyfriend.org>.
+   All Rights Reserved.
+
+   This document and translations of it may be copied and furnished to
+   others, and derivative works that comment on or otherwise explain it
+   or assist in its implementation may be prepared, copied, published
+   and distributed, in whole or in part, without restriction of any
+   kind, provided that the above copyright notice and this paragraph are
+   included on all such copies and derivative works.  However, this
+   document itself may not be modified in any way, such as by removing
+   the copyright notice.
+
+   The limited permissions granted above are perpetual and will not be
+   revoked by the authors or their successors or assigns.
+
+   This document and the information contained herein is provided on an
+   "AS IS" basis and THE AUTHORS DISCLAIMS ALL WARRANTIES, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES
+   OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
