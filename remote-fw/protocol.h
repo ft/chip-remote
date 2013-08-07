@@ -10,11 +10,13 @@
 #define DONE_REPLY "DONE"
 #define HI_REPLY "Hi there, stranger."
 #define OK_REPLY "OK"
+#define VERSION_REPLY "VERSION 2 0 0"
 #define WTF_REPLY "WTF"
 
 enum cr_requests {
     REQUEST_HI = 0,
     REQUEST_BYE,
+    REQUEST_VERSION,
     MAX_REQUEST
 };
 

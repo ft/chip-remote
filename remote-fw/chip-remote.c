@@ -114,7 +114,8 @@ static const cr_ml_jump_table ml_jump_table[CR_ML_NONE] = {
 
 static struct cr_args cr_arg_defs[MAX_REQUEST] = {
     [REQUEST_HI] = { 0, 0 },
-    [REQUEST_BYE] = { 0, 0 }
+    [REQUEST_BYE] = { 0, 0 },
+    [REQUEST_VERSION] = { 0, 0 }
 };
 
 static int
@@ -221,6 +222,10 @@ cr_in_conv_process(void)
             xcr_send_host(BYE_REPLY);
             xcr_post_bye();
             return 1;
+        } else if (cr_word_eq(&words, 0, "VERSION")) {
+            if (!cr_check_args(REQUEST_BYE, &words))
+                return 0;
+            xcr_send_host(VERSION_REPLY);
         } else if (cr_is_multi_line(&words)) {
             cr_multi_line_process(&words);
             state = CR_MULTI_LINE;
