@@ -7,9 +7,15 @@
 *.a
 *.pro
 *.tar.*
+*.elf
+*.lst
+*.a43
 gmon.out
 tags
 TAGS
 core
 core.*
 spec.txt
+remote-fw/Makefile
+remote-fw/config.*.h
+remote-fw/platform.h
