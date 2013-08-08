@@ -25,9 +25,9 @@ enum cr_requests {
 };
 
 struct cr_args {
-    size_t min;
+    unsigned int min;
     /** If -1, there is no maximum */
-    ssize_t max;
+    int max;
 };
 
 struct cr_word {
