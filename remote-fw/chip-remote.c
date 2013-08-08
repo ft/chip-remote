@@ -177,6 +177,11 @@ cr_multi_line_process(struct cr_words *words)
         state = cr_word2state(words, 0);
         /* FALLTHROUGH */
     default:
+        if (cnt > 0 && !cr_word_eq(words, 0, "MORE")) {
+            cr_fail("Unknown request in multiline state");
+            state = CR_ML_NONE;
+            return 1;
+        }
         if (ml_jump_table[state](cnt, words)) {
             state = CR_ML_NONE;
             xcr_send_host(DONE_REPLY);
