@@ -115,6 +115,10 @@ static const cr_ml_jump_table ml_jump_table[CR_ML_NONE] = {
 static struct cr_args cr_arg_defs[MAX_REQUEST] = {
     [REQUEST_HI] = { 0, 0 },
     [REQUEST_BYE] = { 0, 0 },
+    [REQUEST_FEATURES] = { 0, 0 },
+    [REQUEST_LINES] = { 1, 1 },
+    [REQUEST_MODES] = { 0, 0 },
+    [REQUEST_PORTS] = { 0, 0 },
     [REQUEST_VERSION] = { 0, 0 }
 };
 
@@ -197,13 +201,27 @@ cr_word2state(struct cr_words *words, int idx)
 static int
 cr_is_multi_line(struct cr_words *words)
 {
-    if (cr_word_eq(words, 0, "FEATURES")
-        || cr_word_eq(words, 0, "LINES")
-        || cr_word_eq(words, 0, "MODES")
-        || cr_word_eq(words, 0, "PORTS"))
-    {
-        return 1;
+    if (cr_word_eq(words, 0, "FEATURES")) {
+        if (cr_check_args(REQUEST_FEATURES, words))
+            return 1;
+        return -1;
     }
+    if (cr_word_eq(words, 0, "LINES")) {
+        if (cr_check_args(REQUEST_LINES, words))
+            return 1;
+        return -1;
+    }
+    if (cr_word_eq(words, 0, "MODES")) {
+        if (cr_check_args(REQUEST_MODES, words))
+            return 1;
+        return -1;
+    }
+    if (cr_word_eq(words, 0, "PORTS")) {
+        if (cr_check_args(REQUEST_PORTS, words))
+            return 1;
+        return -1;
+    }
+
     return 0;
 }
 
@@ -212,6 +230,7 @@ cr_in_conv_process(void)
 {
     static enum cr_conv_states state = CR_SINGLE_LINE;
     static struct cr_words words;
+    int rc;
 
     switch (state) {
     case CR_SINGLE_LINE:
@@ -226,8 +245,8 @@ cr_in_conv_process(void)
             if (!cr_check_args(REQUEST_BYE, &words))
                 return 0;
             xcr_send_host(VERSION_REPLY);
-        } else if (cr_is_multi_line(&words)) {
-            if (!cr_multi_line_process(&words))
+        } else if ((rc = cr_is_multi_line(&words))) {
+            if (rc > 0 && !cr_multi_line_process(&words))
                 state = CR_MULTI_LINE;
         } else {
             cr_fail("Unknown request");
