@@ -97,6 +97,11 @@ static char *cr_features[] = {
     (char *)NULL
 };
 
+static char *cr_modes[] = {
+    "SPI",
+    (char *)NULL
+};
+
 static enum cr_multi_line_states cr_word2state(struct cr_words *, int);
 static int cr_multi_line_process(struct cr_words *);
 static int cr_is_multi_line(struct cr_words *);
@@ -148,28 +153,34 @@ cr_check_args(enum cr_requests req, struct cr_words *words)
     return 1;
 }
 
-int
-cr_ml_handle_features(int cnt, struct cr_words *words)
+static int
+cr_ml_return_list(int cnt, char *list[])
 {
-    if (cr_features[cnt] == (char *)NULL)
+    if (list[cnt] == (char *)NULL)
         return 1;
-    xcr_send_host(cr_features[cnt]);
+    xcr_send_host(list[cnt]);
     return 0;
 }
 
-int
+static int
+cr_ml_handle_features(int cnt, struct cr_words *words)
+{
+    return cr_ml_return_list(cnt, cr_features);
+}
+
+static int
 cr_ml_handle_lines(int cnt, struct cr_words *words)
 {
     return 1;
 }
 
-int
+static int
 cr_ml_handle_modes(int cnt, struct cr_words *words)
 {
-    return 1;
+    return cr_ml_return_list(cnt, cr_modes);
 }
 
-int
+static int
 cr_ml_handle_ports(int cnt, struct cr_words *words)
 {
     return 1;
