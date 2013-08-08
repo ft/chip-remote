@@ -24,8 +24,8 @@ msp430)
     OBJFMT=ihex
     CFLAGS="-Wall -Wnested-externs -Wmissing-prototypes -Wstrict-prototypes"
     CFLAGS="$CFLAGS -std=gnu99"
-    COPTIM=-O0
-    CDEBUG=-g
+    COPTIM=-Os
+    CDEBUG=
     CONFIG_H=config.msp430.h
     MSPGCC_LOCATION=/usr
     ;;
@@ -39,8 +39,8 @@ sim)
     OBJFMT=ihex
     CFLAGS="-Wall -Wnested-externs -Wmissing-prototypes -Wstrict-prototypes"
     CFLAGS="$CFLAGS -std=gnu99"
-    COPTIM=-O0
-    CDEBUG=-g
+    COPTIM=-Os
+    CDEBUG=
     CONFIG_H=config.sim.h
     ;;
 *)
@@ -48,6 +48,29 @@ sim)
     exit 1
     ;;
 esac
+
+is_opt() {
+    case "$1" in
+    -*) return 0 ;;
+    *) return 1 ;;
+    esac
+}
+
+while is_opt "$1"; do
+    case "$1" in
+    -debug)
+        COPTIM=-O0
+        CDEBUG=-g
+        ;;
+    -performance)
+        COPTIM=-O2
+        CDEBUG=
+        ;;
+    *)
+        printf 'Unknown option `%s'\''\n' "$1"
+    esac
+    shift
+done
 
 case "$target" in
 msp430f1481)
