@@ -56,15 +56,18 @@ is_opt() {
     esac
 }
 
+optimizer=size
 while is_opt "$1"; do
     case "$1" in
     -debug)
         COPTIM=-O0
         CDEBUG=-g
+        optimizer=debug
         ;;
     -performance)
         COPTIM=-O2
         CDEBUG=
+        optimizer=performance
         ;;
     *)
         printf 'Unknown option `%s'\''\n' "$1"
@@ -133,6 +136,21 @@ filter() {
         -e "s,@@MSPGCC_LOCATION@@,${MSPGCC_LOCATION},g"
 }
 
+printf '\n  Configuring project for archtecture `%s'\''...\n' "$arch"
+printf '    Specific target `%s'\''...\n' "$target"
+printf '  Optimizer settings: `%s'\''...\n' "$optimizer"
+printf '\n  Generating files...\n'
+
 for file in Makefile platform.h config."$arch".h; do
+    printf '    => "%s"\n' "$file"
     filter < "$file".in > "$file"
 done
+
+printf '\n  To build the firmware, issue the following commands:\n'
+
+which mkdep 2>&1 > /dev/null
+rc=$?
+if [ "$rc" = 0 ]; then
+    printf '   %% make depend\n'
+fi
+printf '   %% make\n\n'
