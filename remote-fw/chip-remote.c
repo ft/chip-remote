@@ -90,6 +90,13 @@ enum cr_multi_line_states {
     CR_ML_NONE
 };
 
+static char *cr_features[] = {
+    "LINES",
+    "MODES",
+    "PORTS",
+    (char *)NULL
+};
+
 static enum cr_multi_line_states cr_word2state(struct cr_words *, int);
 static int cr_multi_line_process(struct cr_words *);
 static int cr_is_multi_line(struct cr_words *);
@@ -144,7 +151,10 @@ cr_check_args(enum cr_requests req, struct cr_words *words)
 int
 cr_ml_handle_features(int cnt, struct cr_words *words)
 {
-    return 1;
+    if (cr_features[cnt] == (char *)NULL)
+        return 1;
+    xcr_send_host(cr_features[cnt]);
+    return 0;
 }
 
 int
