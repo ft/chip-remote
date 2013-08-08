@@ -240,9 +240,9 @@ cr_in_conv_process(void)
     static struct cr_words words;
     int rc;
 
+    cr_split_request(rxbuf, &words);
     switch (state) {
     case CR_SINGLE_LINE:
-        cr_split_request(rxbuf, &words);
         if (cr_word_eq(&words, 0, "BYE")) {
             if (!cr_check_args(REQUEST_BYE, &words))
                 return 0;
