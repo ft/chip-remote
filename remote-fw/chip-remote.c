@@ -97,13 +97,13 @@ static int cr_in_conv_process(void);
 static int cr_no_conv_process(void);
 static int cr_check_args(enum cr_requests, struct cr_words *);
 
-static int cr_ml_handle_features(struct cr_words *);
-static int cr_ml_handle_lines(struct cr_words *);
-static int cr_ml_handle_modes(struct cr_words *);
-static int cr_ml_handle_ports(struct cr_words *);
+static int cr_ml_handle_features(int, struct cr_words *);
+static int cr_ml_handle_lines(int, struct cr_words *);
+static int cr_ml_handle_modes(int, struct cr_words *);
+static int cr_ml_handle_ports(int, struct cr_words *);
 static void cr_process(void);
 
-typedef int (*cr_ml_jump_table)(struct cr_words *words);
+typedef int (*cr_ml_jump_table)(int cnt, struct cr_words *words);
 
 static const cr_ml_jump_table ml_jump_table[CR_ML_NONE] = {
     [CR_ML_FEATURES] = cr_ml_handle_features,
@@ -142,25 +142,25 @@ cr_check_args(enum cr_requests req, struct cr_words *words)
 }
 
 int
-cr_ml_handle_features(struct cr_words *words)
+cr_ml_handle_features(int cnt, struct cr_words *words)
 {
     return 1;
 }
 
 int
-cr_ml_handle_lines(struct cr_words *words)
+cr_ml_handle_lines(int cnt, struct cr_words *words)
 {
     return 1;
 }
 
 int
-cr_ml_handle_modes(struct cr_words *words)
+cr_ml_handle_modes(int cnt, struct cr_words *words)
 {
     return 1;
 }
 
 int
-cr_ml_handle_ports(struct cr_words *words)
+cr_ml_handle_ports(int cnt, struct cr_words *words)
 {
     return 1;
 }
@@ -169,17 +169,20 @@ static int
 cr_multi_line_process(struct cr_words *words)
 {
     static enum cr_multi_line_states state = CR_ML_NONE;
+    static int cnt = 0;
 
     switch (state) {
     case CR_ML_NONE:
+        cnt = 0;
         state = cr_word2state(words, 0);
         /* FALLTHROUGH */
     default:
-        if (ml_jump_table[state](words)) {
+        if (ml_jump_table[state](cnt, words)) {
             state = CR_ML_NONE;
             xcr_send_host(DONE_REPLY);
             return 1;
         }
+        cnt++;
     }
     return 0;
 }
