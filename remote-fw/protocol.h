@@ -44,4 +44,6 @@ void cr_fail(const char *);
 void cr_split_request(char *, struct cr_words *);
 int cr_word_eq(struct cr_words *, size_t, const char *);
 
+extern char rxbuf[CR_MAX_LINE + 1];
+
 #endif /* INC_PROTOCOL_H */

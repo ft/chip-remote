@@ -66,6 +66,7 @@
 
 #include "chip-remote.h"
 #include "platform.h"
+#include "port.h"
 #include "protocol.h"
 #include "utils.h"
 
@@ -183,6 +184,22 @@ cr_ml_handle_modes(int cnt, struct cr_words *words)
 static int
 cr_ml_handle_ports(int cnt, struct cr_words *words)
 {
+    char buf0[CR_MAX_LINE + 1];
+    char buf1[CR_MAX_LINE + 1];
+    uint32_t num;
+
+    if (cnt == 0) {
+        num = cr_numofports(cr_ports);
+        strcpy(buf0, "PORTS ");
+        uint2str(num, buf1);
+        strncat(buf0, buf1, CR_MAX_LINE);
+        buf0[CR_MAX_LINE] = '\0';
+        xcr_send_host(buf0);
+        return 0;
+    } else if (cnt == 1) {
+        xcr_send_host("FOCUS 0");
+        return 0;
+    }
     return 1;
 }
 

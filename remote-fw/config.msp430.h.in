@@ -4,7 +4,10 @@
 #define @@TARGET@@
 
 #ifdef CR_MSP430F1481
+#include <stdint.h>
+typedef uint16_t cr_port_addr;
+typedef uint8_t cr_pin_mask;
 #include <msp430f1481.h>
-#endif
+#endif /* CR_MSP430F1481 */
 
 #endif /* INC_CONFIG_MSP430_H */

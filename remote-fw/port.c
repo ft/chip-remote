@@ -97,3 +97,14 @@
  * >>> INIT 0
  * <<< OK
  */
+
+#include "port.h"
+
+size_t
+cr_numofports(struct cr_port *ports)
+{
+    size_t i;
+    for (i = 0; ports[i].nlines != 0; ++i)
+        /* NOP */;
+    return i;
+}

@@ -4,7 +4,7 @@
 #define SPI_MSB_FIRST 0x0f
 #define SPI_LSB_FIRST 0xf0
 
-struct spi_cfg {
+struct cr_mode_spi {
     /** currently ignored */
     int clk_rate;
     /** integer: number of chip-select-lines */
