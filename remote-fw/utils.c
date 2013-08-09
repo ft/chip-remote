@@ -11,11 +11,26 @@ void
 uint2str(uint32_t num, char *buf)
 {
     /* buf needs to be able to hold 8+1 characters. */
-    int i, step;
+    int i, max, step;
 
     for (i = 7; i >= 0; --i) {
         step = 4 * i;
-        buf[7-i] = chtable[(num & (uint32_t)(0xful << step)) >> step];
+        if (num & (uint32_t)(0xful << step)) {
+            max = i;
+            break;
+        }
+    }
+
+    if (i < 0) {
+        buf[0] = '0';
+        buf[1] = '\0';
+        return;
+    }
+
+    buf[i+1] = '\0';
+    for (i = max; i >= 0; --i) {
+        step = 4 * i;
+        buf[max-i] = chtable[(num & (uint32_t)(0xful << step)) >> step];
     }
     buf[8] = '\0';
 }
