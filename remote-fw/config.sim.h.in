@@ -2,8 +2,16 @@
 #define INC_CONFIG_SIM_H_IN
 
 #define @@TARGET@@
+
 #include <stdint.h>
+
 typedef uint32_t cr_port_addr;
 typedef uint16_t cr_pin_mask;
+
+#include "port.h"
+
+#ifdef CR_STDOUT
+int access_portA(cr_pin_mask, enum cr_access_mode, int);
+#endif
 
 #endif /* INC_CONFIG_SIM_H_IN */

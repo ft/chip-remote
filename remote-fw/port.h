@@ -9,6 +9,19 @@ enum cr_port_modes {
     CR_MODE_SPI
 };
 
+enum cr_pin_role {
+    CR_ROLE_NONE = 0,
+    CR_ROLE_SPI_CLK,
+    CR_ROLE_SPI_CS,
+    CR_ROLE_SPI_MISO,
+    CR_ROLE_SPI_MOSI
+};
+
+enum cr_access_mode {
+    CR_ACCESS_READ = 0,
+    CR_ACCESS_WRITE
+};
+
 /**
  * Description of a port configuration
  *
@@ -49,9 +62,10 @@ struct cr_port_cfg {
  * which only one bit should be set unless you are being tricky).
  */
 struct cr_line {
-    cr_port_addr addr_in;
-    cr_port_addr addr_out;
+    int (*access)(cr_pin_mask mask, enum cr_access_mode mode, int value);
     cr_pin_mask bitmask;
+    enum cr_pin_role role;
+    size_t index;
 };
 
 /**

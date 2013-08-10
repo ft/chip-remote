@@ -3,6 +3,12 @@
 #include "../chip-remote.h"
 #include "../platform.h"
 
+int
+access_portA(cr_pin_mask mask, enum cr_access_mode mode, int value)
+{
+    return -1;
+}
+
 void
 xcr_pre_top_level(void)
 {

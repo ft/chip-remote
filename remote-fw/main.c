@@ -31,21 +31,21 @@ struct cr_port cr_ports[] = {
 #ifdef CR_STDOUT
 
 static struct cr_line port1_lines[] = {
-    { 0x3200abcd, 0x3200abce, 1<<0 },
-    { 0x3200abcd, 0x3200abce, 1<<1 },
-    { 0x3200abcd, 0x3200abce, 1<<2 },
-    { 0x3200abcd, 0x3200abce, 1<<3 }
+    { access_portA, 1<<0, CR_ROLE_NONE },
+    { access_portA, 1<<1, CR_ROLE_NONE },
+    { access_portA, 1<<2, CR_ROLE_NONE },
+    { access_portA, 1<<3, CR_ROLE_NONE }
 };
 
 static struct cr_line port2_lines[] = {
-    { 0x3200abcd, 0x3200abce, 1<<4 },
-    { 0x3200abcd, 0x3200abce, 1<<5 },
-    { 0x3200abcd, 0x3200abce, 1<<6 },
-    { 0x3200abcd, 0x3200abce, 1<<7 },
-    { 0x3200abcd, 0x3200abce, 1<<8 },
-    { 0x3200abcd, 0x3200abce, 1<<9 },
-    { 0x3200abcd, 0x3200abce, 1<<10 },
-    { 0x3200abcd, 0x3200abce, 1<<11 }
+    { access_portA, 1<<4, CR_ROLE_NONE },
+    { access_portA, 1<<5, CR_ROLE_NONE },
+    { access_portA, 1<<6, CR_ROLE_NONE },
+    { access_portA, 1<<7, CR_ROLE_NONE },
+    { access_portA, 1<<8, CR_ROLE_NONE },
+    { access_portA, 1<<9, CR_ROLE_NONE },
+    { access_portA, 1<<10, CR_ROLE_NONE },
+    { access_portA, 1<<11, CR_ROLE_NONE }
 };
 
 struct cr_port cr_ports[] = {
