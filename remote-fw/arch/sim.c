@@ -6,6 +6,8 @@
 int
 access_portA(cr_pin_mask mask, enum cr_access_mode mode, int value)
 {
+    if (mode == CR_ACCESS_READ)
+        return 1;
     return -1;
 }
 
