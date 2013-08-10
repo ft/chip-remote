@@ -38,14 +38,14 @@ static struct cr_line port1_lines[] = {
 };
 
 static struct cr_line port2_lines[] = {
-    { access_portA, 1<<4, CR_ROLE_NONE, -1 },
-    { access_portA, 1<<5, CR_ROLE_NONE, -1 },
-    { access_portA, 1<<6, CR_ROLE_NONE, -1 },
-    { access_portA, 1<<7, CR_ROLE_NONE, -1 },
-    { access_portA, 1<<8, CR_ROLE_NONE, -1 },
-    { access_portA, 1<<9, CR_ROLE_NONE, -1 },
-    { access_portA, 1<<10, CR_ROLE_NONE, -1 },
-    { access_portA, 1<<11, CR_ROLE_NONE }
+    { access_portA, 1<<4, CR_ROLE_SPI_CLK, -1 },
+    { access_portA, 1<<5, CR_ROLE_SPI_MISO, -1 },
+    { access_portA, 1<<6, CR_ROLE_SPI_MOSI, -1 },
+    { access_portA, 1<<7, CR_ROLE_SPI_CS, 0 },
+    { access_portA, 1<<8, CR_ROLE_SPI_CS, 1 },
+    { access_portA, 1<<9, CR_ROLE_SPI_CS, 2 },
+    { access_portA, 1<<10, CR_ROLE_SPI_CS, 3 },
+    { access_portA, 1<<11, CR_ROLE_SPI_CS, 4 }
 };
 
 struct cr_port cr_ports[] = {
