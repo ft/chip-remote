@@ -13,6 +13,11 @@ struct cr_state {
     int line_pending;
 };
 
+enum cr_access_mode {
+    CR_ACCESS_READ = 0,
+    CR_ACCESS_WRITE
+};
+
 void cr_set_active(int);
 void cr_set_line_pending(int);
 void cr_set_line_pending(int);

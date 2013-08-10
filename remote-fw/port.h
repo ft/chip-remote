@@ -17,11 +17,6 @@ enum cr_pin_role {
     CR_ROLE_SPI_MOSI
 };
 
-enum cr_access_mode {
-    CR_ACCESS_READ = 0,
-    CR_ACCESS_WRITE
-};
-
 /**
  * Description of a port configuration
  *
