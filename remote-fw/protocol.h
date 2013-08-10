@@ -1,15 +1,22 @@
 #ifndef INC_PROTOCOL_H
 #define INC_PROTOCOL_H
 
+#include <stdint.h>
 #include <stdlib.h>
+
+#include "port.h"
 
 #define CR_MAX_WORDS 8
 #define CR_MAX_LINE 127
+#define CR_INT_MAX_LEN 8
 
 #define BYE_REPLY "Have a nice day."
+#define BROKEN_VALUE_REPLY "BROKEN-VALUE"
 #define DONE_REPLY "DONE"
 #define HI_REPLY "Hi there, stranger."
+#define LINE_REPLY "LINE"
 #define OK_REPLY "OK"
+#define VALUE_OUT_OF_RANGE_REPLY "VALUE-OUT-OF-RANGE"
 #define VERSION_REPLY "VERSION 2 0 0"
 #define WTF_REPLY "WTF"
 
@@ -40,8 +47,11 @@ struct cr_words {
     size_t count;
 };
 
+void cr_broken_value(char *, size_t);
+void cr_echo_line(size_t, size_t, enum cr_pin_role, int);
 void cr_fail(const char *);
 void cr_split_request(char *, struct cr_words *);
+void cr_uint_oor(uint32_t);
 int cr_word_eq(struct cr_words *, size_t, const char *);
 
 extern char rxbuf[CR_MAX_LINE + 1];

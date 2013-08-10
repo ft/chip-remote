@@ -83,3 +83,60 @@ cr_fail(const char *reason)
     buf[CR_MAX_LINE] = '\0';
     xcr_send_host(buf);
 }
+
+void
+cr_broken_value(char *value, size_t len)
+{
+    char buf[CR_MAX_LINE + 1];
+
+    strncpy(buf, BROKEN_VALUE_REPLY, CR_MAX_LINE);
+    strncat(buf, " ", CR_MAX_LINE);
+    strncat(buf, value, len);
+    buf[CR_MAX_LINE] = '\0';
+    xcr_send_host(buf);
+}
+
+void
+cr_uint_oor(uint32_t value)
+{
+    char buf[CR_MAX_LINE + 1];
+    char ibuf[CR_INT_MAX_LEN + 1];
+
+    strncpy(buf, VALUE_OUT_OF_RANGE_REPLY, CR_MAX_LINE);
+    strncat(buf, " ", CR_MAX_LINE);
+    uint2str(value, ibuf);
+    strncat(buf, ibuf, CR_INT_MAX_LEN);
+    buf[CR_MAX_LINE] = '\0';
+    xcr_send_host(buf);
+}
+
+static char *roles[] = {
+    [CR_ROLE_NONE] = "NONE",
+    [CR_ROLE_SPI_CLK] = "CLK",
+    [CR_ROLE_SPI_CS] = "CS",
+    [CR_ROLE_SPI_MOSI] = "MOSI",
+    [CR_ROLE_SPI_MISO] = "MISO",
+};
+
+void
+cr_echo_line(size_t port, size_t line, enum cr_pin_role role, int idx)
+{
+    char buf[CR_MAX_LINE + 1];
+    char ibuf[CR_INT_MAX_LEN + 1];
+
+    strncpy(buf, LINE_REPLY, CR_MAX_LINE);
+    strncat(buf, " ", CR_MAX_LINE);
+    uint2str(port, ibuf);
+    strncat(buf, ibuf, CR_INT_MAX_LEN);
+    strncat(buf, " ", CR_MAX_LINE);
+    uint2str(line, ibuf);
+    strncat(buf, ibuf, CR_INT_MAX_LEN);
+    strncat(buf, " ", CR_MAX_LINE);
+    strncat(buf, roles[role], CR_INT_MAX_LEN);
+    if (idx >= 0) {
+        strncat(buf, ":", CR_MAX_LINE);
+        uint2str(idx, ibuf);
+        strncat(buf, ibuf, CR_INT_MAX_LEN);
+    }
+    xcr_send_host(buf);
+}

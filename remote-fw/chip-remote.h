@@ -6,11 +6,17 @@
 #ifndef INC_CHIP_REMOTE_H
 #define INC_CHIP_REMOTE_H
 
-#include "protocol.h"
-
 struct cr_state {
     int cr_active;
     int line_pending;
+};
+
+enum cr_pin_role {
+    CR_ROLE_NONE = 0,
+    CR_ROLE_SPI_CLK,
+    CR_ROLE_SPI_CS,
+    CR_ROLE_SPI_MISO,
+    CR_ROLE_SPI_MOSI
 };
 
 enum cr_access_mode {
