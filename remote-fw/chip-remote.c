@@ -246,7 +246,7 @@ cr_ml_handle_ports(int cnt, struct cr_words *words)
         cr_echo_ports(cr_numofports(cr_ports));
         return 0;
     } else if (cnt == 1) {
-        xcr_send_host("FOCUS 0");
+        cr_echo_focus(cr_data.fport);
         return 0;
     }
     return 1;
@@ -417,6 +417,7 @@ cr_init(int activate)
 {
     cr_data.cr_active = activate;
     cr_data.line_pending = 0;
+    cr_data.fport = -1;
 }
 
 void

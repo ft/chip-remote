@@ -9,6 +9,7 @@ static int eos(char);
 static char *find_end(char *);
 static char *find_start(char *);
 static int space(char);
+static void echo_int(char *, uint32_t);
 
 static int
 eos(char c)
@@ -144,10 +145,25 @@ cr_echo_line(size_t port, size_t line, enum cr_pin_role role, int idx)
 void
 cr_echo_ports(size_t num)
 {
+    echo_int(PORTS_REPLY, num);
+}
+
+void
+cr_echo_focus(int num)
+{
+    if (num < 0)
+        xcr_send_host(FOCUS_REPLY " NONE");
+    else
+        echo_int(FOCUS_REPLY, num);
+}
+
+static void
+echo_int(char *prefix, uint32_t num)
+{
     char buf0[CR_MAX_LINE + 1];
     char buf1[CR_INT_MAX_LEN + 1];
 
-    strcpy(buf0, PORTS_REPLY);
+    strcpy(buf0, prefix);
     strncat(buf0, " ", CR_MAX_LINE);
     uint2str(num, buf1);
     strncat(buf0, buf1, CR_MAX_LINE);

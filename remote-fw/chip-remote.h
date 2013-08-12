@@ -9,6 +9,7 @@
 struct cr_state {
     int cr_active;
     int line_pending;
+    int fport;
 };
 
 enum cr_pin_role {
