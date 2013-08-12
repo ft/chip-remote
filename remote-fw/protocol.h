@@ -16,6 +16,7 @@
 #define HI_REPLY "Hi there, stranger."
 #define LINE_REPLY "LINE"
 #define OK_REPLY "OK"
+#define PORTS_REPLY "PORTS"
 #define VALUE_OUT_OF_RANGE_REPLY "VALUE-OUT-OF-RANGE"
 #define VERSION_REPLY "VERSION 2 0 0"
 #define WTF_REPLY "WTF"
@@ -49,6 +50,7 @@ struct cr_words {
 
 void cr_broken_value(char *, size_t);
 void cr_echo_line(size_t, size_t, enum cr_pin_role, int);
+void cr_echo_ports(size_t);
 void cr_fail(const char *);
 void cr_split_request(char *, struct cr_words *);
 void cr_uint_oor(uint32_t);

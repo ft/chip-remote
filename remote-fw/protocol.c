@@ -140,3 +140,17 @@ cr_echo_line(size_t port, size_t line, enum cr_pin_role role, int idx)
     }
     xcr_send_host(buf);
 }
+
+void
+cr_echo_ports(size_t num)
+{
+    char buf0[CR_MAX_LINE + 1];
+    char buf1[CR_INT_MAX_LEN + 1];
+
+    strcpy(buf0, PORTS_REPLY);
+    strncat(buf0, " ", CR_MAX_LINE);
+    uint2str(num, buf1);
+    strncat(buf0, buf1, CR_MAX_LINE);
+    buf0[CR_MAX_LINE] = '\0';
+    xcr_send_host(buf0);
+}
