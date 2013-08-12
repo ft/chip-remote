@@ -54,6 +54,7 @@ struct cr_line {
     cr_pin_mask bitmask;
     enum cr_pin_role role;
     size_t index;
+    enum cr_value_type type;
 };
 
 /**
@@ -65,6 +66,7 @@ struct cr_port {
     struct cr_port_cfg *cfg;
     size_t nlines;
     struct cr_line *lines;
+    enum cr_value_type type;
 };
 
 extern struct cr_port cr_ports[];

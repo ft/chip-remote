@@ -12,6 +12,11 @@ struct cr_state {
     int fport;
 };
 
+enum cr_value_type {
+    CR_TYPE_MUTABLE = 0,
+    CR_TYPE_IMMUTABLE
+};
+
 enum cr_pin_role {
     CR_ROLE_NONE = 0,
     CR_ROLE_SPI_CLK,
