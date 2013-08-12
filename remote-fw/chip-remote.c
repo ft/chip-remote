@@ -92,6 +92,7 @@ enum cr_multi_line_states {
 };
 
 static char *cr_features[] = {
+    "FOCUS",
     "LINES",
     "MODES",
     "PORTS",
@@ -114,6 +115,7 @@ static int cr_ml_handle_features(int, struct cr_words *);
 static int cr_ml_handle_lines(int, struct cr_words *);
 static int cr_ml_handle_modes(int, struct cr_words *);
 static int cr_ml_handle_ports(int, struct cr_words *);
+static void cr_handle_focus(struct cr_words *);
 static void cr_process(void);
 
 typedef int (*cr_ml_jump_table)(int cnt, struct cr_words *words);
@@ -129,6 +131,7 @@ static struct cr_args cr_arg_defs[MAX_REQUEST] = {
     [REQUEST_HI] = { 0, 0 },
     [REQUEST_BYE] = { 0, 0 },
     [REQUEST_FEATURES] = { 0, 0 },
+    [REQUEST_FOCUS] = { 1, 1 },
     [REQUEST_LINES] = { 1, 1 },
     [REQUEST_MODES] = { 0, 0 },
     [REQUEST_PORTS] = { 0, 0 },
@@ -279,6 +282,36 @@ cr_multi_line_process(struct cr_words *words)
     return 0;
 }
 
+static void
+cr_handle_focus(struct cr_words *words)
+{
+    uint32_t idx, max;
+    int err;
+    char buf[CR_INT_MAX_LEN + 1];
+
+    if (words->word[1].length > CR_INT_MAX_LEN)
+        goto broken_value;
+
+    strncpy(buf, words->word[1].start, words->word[1].length);
+    buf[words->word[1].length] = '\0';
+    idx = str2uint(buf, &err);
+    if (err)
+        goto broken_value;
+
+    max = cr_numofports(cr_ports);
+    if (idx > max)
+        goto out_of_range;
+
+    cr_data.fport = (int)idx;
+    xcr_send_host(OK_REPLY);
+    return;
+broken_value:
+    cr_broken_value(words->word[1].start, words->word[1].length);
+    return;
+out_of_range:
+    cr_uint_oor(idx);
+}
+
 static enum cr_multi_line_states
 cr_word2state(struct cr_words *words, int idx)
 {
@@ -336,6 +369,10 @@ cr_in_conv_process(void)
             xcr_send_host(BYE_REPLY);
             xcr_post_bye();
             return 1;
+        } else if (cr_word_eq(&words, 0, "FOCUS")) {
+            if (!cr_check_args(REQUEST_FOCUS, &words))
+                return 0;
+            cr_handle_focus(&words);
         } else if (cr_word_eq(&words, 0, "VERSION")) {
             if (!cr_check_args(REQUEST_BYE, &words))
                 return 0;

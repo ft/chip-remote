@@ -26,6 +26,7 @@ enum cr_requests {
     REQUEST_HI = 0,
     REQUEST_BYE,
     REQUEST_FEATURES,
+    REQUEST_FOCUS,
     REQUEST_LINES,
     REQUEST_MODES,
     REQUEST_PORTS,
