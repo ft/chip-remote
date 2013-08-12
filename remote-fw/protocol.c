@@ -120,7 +120,8 @@ static char *roles[] = {
 };
 
 void
-cr_echo_line(size_t port, size_t line, enum cr_pin_role role, int idx)
+cr_echo_line(size_t port, size_t line, enum cr_pin_role role, int idx,
+             enum cr_value_type type)
 {
     char buf[CR_MAX_LINE + 1];
     char ibuf[CR_INT_MAX_LEN + 1];
@@ -139,6 +140,9 @@ cr_echo_line(size_t port, size_t line, enum cr_pin_role role, int idx)
         uint2str(idx, ibuf);
         strncat(buf, ibuf, CR_INT_MAX_LEN);
     }
+    if (type == CR_TYPE_IMMUTABLE)
+        strncat(buf, " FIXED", CR_MAX_LINE);
+
     xcr_send_host(buf);
 }
 

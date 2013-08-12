@@ -52,7 +52,7 @@ struct cr_words {
 
 void cr_broken_value(char *, size_t);
 void cr_echo_focus(int);
-void cr_echo_line(size_t, size_t, enum cr_pin_role, int);
+void cr_echo_line(size_t, size_t, enum cr_pin_role, int, enum cr_value_type);
 void cr_echo_ports(size_t);
 void cr_fail(const char *);
 void cr_split_request(char *, struct cr_words *);

@@ -231,7 +231,8 @@ cr_ml_handle_lines(int cnt, struct cr_words *words)
     cr_echo_line(idx,
                  cnt,
                  cr_ports[idx].lines[cnt].role,
-                 cr_ports[idx].lines[cnt].index);
+                 cr_ports[idx].lines[cnt].index,
+                 cr_ports[idx].lines[cnt].type);
 
     return 0;
 }
