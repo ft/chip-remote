@@ -6,6 +6,8 @@
 #include "platform.h"
 #include "spi.h"
 
+#define CR_NO_INDEX -1
+
 enum cr_port_modes {
     CR_MODE_SPI
 };
