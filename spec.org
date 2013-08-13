@@ -261,11 +261,6 @@ more colloquial term for the project, this specification is part of, is
     of properties for the port in question. These are the generic properties
     that may be returned:
 
-      - "PROPERTIES <CONFIGURABLE|FIXED>": If CONFIGURABLE is returned,
-        properties for this port are configurable unless otherwise noted. FIXED
-        in turn indicates, that all properties are fixed values and cannot be
-        changed.
-
       - "LINES <int> [FIXED]": <int> defines the number of lines the port has
         access to.
 
@@ -277,10 +272,7 @@ more colloquial term for the project, this specification is part of, is
         symbol-rate.
 
     All properties that return a "FIXED" as their last argument are read-only
-    values even if the port itself indicated, it is configurable by returning
-    CONFIGURABLE with the PROPERTIES line.
-
-    The request may return other mode-specific properties.
+    values. The request may return other mode-specific properties.
 
 *** LINES Request
 
