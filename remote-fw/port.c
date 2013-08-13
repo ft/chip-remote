@@ -104,7 +104,7 @@ size_t
 cr_numofports(struct cr_port *ports)
 {
     size_t i;
-    for (i = 0; ports[i].nlines != 0; ++i)
+    for (i = 0; ports[i].lines.value != 0; ++i)
         /* NOP */;
     return i;
 }

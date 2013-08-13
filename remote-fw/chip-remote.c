@@ -87,6 +87,7 @@ enum cr_multi_line_states {
     CR_ML_FEATURES = 0,
     CR_ML_LINES,
     CR_ML_MODES,
+    CR_ML_PORT,
     CR_ML_PORTS,
     CR_ML_NONE
 };
@@ -95,6 +96,7 @@ static char *cr_features[] = {
     "FOCUS",
     "LINES",
     "MODES",
+    "PORT",
     "PORTS",
     (char *)NULL
 };
@@ -114,6 +116,7 @@ static int cr_check_args(enum cr_requests, struct cr_words *);
 static int cr_ml_handle_features(int, struct cr_words *);
 static int cr_ml_handle_lines(int, struct cr_words *);
 static int cr_ml_handle_modes(int, struct cr_words *);
+static int cr_ml_handle_port(int, struct cr_words *);
 static int cr_ml_handle_ports(int, struct cr_words *);
 static void cr_handle_focus(struct cr_words *);
 static void cr_process(void);
@@ -124,6 +127,7 @@ static const cr_ml_jump_table ml_jump_table[CR_ML_NONE] = {
     [CR_ML_FEATURES] = cr_ml_handle_features,
     [CR_ML_LINES] = cr_ml_handle_lines,
     [CR_ML_MODES] = cr_ml_handle_modes,
+    [CR_ML_PORT] = cr_ml_handle_port,
     [CR_ML_PORTS] = cr_ml_handle_ports
 };
 
@@ -134,6 +138,7 @@ static struct cr_args cr_arg_defs[MAX_REQUEST] = {
     [REQUEST_FOCUS] = { 1, 1 },
     [REQUEST_LINES] = { 1, 1 },
     [REQUEST_MODES] = { 0, 0 },
+    [REQUEST_PORT] = { 1, 1 },
     [REQUEST_PORTS] = { 0, 0 },
     [REQUEST_VERSION] = { 0, 0 }
 };
@@ -194,7 +199,7 @@ verify_lines_args(struct cr_words *words)
     if (err)
         goto broken_value;
 
-    for (i = 0; cr_ports[i].nlines > 0; ++i)
+    for (i = 0; cr_ports[i].lines.value > 0; ++i)
         /* NOP */;
 
     if (idx >= i)
@@ -225,14 +230,14 @@ cr_ml_handle_lines(int cnt, struct cr_words *words)
         idx = str2uint(buf, &err);
     }
 
-    if (cnt >= cr_ports[idx].nlines)
+    if (cnt >= cr_ports[idx].lines.value)
         return 1;
 
     cr_echo_line(idx,
                  cnt,
-                 cr_ports[idx].lines[cnt].role,
-                 cr_ports[idx].lines[cnt].index,
-                 cr_ports[idx].lines[cnt].type);
+                 cr_ports[idx].l[cnt].role,
+                 cr_ports[idx].l[cnt].index,
+                 cr_ports[idx].l[cnt].type);
 
     return 0;
 }
@@ -241,6 +246,35 @@ static int
 cr_ml_handle_modes(int cnt, struct cr_words *words)
 {
     return cr_ml_return_list(cnt, cr_modes);
+}
+
+static int
+cr_ml_handle_port(int cnt, struct cr_words *words)
+{
+    static uint32_t idx;
+
+    if (cnt == 0 && !verify_lines_args(words))
+        return 1;
+    if (cnt == 0) {
+        char buf[CR_INT_MAX_LEN + 1];
+        int err;
+        strncpy(buf, words->word[1].start, words->word[1].length);
+        buf[words->word[1].length] = '\0';
+        idx = str2uint(buf, &err);
+    }
+
+    if (cnt == 0) {
+        cr_echo_mode(cr_ports, idx);
+        return 0;
+    } else if (cnt == 1) {
+        cr_echo_lines(cr_ports, idx);
+        return 0;
+    } else if (cnt == 2) {
+        cr_echo_rate(cr_ports, idx);
+        return 0;
+    }
+    /* TODO: Protocol specific properties need to by echoed */
+    return 1;
 }
 
 static int
@@ -322,6 +356,8 @@ cr_word2state(struct cr_words *words, int idx)
         return CR_ML_LINES;
     if (cr_word_eq(words, idx, "MODES"))
         return CR_ML_MODES;
+    if (cr_word_eq(words, idx, "PORT"))
+        return CR_ML_PORT;
     if (cr_word_eq(words, idx, "PORTS"))
         return CR_ML_PORTS;
     return CR_ML_NONE;
@@ -342,6 +378,11 @@ cr_is_multi_line(struct cr_words *words)
     }
     if (cr_word_eq(words, 0, "MODES")) {
         if (cr_check_args(REQUEST_MODES, words))
+            return 1;
+        return -1;
+    }
+    if (cr_word_eq(words, 0, "PORT")) {
+        if (cr_check_args(REQUEST_PORT, words))
             return 1;
         return -1;
     }

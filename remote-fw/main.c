@@ -48,10 +48,14 @@ static struct cr_line port2_lines[] = {
     { access_portA, 1<<11, CR_ROLE_NONE, CR_NO_INDEX, CR_TYPE_MUTABLE }
 };
 
+#define MSTR(x) {CR_TYPE_MUTABLE, x}
+#define IMINT(x) {CR_TYPE_IMMUTABLE, x}
+#define DEFAULT_RATE {CR_TYPE_IMMUTABLE, -1}
+
 struct cr_port cr_ports[] = {
-    { NULL, 4, port1_lines, CR_TYPE_MUTABLE },
-    { NULL, 8, port2_lines, CR_TYPE_MUTABLE },
-    { NULL, 0, NULL, CR_TYPE_IMMUTABLE }
+    { MSTR("NONE"), IMINT(4), DEFAULT_RATE, NULL, port1_lines },
+    { MSTR("NONE"), IMINT(8), DEFAULT_RATE, NULL, port2_lines },
+    { MSTR("NONE"), IMINT(0), IMINT(0), NULL, NULL }
 };
 
 #endif /* CR_STDOUT */

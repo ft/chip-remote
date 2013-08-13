@@ -6,6 +6,8 @@
 #ifndef INC_CHIP_REMOTE_H
 #define INC_CHIP_REMOTE_H
 
+#define CR_STRING_PROP_MAX 16
+
 struct cr_state {
     int cr_active;
     int line_pending;
@@ -15,6 +17,16 @@ struct cr_state {
 enum cr_value_type {
     CR_TYPE_MUTABLE = 0,
     CR_TYPE_IMMUTABLE
+};
+
+struct cr_int_prop {
+    enum cr_value_type type;
+    int value;
+};
+
+struct cr_string_prop {
+    enum cr_value_type type;
+    char value[CR_STRING_PROP_MAX + 1];
 };
 
 enum cr_pin_role {

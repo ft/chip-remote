@@ -147,6 +147,60 @@ cr_echo_line(size_t port, size_t line, enum cr_pin_role role, int idx,
 }
 
 void
+cr_echo_lines(struct cr_port *ports, size_t num)
+{
+    cr_echo_int_property(LINES_REPLY, &(ports[num].lines));
+}
+
+void
+cr_echo_int_property(char *reply, struct cr_int_prop *p)
+{
+    char buf0[CR_MAX_LINE + 1];
+    char buf1[CR_INT_MAX_LEN + 1];
+
+    strncpy(buf0, reply, CR_MAX_LINE);
+    strncat(buf0, " ", CR_MAX_LINE);
+    uint2str(p->value, buf1);
+    strncat(buf0, buf1, CR_MAX_LINE);
+    if (p->type == CR_TYPE_IMMUTABLE)
+        strncat(buf0, " FIXED", CR_MAX_LINE);
+    buf0[CR_MAX_LINE] = '\0';
+    xcr_send_host(buf0);
+}
+
+void
+cr_echo_string_property(char *reply, struct cr_string_prop *p)
+{
+    char buf[CR_MAX_LINE + 1];
+
+    strncpy(buf, reply, CR_MAX_LINE);
+    strncat(buf, " ", CR_MAX_LINE);
+    strncat(buf, p->value, CR_MAX_LINE);
+    if (p->type == CR_TYPE_IMMUTABLE)
+        strncat(buf, " FIXED", CR_MAX_LINE);
+    buf[CR_MAX_LINE] = '\0';
+    xcr_send_host(buf);
+}
+
+void
+cr_echo_rate(struct cr_port *ports, size_t num)
+{
+    if (ports[num].rate.value < 0) {
+        struct cr_string_prop sp;
+        strncpy(sp.value, "DEFAULT", CR_STRING_PROP_MAX);
+        sp.type = ports[num].rate.type;
+        cr_echo_string_property(RATE_REPLY, &sp);
+    } else
+        cr_echo_int_property(RATE_REPLY, &(ports[num].rate));
+}
+
+void
+cr_echo_mode(struct cr_port *ports, size_t num)
+{
+    cr_echo_string_property(MODE_REPLY, &(ports[num].mode));
+}
+
+void
 cr_echo_ports(size_t num)
 {
     echo_int(PORTS_REPLY, num);

@@ -18,7 +18,7 @@ enum cr_port_modes {
  * Each port has a current mode attached to it. Each mode has a specific
  * configuration structure, that is accessable via this structure's "u" union.
  */
-struct cr_port_cfg {
+struct cr_port_mode {
     enum cr_port_modes mode;
     union {
         struct cr_mode_spi spi;
@@ -65,10 +65,11 @@ struct cr_line {
  * A port has a list of lines and a configuration.
  */
 struct cr_port {
-    struct cr_port_cfg *cfg;
-    size_t nlines;
-    struct cr_line *lines;
-    enum cr_value_type type;
+    struct cr_string_prop mode;
+    struct cr_int_prop lines;
+    struct cr_int_prop rate;
+    struct cr_port_mode *m;
+    struct cr_line *l;
 };
 
 extern struct cr_port cr_ports[];
