@@ -2,7 +2,6 @@
 
 #include "chip-remote.h"
 #include "platform.h"
-#include "port.h"
 
 #ifdef CR_MSP430F1481
 

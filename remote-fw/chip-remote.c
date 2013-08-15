@@ -60,6 +60,21 @@
  *
  * Convention: "cr_" is the prefix for platform independent code; "xcr_" for
  *             platform-dependent code.
+ *
+ * In `chip-remote', a port defines one physical connection on the remote micro
+ * controller, that can be used to talk to a configurable chip. The chip-remote
+ * protocol allows for multiple ports on a controller, of which each is
+ * configurable with respect to the type of bus it implements.
+ *
+ * While the reference implementation supports this kind of configurability,
+ * the protocol defines it as optional. So other implementations may just
+ * decide to have on fixed port that talks - for example - SPI of a fixed
+ * variety to a single chip. This reduces complexity and the need to initialise
+ * the remote controller with the right set of parameters required for
+ * successful operation.
+ *
+ * A configurable port has to be explicitly initialised before it is put to use
+ * and after any configuration changes.
  */
 
 #include <stdlib.h>

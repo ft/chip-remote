@@ -1,7 +1,6 @@
 #include <string.h>
 
 #include "chip-remote.h"
-#include "port.h"
 #include "protocol.h"
 #include "requests.h"
 #include "utils.h"
@@ -18,6 +17,15 @@ cr_return_list(int cnt, char *list[])
         return 1;
     xcr_send_host(list[cnt]);
     return 0;
+}
+
+static size_t
+cr_numofports(struct cr_port *ports)
+{
+    size_t i;
+    for (i = 0; ports[i].lines.value != 0; ++i)
+        /* NOP */;
+    return i;
 }
 
 static uint32_t

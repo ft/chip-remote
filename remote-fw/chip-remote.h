@@ -14,6 +14,7 @@
 #define CR_MAX_LINE 127
 #define CR_INT_MAX_LEN 8
 #define CR_STRING_PROP_MAX 16
+#define CR_NO_INDEX -1
 
 enum cr_value_type {
     CR_TYPE_MUTABLE = 0,
@@ -169,5 +170,6 @@ void cr_init(int);
 void cr_top_level(void);
 enum cr_request_ids cr_string_to_request(struct cr_words *, size_t);
 extern struct cr_request requests[MAX_REQUEST + 1];
+extern struct cr_port cr_ports[];
 
 #endif /* INC_CHIP_REMOTE_H */
