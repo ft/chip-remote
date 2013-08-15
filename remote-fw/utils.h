@@ -8,7 +8,7 @@
 #define STREQ_N(x, y, n) (!strncmp(x, y, n))
 #define _(x) ((const char *)x)
 
-uint32_t str2uint(const char *, int *);
+uint32_t str2uint(const char *, int, int *);
 void uint2str(uint32_t, char *);
 
 #endif /* INC_UTILS_H */

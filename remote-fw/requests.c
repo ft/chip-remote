@@ -11,8 +11,59 @@ static char *cr_modes[] = {
     (char *)NULL
 };
 
-static int verify_lines_args(struct cr_words *);
-static int cr_return_list(int, char *[]);
+static int
+cr_return_list(int cnt, char *list[])
+{
+    if (list[cnt] == (char *)NULL)
+        return 1;
+    xcr_send_host(list[cnt]);
+    return 0;
+}
+
+static uint32_t
+verify_word_is_int(struct cr_words *words, size_t idx, int *error)
+{
+    uint32_t rc;
+    int err;
+
+    if (words->word[idx].length > CR_INT_MAX_LEN)
+        goto broken_value;
+
+    rc = str2uint(words->word[idx].start, words->word[idx].length, &err);
+    if (err)
+        goto broken_value;
+
+    *error = 0;
+    return rc;
+broken_value:
+    cr_broken_value(words->word[idx].start, words->word[idx].length);
+    *error = 1;
+    return 0;
+}
+
+static int
+verify_fits_numofports(struct cr_words *words, size_t num)
+{
+    /*
+     * The dispatcher code already makes sure, that we got the right number of
+     * arguments. So, we got one argument. Make sure it's an integer (according
+     * to the protocol spec) and make sure the port that integer is indexing
+     * exists.
+     */
+    uint32_t idx;
+    int err;
+
+    idx = verify_word_is_int(words, num, &err);
+    if (err)
+        return 0;
+
+    if (idx >= cr_numofports(cr_ports)) {
+        cr_uint_oor(idx);
+        return 0;
+    }
+
+    return 1;
+}
 
 int
 cr_handle_features(int cnt, struct cr_words *words)
@@ -31,57 +82,16 @@ cr_handle_features(int cnt, struct cr_words *words)
     return 1;
 }
 
-static int
-verify_lines_args(struct cr_words *words)
-{
-    /*
-     * The dispatcher code already makes sure, that we got the right number of
-     * arguments. So, we got one argument. Make sure it's an integer (according
-     * to the protocol spec) and make sure the port that integer is indexing
-     * exists.
-     */
-    uint32_t idx, i;
-    int err;
-    char buf[CR_INT_MAX_LEN + 1];
-
-    if (words->word[1].length > CR_INT_MAX_LEN)
-        goto broken_value;
-
-    strncpy(buf, words->word[1].start, words->word[1].length);
-    buf[words->word[1].length] = '\0';
-    idx = str2uint(buf, &err);
-    if (err)
-        goto broken_value;
-
-    for (i = 0; cr_ports[i].lines.value > 0; ++i)
-        /* NOP */;
-
-    if (idx >= i)
-        goto out_of_range;
-
-    return 1;
-
-broken_value:
-    cr_broken_value(words->word[1].start, words->word[1].length);
-    return 0;
-out_of_range:
-    cr_uint_oor(idx);
-    return 0;
-}
-
 int
 cr_handle_lines(int cnt, struct cr_words *words)
 {
     static uint32_t idx;
 
-    if (cnt == 0 && !verify_lines_args(words))
+    if (cnt == 0 && !verify_fits_numofports(words, 1))
         return 1;
     if (cnt == 0) {
-        char buf[CR_INT_MAX_LEN + 1];
         int err;
-        strncpy(buf, words->word[1].start, words->word[1].length);
-        buf[words->word[1].length] = '\0';
-        idx = str2uint(buf, &err);
+        idx = str2uint(words->word[1].start, words->word[1].length, &err);
     }
 
     if (cnt >= cr_ports[idx].lines.value)
@@ -96,15 +106,6 @@ cr_handle_lines(int cnt, struct cr_words *words)
     return 0;
 }
 
-static int
-cr_return_list(int cnt, char *list[])
-{
-    if (list[cnt] == (char *)NULL)
-        return 1;
-    xcr_send_host(list[cnt]);
-    return 0;
-}
-
 int
 cr_handle_modes(int cnt, struct cr_words *words)
 {
@@ -116,14 +117,11 @@ cr_handle_port(int cnt, struct cr_words *words)
 {
     static uint32_t idx;
 
-    if (cnt == 0 && !verify_lines_args(words))
+    if (cnt == 0 && !verify_fits_numofports(words, 1))
         return 1;
     if (cnt == 0) {
-        char buf[CR_INT_MAX_LEN + 1];
         int err;
-        strncpy(buf, words->word[1].start, words->word[1].length);
-        buf[words->word[1].length] = '\0';
-        idx = str2uint(buf, &err);
+        idx = str2uint(words->word[1].start, words->word[1].length, &err);
     }
 
     if (cnt == 0) {
@@ -158,29 +156,19 @@ cr_handle_focus(int cnt, struct cr_words *words)
 {
     uint32_t idx, max;
     int err;
-    char buf[CR_INT_MAX_LEN + 1];
 
-    if (words->word[1].length > CR_INT_MAX_LEN)
-        goto broken_value;
-
-    strncpy(buf, words->word[1].start, words->word[1].length);
-    buf[words->word[1].length] = '\0';
-    idx = str2uint(buf, &err);
+    idx = verify_word_is_int(words, 1, &err);
     if (err)
-        goto broken_value;
+        return 0;
 
     max = cr_numofports(cr_ports);
-    if (idx > max)
-        goto out_of_range;
+    if (idx > max) {
+        cr_uint_oor(idx);
+        return 0;
+    }
 
     cr_set_focused_port((int)idx);
     xcr_send_host(OK_REPLY);
-    return 1;
-broken_value:
-    cr_broken_value(words->word[1].start, words->word[1].length);
-    return 1;
-out_of_range:
-    cr_uint_oor(idx);
     return 1;
 }
 
@@ -188,19 +176,19 @@ int
 cr_handle_hi(int cnt, struct cr_words *words)
 {
     xcr_send_host(HI_REPLY);
-    return 0;
+    return 1;
 }
 
 int
 cr_handle_bye(int cnt, struct cr_words *words)
 {
     xcr_send_host(BYE_REPLY);
-    return 0;
+    return 1;
 }
 
 int
 cr_handle_version(int cnt, struct cr_words *words)
 {
     xcr_send_host(VERSION_REPLY);
-    return 0;
+    return 1;
 }

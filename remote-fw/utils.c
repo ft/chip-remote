@@ -36,7 +36,7 @@ uint2str(uint32_t num, char *buf)
 }
 
 uint32_t
-str2uint(const char *buf, int *err)
+str2uint(const char *buf, int len, int *err)
 {
     char c;
     int idx, i;
@@ -44,7 +44,10 @@ str2uint(const char *buf, int *err)
 
     *err = 0;
     rc = 0;
-    idx = strlen(buf) - 1;
+    if (len < 0)
+        idx = len;
+    else
+        idx = strlen(buf) - 1;
 
     if (idx > 7)
         goto error;
