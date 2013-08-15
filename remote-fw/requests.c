@@ -44,12 +44,6 @@ broken_value:
 static int
 verify_fits_numofports(struct cr_words *words, size_t num)
 {
-    /*
-     * The dispatcher code already makes sure, that we got the right number of
-     * arguments. So, we got one argument. Make sure it's an integer (according
-     * to the protocol spec) and make sure the port that integer is indexing
-     * exists.
-     */
     uint32_t idx;
     int err;
 
