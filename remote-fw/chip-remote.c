@@ -178,6 +178,8 @@ cr_in_conv_process(void)
     switch (state) {
     case CR_SINGLE_LINE:
         curreq = cr_string_to_request(&words, 0);
+        if (!cr_check_args(curreq, &words))
+            return 0;
 
         if (curreq == MAX_REQUEST) {
             cr_fail("Unknown request");
