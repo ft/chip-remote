@@ -50,10 +50,13 @@ cr_split_request(char *buf, struct cr_words *words)
     size_t n;
 
     end = buf;
+    words->count = 0;
     n = 0;
     while (n < CR_MAX_WORDS) {
         start = find_start(end);
         end = find_end(start);
+        if (*end == '\0' && *start == '\0')
+            break;
         words->word[n].start = start;
         words->word[n].length = end - start;
         words->count = ++n;
