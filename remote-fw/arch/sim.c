@@ -5,6 +5,8 @@
 #include "../platform.h"
 #include "../protocol.h"
 
+#include "stdout.h"
+
 int
 access_portA(cr_pin_mask mask, enum cr_access_mode mode, int value)
 {

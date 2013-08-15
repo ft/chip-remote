@@ -4,11 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "port.h"
-
-#define CR_MAX_WORDS 8
-#define CR_MAX_LINE 127
-#define CR_INT_MAX_LEN 8
+#include "chip-remote.h"
 
 #define BYE_REPLY "Have a nice day."
 #define BROKEN_VALUE_REPLY "BROKEN-VALUE"
@@ -24,35 +20,6 @@
 #define VALUE_OUT_OF_RANGE_REPLY "VALUE-OUT-OF-RANGE"
 #define VERSION_REPLY "VERSION 2 0 0"
 #define WTF_REPLY "WTF"
-
-enum cr_requests {
-    REQUEST_HI = 0,
-    REQUEST_BYE,
-    REQUEST_FEATURES,
-    REQUEST_FOCUS,
-    REQUEST_LINES,
-    REQUEST_MODES,
-    REQUEST_PORT,
-    REQUEST_PORTS,
-    REQUEST_VERSION,
-    MAX_REQUEST
-};
-
-struct cr_args {
-    unsigned int min;
-    /** If -1, there is no maximum */
-    int max;
-};
-
-struct cr_word {
-    char *start;
-    size_t length;
-};
-
-struct cr_words {
-    struct cr_word word[CR_MAX_WORDS];
-    size_t count;
-};
 
 void cr_echo_int_property(char *, struct cr_int_prop *);
 void cr_echo_string_property(char *, struct cr_string_prop *);

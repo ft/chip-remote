@@ -30,6 +30,8 @@ struct cr_port cr_ports[] = {
 
 #ifdef CR_STDOUT
 
+#include "arch/stdout.h"
+
 static struct cr_line port1_lines[] = {
     { access_portA, 1<<0, CR_ROLE_NONE, CR_NO_INDEX, CR_TYPE_MUTABLE },
     { access_portA, 1<<1, CR_ROLE_NONE, CR_NO_INDEX, CR_TYPE_MUTABLE },
