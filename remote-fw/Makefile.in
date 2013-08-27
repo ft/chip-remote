@@ -25,8 +25,13 @@ clean:
 	rm -f .depend TAGS
 	rm -f *~ arch/*~
 
-ctags:
+etags:
 	ctags -e -R
+
+ctags:
+	ctags -R
+
+tags: ctags etags
 
 distclean: clean
 	rm -f Makefile platform.h $(CONFIG_H)
@@ -53,4 +58,4 @@ $(NAME).lst: $(NAME).elf
 	$(OBJDUMP) -dSt $< > $@
 
 -include .depend
-.PHONY: all depend clean ctags distclean
+.PHONY: all depend clean ctags etags tags distclean
