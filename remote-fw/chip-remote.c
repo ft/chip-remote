@@ -80,6 +80,7 @@
 #include <stdlib.h>
 
 #include "chip-remote.h"
+#include "buf-parse.h"
 #include "protocol.h"
 #include "requests.h"
 #include "utils.h"
@@ -110,6 +111,7 @@ struct cr_request requests[MAX_REQUEST + 1] = {
     NOR("MODES", REQUEST_MODES, CR_MULTI_LINE, cr_handle_modes, 0, 0),
     NOR("PORT", REQUEST_PORT, CR_MULTI_LINE, cr_handle_port, 1, 1),
     NOR("PORTS", REQUEST_PORTS, CR_MULTI_LINE, cr_handle_ports, 0, 0),
+    NMR("TRANSMIT", REQUEST_TRANSMIT, CR_SINGLE_LINE, cr_handle_transmit, 1, 1),
     NMR("VERSION", REQUEST_VERSION, CR_SINGLE_LINE, cr_handle_version, 0, 0),
     NMR(NULL, MAX_REQUEST, CR_SINGLE_LINE, NULL, 0, 0)
 };
