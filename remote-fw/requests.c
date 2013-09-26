@@ -2,7 +2,9 @@
 
 #include "chip-remote.h"
 #include "protocol.h"
+#include "proto-utils.h"
 #include "requests.h"
+#include "transmit.h"
 #include "utils.h"
 
 static char *cr_modes[] = {
@@ -23,7 +25,7 @@ static size_t
 cr_numofports(struct cr_port *ports)
 {
     size_t i;
-    for (i = 0; ports[i].lines.value != 0; ++i)
+    for (i = 0; ports[i].lines != 0; ++i)
         /* NOP */;
     return i;
 }
@@ -96,14 +98,14 @@ cr_handle_lines(int cnt, struct cr_words *words)
         idx = str2uint(words->word[1].start, words->word[1].length, &err);
     }
 
-    if (cnt >= cr_ports[idx].lines.value)
+    if (cnt >= cr_ports[idx].lines)
         return 1;
 
     cr_echo_line(idx,
                  cnt,
                  cr_ports[idx].l[cnt].role,
                  cr_ports[idx].l[cnt].index,
-                 cr_ports[idx].l[cnt].type);
+                 cr_ports[idx].l[cnt].mutable_p);
 
     return 0;
 }
@@ -185,6 +187,24 @@ int
 cr_handle_bye(int cnt, struct cr_words *words)
 {
     xcr_send_host(BYE_REPLY);
+    return 1;
+}
+
+int
+cr_handle_transmit(int cnt, struct cr_words *words)
+{
+    uint32_t value, read_value;
+    int err;
+
+    value = verify_word_is_int(words, 1, &err);
+    if (err)
+        return 0;
+    err = cr_transmit(value, &read_value);
+    if (err < 0)
+        return 1;
+    tx_init();
+    tx_add_integer(read_value);
+    tx_trigger();
     return 1;
 }
 
