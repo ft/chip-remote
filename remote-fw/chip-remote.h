@@ -8,7 +8,6 @@
 
 #include <stdlib.h>
 #include "platform.h"
-#include "spi.h"
 
 #define CR_MAX_WORDS 8
 #define CR_MAX_LINE 127
@@ -16,15 +15,14 @@
 #define CR_STRING_PROP_MAX 16
 #define CR_NO_INDEX -1
 
-enum cr_value_type {
-    CR_TYPE_MUTABLE = 0,
-    CR_TYPE_IMMUTABLE
-};
+#define CR_IMMUTABLE 0
+#define CR_MUTABLE 1
 
 enum cr_pin_role {
-    CR_ROLE_NONE = 0,
-    CR_ROLE_SPI_CLK,
-    CR_ROLE_SPI_CS,
+    CR_ROLE_INVALID = -1,
+    CR_ROLE_NONE,
+    CR_ROLE_CLK,
+    CR_ROLE_CS,
     CR_ROLE_SPI_MISO,
     CR_ROLE_SPI_MOSI
 };
@@ -34,36 +32,44 @@ enum cr_access_mode {
     CR_ACCESS_WRITE
 };
 
+enum cr_parameter_type {
+    CR_INVALID_PARAM = -1,
+    CR_BOOLEAN_PARAM,
+    CR_INTEGER_PARAM,
+    CR_STRING_PARAM
+};
+
 struct cr_state {
     int cr_active;
     int line_pending;
     int fport;
 };
 struct cr_int_prop {
-    enum cr_value_type type;
+    int mutable_p;
     int value;
 };
 
 struct cr_string_prop {
-    enum cr_value_type type;
+    int mutable_p;
     char value[CR_STRING_PROP_MAX + 1];
 };
 
-enum cr_port_modes {
-    CR_MODE_SPI
+struct cr_parameter {
+    char *name;
+    enum cr_parameter_type type;
+    union {
+        struct cr_int_prop integer;
+        struct cr_string_prop string;
+    } data;
 };
 
-/**
- * Description of a port configuration
- *
- * Each port has a current mode attached to it. Each mode has a specific
- * configuration structure, that is accessable via this structure's "u" union.
- */
-struct cr_port_mode {
-    enum cr_port_modes mode;
-    union {
-        struct cr_mode_spi spi;
-    } u;
+enum cr_port_modes {
+    CR_MODE_NONE = -1,
+    CR_MODE_SPI,
+    CR_MODE_INVALID
+};
+
+struct cr_mode_spi {
 };
 
 /**
@@ -97,7 +103,23 @@ struct cr_line {
     cr_pin_mask bitmask;
     enum cr_pin_role role;
     size_t index;
-    enum cr_value_type type;
+    int mutable_p;
+};
+
+#include "line-maps.h"
+
+/**
+ * Description of a port configuration
+ *
+ * Each port has a current mode attached to it. Each mode has a specific
+ * configuration structure, that is accessable via this structure's "u" union.
+ */
+struct cr_port_mode {
+    int mutable_p;
+    enum cr_port_modes mode;
+    union {
+        struct cr_spi_map *spi;
+    } map;
 };
 
 /**
@@ -106,11 +128,12 @@ struct cr_line {
  * A port has a list of lines and a configuration.
  */
 struct cr_port {
-    struct cr_string_prop mode;
-    struct cr_int_prop lines;
+    int lines;
     struct cr_int_prop rate;
-    struct cr_port_mode *m;
+    struct cr_port_mode mode;
+    struct cr_parameter *params;
     struct cr_line *l;
+    uint32_t (*transmit)(struct cr_port *port, uint32_t word);
 };
 
 struct cr_args {
@@ -138,6 +161,7 @@ enum cr_request_ids {
     REQUEST_MODES,
     REQUEST_PORT,
     REQUEST_PORTS,
+    REQUEST_TRANSMIT,
     REQUEST_VERSION,
     MAX_REQUEST
 };
