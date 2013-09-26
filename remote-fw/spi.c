@@ -70,3 +70,112 @@
  * implementations may obviously leverage hardware SPI interfaces should their
  * target controller support that.
  */
+
+#include "chip-remote.h"
+#include "spi.h"
+#include <stdint.h>
+
+static inline void
+spi_wait(uint32_t n)
+{
+    uint32_t i;
+    for (i = 0; i < n; ++i)
+        /* nop */;
+}
+
+static void
+cr_line_write(struct cr_line *line, int value)
+{
+    line->access(line->bitmask, CR_ACCESS_WRITE, value);
+}
+
+static int
+cr_line_read(struct cr_line *line)
+{
+    return line->access(line->bitmask, CR_ACCESS_READ, 0);
+}
+
+static void
+cr_set_line_with_polarity(struct cr_line *line, int polarity)
+{
+    cr_line_write(line, !polarity);
+}
+
+static void
+cr_unset_line_with_polarity(struct cr_line *line, int polarity)
+{
+    cr_line_write(line, polarity);
+}
+
+uint32_t
+cr_spi_transmit(struct cr_port *port, uint32_t data)
+{
+    struct cr_spi_map *map;
+    uint32_t rv, scan;
+    int i;
+
+    rv = 0;
+    map = port->mode.map.spi;
+    cr_set_line_with_polarity(map->cs[map->cs_focused], map->cs_polarity);
+    spi_wait(CR_T_SPI_CS_SETUP);
+    for (i = 0; i < map->frame_length; ++i) {
+        /* Determine the current scan-mask depending on bit-order */
+        if (map->bit_order == SPI_LSB_FIRST)
+            scan = (uint32_t)1 << i;
+        else
+            scan = (uint32_t)1 << (map->frame_length - (i+1));
+
+        /* Setup the current bit on MOSI */
+        cr_line_write(map->mosi, (data & scan));
+        if (!map->clk_phase_delay)
+            cr_set_line_with_polarity(map->clk, map->clk_polarity);
+        spi_wait(CR_T_SPI_BIT_DURATION / 2);
+
+        /* Read MISO after half a bit */
+        rv |= cr_line_read(map->miso) ? scan : 0;
+        if (map->clk_phase_delay)
+            cr_set_line_with_polarity(map->clk, map->clk_polarity);
+
+        spi_wait(CR_T_SPI_BIT_DURATION / 2);
+        cr_unset_line_with_polarity(map->clk, map->clk_polarity);
+    }
+    spi_wait(CR_T_SPI_CS_SETUP);
+    cr_set_line_with_polarity(map->cs[map->cs_focused], map->cs_polarity);
+    return rv;
+}
+
+/**
+ * Check configuration and initialise an SPI port
+ *
+ * - CLK: output; default value depends on CLK Polarity
+ * - MOSI: output
+ * - MISO: input
+ * - CS:*: outputs; default value depands on Chip-Select Polarity
+ *
+ * This is called by `cr_port_init()', which will have taken care of
+ * initialising port->m (which is a pointer to a struct cr_port_mode).
+ *
+ * If port->m is NULL, that indicates, that this is the initial configuration
+ * with this mode. In that case obviously all configuration needs to be
+ * performed. There is port->m->u->focused_changed, that indicates, that only
+ * the focused chip-select line changed.
+ *
+ * @return 0 if initialisation failed; non-zero otherwise.
+ */
+int
+cr_spi_init(struct cr_port *port)
+{
+    return 0;
+}
+
+int
+cr_spi_params(struct cr_port *port)
+{
+    return 0;
+}
+
+int
+cr_spi_map(struct cr_port *port)
+{
+    return 0;
+}
