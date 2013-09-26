@@ -21,20 +21,15 @@
 #define VERSION_REPLY "VERSION 2 0 0"
 #define WTF_REPLY "WTF"
 
-void cr_echo_int_property(char *, struct cr_int_prop *);
-void cr_echo_string_property(char *, struct cr_string_prop *);
-
 void cr_broken_value(char *, size_t);
 void cr_echo_focus(int);
-void cr_echo_line(size_t, size_t, enum cr_pin_role, int, enum cr_value_type);
+void cr_echo_line(size_t, size_t, enum cr_pin_role, int, int);
 void cr_echo_lines(struct cr_port *, size_t);
-void cr_echo_rate(struct cr_port *, size_t);
 void cr_echo_mode(struct cr_port *, size_t);
 void cr_echo_ports(size_t);
-void cr_fail(const char *);
-void cr_split_request(char *, struct cr_words *);
+void cr_echo_rate(struct cr_port *, size_t);
+void cr_fail(char *);
 void cr_uint_oor(uint32_t);
-int cr_word_eq(struct cr_words *, size_t, const char *);
 
 extern char rxbuf[CR_MAX_LINE + 1];
 
