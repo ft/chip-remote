@@ -22,7 +22,6 @@ all: @@ALLTARGETS@@
 
 clean:
 	rm -f *.p *.o *.s *.elf *.$(OBJEXT) *.lst arch/*.o
-	rm -f .depend TAGS
 	rm -f *~ arch/*~
 
 etags:
@@ -34,6 +33,7 @@ ctags:
 tags: ctags etags
 
 distclean: clean
+	rm -f .depend TAGS
 	rm -f Makefile platform.h $(CONFIG_H)
 
 depend:
