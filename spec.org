@@ -307,6 +307,10 @@ more colloquial term for the project, this specification is part of, is
     <int> is the index of the port to configure. <key> is the property's name
     to set. <value> is the new value for the property.
 
+    Non-mode-specific parameters that the SET request may be able to modify:
+
+      - MODE: Sets the port's mode of operation to <value>.
+
 *** INIT Request
 
     The INIT request takes one non-optional argument: The index of the port to
