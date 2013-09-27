@@ -235,6 +235,9 @@ cr_handle_bye(int cnt, struct cr_words *words)
 int
 cr_handle_set(int cnt, struct cr_words *words)
 {
+    tx_init();
+    tx_add(OK_REPLY);
+    tx_trigger();
     return 1;
 }
 
