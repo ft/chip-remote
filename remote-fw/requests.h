@@ -10,6 +10,7 @@ int cr_handle_ports(int, struct cr_words *);
 int cr_handle_bye(int, struct cr_words *);
 int cr_handle_focus(int, struct cr_words *);
 int cr_handle_hi(int, struct cr_words *);
+int cr_handle_set(int, struct cr_words *);
 int cr_handle_transmit(int, struct cr_words *);
 int cr_handle_version(int, struct cr_words *);
 

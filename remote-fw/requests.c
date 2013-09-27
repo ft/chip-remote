@@ -191,6 +191,12 @@ cr_handle_bye(int cnt, struct cr_words *words)
 }
 
 int
+cr_handle_set(int cnt, struct cr_words *words)
+{
+    return 1;
+}
+
+int
 cr_handle_transmit(int cnt, struct cr_words *words)
 {
     uint32_t value, read_value;
