@@ -1,3 +1,45 @@
+/*
+ * Copyright (c) 2013 chip-remote workers, All rights reserved.
+ *
+ * Terms for redistribution and use can be found in doc/LICENCE.
+ */
+
+/**
+ * @file requests.c
+ * @brief Request handling callbacks for chip-remote.c
+ *
+ * When the chip-remote main loop encounters a request from the host computer,
+ * it examines it, by checking if it knows the request and if the number of
+ * arguments given makes sense. (It does *not* type-check the arguments.)
+ *
+ * When it is satisfied it calls the correct handler from this file to actually
+ * handle the request. All these functions have the same signature, to be
+ * viable as callback-pointers:
+ *
+ *     int cr_handle_something(int cnt, struct cr_words *words);
+ *
+ * The `words' parameter points to the original request split up into words (by
+ * code from buf-parse.c). This is obviously required to use arguments, that
+ * the user has passed with the request.
+ *
+ * For requests, that case a single reply (those marked CR_SINGLE_LINE), that
+ * is everything there is to know. The `cnt' parameter is always set to "0" and
+ * the return value is ignored.
+ *
+ * With multi-line requests (those marked CR_MULTI_LINE), that changes: The
+ * return value is important. It signals the dispatching process, if the
+ * multi-line request is finished. So, multi-line handlers return 0 if they
+ * need to return more lines and they return 1 (or rather anything non-zero) to
+ * tell the dispatcher, that it is done. The dispatcher takes care of returning
+ * a DONE_REPLY to the host computer.
+ *
+ * The `cnt' paramater tells multi-line request handler how often it was called
+ * before in handling the request. Thus, when a multi-line handler is called
+ * for the first time, `cnt' is zero. The next time it is incremented to one,
+ * then to two and so on.
+ */
+
+
 #include <string.h>
 
 #include "chip-remote.h"
