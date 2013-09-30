@@ -63,11 +63,6 @@ sub cr_test_set {
     }
 }
 
-sub cr_simulator {
-    my ($s) = @_;
-    $simulator = $s;
-}
-
 sub expected_from_script {
     my ($script) = @_;
     my (@expected);
