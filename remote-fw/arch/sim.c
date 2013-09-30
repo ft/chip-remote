@@ -52,4 +52,5 @@ void
 xcr_send_host(char *buf)
 {
     printf("<<< %s\n", buf);
+    fflush(NULL);
 }
