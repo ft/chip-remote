@@ -190,7 +190,18 @@ sub cr_run_script {
     @diff = split /^/, diff($output, $expect, { STYLE => "Table" });
     if ($#diff >= 0) {
         print qq{# --- Differences detected (actual vs expected): ---\n};
-        print qq{#   $_} foreach (@diff);
+        foreach my $entry (@diff) {
+            chomp $entry;
+            print qq{#   };
+            if ($entry =~ m/^\*/) {
+                print color 'red';
+            }
+            print $entry;
+            if ($entry =~ m/^\*/) {
+                print color 'reset';
+            }
+            print qq{\n};
+        }
         print qq{nok 1 - $title\n};
     } else {
         print qq{ok 1 - $title\n};
