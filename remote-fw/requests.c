@@ -226,6 +226,13 @@ cr_handle_hi(int cnt, struct cr_words *words)
 }
 
 int
+cr_handle_init(int cnt, struct cr_words *words)
+{
+    xcr_send_host(OK_REPLY);
+    return 1;
+}
+
+int
 cr_handle_bye(int cnt, struct cr_words *words)
 {
     xcr_send_host(BYE_REPLY);
