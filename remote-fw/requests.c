@@ -43,6 +43,7 @@
 #include <string.h>
 
 #include "chip-remote.h"
+#include "port.h"
 #include "protocol.h"
 #include "proto-utils.h"
 #include "requests.h"
@@ -228,7 +229,18 @@ cr_handle_hi(int cnt, struct cr_words *words)
 int
 cr_handle_init(int cnt, struct cr_words *words)
 {
-    xcr_send_host(OK_REPLY);
+    uint32_t idx, max;
+    int err;
+
+    idx = verify_word_is_int(words, 1, &err);
+    if (err)
+        return 0;
+    max = cr_numofports(cr_ports);
+    if (idx >= max) {
+        cr_uint_oor(idx);
+        return 0;
+    }
+    cr_init_port(&(cr_ports[idx]));
     return 1;
 }
 

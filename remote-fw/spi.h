@@ -13,5 +13,6 @@
 uint32_t cr_spi_transmit(struct cr_port *, uint32_t);
 int cr_spi_map(struct cr_port *);
 int cr_spi_params(struct cr_port *);
+int cr_spi_init(struct cr_port *);
 
 #endif /* INC_SPI_H */
