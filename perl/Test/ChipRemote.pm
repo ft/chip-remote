@@ -90,7 +90,7 @@ sub fail {
     print qq{# $reason\n};
     print qq{# Current log:\n};
     foreach my $entry (@{ $log }) {
-        print qq{#  |$entry|\n};
+        print qq{# |$entry|\n};
     }
     print qq{# --- End-of-log ---\n};
     exit 1;
@@ -192,7 +192,7 @@ sub cr_run_script {
         print qq{# --- Differences detected (actual vs expected): ---\n};
         foreach my $entry (@diff) {
             chomp $entry;
-            print qq{#   };
+            print qq{# };
             if ($entry =~ m/^\*/) {
                 print color 'red';
             }
