@@ -32,6 +32,7 @@ use vars qw{ @EXPORT };
 # process. In the process, collect the output from the simulation instance and
 # diff it against a defined expected output.
 
+my $max_multi_steps = 32;
 my $simulator = q{./remote-fw/remote-fw.elf};
 my $read_timeout = 1;
 my $write_timeout = 1;
@@ -39,6 +40,7 @@ my $title = q{SET A TITLE!};
 my $trace = 1;
 
 my %setters = (
+    max_multi_steps => sub { $max_multi_steps = $_[0] },
     read_timeout => sub { $read_timeout = $_[0] },
     simulator => sub { $simulator = $_[0] },
     trace => sub { $trace = $_[0] },
@@ -109,7 +111,8 @@ sub collect_replies {
             fail("Read timeout (value: $read_timeout)", $log);
         }
         my $buf;
-        sysread $handle->{output}, $buf, 1;
+        sysread($handle->{output}, $buf, 1)
+            or fail("Failed to read from simulator! Did it crash?\n", $log);
         $nlcnt++ if ($buf eq "\n");
         $tmp .= $buf if ($buf ne "\n" || $nlcnt < 2);
     }
@@ -146,8 +149,13 @@ sub walk_script_with_program {
     foreach my $step (@{ $script }) {
         transact($step->{request}, $handle, \@log);
         if ($step->{n_replies} > 1) {
+            my $multi_steps = 0;
             do {
                 transact(q{MORE}, $handle, \@log);
+                $multi_steps++;
+                if ($multi_steps > $max_multi_steps) {
+                    fail("Too many multiline steps ($max_multi_steps)", \@log);
+                }
             } until ($log[$#log] eq '<<< DONE');
         }
     }
