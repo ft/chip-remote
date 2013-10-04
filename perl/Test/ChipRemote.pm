@@ -32,6 +32,7 @@ use vars qw{ @EXPORT };
 # process. In the process, collect the output from the simulation instance and
 # diff it against a defined expected output.
 
+my $comment;
 my $max_multi_steps = 32;
 my $simulator = q{./remote-fw/remote-fw.elf};
 my $read_timeout = 1;
@@ -189,6 +190,16 @@ sub walk_script_with_program {
     return \@log;
 }
 
+sub cr_print_comment {
+    my ($c) = @_;
+
+    if (defined $c) {
+        print qq{ # $c\n};
+    } else {
+        print qq{\n};
+    }
+}
+
 sub cr_run_script {
     my ($script) = @_;
     my ($expect, $output, @diff);
@@ -210,9 +221,11 @@ sub cr_run_script {
             }
             print qq{\n};
         }
-        print qq{nok 1 - $title\n};
+        print qq{not ok 1 - $title};
+        cr_print_comment($comment);
     } else {
-        print qq{ok 1 - $title\n};
+        print qq{ok 1 - $title};
+        cr_print_comment($comment);
     }
 }
 
@@ -225,12 +238,13 @@ sub cr_request {
 }
 
 sub cr_test_title {
-    my ($t) = @_;
+    my ($xtitle, $xcomment) = @_;
 
     if (! -x $simulator || ! -e q{remote-fw/config.sim.h}) {
         print "1..0 # Skipped: Simulator not available.\n";
         exit 0;
     }
     print "1..1\n";
-    $title = $t;
+    $title = $xtitle;
+    $comment = $xcomment;
 }
