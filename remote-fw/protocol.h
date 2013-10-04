@@ -21,7 +21,7 @@
 #define VERSION_REPLY "VERSION 2 0 0"
 #define WTF_REPLY "WTF"
 
-void cr_broken_value(char *, size_t);
+void cr_broken_value(struct cr_words *, size_t);
 void cr_echo_focus(int);
 void cr_echo_line(size_t, size_t, enum cr_pin_role, int, int);
 void cr_echo_lines(struct cr_port *, size_t);

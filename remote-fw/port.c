@@ -108,26 +108,72 @@ cr_new_port_map(struct cr_port *port, enum cr_port_modes mode)
     return setter(port);
 }
 
+/**
+ * Set up a new mode for a port
+ *
+ * If a port has a configurable mode, this function is responsible for setting
+ * up the following mode-specific values:
+ *
+ *   - The list of mode-specific parameters
+ *
+ *   - The line-map
+ *
+ *   - The transmission function
+ *
+ * The parameter-list and and line-map take dynamic memory, so it needs to be
+ * destroyed and freshly allocated.
+ *
+ * The return value encodes an error-condition:
+ *
+ *   0: no error
+ *   1: Port mode is not configurable
+ *   2: out-of-memory condition
+ *   4: mode configuration did not assign a tranmission function
+ *
+ * @param  port   the port to modify
+ *
+ * @return integer, see description for details.
+ */
 int
 cr_port_mode_set(struct cr_port *port, enum cr_port_modes mode)
 {
+    int rc;
+
+    if (!port->mode.mutable_p)
+        return INT_BIT(0);
+
+    rc = 0;
+    cr_destroy_port_map(port);
     port->mode.mode = mode;
-    port->mode.mutable_p = CR_MUTABLE;
     cr_destroy_params(port->params);
-    if (cr_params_for_mode(port, mode) < 0)
+    PORT_MARK_NOT_INITIALISED(port);
+
+    if (cr_params_for_mode(port, mode) < 0) {
+        rc = INT_BIT(1);
         goto error;
-    if (cr_new_port_map(port, mode) < 0)
+    }
+
+    if (cr_new_port_map(port, mode) < 0) {
+        rc = INT_BIT(1);
         goto error;
+    }
+
     port->transmit = cr_port_transmitter(mode);
-    if (port->transmit == NULL)
+    if (port->transmit == NULL) {
+        rc = INT_BIT(2);
         goto error;
+    }
+
     cr_port_reset_line_roles(port);
-    return 1;
+    return rc;
 
 error:
     cr_destroy_params(port->params);
+    port->params = NULL;
     cr_destroy_port_map(port);
-    return -1;
+    cr_port_reset_line_roles(port);
+    port->mode.mode = CR_MODE_NONE;
+    return rc;
 }
 
 void
@@ -154,5 +200,6 @@ cr_init_port(struct cr_port *port)
         cr_fail("Initialisation failed!");
         return;
     }
+    PORT_MARK_INITIALISED(port);
     xcr_send_host(OK_REPLY);
 }

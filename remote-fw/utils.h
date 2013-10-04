@@ -8,6 +8,10 @@
 #define STREQ_N(x, y, n) (!strncmp(x, y, n))
 #define _(x) ((const char *)x)
 #define xmalloc(n, t) ((t *)malloc(n * sizeof(t)))
+#define INT_BIT(n) ((int) 1 << n)
+#define INT_BIT_SET_P(data,n) (!!(data & INT_BIT(n)))
+#define INT_BIT_SET(data,n) ((data) |= INT_BIT(n))
+#define INT_BIT_CLEAR(data,n) ((data) &= ~(INT_BIT(n)))
 
 uint32_t str2uint(const char *, int, int *);
 void uint2str(uint32_t, char *);

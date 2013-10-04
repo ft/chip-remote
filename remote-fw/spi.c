@@ -147,18 +147,9 @@ cr_spi_transmit(struct cr_port *port, uint32_t data)
 /**
  * Check configuration and initialise an SPI port
  *
- * - CLK: output; default value depends on CLK Polarity
- * - MOSI: output
- * - MISO: input
- * - CS:*: outputs; default value depands on Chip-Select Polarity
- *
- * This is called by `cr_port_init()', which will have taken care of
- * initialising port->m (which is a pointer to a struct cr_port_mode).
- *
- * If port->m is NULL, that indicates, that this is the initial configuration
- * with this mode. In that case obviously all configuration needs to be
- * performed. There is port->m->u->focused_changed, that indicates, that only
- * the focused chip-select line changed.
+ * This is called by `cr_init_port()' via the `initfnc' pointer from port.c's
+ * `mode_helpers' table. Its job is to process the port's parameter and line
+ * lists and set the port's map structure accordingly.
  *
  * @return 0 if initialisation failed; non-zero otherwise.
  */
@@ -168,12 +159,52 @@ cr_spi_init(struct cr_port *port)
     return 0;
 }
 
+/**
+ * Allocate and initialise a parameter list for SPI mode
+ *
+ * The SPI mode implemented in this firmware is configurable via a list of
+ * parameters. This list of parameters can by modified via the protocol's SET
+ * request. Each time, a parameter is changed, the port needs to be
+ * re-initialised.
+ *
+ * This function's job is to allocate a list that contains all SPI parameters,
+ * that are supported by this implementation.
+ *
+ * @param  port   the port in which to link the new list into
+ *
+ * @return integer; value less than zero signals out-of-memory
+ */
 int
 cr_spi_params(struct cr_port *port)
 {
     return 0;
 }
 
+/**
+ * Allocate a mode-specific mapping for SPI mode
+ *
+ * The port's parameter list is designed to be easy to interface the
+ * chip-remote protocol. The port's line list allows for complete control over
+ * which physical pin is used for which action. The SPI implementation on the
+ * other hand needs mode direct access to all those parameters. There is no
+ * time to traverse the different parameter lists every time just to figure
+ * out, which pin should be used for the CLK functionality of the interface or
+ * whether or not it should be phase-delayed from the data streams on the MISO
+ * and MOSI pins (which you'd also have to look up in the line list of the
+ * port). This way of doing things wouldn't scale.
+ *
+ * Instead an interface implementation (such as SPI) defines a map of lines and
+ * values for it to have immediate access to, so there is a chance for decent
+ * performance.
+ *
+ * This function's job in that system is to allocate memory for the SPI mode's
+ * mode-map. It's doesn't have to do any initialisation, since that's the job
+ * of the `init' step (see `cr_spi_in()' above).
+ *
+ * @param  port   the port in which to link the new map into
+ *
+ * @return integer; value less than zero signals out-of-memory
+ */
 int
 cr_spi_map(struct cr_port *port)
 {

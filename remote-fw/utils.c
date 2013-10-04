@@ -44,8 +44,8 @@ str2uint(const char *buf, int len, int *err)
 
     *err = 0;
     rc = 0;
-    if (len < 0)
-        idx = len;
+    if (len > 0)
+        idx = len - 1;
     else
         idx = strlen(buf) - 1;
 

@@ -1,6 +1,7 @@
 #include <stdint.h>
 
 #include "chip-remote.h"
+#include "port.h"
 #include "protocol.h"
 #include "transmit.h"
 
@@ -18,6 +19,10 @@ cr_transmit(uint32_t value, uint32_t *retval)
     cp = &(cr_ports[fp]);
     if (cp->mode.mode == CR_MODE_NONE) {
         cr_fail("Focused port is unconfigured.");
+        return -1;
+    }
+    if (!PORT_INITIALISED_P(cp)) {
+        cr_fail("Focused port is not initialised.");
         return -1;
     }
     if (cp->mode.mode == CR_MODE_INVALID) {

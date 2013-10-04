@@ -23,6 +23,7 @@
 #define NEW_PORT(n,l)                   \
     {                                   \
         n,                              \
+        0,                              \
         DEFAULT_RATE,                   \
         { CR_MUTABLE, CR_MODE_NONE },   \
         NULL,                           \
@@ -31,7 +32,7 @@
     }
 
 #define PORT_LIST_END \
-    { 0, NO_RATE, { CR_IMMUTABLE, CR_MODE_INVALID }, NULL, NULL, NULL }
+    { 0, 0, NO_RATE, { CR_IMMUTABLE, CR_MODE_INVALID }, NULL, NULL, NULL }
 
 /* -------------------------------------------------------------------------- */
 

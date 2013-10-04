@@ -43,6 +43,7 @@
 #include <string.h>
 
 #include "chip-remote.h"
+#include "buf-parse.h"
 #include "port.h"
 #include "protocol.h"
 #include "proto-utils.h"
@@ -51,9 +52,22 @@
 #include "utils.h"
 
 static char *cr_modes[] = {
-    "SPI",
-    (char *)NULL
+    [ CR_MODE_SPI ] = "SPI",
+    [ CR_MODE_INVALID ] = (char *)NULL
 };
+
+static enum cr_port_modes
+cr_word2mode(struct cr_words *words, size_t idx)
+{
+    int i;
+
+    for (i = 0; cr_modes[i] != NULL; ++i)
+        if (cr_word_eq(words, idx, cr_modes[i]))
+            break;
+    if (i > CR_MODE_INVALID)
+        i = CR_MODE_INVALID;
+    return (enum cr_port_modes)i;
+}
 
 static int
 cr_return_list(int cnt, char *list[])
@@ -89,7 +103,7 @@ verify_word_is_int(struct cr_words *words, size_t idx, int *error)
     *error = 0;
     return rc;
 broken_value:
-    cr_broken_value(words->word[idx].start, words->word[idx].length);
+    cr_broken_value(words, idx);
     *error = 1;
     return 0;
 }
@@ -254,9 +268,48 @@ cr_handle_bye(int cnt, struct cr_words *words)
 int
 cr_handle_set(int cnt, struct cr_words *words)
 {
-    tx_init();
-    tx_add(OK_REPLY);
-    tx_trigger();
+    uint32_t idx, max;
+    enum cr_port_modes mode;
+    int err;
+
+    idx = verify_word_is_int(words, 1, &err);
+    if (err)
+        return 0;
+
+    max = cr_numofports(cr_ports);
+    if (idx >= max) {
+        cr_uint_oor(idx);
+        return 0;
+    }
+
+    if (cr_word_eq(words, 2, "MODE")) {
+        /* TODO: Actually set the port to the desired mode. */
+        mode = cr_word2mode(words, 3);
+        if (mode == CR_MODE_NONE || mode == CR_MODE_INVALID) {
+            cr_broken_value(words, 3);
+            return 0;
+        }
+        err = cr_port_mode_set(&(cr_ports[idx]), mode);
+        switch (err) {
+        case 0x1:
+            cr_fail("Cannot configure non-configurable port.");
+            break;
+        case 0x2:
+            cr_fail("Firmware out-of-memory.");
+            break;
+        case 0x4:
+            cr_fail("Did not set transmission function.");
+            break;
+        default:
+            xcr_send_host(OK_REPLY);
+        }
+    } else {
+        tx_init();
+        tx_add(WTF_REPLY);
+        tx_add(" SET: Unknown parameter ");
+        tx_add_word(words, 2);
+        tx_trigger();
+    }
     return 1;
 }
 

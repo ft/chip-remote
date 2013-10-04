@@ -129,6 +129,7 @@ struct cr_port_mode {
  */
 struct cr_port {
     int lines;
+    int status;
     struct cr_int_prop rate;
     struct cr_port_mode mode;
     struct cr_parameter *params;

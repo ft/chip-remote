@@ -54,12 +54,12 @@ cr_fail(char *reason)
 }
 
 void
-cr_broken_value(char *value, size_t len)
+cr_broken_value(struct cr_words *words, size_t idx)
 {
     tx_init();
     tx_add(BROKEN_VALUE_REPLY);
     tx_add_space();;
-    tx_add_n(value, len);
+    tx_add_n(words->word[idx].start, words->word[idx].length);
     tx_trigger();
 }
 

@@ -31,6 +31,12 @@ tx_add_n(char *buf, size_t len)
 }
 
 void
+tx_add_word(struct cr_words *words, size_t idx)
+{
+    tx_add_n(words->word[idx].start, words->word[idx].length);
+}
+
+void
 tx_add(char *buf)
 {
     tx_add_n(buf, 0);
