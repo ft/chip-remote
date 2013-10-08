@@ -11,6 +11,8 @@ static struct cr_symb_tab bool_table[] = {
     { "FALSE", 0 },
     { "true", 1 },
     { "false", 0 },
+    { "ON", 1 },
+    { "OFF", 0 },
     { "on", 1 },
     { "off", 0 },
     { "1", 1 },
