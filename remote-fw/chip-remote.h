@@ -59,7 +59,7 @@ struct cr_parameter {
 };
 
 enum cr_port_modes {
-    CR_MODE_NONE = -1,
+    CR_MODE_NONE = 0,
     CR_MODE_SPI,
     CR_MODE_INVALID
 };

@@ -10,11 +10,17 @@ static struct {
     enum cr_port_modes mode;
     int (*set_parameters)(struct cr_port *);
     int (*set_map)(struct cr_port *);
+    int (*destroy_map)(struct cr_port *);
     int (*init_port)(struct cr_port *);
     uint32_t (*transmit)(struct cr_port *, uint32_t);
 } mode_helpers[] = {
-    { CR_MODE_SPI, cr_spi_params, cr_spi_map, cr_spi_init, cr_spi_transmit },
-    { CR_MODE_INVALID, NULL, NULL, NULL }
+    { CR_MODE_NONE, NULL, NULL, NULL, NULL },
+    { CR_MODE_SPI, cr_spi_params,
+                   cr_spi_map,
+                   cr_spi_destroy_map,
+                   cr_spi_init,
+                   cr_spi_transmit },
+    { CR_MODE_INVALID, NULL, NULL, NULL, NULL }
 };
 
 typedef int (*port_setter)(struct cr_port *);
@@ -50,6 +56,17 @@ cr_map_setter(enum cr_port_modes mode)
     for (i = 0; mode_helpers[i].mode != CR_MODE_INVALID; ++i)
         if (mode_helpers[i].mode == mode)
             return mode_helpers[i].set_map;
+    return NULL;
+}
+
+static port_setter
+cr_map_destroy(enum cr_port_modes mode)
+{
+    int i;
+
+    for (i = 0; mode_helpers[i].mode != CR_MODE_INVALID; ++i)
+        if (mode_helpers[i].mode == mode)
+            return mode_helpers[i].destroy_map;
     return NULL;
 }
 
@@ -93,7 +110,7 @@ cr_params_for_mode(struct cr_port *port, enum cr_port_modes mode)
 
     setter = cr_params_setter(mode);
     if (setter == NULL)
-        return -1;
+        return 1;
     return setter(port);
 }
 
@@ -104,8 +121,19 @@ cr_new_port_map(struct cr_port *port, enum cr_port_modes mode)
 
     setter = cr_map_setter(mode);
     if (setter == NULL)
-        return -1;
+        return 1;
     return setter(port);
+}
+
+static void
+cr_destroy_port_map(struct cr_port *port)
+{
+    port_setter destroy;
+
+    destroy = cr_map_destroy(port->mode.mode);
+    if (destroy == NULL)
+        return;
+    destroy(port);
 }
 
 /**
@@ -159,7 +187,7 @@ cr_port_mode_set(struct cr_port *port, enum cr_port_modes mode)
     }
 
     port->transmit = cr_port_transmitter(mode);
-    if (port->transmit == NULL) {
+    if (port->mode.mode != CR_MODE_NONE && port->transmit == NULL) {
         rc = INT_BIT(2);
         goto error;
     }
@@ -169,7 +197,6 @@ cr_port_mode_set(struct cr_port *port, enum cr_port_modes mode)
 
 error:
     cr_destroy_params(port);
-    port->params = NULL;
     cr_destroy_port_map(port);
     cr_port_reset_line_roles(port);
     port->mode.mode = CR_MODE_NONE;

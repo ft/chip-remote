@@ -221,6 +221,21 @@ cr_spi_init(struct cr_port *port)
     return 1;
 }
 
+int
+cr_spi_destroy_map(struct cr_port *port)
+{
+    struct cr_spi_map *map;
+
+    map = port->mode.map.spi;
+    if (map != NULL) {
+        free(map->cs);
+        map->cs = NULL;
+        free(map);
+        port->mode.map.spi = NULL;
+    }
+    return 0;
+}
+
 /**
  * Allocate and initialise a parameter list for SPI mode
  *

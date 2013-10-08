@@ -32,11 +32,6 @@ cr_port_reset_line_roles(struct cr_port *port)
 {
 }
 
-void
-cr_destroy_port_map(struct cr_port *port)
-{
-}
-
 int
 cr_uint_param_get(struct cr_parameter *p, char *k)
 {

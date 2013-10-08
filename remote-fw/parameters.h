@@ -5,7 +5,6 @@
 
 void cr_destroy_params(struct cr_port *);
 void cr_port_reset_line_roles(struct cr_port *);
-void cr_destroy_port_map(struct cr_port *);
 
 int cr_bool_param_get(struct cr_parameter *, char *);
 int cr_uint_param_get(struct cr_parameter *, char *);

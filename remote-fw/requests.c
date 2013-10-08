@@ -53,6 +53,7 @@
 #include "utils.h"
 
 static char *cr_modes[] = {
+    [ CR_MODE_NONE ] = "NONE",
     [ CR_MODE_SPI ] = "SPI",
     [ CR_MODE_INVALID ] = (char *)NULL
 };
@@ -292,7 +293,7 @@ cr_handle_set(int cnt, struct cr_words *words)
 
     if (cr_word_eq(words, 2, "MODE")) {
         mode = cr_word2mode(words, 3);
-        if (mode == CR_MODE_NONE || mode == CR_MODE_INVALID) {
+        if (mode == CR_MODE_INVALID) {
             cr_broken_value(words, 3);
             return 0;
         }
