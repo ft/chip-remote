@@ -45,6 +45,7 @@
 #include "chip-remote.h"
 #include "buf-parse.h"
 #include "port.h"
+#include "parameters.h"
 #include "protocol.h"
 #include "proto-utils.h"
 #include "requests.h"
@@ -277,7 +278,7 @@ cr_handle_set(int cnt, struct cr_words *words)
 {
     uint32_t idx, max;
     enum cr_port_modes mode;
-    int err;
+    int err, rc;
 
     idx = verify_word_is_int(words, 1, &err);
     if (err)
@@ -309,13 +310,21 @@ cr_handle_set(int cnt, struct cr_words *words)
         default:
             xcr_send_host(OK_REPLY);
         }
-    } else {
-        tx_init();
+        return 1;
+    }
+    rc = cr_param_set(cr_ports[idx].params, words, 2, 3);
+    tx_init();
+    if (rc == 0) {
+        tx_add(WTF_REPLY);
+        tx_add(" SET: Non-mutable parameter: ");
+        tx_add_word(words, 2);
+    } else if (rc < 0) {
         tx_add(WTF_REPLY);
         tx_add(" SET: Unknown parameter ");
         tx_add_word(words, 2);
-        tx_trigger();
-    }
+    } else
+        tx_add(OK_REPLY);
+    tx_trigger();
     return 1;
 }
 

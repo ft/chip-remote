@@ -5,6 +5,7 @@
 
 void cr_int_prop_set(struct cr_int_prop *, int, int);
 void cr_string_prop_set(struct cr_string_prop *, char *, int);
+void cr_string_prop_set_n(struct cr_string_prop *, char *, size_t, int);
 
 #define CR_MARK_PROP(p, m)                      \
     do {                                        \

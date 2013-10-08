@@ -12,7 +12,7 @@ int cr_uint_param_get(struct cr_parameter *, char *);
 int cr_symb_param_get(struct cr_parameter *, char *, struct cr_symb_tab *);
 
 char *cr_param_get(struct cr_parameter *, char *);
-int cr_param_set(struct cr_parameter *, char *, char *);
+int cr_param_set(struct cr_parameter *, struct cr_words *, int, int);
 
 void cr_param_init(struct cr_parameter *, int, char *, char *);
 void cr_end_param_init(struct cr_parameter *, int);

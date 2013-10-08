@@ -93,16 +93,23 @@ cr_param_get(struct cr_parameter *params, char *key)
 }
 
 int
-cr_param_set(struct cr_parameter *params, char *key, char *value)
+cr_param_set(struct cr_parameter *params,
+             struct cr_words *words, int key, int value)
 {
     int i;
 
     for (i = 0; params[i].name != NULL; ++i)
-        if (STREQ(params[i].name, key)) {
+        if (STREQ_N(params[i].name,
+                    words->word[key].start,
+                    words->word[key].length))
+        {
             if (!params[i].value.mutable_p)
                 return 0;
 
-            cr_string_prop_set(&(params[i].value), value, CR_MUTABLE);
+            cr_string_prop_set_n(&(params[i].value),
+                                 words->word[value].start,
+                                 words->word[value].length,
+                                 CR_MUTABLE);
             return 1;
         }
     return -1;

@@ -17,3 +17,15 @@ cr_string_prop_set(struct cr_string_prop *p, char *value, int mutable)
     p->value[CR_STRING_PROP_MAX] = '\0';
     p->mutable_p = mutable;
 }
+
+void
+cr_string_prop_set_n(struct cr_string_prop *p, char *v, size_t n, int mutable)
+{
+    if (n > CR_STRING_PROP_MAX)
+        cr_string_prop_set(p, v, mutable);
+    else {
+        strncpy(p->value, v, n);
+        p->value[n] = '\0';
+        p->mutable_p = mutable;
+    }
+}
