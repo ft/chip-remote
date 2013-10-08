@@ -1,6 +1,7 @@
 #include <string.h>
 #include "chip-remote.h"
 #include "properties.h"
+#include "utils.h"
 
 void
 cr_int_prop_set(struct cr_int_prop *p, int value, int mutable)

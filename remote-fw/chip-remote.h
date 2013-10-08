@@ -32,18 +32,17 @@ enum cr_access_mode {
     CR_ACCESS_WRITE
 };
 
-enum cr_parameter_type {
-    CR_INVALID_PARAM = -1,
-    CR_BOOLEAN_PARAM,
-    CR_INTEGER_PARAM,
-    CR_STRING_PARAM
-};
-
 struct cr_state {
     int cr_active;
     int line_pending;
     int fport;
 };
+
+struct cr_symb_tab {
+    char *symbol;
+    int value;
+};
+
 struct cr_int_prop {
     int mutable_p;
     int value;
@@ -56,11 +55,7 @@ struct cr_string_prop {
 
 struct cr_parameter {
     char *name;
-    enum cr_parameter_type type;
-    union {
-        struct cr_int_prop integer;
-        struct cr_string_prop string;
-    } data;
+    struct cr_string_prop value;
 };
 
 enum cr_port_modes {

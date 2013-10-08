@@ -17,6 +17,18 @@ cr_echo_int(char *prefix, uint32_t num)
     tx_trigger();
 }
 
+void
+cr_echo_parameter(struct cr_parameter *p)
+{
+    tx_init();
+    tx_add(p->name);
+    tx_add_space();;
+    tx_add(p->value.value);
+    if (!p->value.mutable_p)
+        tx_add(" FIXED");
+    tx_trigger();
+}
+
 static void
 cr_echo_int_property(char *reply, struct cr_int_prop *p)
 {
@@ -60,6 +72,28 @@ cr_broken_value(struct cr_words *words, size_t idx)
     tx_add(BROKEN_VALUE_REPLY);
     tx_add_space();;
     tx_add_n(words->word[idx].start, words->word[idx].length);
+    tx_trigger();
+}
+
+void
+cr_unknown_param(char *key)
+{
+    tx_init();
+    tx_add(WTF_REPLY);
+    tx_add(" Unknown parameter: ");
+    tx_add(key);
+    tx_trigger();
+}
+
+void
+cr_broken_param(char *key, char *value)
+{
+    tx_init();
+    tx_add(BROKEN_VALUE_REPLY);
+    tx_add_space();
+    tx_add(key);
+    tx_add(": ");
+    tx_add(value);
     tx_trigger();
 }
 
@@ -116,9 +150,11 @@ void
 cr_echo_mode(struct cr_port *ports, size_t num)
 {
     tx_init();
+    tx_add("MODE ");
     switch (ports[num].mode.mode) {
     case CR_MODE_SPI:
         tx_add("SPI");
+        break;
     default:
         tx_add("NONE");
     }

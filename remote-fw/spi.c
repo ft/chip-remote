@@ -71,9 +71,13 @@
  * target controller support that.
  */
 
-#include "chip-remote.h"
-#include "spi.h"
 #include <stdint.h>
+
+#include "chip-remote.h"
+#include "parameters.h"
+#include "properties.h"
+#include "spi.h"
+#include "utils.h"
 
 static inline void
 spi_wait(uint32_t n)
@@ -86,25 +90,40 @@ spi_wait(uint32_t n)
 static void
 cr_line_write(struct cr_line *line, int value)
 {
+#if 0
     line->access(line->bitmask, CR_ACCESS_WRITE, value);
+#endif
 }
 
 static int
 cr_line_read(struct cr_line *line)
 {
+#if 0
     return line->access(line->bitmask, CR_ACCESS_READ, 0);
+#else
+    /*
+     * This makes ‘general-transmit-pl.t’ fail; which is better than letting it
+     * pass because a portion of the code is disabled. The test is marked TODO
+     * anyway.
+     */
+    return 1;
+#endif
 }
 
 static void
 cr_set_line_with_polarity(struct cr_line *line, int polarity)
 {
+#if 0
     cr_line_write(line, !polarity);
+#endif
 }
 
 static void
 cr_unset_line_with_polarity(struct cr_line *line, int polarity)
 {
+#if 0
     cr_line_write(line, polarity);
+#endif
 }
 
 uint32_t
@@ -156,7 +175,50 @@ cr_spi_transmit(struct cr_port *port, uint32_t data)
 int
 cr_spi_init(struct cr_port *port)
 {
-    return 0;
+    static struct cr_symb_tab polarity_tab[] = {
+        { "ACTIVE-HIGH", 1 },
+        { "ACTIVE-LOW", 0 },
+        { NULL, -1 }
+    };
+    static struct cr_symb_tab bit_order_tab[] = {
+        { "MSB-FIRST", 1 },
+        { "LSB-FIRST", 0 },
+        { NULL, -1 }
+    };
+    struct cr_spi_map *map;
+    struct cr_parameter *params;
+#if 0
+    int i;
+#endif
+
+    map = port->mode.map.spi;
+    params = port->params;
+    map->cs_focused = 0;
+
+    CR_SYMB_PARAM_GET(params, "CLK-POLARITY", polarity_tab, map->clk_polarity);
+    CR_SYMB_PARAM_GET(params, "CS-POLARITY", polarity_tab, map->cs_polarity);
+    CR_SYMB_PARAM_GET(params, "BIT-ORDER", bit_order_tab, map->bit_order);
+    CR_BOOL_PARAM_GET(params, "CLK-PHASE-DELAY", map->clk_phase_delay);
+    CR_UINT_PARAM_GET(params, "FRAME-LENGTH", map->frame_length);
+    CR_UINT_PARAM_GET(params, "CS-LINES", map->cs_lines_num);
+
+#if 0
+    map->clk = cr_get_line(port, "CLK");
+    if (map->clk == NULL)
+        return 0;
+    map->mosi = cr_get_line(port, "MOSI");
+    if (map->mosi == NULL)
+        return 0;
+    map->miso = cr_get_line(port, "MISO");
+    if (map->miso == NULL)
+        return 0;
+    for (i = 0; i <= map->cs_lines_num; ++i) {
+        map->cs[i] = cr_get_indexed_line(port, "CS", i);
+        if ((map->cs[i]) == NULL)
+            return 0;
+    }
+#endif
+    return 1;
 }
 
 /**
@@ -177,6 +239,26 @@ cr_spi_init(struct cr_port *port)
 int
 cr_spi_params(struct cr_port *port)
 {
+    struct cr_parameter *new;
+    int n;
+    char buf[CR_INT_MAX_LEN + 1];
+
+    new = xmalloc(7, struct cr_parameter);
+    if (new == NULL)
+        return -1;
+
+    cr_param_init(new, 0, "BIT-ORDER", "MSB-FIRST");
+    cr_param_init(new, 1, "CLK-PHASE-DELAY", "TRUE");
+    cr_param_init(new, 2, "CLK-POLARITY", "ACTIVE-HIGH");
+    n = port->lines - 3;
+    uint2str((uint32_t)n, buf);
+    cr_param_init(new, 3, "CS-LINES", buf);
+    CR_MARK_PROP(&(new[3].value), CR_IMMUTABLE);
+    cr_param_init(new, 4, "CS-POLARITY", "ACTIVE-HIGH");
+    cr_param_init(new, 5, "FRAME-LENGTH", "8");
+    cr_end_param_init(new, 6);
+    port->params = new;
+
     return 0;
 }
 
@@ -208,5 +290,17 @@ cr_spi_params(struct cr_port *port)
 int
 cr_spi_map(struct cr_port *port)
 {
+    port->mode.map.spi = xmalloc(1, struct cr_spi_map);
+    if (port->mode.map.spi == NULL)
+        return -1;
+
+    CR_UINT_PARAM_GET(
+        port->params, "CS-LINES", port->mode.map.spi->cs_lines_num);
+    port->mode.map.spi->cs = xmalloc(port->mode.map.spi->cs_lines_num,
+                                     struct cr_line *);
+    if (port->mode.map.spi->cs == NULL) {
+        free(port->mode.map.spi);
+        return -1;
+    }
     return 0;
 }

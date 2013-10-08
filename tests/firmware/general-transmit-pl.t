@@ -2,7 +2,7 @@
 use strict;
 use Test::ChipRemote;
 
-cr_test_title q{FEATURES request works},
+cr_test_title q{Transmitting words works generally},
               q{TODO SPI internals are not complete yet};
 cr_run_script [ cr_request("SET 0 MODE SPI", "OK"),
                 cr_request("INIT 0", "OK"),

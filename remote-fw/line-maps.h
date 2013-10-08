@@ -2,7 +2,6 @@
 #define INC_LINE_MAPS_H
 
 struct cr_spi_map {
-    int cs_n;
     int cs_focused;
     struct cr_line *clk;
     struct cr_line *mosi;
@@ -13,16 +12,14 @@ struct cr_spi_map {
     /** integer: number of chip-select-lines */
     int cs_lines_num;
     /** [0|1] Chip Select Polarity */
-    char cs_polarity;
+    int cs_polarity;
     /** [0|1] Clock Polarity */
-    char clk_polarity;
+    int clk_polarity;
     /** [0|1] Clock Phase Delay */
-    char clk_phase_delay;
+    int clk_phase_delay;
     int frame_length;
     /** [SPI_MSB_FIRST|SPI_LSB_FIRST] */
     int bit_order;
-    /** indicate whether the focused chip-select line changed */
-    int focus_changed;
 };
 
 #endif /* INC_LINE_MAPS_H */

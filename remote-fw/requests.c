@@ -195,7 +195,14 @@ cr_handle_port(int cnt, struct cr_words *words)
         cr_echo_rate(cr_ports, idx);
         return 0;
     }
-    /* TODO: Protocol specific properties need to by echoed */
+
+    if (cr_ports[idx].params != NULL) {
+        cnt -= 3;
+        if (cr_ports[idx].params[cnt].name != NULL) {
+            cr_echo_parameter(&(cr_ports[idx].params[cnt]));
+            return 0;
+        }
+    }
     return 1;
 }
 
@@ -283,7 +290,6 @@ cr_handle_set(int cnt, struct cr_words *words)
     }
 
     if (cr_word_eq(words, 2, "MODE")) {
-        /* TODO: Actually set the port to the desired mode. */
         mode = cr_word2mode(words, 3);
         if (mode == CR_MODE_NONE || mode == CR_MODE_INVALID) {
             cr_broken_value(words, 3);
