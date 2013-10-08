@@ -1,0 +1,10 @@
+#!/bin/sh
+
+exec valgrind --verbose                 \
+              --read-var-info=yes       \
+              --leak-check=full         \
+              --leak-resolution=high    \
+              --show-possibly-lost=yes  \
+              --show-reachable=no       \
+              --undef-value-errors=yes  \
+              "$@"
