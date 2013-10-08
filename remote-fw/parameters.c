@@ -21,8 +21,10 @@ static struct cr_symb_tab bool_table[] = {
 };
 
 void
-cr_destroy_params(struct cr_parameter *params)
+cr_destroy_params(struct cr_port *port)
 {
+    free(port->params);
+    port->params = NULL;
 }
 
 void

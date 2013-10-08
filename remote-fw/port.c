@@ -145,7 +145,7 @@ cr_port_mode_set(struct cr_port *port, enum cr_port_modes mode)
     rc = 0;
     cr_destroy_port_map(port);
     port->mode.mode = mode;
-    cr_destroy_params(port->params);
+    cr_destroy_params(port);
     PORT_MARK_NOT_INITIALISED(port);
 
     if (cr_params_for_mode(port, mode) < 0) {
@@ -168,7 +168,7 @@ cr_port_mode_set(struct cr_port *port, enum cr_port_modes mode)
     return rc;
 
 error:
-    cr_destroy_params(port->params);
+    cr_destroy_params(port);
     port->params = NULL;
     cr_destroy_port_map(port);
     cr_port_reset_line_roles(port);

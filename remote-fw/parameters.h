@@ -3,7 +3,7 @@
 
 #include "chip-remote.h"
 
-void cr_destroy_params(struct cr_parameter *);
+void cr_destroy_params(struct cr_port *);
 void cr_port_reset_line_roles(struct cr_port *);
 void cr_destroy_port_map(struct cr_port *);
 
