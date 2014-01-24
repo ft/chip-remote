@@ -31,3 +31,56 @@ is going to be ANSI C, with as little micro-controller dependent code as
 possible.
 
 All of this is still VERY MUCH work in progress.
+
+
+Current contents:
+
+  Directories:
+
+  - examples/
+
+    Contains example scripts that use the client library.
+
+  - perl/
+
+    This is a module path specific to any Perl scripts in the distribution.
+
+  - remote-fw/
+
+    Here you can find an example implementation of a remote firmware for
+    microcontrollers that talks the chip-remote protocol.
+
+  - scheme/
+
+    This directory holds the reference implementation of the client library
+    written in GNU Guile scheme.
+
+  - simulator/
+
+    The ‘simulator’ sub-directory contains a Perl script that opens a pseudo
+    terminal and responds to bytes send to it like a remote board with a
+    firmware that talks the chip-remote protocol would.
+
+    It is used to implement interaction tests for the client library.
+
+  - tests/
+
+    Shockingly, this directory contains the project's test-suite.
+
+
+  Files:
+
+  - Makefile: In chip-remote, the top-level Makefile is only used run the
+    test-suite.
+
+  - cr-valgrind: This is a wrapper around ‘valgrind’ with a set of options
+    suitable for chip-remote's ‘remote-fw’ example firmware, to find possible
+    memory leaks.
+
+  - README: This file...
+
+  - single-test: Using this wrapper, you can run single “.t” files from the
+    test-suite.
+
+  - spec.org: This is the actual specification RCCEP protocol in org-mode
+    markup for easy export to many popular formats.
