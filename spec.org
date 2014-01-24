@@ -327,7 +327,7 @@ more colloquial term for the project, this specification is part of, is
 
 *** MORE Request
 
-    This request take no argument.
+    This request takes no argument.
 
     This request causes the next line of a multiline reply to be returned. When
     there are no more lines left in the multiline reply, the request will return
