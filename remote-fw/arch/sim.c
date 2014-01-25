@@ -8,10 +8,23 @@
 #include "stdout.h"
 
 int
-access_portA(cr_pin_mask mask, enum cr_access_mode mode, int value)
+access_portA(struct cr_line *line, enum cr_access_mode mode, int value)
 {
-    if (mode == CR_ACCESS_READ)
-        return 1;
+    static int val = 0;
+
+    printf("-!- %c%c[%04x]{%s}",
+           'A',
+           mode == CR_ACCESS_READ ? '>' : '<',
+           line->bitmask,
+           line->rolestr);
+
+    if (mode == CR_ACCESS_READ) {
+        int v = (val++)%2;
+        printf("(%x)\n", v);
+        return v;
+    }
+
+    printf("(%d)\n", value ? 1 : 0);
     return -1;
 }
 
@@ -53,4 +66,10 @@ xcr_send_host(char *buf)
 {
     printf("<<< %s\n", buf);
     fflush(NULL);
+}
+
+void
+xcr_wait(uint32_t n)
+{
+    printf("-!- time: %u\n", n);
 }

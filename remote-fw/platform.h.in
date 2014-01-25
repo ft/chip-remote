@@ -1,6 +1,8 @@
 #ifndef INC_PLATFORM_H
 #define INC_PLATFORM_H
 
+#include <stdint.h>
+
 #define @@ARCH@@
 
 #if defined CR_MSP430
@@ -12,5 +14,6 @@
 void xcr_send_host(char *);
 void xcr_pre_top_level(void);
 void xcr_post_bye(void);
+void xcr_wait(uint32_t);
 
 #endif /* INC_PLATFORM_H */

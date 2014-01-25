@@ -95,7 +95,7 @@ struct cr_mode_spi {
  * which only one bit should be set unless you are being tricky).
  */
 struct cr_line {
-    int (*access)(cr_pin_mask mask, enum cr_access_mode mode, int value);
+    int (*access)(struct cr_line *, enum cr_access_mode mode, int value);
     cr_pin_mask bitmask;
     char rolestr[CR_MAX_ROLE_STRING + 1];
     enum cr_pin_role role;
