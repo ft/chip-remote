@@ -24,7 +24,11 @@ use Exporter;
 use base qw{ Exporter };
 use vars qw{ @EXPORT };
 @EXPORT = qw{ cr_request
+              cr_transmit
               cr_run_script
+              cr_line_trace_reply_in
+              cr_line_trace_reply_out
+              cr_line_trace_wait
               cr_test_set
               cr_test_title };
 
@@ -73,6 +77,13 @@ sub expected_from_script {
     push @expected, (q{>>> HI}, q{<<< Hi there, stranger.});
     foreach my $step (@{ $script }) {
         push @expected, q{>>> } . $step->{request};
+        if ($step->{additional} > 0) {
+            # This request defines additional lines, which are to be inserted
+            # before any replies and prefixed by "-!- ".
+            for my $m (@{ $step->{more} }) {
+                push @expected, q{-!- } . $m;
+            }
+        }
         if ($step->{n_replies} == 1) {
             push @expected, q{<<< } . $step->{replies}->[0];
         } else {
@@ -100,28 +111,29 @@ sub fail {
 }
 
 sub collect_replies {
-    my ($handle, $log) = @_;
+    my ($handle, $log, $wantednumoflines) = @_;
     my (@fh, $nlcnt, $tmp);
 
     $nlcnt = 0;
-    while ($nlcnt < 2) {
+    while ($nlcnt < $wantednumoflines) {
         @fh = $handle->{select}->can_read($read_timeout);
         unless ($#fh >= 0) {
-            chomp $tmp;
-            push @{ $log }, qq{[read-buffer] "$tmp"};
+            defined $tmp and chomp $tmp;
+            push @{ $log }, qq{[read-buffer] "} .
+                (defined $tmp ? $tmp : q{}) . q{"};
             fail("Read timeout (value: $read_timeout)", $log);
         }
         my $buf;
         sysread($handle->{output}, $buf, 1)
             or fail("Failed to read from simulator! Did it crash?\n", $log);
         $nlcnt++ if ($buf eq "\n");
-        $tmp .= $buf if ($buf ne "\n" || $nlcnt < 2);
+        $tmp .= $buf if ($buf ne "\n" || $nlcnt < $wantednumoflines);
     }
     return split /\n/, $tmp;
 }
 
 sub transact {
-    my ($request, $handle, $log) = @_;
+    my ($request, $wantednumoflines, $handle, $log) = @_;
     my (@fh);
 
     @fh = $handle->{select}->can_write($write_timeout);
@@ -129,7 +141,23 @@ sub transact {
         fail("Write timeout (value: $write_timeout)", $log);
     }
     syswrite $handle->{input}, $request . "\n";
-    push @{ $log }, collect_replies($handle, $log);
+    push @{ $log }, collect_replies($handle, $log, $wantednumoflines);
+}
+
+sub slurp_handle_to_log {
+    my ($handle, $log) = @_;
+    my (@fh, $reply, $buf);
+
+    @fh = $handle->{select}->can_read(0.1);
+    return if ($#fh < 0);
+    $reply = q{};
+    BYTE: while (sysread($handle->{output}, $buf, 1)) {
+        $reply .= $buf;
+        @fh = $handle->{select}->can_read(0.1);
+        last BYTE if ($#fh < 0);
+    }
+    push @{ $log }, split(/\n/, $reply);
+    return;
 }
 
 sub walk_script_with_program {
@@ -146,13 +174,13 @@ sub walk_script_with_program {
                  $simulator, ());
     $handle->{select}->add($handle->{input});
     $handle->{select}->add($handle->{output});
-    transact(q{HI}, $handle, \@log);
+    transact(q{HI}, 2, $handle, \@log);
     foreach my $step (@{ $script }) {
-        transact($step->{request}, $handle, \@log);
+        transact($step->{request}, 2 + $step->{additional}, $handle, \@log);
         if ($step->{n_replies} > 1) {
             my $multi_steps = 0;
             do {
-                transact(q{MORE}, $handle, \@log);
+                transact(q{MORE}, 2, $handle, \@log);
                 $multi_steps++;
                 if ($multi_steps > $max_multi_steps) {
                     fail("Too many multiline steps ($max_multi_steps)", \@log);
@@ -160,7 +188,10 @@ sub walk_script_with_program {
             } until ($log[$#log] eq '<<< DONE');
         }
     }
-    transact(q{BYE}, $handle, \@log);
+    transact(q{BYE}, 2, $handle, \@log);
+    # Now eat up any remaining lines the simulator might output. If any, that
+    # will definitely make the test fail later on.
+    slurp_handle_to_log($handle, \@log);
     waitpid $pid, 0;
     $rc = $? >> 8;
     if ($rc != 0) {
@@ -175,11 +206,15 @@ sub walk_script_with_program {
                 print q{# };
                 print color q{green};
                 print q{<<<};
-            } else {
-                $copy =~ s,^...,,;
+            } elsif ($copy =~ s,^>>>,,) {
                 print q{# };
                 print color q{red};
                 print q{>>>};
+            } else {
+                $copy =~ s,^...,,;
+                print q{# };
+                print color q{magenta};
+                print q{-!-};
             }
             print qq{$copy};
             print color q{reset};
@@ -212,13 +247,11 @@ sub cr_run_script {
         foreach my $entry (@diff) {
             chomp $entry;
             print qq{# };
-            if ($entry =~ m/^\*/) {
-                print color 'red';
-            }
+            my $isdiff = 0;
+            $isdiff = 1 if ($entry =~ m/^\*/ || $entry =~ m/\*$/);
+            print color 'red' if ($isdiff);
             print $entry;
-            if ($entry =~ m/^\*/) {
-                print color 'reset';
-            }
+            print color 'reset' if ($isdiff);
             print qq{\n};
         }
         print qq{not ok 1 - $title};
@@ -229,12 +262,50 @@ sub cr_run_script {
     }
 }
 
+sub cr_line_trace_reply {
+    my ($line, $value, $direction) = @_;
+    my $reply = q{};
+
+    $reply .= $line->{port};
+    $reply .= $direction;
+    $reply .= sprintf q{[%04x]}, 1 << $line->{index};
+    $reply .= q|{| . $line->{role} . q|}|;
+    $reply .= q|(| . $value . q|)|;
+}
+
+sub cr_line_trace_reply_in {
+    my ($line, $value) = @_;
+    cr_line_trace_reply($line, $value, q{>});
+}
+
+sub cr_line_trace_reply_out {
+    my ($line, $value) = @_;
+    cr_line_trace_reply($line, $value, q{<});
+}
+
+sub cr_line_trace_wait {
+    my ($time) = @_;
+
+    return qq{time: $time};
+}
+
 sub cr_request {
     my ($request, @replies) = @_;
 
     return { request => $request,
              replies => \@replies,
-             n_replies => ($#replies + 1) };
+             n_replies => ($#replies + 1),
+             additional => 0 };
+}
+
+sub cr_transmit {
+    my ($data, $reply, $line_trace) = @_;
+
+    return { request => qq{TRANSMIT $data},
+             replies => [ $reply ],
+             n_replies => 1,
+             more => $line_trace,
+             additional => $#{ $line_trace } + 1 };
 }
 
 sub cr_test_title {
