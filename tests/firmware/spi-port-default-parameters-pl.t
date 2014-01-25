@@ -19,5 +19,5 @@ cr_run_script [
                "CLK-PHASE-DELAY TRUE",
                "CLK-POLARITY IDLE-LOW",
                "CS-LINES 1 FIXED",
-               "CS-POLARITY ACTIVE-HIGH",
+               "CS-POLARITY ACTIVE-LOW",
                "FRAME-LENGTH 8") ];

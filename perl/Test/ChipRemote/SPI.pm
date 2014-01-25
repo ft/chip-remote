@@ -47,6 +47,7 @@ sub spi_default_setup {
              cr_request("SET 0 BIT-ORDER MSB-FIRST", "OK"),
              cr_request("SET 0 CLK-PHASE-DELAY TRUE", "OK"),
              cr_request("SET 0 CLK-POLARITY IDLE-LOW", "OK"),
+             cr_request("SET 0 CS-POLARITY ACTIVE-LOW", "OK"),
              cr_request("LINE 0 $clk{index} $clk{role}", "OK"),
              cr_request("LINE 0 $cs{index} $cs{role}", "OK"),
              cr_request("LINE 0 $mosi{index} $mosi{role}", "OK"),

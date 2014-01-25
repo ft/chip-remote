@@ -168,8 +168,8 @@ int
 cr_spi_init(struct cr_port *port)
 {
     static struct cr_symb_tab cs_polarity_tab[] = {
-        { "ACTIVE-HIGH", 1 },
-        { "ACTIVE-LOW", 0 },
+        { "ACTIVE-HIGH", 0 },
+        { "ACTIVE-LOW", 1 },
         { NULL, -1 }
     };
     static struct cr_symb_tab clk_polarity_tab[] = {
@@ -267,7 +267,7 @@ cr_spi_params(struct cr_port *port)
     uint2str((uint32_t)n, buf);
     cr_param_init(new, 3, "CS-LINES", buf);
     CR_MARK_PROP(&(new[3].value), CR_IMMUTABLE);
-    cr_param_init(new, 4, "CS-POLARITY", "ACTIVE-HIGH");
+    cr_param_init(new, 4, "CS-POLARITY", "ACTIVE-LOW");
     cr_param_init(new, 5, "FRAME-LENGTH", "8");
     cr_end_param_init(new, 6);
     port->params = new;
