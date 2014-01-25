@@ -109,6 +109,7 @@ struct cr_request requests[MAX_REQUEST + 1] = {
     NMR("HI", REQUEST_HI, CR_SINGLE_LINE, cr_handle_hi, 0, 0),
     NOR("INIT", REQUEST_INIT, CR_SINGLE_LINE, cr_handle_init, 1, 1),
     NOR("LINES", REQUEST_LINES, CR_MULTI_LINE, cr_handle_lines, 1, 1),
+    NOR("LINE", REQUEST_LINE, CR_SINGLE_LINE, cr_handle_line, 3, 3),
     NOR("MODES", REQUEST_MODES, CR_MULTI_LINE, cr_handle_modes, 0, 0),
     NOR("PORT", REQUEST_PORT, CR_MULTI_LINE, cr_handle_port, 1, 1),
     NOR("PORTS", REQUEST_PORTS, CR_MULTI_LINE, cr_handle_ports, 0, 0),

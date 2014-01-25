@@ -8,6 +8,7 @@ cr_run_script [
                    FOCUS
                    INIT
                    LINES
+                   LINE
                    MODES
                    PORT
                    PORTS

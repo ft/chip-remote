@@ -11,6 +11,7 @@
 
 #define CR_MAX_WORDS 8
 #define CR_MAX_LINE 127
+#define CR_MAX_ROLE_STRING 8
 #define CR_INT_MAX_LEN 8
 #define CR_STRING_PROP_MAX 16
 #define CR_NO_INDEX -1
@@ -96,6 +97,7 @@ struct cr_mode_spi {
 struct cr_line {
     int (*access)(cr_pin_mask mask, enum cr_access_mode mode, int value);
     cr_pin_mask bitmask;
+    char rolestr[CR_MAX_ROLE_STRING + 1];
     enum cr_pin_role role;
     size_t index;
     int mutable_p;
@@ -155,6 +157,7 @@ enum cr_request_ids {
     REQUEST_FOCUS,
     REQUEST_INIT,
     REQUEST_LINES,
+    REQUEST_LINE,
     REQUEST_MODES,
     REQUEST_PORT,
     REQUEST_PORTS,

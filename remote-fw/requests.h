@@ -3,6 +3,7 @@
 
 int cr_handle_features(int, struct cr_words *);
 int cr_handle_lines(int, struct cr_words *);
+int cr_handle_line(int, struct cr_words *);
 int cr_handle_modes(int, struct cr_words *);
 int cr_handle_port(int, struct cr_words *);
 int cr_handle_ports(int, struct cr_words *);

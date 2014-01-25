@@ -145,6 +145,51 @@ cr_handle_features(int cnt, struct cr_words *words)
     return 1;
 }
 
+static void
+cr_assign_line_role_string(uint32_t port_idx, uint32_t line_idx,
+                           struct cr_words *words, int word_idx)
+{
+    size_t len;
+    struct cr_line *l;
+    struct cr_word *w;
+
+    w = words->word + word_idx;
+    l = cr_ports[port_idx].l + line_idx;
+    len = w->length > CR_MAX_ROLE_STRING ? CR_MAX_ROLE_STRING : w->length;
+    strncpy(l->rolestr, w->start, len);
+    l->rolestr[len] = '\0';
+}
+
+int
+cr_handle_line(int cnt, struct cr_words *words)
+{
+    uint32_t pi, li, max;
+    int err;
+
+    pi = verify_word_is_int(words, 1, &err);
+    if (err)
+        return 0;
+
+    max = cr_numofports(cr_ports);
+    if (pi >= max) {
+        cr_uint_oor(pi);
+        return 0;
+    }
+
+    li = verify_word_is_int(words, 2, &err);
+    if (err)
+        return 0;
+    if (li >= cr_ports[pi].lines) {
+        cr_uint_oor(li);
+        return 0;
+    }
+
+    cr_assign_line_role_string(pi, li, words, 3);
+
+    xcr_send_host(OK_REPLY);
+    return 0;
+}
+
 int
 cr_handle_lines(int cnt, struct cr_words *words)
 {

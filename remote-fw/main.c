@@ -12,13 +12,14 @@
     {                      \
         a,                 \
         m,                 \
+        { (char)0 },       \
         CR_ROLE_NONE,      \
         CR_NO_INDEX,       \
         CR_MUTABLE         \
     }
 
 #define LINE_LIST_END \
-    { NULL, 0, CR_ROLE_NONE, CR_NO_INDEX, CR_MUTABLE }
+    { NULL, 0, { (char)0 }, CR_ROLE_NONE, CR_NO_INDEX, CR_MUTABLE }
 
 #define NEW_PORT(n,l)                   \
     {                                   \
