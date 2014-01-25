@@ -170,8 +170,8 @@ cr_spi_init(struct cr_port *port)
         { NULL, -1 }
     };
     static struct cr_symb_tab bit_order_tab[] = {
-        { "MSB-FIRST", 1 },
-        { "LSB-FIRST", 0 },
+        { "MSB-FIRST", SPI_MSB_FIRST },
+        { "LSB-FIRST", SPI_LSB_FIRST },
         { NULL, -1 }
     };
     struct cr_spi_map *map;
