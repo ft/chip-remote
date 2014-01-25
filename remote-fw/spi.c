@@ -130,17 +130,25 @@ cr_spi_transmit(struct cr_port *port, uint32_t data)
 
         /* Setup the current bit on MOSI */
         cr_line_write(map->mosi, (data & scan));
-        if (!map->clk_phase_delay)
+
+        if (map->clk_phase_delay) {
+            spi_wait(CR_T_SPI_BIT_DURATION / 2);
             cr_set_line_with_polarity(map->clk, map->clk_polarity);
-        spi_wait(CR_T_SPI_BIT_DURATION / 2);
+        } else {
+            cr_set_line_with_polarity(map->clk, map->clk_polarity);
+            spi_wait(CR_T_SPI_BIT_DURATION / 2);
+        }
 
         /* Read MISO after half a bit */
-        if (map->clk_phase_delay)
-            cr_set_line_with_polarity(map->clk, map->clk_polarity);
         rv |= cr_line_read(map->miso) ? scan : 0;
 
-        spi_wait(CR_T_SPI_BIT_DURATION / 2);
-        cr_unset_line_with_polarity(map->clk, map->clk_polarity);
+        if (map->clk_phase_delay) {
+            spi_wait(CR_T_SPI_BIT_DURATION / 2);
+            cr_unset_line_with_polarity(map->clk, map->clk_polarity);
+        } else {
+            cr_unset_line_with_polarity(map->clk, map->clk_polarity);
+            spi_wait(CR_T_SPI_BIT_DURATION / 2);
+        }
     }
     spi_wait(CR_T_SPI_CS_SETUP);
     cr_unset_line_with_polarity(map->cs[map->cs_focused], map->cs_polarity);
