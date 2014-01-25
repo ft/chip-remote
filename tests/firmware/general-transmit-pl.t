@@ -3,7 +3,7 @@ use strict;
 use Test::ChipRemote;
 use Test::ChipRemote::SPI;
 
-cr_test_title q{Transmitting words works generally};
+cr_test_title q{SPI: 2 Bit frame with default settings works};
 
 cr_run_script [ spi_default_setup,
                 cr_request("SET 0 FRAME-LENGTH 2", "OK"),
