@@ -7,7 +7,8 @@ cr_test_title q{Transmitting words works generally};
 
 cr_run_script [ spi_default_setup,
                 cr_request("SET 0 FRAME-LENGTH 2", "OK"),
-                cr_request("INIT 0", "OK"),
+                cr_request_io("INIT 0", "OK",
+                          [ cs_high, clk_low ] ),
                 cr_request("FOCUS 0", "OK"),
                 # FRAME-LENGTH is set to 2. BIT-ORDER is MSB-FIRST, so
                 # transmitting "2" is the bit-stream "10". So, MOSI is first
@@ -24,7 +25,7 @@ cr_run_script [ spi_default_setup,
                 # between 0 and one, when reading from pins. So, the returned
                 # bit-stream will be "01", thus resulting in "1" as the
                 # firmware's reply.
-                cr_transmit("2", "1",
+                cr_request_io("TRANSMIT 2", "1",
                         [ cs_low,
                           cs_setup,
                           # First bit:

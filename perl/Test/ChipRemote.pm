@@ -24,7 +24,7 @@ use Exporter;
 use base qw{ Exporter };
 use vars qw{ @EXPORT };
 @EXPORT = qw{ cr_request
-              cr_transmit
+              cr_request_io
               cr_run_script
               cr_line_trace_reply_in
               cr_line_trace_reply_out
@@ -298,10 +298,10 @@ sub cr_request {
              additional => 0 };
 }
 
-sub cr_transmit {
-    my ($data, $reply, $line_trace) = @_;
+sub cr_request_io {
+    my ($request, $reply, $line_trace) = @_;
 
-    return { request => qq{TRANSMIT $data},
+    return { request => qq{$request},
              replies => [ $reply ],
              n_replies => 1,
              more => $line_trace,

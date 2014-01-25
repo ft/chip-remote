@@ -205,6 +205,9 @@ cr_spi_init(struct cr_port *port)
         if ((map->cs[i]) == NULL)
             return 0;
     }
+    /* Bring CS and CLK to their idle states */
+    cr_unset_line_with_polarity(map->cs[map->cs_focused], map->cs_polarity);
+    cr_unset_line_with_polarity(map->clk, map->clk_polarity);
     return 1;
 }
 
