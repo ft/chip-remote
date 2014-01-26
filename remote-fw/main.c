@@ -39,24 +39,27 @@
 
 #ifdef CR_MSP430F1481
 
+#include "arch/cr-msp430.h"
+
 static struct cr_line port1_lines[] = {
-    { P1IN_, P1OUT_, 0x01 },
-    { P1IN_, P1OUT_, 0x02 },
-    { P1IN_, P1OUT_, 0x04 },
-    { P1IN_, P1OUT_, 0x08 }
+    NEW_LINE(access_port1, 1<<0),
+    NEW_LINE(access_port1, 1<<1),
+    NEW_LINE(access_port1, 1<<2),
+    NEW_LINE(access_port1, 1<<3),
+    LINE_LIST_END
 };
 
 static struct cr_line port2_lines[] = {
-    { P1IN_, P1OUT_, 0x10 },
-    { P1IN_, P1OUT_, 0x20 },
-    { P1IN_, P1OUT_, 0x40 },
-    { P1IN_, P1OUT_, 0x80 }
+    NEW_LINE(access_port1, 1<<4),
+    NEW_LINE(access_port1, 1<<5),
+    NEW_LINE(access_port1, 1<<6),
+    NEW_LINE(access_port1, 1<<7),
+    LINE_LIST_END
 };
 
 struct cr_port cr_ports[] = {
-    { NULL, 4, port1_lines },
-    { NULL, 4, port2_lines },
-    { NULL, 0, NULL }
+    NEW_PORT(4, port1_lines),
+    NEW_PORT(8, port2_lines),
 };
 
 #endif /* CR_MSP430F1481 */
