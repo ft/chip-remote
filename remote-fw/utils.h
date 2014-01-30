@@ -13,6 +13,14 @@
 #define INT_BIT_SET(data,n) ((data) |= INT_BIT(n))
 #define INT_BIT_CLEAR(data,n) ((data) &= ~(INT_BIT(n)))
 
+#define BITMASK_CLEAR(DEST,MASK) ((DEST) &= ~(MASK))
+#define BITMASK_SET(DEST,MASK) ((DEST) |= (MASK))
+#define BITMASK_TOGGLE(DEST,MASK) ((DEST) ^= (MASK))
+#define IS_AT_LEAST_ONE_BIT_SET(DEST,MASK) ((DEST) & (MASK))
+#define IS_AT_LEAST_ONE_BIT_UNSET(DEST,MASK) ((~DEST) & (MASK))
+#define IS_BITMASK_SET(DEST,MASK) (((DEST) & (MASK)) == (MASK))
+#define IS_BITMASK_UNSET(DEST,MASK) (((~DEST) & (MASK)) == (MASK))
+
 uint32_t str2uint(const char *, int, int *);
 void uint2str(uint32_t, char *);
 
