@@ -24,6 +24,7 @@ msp430)
     OBJFMT=ihex
     CFLAGS="-Wall -Wnested-externs -Wmissing-prototypes -Wstrict-prototypes"
     CFLAGS="$CFLAGS -std=gnu99"
+    CFLAGS="$CFLAGS -DMSPGCC_BUILD"
     COPTIM=-Os
     CDEBUG=
     CONFIG_H=config.msp430.h
