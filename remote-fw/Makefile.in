@@ -33,7 +33,7 @@ ctags:
 tags: ctags etags
 
 distclean: clean
-	rm -f .depend TAGS
+	rm -f .depend TAGS tags
 	rm -f Makefile platform.h $(CONFIG_H)
 
 depend:
