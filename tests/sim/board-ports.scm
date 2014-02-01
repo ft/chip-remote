@@ -1,27 +1,15 @@
-(use-modules (chip-remote io)
+(use-modules (test chip-remote)
              (chip-remote protocol))
 
-(define device (getenv "CR_BOARD_DEVICE"))
-(define connection (make-cr-connection device))
+(define connection (init-connection))
 
-(define (looks-good p)
+(define (looks-good? p)
   (and (list? p)
        (list? (car p))
        (pair? (caar p))
        (not (list? (caar p)))))
 
-(or (io-open connection)
-    (throw 'open-failed))
-(or (hi connection)
-    (throw 'hi-failed))
+(test-with-tag 'broken-ports-reply (looks-good? (ports connection)))
 
-(let ((p (ports connection)))
-  (or (looks-good p)
-      (throw 'ports-failed `(ports ,p))))
-
-(or (bye connection)
-    (throw 'bye-failed))
-(or (io-close connection)
-    (throw 'close-failed))
-
+(close-connection connection)
 (quit 0)
