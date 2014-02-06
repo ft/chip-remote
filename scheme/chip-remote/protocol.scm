@@ -198,34 +198,21 @@
         (else (map proc list))))
 
 ;; Turns a string into a lower-cased symbol: "FOO" => foo
-(define (feature->symbol s)
+(define (reply->symbol s)
   (string->symbol (string-downcase s)))
 
 ;; Queries the board's feature list and returns a list of according symbols.
 (define (features conn)
-  (list-and-map feature->symbol
+  (list-and-map reply->symbol
                 (list-more-done conn "FEATURES")))
 
-;; Given a PORTS reply like "0 SPI FIXED STATIC", this returns an alist like
-;; this:
-;;
-;;  ((number       . 0)
-;;   (type         . spi)
-;;   (changable    . fixed)
-;;   (configurable . static))
-;;
-;; It is used by the `ports' function to return a list of alists.
-(define (port->pair s)
-  (let ((l (expect-read s '(int string string string))))
+(define (string+int->pair s)
+  (let ((l (expect-read s '(string int))))
     (cond ((not (list? l)) l)
-          (else
-           (cons (cons 'number (car l))
-                 (map (lambda (a b)
-                        (cons a b))
-                      '(type changable configurable)
-                      (map feature->symbol (cdr l))))))))
+          (else (cons (reply->symbol (car l))
+                      (cadr l))))))
 
 ;; Queries the board for its ports and returns a list of alists.
 (define (ports conn)
-  (list-and-map port->pair
+  (list-and-map string+int->pair
                 (list-more-done conn "PORTS")))
