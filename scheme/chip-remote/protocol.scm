@@ -51,29 +51,29 @@
 (define (hexstring->int str)
   (string->number str 16))
 
-;; Takes a list of exactly two elements:
+;; Takes a pair:
 ;;
 ;;   - If the second item is a string, the first string must be the same string.
 ;;   - If the second item is 'int, the first must by a valid hexstring.
 ;;
-;; Returns a list of two items: `#t' or `#f' depending on whether the
-;; verification succeeded and the (possibly converted) input data; if the first
-;; value is `#f', the second is always the unchanged input data.
+;; Returns a pairs: `#t' or `#f' depending on whether the verification
+;; succeeded and the (possibly converted) input data; if the first value is
+;; `#f', the second is always the unchanged input data.
 (define (verify pair)
   (let ((got (car pair))
         (want (cdr pair)))
     (cond ((string? want)
-           (list (string=? want got)
+           (cons (string=? want got)
                  got))
           ((eq? want 'int)
            (let* ((val (hexstring->int got))
                   (success (integer? val)))
-             (list success
+             (cons success
                    (if success val got))))
           ((eq? want 'string)
-           (list #t got))
+           (cons #t got))
           (else
-           (list #f got)))))
+           (cons #f got)))))
 
 ;; Checks if an input string meets the supplied conditions.
 ;;
@@ -119,7 +119,7 @@
                               (v (verify new)))
                           (append (list (and old (car v)))
                                   lst
-                                  (cdr v))))
+                                  (cons (cdr v) '()))))
                       '(#t)
                       dtp)))
         (if (car results)

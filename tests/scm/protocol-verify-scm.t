@@ -32,9 +32,9 @@
             ("ca" . int)
             ("cat" . int)))
 
-(define b '((#t "VERBOSE")
-            (#t 202)
-            (#f "cat")))
+(define b '((#t . "VERBOSE")
+            (#t . 202)
+            (#f . "cat")))
 
 (with-fs-test-bundle
  (plan (length a))
