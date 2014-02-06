@@ -1,4 +1,4 @@
-;; Copyright 2012-2013 Frank Terbeck <ft@bewatermyfriend.org>, All
+;; Copyright 2014 Frank Terbeck <ft@bewatermyfriend.org>, All
 ;; rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,28 @@
              (srfi srfi-1))
 (primitive-load "tests/test-tap-cfg.scm")
 
-(define v (@@ (chip-remote protocol) verify))
-
-(define a '(("VERBOSE" . "VERBOSE")
-            ("ca" . int)
-            ("cat" . int)))
-
-(define b '((#t "VERBOSE")
-            (#t 202)
-            (#f "cat")))
+(define zip2 (@@ (chip-remote protocol) zip2))
 
 (with-fs-test-bundle
- (plan (length a))
- (map (lambda (x y) (define-test (format #f "verify ~a != ~a" x y)
-                      (pass-if-equal? x y)))
-      (fold (lambda (x y)
-              (append y (list (v x)))) '() a)
-      b))
+ (plan 6)
+
+ (define-test "zip2: normal zip"
+   (pass-if-equal? (zip2 '(a c e) '(b d f))
+                   '((a . b) (c . d) (e . f))))
+
+ (define-test "zip2: first short"
+   (pass-if-equal? (zip2 '(a c) '(b d f))
+                   '((a . b) (c . d))))
+
+ (define-test "zip2: second short"
+   (pass-if-equal? (zip2 '(a c e) '(b d))
+                   '((a . b) (c . d))))
+
+ (define-test "zip2: first empty"
+   (pass-if-true (null? (zip2 '() '(b d f)))))
+
+ (define-test "zip2: second empty"
+   (pass-if-true (null? (zip2 '(a c e) '()))))
+
+ (define-test "zip2: both empty"
+   (pass-if-true (null? (zip2 '() '())))))

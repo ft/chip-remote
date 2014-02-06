@@ -24,12 +24,23 @@
 
 (define-module (chip-remote protocol)
   :use-module (chip-remote io)
-  :use-module (srfi srfi-1) ;; Implements `fold' and `zip'.
+  :use-module (srfi srfi-1)
   :export (bye
            hi
            features
            ports
            protocol-version))
+
+(define (zip2 la lb)
+  (let next ((a la)
+             (b lb)
+             (acc '()))
+    (cond ((any null? (list a b))
+           (reverse acc))
+          (else
+           (next (cdr a) (cdr b)
+                 (cons (cons (car a) (car b))
+                       acc))))))
 
 ;; Words in the protocol may contain letters and digits from ASCII.
 (define protocol-char-set
@@ -50,7 +61,7 @@
 ;; value is `#f', the second is always the unchanged input data.
 (define (verify pair)
   (let ((got (car pair))
-        (want (cadr pair)))
+        (want (cdr pair)))
     (cond ((string? want)
            (list (string=? want got)
                  got))
@@ -84,7 +95,7 @@
 ;;
 ;; If a condition is not met, `#f' is returned.
 (define* (expect-read string what #:optional (postproc (lambda (x) x)))
-  (let ((dtp (zip (string-tokenize string protocol-char-set) what)))
+  (let ((dtp (zip2 (string-tokenize string protocol-char-set) what)))
     (cond
      ((not (eq? (length what)
                 (length dtp)))
@@ -92,10 +103,10 @@
      (else
       ;; The data in dtp looks like this:
       ;;
-      ;; '(("VERSION" "VERSION")
-      ;;   ("2" int)
-      ;;   ("7" int)
-      ;;   ("c" int))
+      ;; '(("VERSION" . "VERSION")
+      ;;   ("2" . int)
+      ;;   ("7" . int)
+      ;;   ("c" . int))
       ;;
       ;; The `fold' turns it into the following: '(#t "VERSION" 2 7 12)
       ;; Or in case only dec. ints were allowed: '(#f "VERSION" 2 7 "c")
