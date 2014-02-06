@@ -22,38 +22,6 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-;;---------------------------------------------------------------
-;;
-;; This module implements the plain text protocol used between a host computer
-;; (which runs the chip-remote interpreter) and an external interface-driver
-;; board.
-;;
-;; The protocol is versioned. The version implemented by the board may be
-;; queried by using the `VERSION' command. The reply consists of these parts:
-;;
-;;    VERSION  <major-compat> <minor-compat> <additions>
-;;
-;; VERSION is a fixed string.
-;;
-;; <major-compat> is a version number (in hex, like every other numeric value
-;; in the protocol as well. A mismatch here denotes significant differences
-;; between host and board which make the combination unusable (most likely).
-;; Increases in this number would be caused by complete protocol redesign.
-;;
-;; <minor-compat> is another version number. It is increased when existing
-;; features are changed in ways that break backwards compatibility.
-;;
-;; <additions> is yet another version number, that is increased when a new
-;; features is added to the protocol.
-;;
-;;---------------------------------------------------------------
-;;
-;; The protocol supports a implementation-defined communication channel: Any
-;; messages that start in an ASCII colon (`:', code: 0x3a) are explicitly
-;; reserved for implementation specific use.
-;;
-;;---------------------------------------------------------------
-
 (define-module (chip-remote protocol)
   :use-module (chip-remote io)
   :use-module (srfi srfi-1) ;; Implements `fold' and `zip'.
