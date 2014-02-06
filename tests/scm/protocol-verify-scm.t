@@ -26,7 +26,7 @@
              (srfi srfi-1))
 (primitive-load "tests/test-tap-cfg.scm")
 
-(define v (@@ (chip-remote protocol) verify))
+(define v (@@ (chip-remote protocol) verify-and-convert))
 
 (define a '(("VERBOSE" . "VERBOSE")
             ("ca" . int)

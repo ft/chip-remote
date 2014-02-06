@@ -59,7 +59,7 @@
 ;; Returns a pairs: `#t' or `#f' depending on whether the verification
 ;; succeeded and the (possibly converted) input data; if the first value is
 ;; `#f', the second is always the unchanged input data.
-(define (verify pair)
+(define (verify-and-convert pair)
   (let ((got (car pair))
         (want (cdr pair)))
     (cond ((string? want)
@@ -116,7 +116,7 @@
                       (lambda (new acc)
                         (let ((old (car acc))
                               (lst (cdr acc))
-                              (v (verify new)))
+                              (v (verify-and-convert new)))
                           (append (list (and old (car v)))
                                   lst
                                   (cons (cdr v) '()))))
