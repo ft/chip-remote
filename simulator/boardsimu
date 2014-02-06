@@ -113,7 +113,7 @@ sub __cb_list_more {
 }
 
 sub cb_features {
-    my @f = ( qw{ SPI SINGLE } );
+    my @f = ( qw{ FOCUS INIT LINES LINE MODES PORT PORTS SET } );
     return __cb_list_more(\@f, 'FEATURES', 'main', @_);
 }
 
