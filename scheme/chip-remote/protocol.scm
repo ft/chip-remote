@@ -28,6 +28,7 @@
   :export (bye
            hi
            features
+           modes
            ports
            protocol-version))
 
@@ -154,9 +155,12 @@
 (define (reply->symbol s)
   (string->symbol (string-downcase s)))
 
+(define (request->list-of-symbols conn request)
+  (map reply->symbol (list-more-done conn request)))
+
 ;; Queries the board's feature list and returns a list of according symbols.
 (define (features conn)
-  (map reply->symbol (list-more-done conn "FEATURES")))
+  (request->list-of-symbols conn "FEATURES"))
 
 (define (string+int->pair s)
   (let ((l (expect-read s '(string int))))
@@ -167,3 +171,6 @@
 ;; Queries the board for its ports and returns a list of alists.
 (define (ports conn)
   (map string+int->pair (list-more-done conn "PORTS")))
+
+(define (modes conn)
+  (request->list-of-symbols conn "MODES"))
