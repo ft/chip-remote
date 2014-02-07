@@ -150,20 +150,13 @@
                 (next (cons reply f)
                       (io-read conn))))))
 
-;; Check if the second argument (`list') to the function is a list, if not
-;; return it unchanged. If it is, map `proc' over and return the result.
-(define (list-and-map proc list)
-  (cond ((not (list? list)) list)
-        (else (map proc list))))
-
 ;; Turns a string into a lower-cased symbol: "FOO" => foo
 (define (reply->symbol s)
   (string->symbol (string-downcase s)))
 
 ;; Queries the board's feature list and returns a list of according symbols.
 (define (features conn)
-  (list-and-map reply->symbol
-                (list-more-done conn "FEATURES")))
+  (map reply->symbol (list-more-done conn "FEATURES")))
 
 (define (string+int->pair s)
   (let ((l (expect-read s '(string int))))
@@ -173,5 +166,4 @@
 
 ;; Queries the board for its ports and returns a list of alists.
 (define (ports conn)
-  (list-and-map string+int->pair
-                (list-more-done conn "PORTS")))
+  (map string+int->pair (list-more-done conn "PORTS")))
