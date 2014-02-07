@@ -133,9 +133,7 @@
     (syntax-case x ()
       ((_ (c r) code ...)
        #'(let ((r (io-read c)))
-           (if (not (string? r))
-               #f
-               (begin code ...)))))))
+           code ...)))))
 
 ;; Initiate communication channel to the device.
 (define (hi conn)
@@ -163,12 +161,10 @@
   (io-write conn item)
   (let next ((f '())
              (reply (io-read conn)))
-    (cond ((eq? reply #f) #f)
-          ((string=? reply "DONE") f)
-          (else
-           (io-write conn "MORE")
-           (next (cons reply f)
-                 (io-read conn))))))
+    (cond ((string=? reply "DONE") f)
+          (else (io-write conn "MORE")
+                (next (cons reply f)
+                      (io-read conn))))))
 
 ;; Check if the second argument (`list') to the function is a list, if not
 ;; return it unchanged. If it is, map `proc' over and return the result.

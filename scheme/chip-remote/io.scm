@@ -86,6 +86,8 @@
     (if (null? (car result))
         (throw 'read-timeout connection)
         (let ((string (read-line (cr-connection-port connection) 'trim)))
+          (unless (string? string)
+            (throw 'io-read-error))
           (if (io-opt/get 'trace)
               (begin
                 (display (string-concatenate (list " <<< " string)))
