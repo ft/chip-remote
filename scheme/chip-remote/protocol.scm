@@ -87,21 +87,12 @@
 ;;
 ;;  (expect-read "VERSION 2 7 c" '("VERSION" int int int))
 ;;    => ("VERSION" 2 7 12)
-;;
-;; You may optionally supply a function that postprocesses the returned list.
-;; Say, in the previous example, you're really only interested in the three
-;; integers and not in the fixed string "VERSION". You'd do this:
-;;
-;;  (expect-read "VERSION 2 7 c" '("VERSION" int int int))
-;;    => (2 7 12)
-;;
-;; If a condition is not met, `#f' is returned.
-(define* (expect-read string what #:optional (postproc (lambda (x) x)))
+(define (expect-read string what)
   (let ((dtp (zip2 (string-tokenize string protocol-char-set) what)))
     (cond
      ((not (eq? (length what)
                 (length dtp)))
-      #f)
+      (throw 'protocol-number-of-words-mismatch string what dtp))
      (else
       ;; The data in dtp looks like this:
       ;;
@@ -110,23 +101,14 @@
       ;;   ("7" . int)
       ;;   ("c" . int))
       ;;
-      ;; The `fold' turns it into the following: '(#t "VERSION" 2 7 12)
-      ;; Or in case only dec. ints were allowed: '(#f "VERSION" 2 7 "c")
-      ;;
-      ;; If the first element is `#t' return the rest, otherwise return `#f'.
-      (let ((results (fold
-                      (lambda (new acc)
-                        (let ((old (car acc))
-                              (lst (cdr acc))
-                              (v (verify-and-convert new)))
-                          (append (list (and old (car v)))
-                                  lst
-                                  (cons (cdr v) '()))))
-                      '(#t)
-                      dtp)))
-        (if (car results)
-            (postproc (cdr results))
-            #f))))))
+      ;; The `fold' turns it into the following: '("VERSION" 2 7 12)
+      (reverse (fold (lambda (new acc)
+                       (let ((v (verify-and-convert new)))
+                         (unless (eq? (car v) #t)
+                           (throw 'protocol-unexpected-data new))
+                         (cons (cdr v) acc)))
+                     '()
+                     dtp))))))
 
 ;; Read from the device, save the reply and run code in case the read was
 ;; successful. Return `#f' otherwise.
@@ -153,7 +135,7 @@
 (define (protocol-version conn)
   (io-write conn "VERSION")
   (with-read-raw-string (conn reply)
-    (expect-read reply '("VERSION" int int int) cdr)))
+    (expect-read reply '("VERSION" int int int))))
 
 ;; A set of commands return more than one reply. The host triggers the 2nd to
 ;; the N-th reply by saying "MORE". The board will reply with DONE when there

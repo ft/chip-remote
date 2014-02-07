@@ -27,17 +27,32 @@
 
 (define er (@@ (chip-remote protocol) expect-read))
 
+(define working-expects '(("VERSION 2 7 ca"
+                           ("VERSION" int int int)
+                           ("VERSION" 2 7 202))))
+
+(define failing-expects '(("VERSION 2 7z ca"
+                           ("VERSION" int int int)
+                           ("7z" . int))))
+
 (with-fs-test-bundle
- (define syntax '("VERSION" int int int))
- (define input "VERSION 2 7 ca")
- (define expected '("VERSION" 2 7 202))
+ (plan (+ (length working-expects)
+          (length failing-expects)))
 
- (plan 2)
+ (map (lambda (x)
+        (let* ((input (car x))
+               (spec (cadr x))
+               (expected (caddr x))
+               (result (er input spec)))
+          (define-test (format #f "expect-read succeeds: ~s" input)
+            (pass-if-equal? result expected))))
+      working-expects)
 
- (define-test "expect-read with \"VERSION\" 2 7 ca) => '(\"VERSION\" 2 7 202)"
-   (pass-if-equal? (er input syntax)
-                   expected))
-
- (define-test "expect-read with cdr post-proc => '(2 7 202)"
-   (pass-if-equal? (er input syntax cdr)
-                   (cdr expected))))
+ (map (lambda (x)
+        (let* ((input (car x))
+               (spec (cadr x))
+               (failure (caddr x)))
+          (define-test (format #f "expect-read fails: ~s" input)
+            (pass-if-exception 'protocol-unexpected-data
+                               (er input spec)))))
+      failing-expects))
