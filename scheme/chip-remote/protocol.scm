@@ -42,10 +42,12 @@
                  (cons (cons (car a) (car b))
                        acc))))))
 
-;; Words in the protocol may contain letters and digits from ASCII.
+;; Words in the protocol may contain letters, a dash and digits from ASCII.
 (define protocol-char-set
-  (char-set-diff+intersection char-set:ascii
-                              char-set:letter+digit))
+  (char-set-union
+   (char-set-diff+intersection char-set:ascii
+                               char-set:letter+digit)
+   (char-set #\-)))
 
 ;; Turn a hexadecimal string into an integer. Returns `#f' in case of an error.
 (define (hexstring->int str)

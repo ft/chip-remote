@@ -27,9 +27,20 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (define zip2 (@@ (chip-remote protocol) zip2))
+(define pcs (@@ (chip-remote protocol) protocol-char-set))
+
+(define charset-tests
+  '(("single word" "FOO123BAR"
+     "FOO123BAR")
+    ("single word with dash" "FOO-BAR"
+     "FOO-BAR")
+    ("three simple words" "FOO BAR BAZ"
+     "FOO" "BAR" "BAZ")
+    ("three simple words, two with dash" "FOO-BAR BAZ-QUUZ DING"
+     "FOO-BAR" "BAZ-QUUZ" "DING")))
 
 (with-fs-test-bundle
- (plan 6)
+ (plan (+ 6 (length charset-tests)))
 
  (define-test "zip2: normal zip"
    (pass-if-equal? (zip2 '(a c e) '(b d f))
@@ -50,4 +61,10 @@
    (pass-if-true (null? (zip2 '(a c e) '()))))
 
  (define-test "zip2: both empty"
-   (pass-if-true (null? (zip2 '() '())))))
+   (pass-if-true (null? (zip2 '() '()))))
+
+ (map (lambda (x)
+        (define-test (format #f "charset: ~a" (car x))
+          (pass-if-equal? (string-tokenize (cadr x) pcs)
+                          (cddr x))))
+      charset-tests))
