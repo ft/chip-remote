@@ -167,7 +167,7 @@
           ((string=? reply "DONE") f)
           (else
            (io-write conn "MORE")
-           (next (append f (list reply))
+           (next (cons reply f)
                  (io-read conn))))))
 
 ;; Check if the second argument (`list') to the function is a list, if not
