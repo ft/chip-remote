@@ -126,13 +126,17 @@
 (define (hi conn)
   (io-write conn "HI")
   (with-read-raw-string (conn reply)
-    (string=? reply "Hi there, stranger.")))
+    (unless (string=? reply "Hi there, stranger.")
+      (throw 'protocol-hi-failed reply))
+    #t))
 
 ;; Close down communication channel to the device.
 (define (bye conn)
   (io-write conn "BYE")
   (with-read-raw-string (conn reply)
-    (string=? reply "Have a nice day.")))
+    (unless (string=? reply "Have a nice day.")
+      (throw 'protocol-bye-failed reply))
+    #t))
 
 ;; Query protocol version from the board.
 (define (protocol-version conn)
