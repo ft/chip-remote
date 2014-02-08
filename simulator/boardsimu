@@ -298,7 +298,7 @@ RR: while (my $input = <$pty>) {
         my $ret = $f->{code}->(@cmd) if (allowed_state($state, $f->{state}));
         board_tx($pty, (defined $ret) ? $ret : q{WTF});
     } else {
-        board_tx($pty, q{UNKNOWN-COMMAND});
+        board_tx($pty, qq{WTF Unknown command: $cmd[0]});
     }
 
     print "# -!- Changed state: $pstate -> $state\n" if ($pstate ne $state);
