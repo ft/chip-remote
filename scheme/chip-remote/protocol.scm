@@ -101,25 +101,17 @@
 ;;  (expect-read "VERSION 2 7 c" '("VERSION" int int int))
 ;;    => ("VERSION" 2 7 12)
 (define (expect-read string what)
-  (let ((dtp (zip2 (string-tokenize string protocol-char-set) what)))
-    (unless (not (eq? (length what)
-                      (length dtp)))
-      (throw 'protocol-number-of-words-mismatch string what dtp))
-    ;; The data in dtp looks like this:
-    ;;
-    ;; '(("VERSION" . "VERSION")
-    ;;   ("2" . int)
-    ;;   ("7" . int)
-    ;;   ("c" . int))
-    ;;
-    ;; The `fold' turns it into the following: '("VERSION" 2 7 12)
-    (reverse (fold (lambda (new acc)
-                     (let ((v (verify-and-convert new)))
-                       (unless (eq? (car v) #t)
-                         (throw 'protocol-unexpected-data new))
-                       (cons (cdr v) acc)))
-                   '()
-                   dtp))))
+  (let ((tokens (string-tokenize string protocol-char-set)))
+    (unless (eq? (length what) (length tokens))
+      (throw 'protocol-number-of-words-mismatch string tokens what))
+    (reverse
+     (fold (lambda (new acc)
+             (let ((v (verify-and-convert new)))
+               (unless (eq? (car v) #t)
+                 (throw 'protocol-unexpected-data new))
+               (cons (cdr v) acc)))
+           '()
+           (zip2 (string-tokenize string protocol-char-set) what)))))
 
 ;; Read from the device, save the reply and run code in case the read was
 ;; successful. Return `#f' otherwise.
