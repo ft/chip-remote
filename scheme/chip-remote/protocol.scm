@@ -30,7 +30,8 @@
            features
            modes
            ports
-           protocol-version))
+           protocol-version
+           transmit))
 
 (define (protocol-read conn)
   (let ((reply (io-read conn)))
@@ -65,6 +66,9 @@
 ;; Turn a hexadecimal string into an integer. Returns `#f' in case of an error.
 (define (hexstring->int str)
   (string->number str 16))
+
+(define (int->hexstring int)
+  (number->string int 16))
 
 ;; Takes a pair:
 ;;
@@ -180,3 +184,11 @@
 
 (define (modes conn)
   (request->list-of-symbols conn "MODES"))
+
+(define (transmit conn data)
+  (protocol-transmit conn (int->hexstring data)))
+
+(define (protocol-transmit conn string)
+  (io-write conn (string-concatenate (list "TRANSMIT " string)))
+  (with-read-raw-string (conn reply)
+    (car (expect-read reply '(int)))))
