@@ -40,9 +40,14 @@
             (string-prefix? "BROKEN-VALUE" reply)
             (string-prefix? "VALUE-OUT-OF-RANGE" reply))
         (let* ((tokens (string-tokenize reply protocol-char-set))
+               (cause (car tokens))
+               (len (+ 1 (string-length cause)))
+               (rest (if (< len (string-length reply))
+                         (substring reply len)
+                         ""))
                (excp (symbol-append 'protocol-
                                     (reply->symbol (car tokens)))))
-          (throw excp (cdr tokens))))
+          (throw excp reply rest tokens)))
     reply))
 
 (define (zip2 la lb)
