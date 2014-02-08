@@ -32,6 +32,18 @@
            ports
            protocol-version))
 
+(define (protocol-read conn)
+  (let ((reply (io-read conn)))
+    (if (or (string-prefix? "WTF" reply)
+            (string-prefix? "MALFORMED-COMMAND" reply)
+            (string-prefix? "BROKEN-VALUE" reply)
+            (string-prefix? "VALUE-OUT-OF-RANGE" reply))
+        (let* ((tokens (string-tokenize reply protocol-char-set))
+               (excp (symbol-append 'protocol-
+                                    (reply->symbol (car tokens)))))
+          (throw excp (cdr tokens))))
+    reply))
+
 (define (zip2 la lb)
   (let next ((a la)
              (b lb)
@@ -117,7 +129,7 @@
   (lambda (x)
     (syntax-case x ()
       ((_ (c r) code ...)
-       #'(let ((r (io-read c)))
+       #'(let ((r (protocol-read c)))
            code ...)))))
 
 ;; Initiate communication channel to the device.
@@ -145,11 +157,11 @@
 (define (list-more-done conn item)
   (io-write conn item)
   (let next ((f '())
-             (reply (io-read conn)))
+             (reply (protocol-read conn)))
     (cond ((string=? reply "DONE") f)
           (else (io-write conn "MORE")
                 (next (cons reply f)
-                      (io-read conn))))))
+                      (protocol-read conn))))))
 
 ;; Turns a string into a lower-cased symbol: "FOO" => foo
 (define (reply->symbol s)
