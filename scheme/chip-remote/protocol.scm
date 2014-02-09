@@ -32,6 +32,7 @@
            ports
            protocol-version
            focus
+           init
            transmit))
 
 (define (protocol-read conn)
@@ -205,6 +206,12 @@
        (throw 'protocol-expected-ok request reply))
      #t)))
 
-(define (focus index)
+(define (request-with-index-to-ok request index)
   (request-expects-ok (string-concatenate
-                       (list "FOCUS " (int->hexstring index)))))
+                       (list request " " (int->hexstring index)))))
+
+(define (focus index)
+  (request-with-index-to-ok "FOCUS" index))
+
+(define (init index)
+  (request-with-index-to-ok "INIT" index))
