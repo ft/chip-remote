@@ -30,6 +30,8 @@
   #:use-module (web uri)
   #:export (cr-connection?
             cr-connection-uri
+            get-cr-capability
+            set-cr-capability!
             cr-path
             io-close
             io-open
@@ -43,7 +45,16 @@
   (make-bare-cr-connection)
   cr-connection?
   (uri cr-connection-uri set-cr-connection-uri!)
-  (port cr-connection-port set-cr-connection-port!))
+  (port cr-connection-port set-cr-connection-port!)
+  (capabilities cr-capabilities set-cr-capabilities!))
+
+(define (get-cr-capability connection key)
+  (assq-ref (cr-capabilities connection) key))
+
+(define (set-cr-capability! connection key value)
+  (set-cr-capabilities! connection (assq-set! (cr-capabilities connection)
+                                              key
+                                              value)))
 
 (define (uri-defaults-to-file string-uri)
   (let ((uri (string->uri string-uri)))
