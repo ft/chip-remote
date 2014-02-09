@@ -200,18 +200,19 @@
   (with-read-raw-string (conn reply)
     (car (expect-read reply '(int)))))
 
-(define (request-expects-ok request)
-  ((let ((reply (io-write request)))
+(define (request-expects-ok conn request)
+  ((let ((reply (io-write conn request)))
      (unless (string=? reply "OK")
        (throw 'protocol-expected-ok request reply))
      #t)))
 
-(define (request-with-index-to-ok request index)
-  (request-expects-ok (string-concatenate
+(define (request-with-index-to-ok conn request index)
+  (request-expects-ok conn
+                      (string-concatenate
                        (list request " " (int->hexstring index)))))
 
-(define (focus index)
-  (request-with-index-to-ok "FOCUS" index))
+(define (focus conn index)
+  (request-with-index-to-ok conn "FOCUS" index))
 
-(define (init index)
-  (request-with-index-to-ok "INIT" index))
+(define (init conn index)
+  (request-with-index-to-ok conn "INIT" index))
