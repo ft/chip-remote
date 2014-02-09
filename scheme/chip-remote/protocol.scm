@@ -31,6 +31,7 @@
            modes
            ports
            protocol-version
+           focus
            transmit))
 
 (define (protocol-read conn)
@@ -197,3 +198,13 @@
   (io-write conn (string-concatenate (list "TRANSMIT " string)))
   (with-read-raw-string (conn reply)
     (car (expect-read reply '(int)))))
+
+(define (request-expects-ok request)
+  ((let ((reply (io-write request)))
+     (unless (string=? reply "OK")
+       (throw 'protocol-expected-ok request reply))
+     #t)))
+
+(define (focus index)
+  (request-expects-ok (string-concatenate
+                       (list "FOCUS " (int->hexstring index)))))
