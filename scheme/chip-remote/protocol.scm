@@ -323,3 +323,16 @@
 (define (port conn index)
   ;; TODO: Needs caching to capabilities structure.
   (map parse-port (list-more-done conn (request-with-index "PORT" index))))
+
+(define (symbol->protocol-string sym)
+  (string-upcase (symbol->string sym)))
+
+(define (set conn pidx key value)
+  (let ((key-str (symbol->protocol-string key))
+        (idx-str (int->hexstring pidx))
+        (val (cond ((symbol? value) (symbol->protocol-string value))
+                   ((integer? value) (int->hexstring value))
+                   ((string? value) value)
+                   (else (throw 'protocol-set-unknown-value-type value)))))
+    (request-expects-ok conn (string-join (list "SET" idx-str key-str val)
+                                          " "))))
