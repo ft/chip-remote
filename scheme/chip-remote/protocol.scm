@@ -225,10 +225,11 @@
        (throw 'protocol-expected-ok request reply))
      #t)))
 
+(define (request-with-index request index)
+  (string-concatenate (list request " " (int->hexstring index))))
+
 (define (request-with-index-to-ok conn request index)
-  (request-expects-ok conn
-                      (string-concatenate
-                       (list request " " (int->hexstring index)))))
+  (request-expects-ok conn (request-with-index request index)))
 
 (define (focus conn index)
   (request-with-index-to-ok conn "FOCUS" index))
@@ -244,3 +245,31 @@
   (and (has-feature? conn 'modes) (modes conn))
   (and (has-feature? conn 'ports) (ports conn))
   #t)
+
+(define (zip-apply lf ld)
+  (map (lambda (x)
+         (let ((fnc (car x))
+               (dat (cdr x)))
+           (if fnc
+               (fnc dat)
+               dat)))
+       (zip2 lf ld)))
+
+(define (parse-line-symbol str)
+  (let* ((data (string-split str #\:))
+         (len (length data)))
+    (cond ((= len 1) (cons (reply->symbol (car data)) 0))
+          ((= len 2) (cons (reply->symbol (car data))
+                           (let ((int (hexstring->int (cadr data))))
+                             (if int int
+                                 (throw 'protocol-line-index-not-integer
+                                        (cadr data))))))
+          (else (throw 'protocol-invalid-lines-reply str data)))))
+
+(define (parse-lines reply)
+  (zip-apply (list #f parse-line-symbol reply->symbol)
+             (expect-read reply '(int string opt "FIXED"))))
+
+(define (lines conn index)
+  ;; TODO: Needs caching to capabilities structure.
+  (map parse-lines (list-more-done conn (request-with-index "LINES" index))))
