@@ -26,15 +26,19 @@
   :use-module (chip-remote io)
   :use-module (srfi srfi-1)
   :export (bye
-           hi
            features
+           focus
+           has-feature?
+           hi
+           init
+           line
+           lines
            modes
+           port
            ports
            protocol-version
-           focus
-           init
+           set
            transmit
-           has-feature?
            update-capabilities))
 
 (define (protocol-tokenize string)
