@@ -33,7 +33,9 @@
            protocol-version
            focus
            init
-           transmit))
+           transmit
+           has-feature?
+           update-capabilities))
 
 (define (protocol-read conn)
   (let ((reply (io-read conn)))
@@ -127,6 +129,9 @@
 (define (push-capability-and-return conn key value)
   (set-cr-capability! conn key value)
   value)
+
+(define (has-feature? conn feature)
+  (memq feature (get-cr-capability conn 'features)))
 
 ;; Read from the device, save the reply and run code in case the read was
 ;; successful. Return `#f' otherwise.
@@ -225,3 +230,12 @@
 
 (define (init conn index)
   (request-with-index-to-ok conn "INIT" index))
+
+(define (update-capabilities conn)
+  ;; VERSION and FEATURES are mandatory...
+  (protocol-version conn)
+  (features conn)
+  ;; ...the rest is optional, so test before issuing:
+  (and (has-feature? conn 'modes) (modes conn))
+  (and (has-feature? conn 'ports) (ports conn))
+  #t)
