@@ -37,13 +37,16 @@
            has-feature?
            update-capabilities))
 
+(define (protocol-tokenize string)
+  (string-tokenize string protocol-char-set))
+
 (define (protocol-read conn)
   (let ((reply (io-read conn)))
     (if (or (string-prefix? "WTF" reply)
             (string-prefix? "MALFORMED-COMMAND" reply)
             (string-prefix? "BROKEN-VALUE" reply)
             (string-prefix? "VALUE-OUT-OF-RANGE" reply))
-        (let* ((tokens (string-tokenize reply protocol-char-set))
+        (let* ((tokens (protocol-tokenize reply))
                (cause (car tokens))
                (len (+ 1 (string-length cause)))
                (rest (if (< len (string-length reply))
@@ -114,7 +117,7 @@
 ;;  (expect-read "VERSION 2 7 c" '("VERSION" int int int))
 ;;    => ("VERSION" 2 7 12)
 (define (expect-read string what)
-  (let ((tokens (string-tokenize string protocol-char-set)))
+  (let ((tokens (protocol-tokenize string)))
     (let ((opt-pos (list-index (lambda (x) (eq? x 'opt)) what))
           (lt (length tokens))
           (lw (length what)))
@@ -128,7 +131,7 @@
                  (throw 'protocol-unexpected-data new))
                (cons (cdr v) acc)))
            '()
-           (zip2 (string-tokenize string protocol-char-set)
+           (zip2 (protocol-tokenize string)
                  (filter (lambda (x) (not (eq? x 'opt))) what))))))
 
 (define (push-capability-and-return conn key value)
