@@ -124,6 +124,10 @@
            '()
            (zip2 (string-tokenize string protocol-char-set) what)))))
 
+(define (push-capability-and-return conn key value)
+  (set-cr-capability! conn key value)
+  value)
+
 ;; Read from the device, save the reply and run code in case the read was
 ;; successful. Return `#f' otherwise.
 (define-syntax with-read-raw-string
@@ -153,7 +157,8 @@
 (define (protocol-version conn)
   (io-write conn "VERSION")
   (with-read-raw-string (conn reply)
-    (expect-read reply '("VERSION" int int int))))
+    (push-capability-and-return conn 'version
+                                (expect-read reply '("VERSION" int int int)))))
 
 ;; A set of commands return more than one reply. The host triggers the 2nd to
 ;; the N-th reply by saying "MORE". The board will reply with DONE when there
@@ -177,7 +182,8 @@
 
 ;; Queries the board's feature list and returns a list of according symbols.
 (define (features conn)
-  (request->list-of-symbols conn "FEATURES"))
+  (push-capability-and-return conn 'features
+                              (request->list-of-symbols conn "FEATURES")))
 
 (define (string+int->pair s)
   (let ((l (expect-read s '(string int))))
@@ -187,10 +193,13 @@
 
 ;; Queries the board for its ports and returns a list of alists.
 (define (ports conn)
-  (map string+int->pair (list-more-done conn "PORTS")))
+  (push-capability-and-return conn 'ports
+                              (map string+int->pair
+                                   (list-more-done conn "PORTS"))))
 
 (define (modes conn)
-  (request->list-of-symbols conn "MODES"))
+  (push-capability-and-return conn 'modes
+                              (request->list-of-symbols conn "MODES")))
 
 (define (transmit conn data)
   (protocol-transmit conn (int->hexstring data)))
