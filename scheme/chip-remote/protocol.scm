@@ -276,3 +276,50 @@
 (define (lines conn index)
   ;; TODO: Needs caching to capabilities structure.
   (map parse-lines (list-more-done conn (request-with-index "LINES" index))))
+
+(define (fixed->symbol string)
+  (let ((sym (reply->symbol string)))
+    (unless (eq? sym 'fixed)
+      (throw 'protocol-unallowed-keyword string sym 'fixed))
+    sym))
+
+(define (return-allowed-symbol ls str)
+  (let ((sym (reply->symbol str)))
+    (if (memq sym ls)
+        sym
+        (throw 'protocol-unallowed-keyword str sym ls))))
+
+(define (port-bit-order str)
+  (return-allowed-symbol '(msb-first lsb-first) str))
+
+(define (port-clk-polarity str)
+  (return-allowed-symbol '(idle-high idle-low) str))
+
+(define (port-cs-polarity str)
+  (return-allowed-symbol '(active-high active-low) str))
+
+(define (port-mode str)
+  (return-allowed-symbol '(spi) str))
+
+(define parse-port-table
+  `((bit-order . ,port-bit-order)
+    (clk-phase-delay . ,hexstring->int)
+    (clk-polarity . ,port-clk-polarity)
+    (cs-lines . ,hexstring->int)
+    (cs-polarity . ,port-cs-polarity)
+    (frame-length . ,hexstring->int)
+    (lines . ,hexstring->int)
+    (mode . ,port-mode)
+    (rate . ,hexstring->int)))
+
+(define (parse-port reply)
+  (let* ((orig (protocol-tokenize reply))
+         (data (cons (reply->symbol (car orig)) (cdr orig))))
+    (zip-apply (list #f
+                     (assq-ref parse-port-table (car data))
+                     fixed->symbol)
+               data)))
+
+(define (port conn index)
+  ;; TODO: Needs caching to capabilities structure.
+  (map parse-port (list-more-done conn (request-with-index "PORT" index))))
