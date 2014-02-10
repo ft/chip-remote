@@ -137,9 +137,9 @@ cr_echo_lines(struct cr_port *ports, size_t num)
 void
 cr_echo_rate(struct cr_port *ports, size_t num)
 {
-    if (ports[num].rate.value < 0) {
+    if (ports[num].rate.value <= 0) {
         struct cr_string_prop sp;
-        strncpy(sp.value, "DEFAULT", CR_STRING_PROP_MAX);
+        strncpy(sp.value, "0", CR_STRING_PROP_MAX);
         sp.mutable_p = ports[num].rate.mutable_p;
         cr_echo_string_property(RATE_REPLY, &sp);
     } else

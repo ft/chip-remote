@@ -14,7 +14,7 @@ cr_run_script [
     cr_request("PORT 0",
                "MODE SPI",
                "LINES 4",
-               "RATE DEFAULT FIXED",
+               "RATE 0 FIXED",
                "BIT-ORDER MSB-FIRST",
                "CLK-PHASE-DELAY TRUE",
                "CLK-POLARITY IDLE-LOW",
