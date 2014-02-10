@@ -267,8 +267,8 @@ more colloquial term for the project, this specification is part of, is
       - "MODE <mode-string> [FIXED]": Indicates the mode the port is currently
         running in.
 
-      - "RATE <DEFAULT|int> [FIXED]": Indicates the symbol-rate with which the
-        port operates. DEFAULT indicates an implementation-defined default
+      - "RATE <int> [FIXED]": Indicates the symbol-rate with which the port
+        operates. A value of zero indicates an implementation-defined default
         symbol-rate.
 
     All properties that return a "FIXED" as their last argument are read-only
