@@ -336,3 +336,13 @@
                    (else (throw 'protocol-set-unknown-value-type value)))))
     (request-expects-ok conn (string-join (list "SET" idx-str key-str val)
                                           " "))))
+
+(define (line conn pidx lidx role)
+  (let ((role-str (symbol->protocol-string role))
+        (pidx-str (int->hexstring pidx))
+        (lidx-str (int->hexstring lidx)))
+    (request-expects-ok conn (string-join (list "LINE"
+                                                pidx-str
+                                                lidx-str
+                                                role-str)
+                                          " "))))
