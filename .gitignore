@@ -15,7 +15,10 @@ tags
 TAGS
 core
 core.*
+spec.pdf
+spec.tex
 spec.txt
+auto/*
 remote-fw/Makefile
 remote-fw/config.*.h
 remote-fw/platform.h
