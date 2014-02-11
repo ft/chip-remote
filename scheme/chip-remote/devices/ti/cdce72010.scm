@@ -109,10 +109,10 @@ end of the function."
   ;; Collect the data (with the hardware bug-fix):
   (logior (write-register conn 0 0) ridx))
 
-(define (read-registers)
+(define (read-registers conn)
   (let ((a '()))
     (let loop ((i 0))
-      (set! a (append a (list (cdce/read-register i))))
+      (set! a (append a (list (read-register conn i))))
       (if (< i 12)
           (loop (+ i 1))))
     a))
@@ -133,18 +133,21 @@ end of the function."
 
 (define (export-registers-scheme-script registers)
   (display "(use-modules ((chip-remote devices ti cdce72010)\n")
-  (display "              #:renamer (symbol-prefix-proc 'cdce/)))\n\n")
-  (display "(cdce/open \"/dev/ttyUSB0\") ;; or whatever device file...\n")
-  (display "(cdce/hi)\n\n")
+  (display "              #:renamer (symbol-prefix-proc 'cdce/)))\n")
+  (display "(use-modules ((chip-remote io)\n")
+  (display "              (chip-remote protocol))\n\n")
+  (display "(define connection\n")
+  (display "        (make-cr-connection \"/dev/ttyUSB0\")\n")
+  (display "(io-open connection)\n")
+  (display "(hi connection)\n\n")
   (let nr ((i 0)
            (r registers))
-    (cond
-     ((null? r) #t)
-     (else
-      (format #t "(cdce/write-register ~2d #x~8,'0x)\n" i (car r))
-      (nr (1+ i) (cdr r)))))
-  (display "\n(cdce/bye)\n")
-  (display "(cdce/close)\n"))
+    (cond ((null? r) #t)
+          (else
+           (format #t "(write-register cconnection ~2d #x~8,'0x)\n" i (car r))
+           (nr (1+ i) (cdr r)))))
+  (display "\n(bye connection)\n")
+  (display "(io-close connection)\n"))
 
 (define (export-registers-scheme-list registers type)
   (display "(define registers\n  '(")
@@ -187,13 +190,12 @@ end of the function."
           (format #t "Unknown export mode: `~a'\n" (symbol->string m))
           #f)))))))
 
-(define (set-feedback-divider val)
+(define (set-feedback-divider conn val)
   (let ((fbdivreg 11))
-    (cdce/write-register fbdivreg (set-bits-fbdiv
-                                   (cdce/read-register fbdivreg)
-                                   val))))
+    (write-register conn fbdivreg
+                         (set-bits-fbdiv (read-register conn fbdivreg) val))))
 
-(define (set-output-divider div val)
+(define (set-output-divider conn div val)
   ;; There are ten outputs but only eight dividers. Outputs 0,1 and 8,9 each
   ;; share one divider. Unlike the outputs, the dividers are numbered starting
   ;; at `1'. Thus the outputs 0 and 1 share the divider number 1.
@@ -207,45 +209,42 @@ end of the function."
 
   (if (not (divider? div))
       (error-divider div)
-      (cdce/write-register div
-                           (set-bits-odiv
-                            (cdce/read-register div)
-                            val))))
+      (write-register conn div
+                           (set-bits-odiv (read-register conn div) val))))
 
-(define (set-output-mode output mode)
+(define (set-output-mode conn output mode)
   (if (not (output-index? output))
       (error-output-index)
-      (cdce/write-register output
-                           (set-bits-output-mode
-                            (cdce/read-register output)
-                            mode))))
+      (write-register conn output
+                           (set-bits-output-mode (read-register conn output)
+                                                 mode))))
 
-(define (change-output-divider with-what div)
+(define (change-output-divider conn with-what div)
   (if (not (divider? div))
       (error-divider div)
-      (cdce/write-register div (with-what (cdce/read-register div)))))
+      (write-register conn div (with-what (read-register conn div)))))
 
-(define (disable-output-divider div)
-  (change-output-divider clear-odiv-enable-bit div))
+(define (disable-output-divider conn div)
+  (change-output-divider conn clear-odiv-enable-bit div))
 
-(define (enable-output-divider div)
-  (change-output-divider set-odiv-enable-bit div))
+(define (enable-output-divider conn div)
+  (change-output-divider conn set-odiv-enable-bit div))
 
-(define (change-mn-divider with-what value)
+(define (change-mn-divider conn with-what value)
   (if (not (mn-divider-value? value))
       (error-mn-divider-value value)
       (let ((mn-div-reg 10))
-        (cdce/write-register mn-div-reg
-                             (with-what (cdce/read-register mn-div-reg)
+        (write-register conn mn-div-reg
+                             (with-what (read-register conn mn-div-reg)
                                         value)))))
 
-(define (set-n-divider value)
-  (change-mn-divider set-bits-ndiv value))
+(define (set-n-divider conn value)
+  (change-mn-divider conn set-bits-ndiv value))
 
-(define (set-m-divider value)
-  (change-mn-divider set-bits-mdiv value))
+(define (set-m-divider conn value)
+  (change-mn-divider conn set-bits-mdiv value))
 
-(define (set-reference-divider type state)
+(define (set-reference-divider conn type state)
   (cond
    ((not (r-divider? type))
     (error-invalid-r-divider)
@@ -255,42 +254,41 @@ end of the function."
     #f)
    (else
     (let ((rdiv-reg 11))
-      (cdce/write-register rdiv-reg
-                           (set-bits-rdiv
-                            (cdce/read-register rdiv-reg)
-                            type state))))))
+      (write-register conn rdiv-reg
+                           (set-bits-rdiv (read-register conn rdiv-reg)
+                                          type state))))))
 
-(define (change-power-down-pll with-what)
+(define (change-power-down-pll conn with-what)
   (let ((pll-pd-reg 11))
-    (cdce/write-register pll-pd-reg
-                         (with-what (cdce/read-register pll-pd-reg)))))
+    (write-register conn pll-pd-reg
+                         (with-what (read-register conn pll-pd-reg)))))
 
-(define (power-down-pll)
-  (change-power-down-pll set-pll-power-down-bit))
+(define (power-down-pll conn)
+  (change-power-down-pll conn set-pll-power-down-bit))
 
-(define (power-up-pll)
-  (change-power-down-pll clear-pll-power-down-bit))
+(define (power-up-pll conn)
+  (change-power-down-pll conn clear-pll-power-down-bit))
 
-(define (change-power-down-device with-what)
+(define (change-power-down-device conn with-what)
   (let ((device-pd-reg 10))
-    (cdce/write-register device-pd-reg
-                         (with-what (cdce/read-register device-pd-reg)))))
+    (write-register conn device-pd-reg
+                         (with-what (read-register conn device-pd-reg)))))
 
-(define (power-down-device)
-  (change-power-down-device set-device-power-down-bit))
+(define (power-down-device conn)
+  (change-power-down-device conn set-device-power-down-bit))
 
-(define (power-up-device)
-  (change-power-down-device clear-device-power-down-bit))
+(define (power-up-device conn)
+  (change-power-down-device conn clear-device-power-down-bit))
 
-(define (decode-register idx)
+(define (decode-register conn idx)
   (cond
    ((not (register-index? idx))
     (error-invalid-reg-index idx))
    (else
-    (decode-register-by-value (cdce/read-register idx)))))
+    (decode-register-by-value (read-register conn idx)))))
 
-(define (decode-device)
-  (let nextreg ((reg (read-registers)))
+(define (decode-device conn)
+  (let nextreg ((reg (read-registers conn)))
     (cond ((null? reg) (display "Done.\n"))
           (else
            (decode-register-by-value (car reg))
