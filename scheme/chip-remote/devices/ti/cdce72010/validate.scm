@@ -36,7 +36,7 @@
 (define (mn-divider-value? value)
   (and (> value 0)
        ;; max. value is 14 bits set to `1' plus 1.
-       (<= value 0b100000000000000)))
+       (<= value #b100000000000000)))
 
 (define (output-index? idx)
   (and (>= idx 0)
