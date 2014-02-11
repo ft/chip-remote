@@ -148,14 +148,7 @@
                (nextval (cdr val)))))))))
 
 (define (decode/reserved-bits bits width type)
-  (format #t
-          (string-join
-           (list "~d reserved bit"
-                 (if (> width 1) "s" "")
-                 ": ~"
-                 (number->string width 10)
-                 ",'0b\n") "")
-          width bits))
+  (format #t "~d reserved bit~p: ~v,'0b~%" width width width bits))
 
 (define (is-output-mode? type bits)
   (let ((val (cadar type)))
