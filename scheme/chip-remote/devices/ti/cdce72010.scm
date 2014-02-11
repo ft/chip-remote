@@ -54,8 +54,7 @@
            set-n-divider
            set-output-divider
            set-output-mode
-           set-reference-divider
-           toggle-trace))
+           set-reference-divider))
 
 (use-modules (bitops)
              (chip-remote devices ti cdce72010 decode)
@@ -140,18 +139,6 @@
          (else
           (format #t "Unknown export mode: `~a'\n" (symbol->string m))
           #f)))))))
-
-(define (toggle-trace)
-  (display "-!- ")
-  (cond
-   (cdce/options:trace
-    (display "Dis")
-    (set! cdce/options:trace #f))
-   (else
-    (display "En")
-    (set! cdce/options:trace #t)))
-  (display "abling serial communication trace.")
-  (newline))
 
 (define (set-feedback-divider val)
   (let ((fbdivreg 11))
