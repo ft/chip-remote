@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013 chip-remote workers, All rights reserved.
  *
- * Terms for redistribution and use can be found in doc/LICENCE.
+ * Terms for redistribution and use can be found in LICENCE.
  */
 
 /**

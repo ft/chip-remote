@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# Copyright (c) 2013 chip-remote workers, All rights reserved.
-# Terms for redistribution and use can be found in doc/LICENCE.
+# Copyright (c) 2013-2014 chip-remote workers, All rights reserved.
+# Terms for redistribution and use can be found in LICENCE.
 
 # This is a helper library to talk to a simulator instance of the firmware
 # code. This is a tiny bit more convenient then cooking up here-docs on the

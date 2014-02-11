@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2013-2014 chip-remote workers, All rights reserved.
+ *
+ * Terms for redistribution and use can be found in LICENCE.
+ */
+
 #ifndef INC_UTILS_H
 #define INC_UTILS_H
 

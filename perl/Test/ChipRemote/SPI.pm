@@ -1,5 +1,8 @@
 package Test::ChipRemote::SPI;
 
+# Copyright (c) 2014 chip-remote workers, All rights reserved.
+# Terms for redistribution and use can be found in LICENCE.
+
 use strict;
 use warnings;
 use diagnostics;

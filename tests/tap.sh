@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Copyright (c) 2011-2014 chip-remote workers, All rights reserved.
+#
+# Terms for redistribution and use can be found in LICENCE.
+
 _num_tests=0
 _test_name=''
 

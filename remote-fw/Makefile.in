@@ -1,3 +1,7 @@
+# Copyright (c) 2011-2014 chip-remote workers, All rights reserved.
+#
+# Terms for redistribution and use can be found in LICENCE.
+
 CC = @@CC@@
 CFLAGS = @@CFLAGS@@ @@CMCU@@ @@CTARGETFLAGS@@ @@COPTIM@@ @@CDEBUG@@
 DEPCFLAGS = @@CFLAGS@@ @@COPTIM@@ @@CDEBUG@@

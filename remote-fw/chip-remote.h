@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2013-2014 chip-remote workers, All rights reserved.
+ *
+ * Terms for redistribution and use can be found in LICENCE.
+ */
+
 /**
  * @file chip-remote.h
  * @brief Header for main chip-remote operation

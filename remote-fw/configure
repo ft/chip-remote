@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Copyright (c) 2011-2014 chip-remote workers, All rights reserved.
+#
+# Terms for redistribution and use can be found in LICENCE.
+
 if [ $# -lt 2 ]; then
     printf 'usage: configure <arch> <target> [OPTION(s)...]\n'
     exit 0
