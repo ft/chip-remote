@@ -49,18 +49,65 @@
            power-up-device
            power-up-pll
            read-registers
+           read-register
            set-feedback-divider
            set-m-divider
            set-n-divider
            set-output-divider
            set-output-mode
-           set-reference-divider))
+           set-reference-divider
+           write-register))
 
 (use-modules (bitops)
+             (chip-remote protocol)
              (chip-remote devices ti cdce72010 decode)
              (chip-remote devices ti cdce72010 messages)
              (chip-remote devices ti cdce72010 prg)
              (chip-remote devices ti cdce72010 validate))
+
+(define (write-register conn ridx value)
+  "Write VALUE to register RIDX.
+
+In the CDCE72010, you got thirteen 28 Bit registers, which require four bits to
+address (it actually uses the full four bits, to implement things like reading
+registers and writing the current configuration to EEPROM). Hence, you write 32
+Bits to it via SPI LSB-first, with data aligned like this:
+
+  vvvvvvvvvvvvvvvvvvvvvvvvvvvvAAAA   (v: value; A: address)"
+  (unless (and (>= value 0)
+               (< value (ash 1 28)))
+    (throw 'value-out-of-range value))
+  (unless (and (>= ridx 0)
+               (< ridx 16))
+    (throw 'register-index-out-of-range ridx))
+  (transmit conn (logior (ash value 4) ridx)))
+
+(define (read-register conn ridx)
+  "Read the value of register RIDX.
+
+On the CDCE72010 this works be first writing the address you want to read into
+a pseudo register 0x0e. Like this:
+
+  xxxxxxxxxxxxxxxxxxxxxxxxAAAA1110   (x: don't-care; A: address)
+
+That'll make the device spit out the value of register AAAA to MISO in the next
+32 Bit transfer (in which case the value on MOSI is don't-care).
+
+That's almost all, except for a hardware bug: When you read a register from a
+CDCE72010 device, the LSB will *always* be zero. Hence if you'd read all
+registers from a device, the last nibble (so the address bits) would come up
+like this: 0, 0, 2, 2, 4, 4, 6, 6 ...
+
+In this function, we can fix the return value, since we know the address we
+have requested (it's in RIDX). This is the reason for the final `logior' at the
+end of the function."
+  (unless (and (>= ridx 0)
+               (< ridx 16))
+    (throw 'register-index-out-of-range ridx))
+  ;; Tell the chip which register's data to send:
+  (write-register conn #x0e ridx)
+  ;; Collect the data (with the hardware bug-fix):
+  (logior (write-register conn 0 0) ridx))
 
 (define (read-registers)
   (let ((a '()))
