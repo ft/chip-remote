@@ -56,7 +56,10 @@
            set-output-divider
            set-output-mode
            set-reference-divider
-           write-register))
+           write-eeprom
+           write-register
+           cdce-write-eeprom-locked-forever
+           cdce-write-eeprom-unlocked))
 
 (use-modules (bitops)
              (chip-remote protocol)
@@ -64,6 +67,23 @@
              (chip-remote devices ti cdce72010 messages)
              (chip-remote devices ti cdce72010 prg)
              (chip-remote devices ti cdce72010 validate))
+
+(define cdce-write-eeprom-locked-forever #xa03f)
+(define cdce-write-eeprom-unlocked #x1f)
+
+;; I'm not adding a function that writes the EEPROM locked: I've had something
+;; like that in very early versions, and locked the EEPROM of a device by
+;; accident. So, if you want to really really do it, use the constant defined
+;; above, and transmit it manually. Note, that you need to wait for at least
+;; 50ms, after writing EEPROM in either case!
+;;
+;; In the CDCE72010 datasheet (SCAS858B, the revision from August 2011), see
+;; table 4 on page 20 and the section "Writing to EEPROM" in page 21 for
+;; details.
+(define (write-eeprom conn)
+  (let ((reply (transmit conn cdce-write-eeprom-unlocked)))
+    (usleep 100000)
+    reply))
 
 (define (write-register conn ridx value)
   "Write VALUE to register RIDX.
