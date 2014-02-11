@@ -26,7 +26,7 @@
   :export (error-divider
            error-invalid-r-divider
            error-invalid-reg-index
-           error-mn-divider
+           error-mn-divider-value
            error-not-boolean
            error-output-index))
 
