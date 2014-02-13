@@ -207,10 +207,11 @@
     (car (expect-read reply '(int)))))
 
 (define (request-expects-ok conn request)
-  ((let ((reply (io-write conn request)))
-     (unless (string=? reply "OK")
-       (throw 'protocol-expected-ok request reply))
-     #t)))
+  (io-write conn request)
+  (let ((reply (io-read conn)))
+    (unless (string=? reply "OK")
+      (throw 'protocol-expected-ok request reply))
+    #t))
 
 (define (request-with-index request index)
   (string-concatenate (list request " " (int->hexstring index))))
