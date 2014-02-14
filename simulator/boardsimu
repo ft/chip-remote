@@ -41,6 +41,12 @@ sub cb_more;
     'PORTS' => { state => q{main},
                  code  => sub { $state = q{ports};
                                 return cb_ports(@_) } },
+    'INIT' => { state => q{main},
+                code => sub { return "OK" } },
+    'LINE' => { state => q{main},
+                code => sub { return "OK" } },
+    'SET' => { state => q{main},
+               code => sub { return "OK" } },
     'TRANSMIT' => { state => q{main},
                     code => sub { return "0" } },
     'MORE' => { state => [ qw{ features ports } ],
