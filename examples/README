@@ -1,0 +1,44 @@
+In this directory, you can find a number of example scripts, that illustrate
+how chip-remote may be used.
+
+  - cdce-decode.scm: Decode a set of register values from a CDCE72010 device
+    without connecting to a remote firmware.
+
+  - cdce-read-all-registers.scm: This is an entire script, that configures the
+    serial link to a remote firmware, connects to that remote firmware,
+    configures a configurable port of the remote firmware for use with Texas
+    Instrument's CDCE72010 device, reads all registers from the device and
+    finally decodes them into human-readable form.
+
+The following scripts are meant to illustrate how one might setup an
+environment to experiment with a device connected to a remote firmware.
+
+  - init-serial.scm: This uses guile-termios to configure a serial link to a
+    remote firmware.
+
+  - init-port.scm: Configures, initialises and focuses a port of a remote
+    firmware suitable for use with the CDCE72010 clock distribution chip.
+
+
+Here's how you'd use those:
+
+    scheme@(guile-user)> (define serial-device "/dev/ttyUSB0")
+    scheme@(guile-user)> (load "init-serial.scm")
+    $1 = #t
+    scheme@(guile-user)> (load "init-port.scm")
+    $2 = #t
+    scheme@(guile-user)> (define c (make-cr-connection serial-device)
+    scheme@(guile-user)> (io-open c)
+    $3 = #<input-output: /dev/ttyUSB0 /dev/ttyUSB0>
+    scheme@(guile-user)> (hi c)
+    $4 = #t
+    scheme@(guile-user)> (use-modules (chip-remote devices ti cdce72010))
+    scheme@(guile-user)> (set-m-divider c 200)
+    $5 = 0
+    scheme@(guile-user)> (read-register c 2)
+    $6 = 1744830466
+    scheme@(guile-user)> (number->string $6 16)
+    $7 = "68000002"
+
+
+At that point, you got a REPL to experiment with the device in question.
