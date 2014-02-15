@@ -3,11 +3,11 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices ti cdce72010 validate)
-  :export (divider?
-           mn-divider-value?
-           output-index?
-           r-divider?
-           register-index?))
+  #:export (divider?
+            mn-divider-value?
+            output-index?
+            r-divider?
+            register-index?))
 
 (define (divider? idx)
   (and (> idx 0)

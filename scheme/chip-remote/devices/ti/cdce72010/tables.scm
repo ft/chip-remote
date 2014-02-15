@@ -3,17 +3,17 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices ti cdce72010 tables)
-  :export (charge-pump-current-table
-           divider-table
-           factory-defaults
-           get-bits-for-divider
-           get-bits-for-output-mode
-           get-divider-value-by-bits
-           mn-phase-delay-table
-           lock-detect-window-table
-           lock-event-count-table
-           output-modes
-           register-content-table))
+  #:export (charge-pump-current-table
+            divider-table
+            factory-defaults
+            get-bits-for-divider
+            get-bits-for-output-mode
+            get-divider-value-by-bits
+            mn-phase-delay-table
+            lock-detect-window-table
+            lock-event-count-table
+            output-modes
+            register-content-table))
 
 (define factory-defaults
   '(#x002c0040

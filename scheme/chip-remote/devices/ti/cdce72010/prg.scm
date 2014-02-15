@@ -3,7 +3,9 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices ti cdce72010 prg)
-  :export (clear-device-power-down-bit
+  #:use-module (bitops)
+  #:use-module (chip-remote devices ti cdce72010 tables)
+  #:export (clear-device-power-down-bit
            clear-odiv-enable-bit
            clear-pll-power-down-bit
            set-bits-fbdiv
@@ -16,8 +18,6 @@
            set-odiv-enable-bit
            set-pll-power-down-bit))
 
-(use-modules (bitops)
-             (chip-remote devices ti cdce72010 tables))
 
 (define (set-bits-odiv regval divval)
   (set-bits regval (get-bits-for-divider divval) 7 17))

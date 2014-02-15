@@ -3,10 +3,10 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (bitops)
-  :export (bit-extract-width
-           clear-bits
-           one-bits
-           set-bits))
+  #:export (bit-extract-width
+            clear-bits
+            one-bits
+            set-bits))
 
 (define (one-bits width)
   (1- (ash 1 width)))

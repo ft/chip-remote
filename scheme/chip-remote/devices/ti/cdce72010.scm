@@ -19,34 +19,34 @@
 ;; will cause an error, because divider 9 does not exist on the device.
 
 (define-module (chip-remote devices ti cdce72010)
-  :export (decode-device
-           decode-register
-           disable-output-divider
-           enable-output-divider
-           export-registers
-           power-down-device
-           power-down-pll
-           power-up-device
-           power-up-pll
-           read-registers
-           read-register
-           set-feedback-divider
-           set-m-divider
-           set-n-divider
-           set-output-divider
-           set-output-mode
-           set-reference-divider
-           write-eeprom
-           write-register
-           cdce-write-eeprom-locked-forever
-           cdce-write-eeprom-unlocked))
+  #:use-module (bitops)
+  #:use-module (chip-remote protocol)
+  #:use-module (chip-remote devices ti cdce72010 decode)
+  #:use-module (chip-remote devices ti cdce72010 messages)
+  #:use-module (chip-remote devices ti cdce72010 prg)
+  #:use-module (chip-remote devices ti cdce72010 validate)
+  #:export (decode-device
+            decode-register
+            disable-output-divider
+            enable-output-divider
+            export-registers
+            power-down-device
+            power-down-pll
+            power-up-device
+            power-up-pll
+            read-registers
+            read-register
+            set-feedback-divider
+            set-m-divider
+            set-n-divider
+            set-output-divider
+            set-output-mode
+            set-reference-divider
+            write-eeprom
+            write-register
+            cdce-write-eeprom-locked-forever
+            cdce-write-eeprom-unlocked))
 
-(use-modules (bitops)
-             (chip-remote protocol)
-             (chip-remote devices ti cdce72010 decode)
-             (chip-remote devices ti cdce72010 messages)
-             (chip-remote devices ti cdce72010 prg)
-             (chip-remote devices ti cdce72010 validate))
 
 (define cdce-write-eeprom-locked-forever #xa03f)
 (define cdce-write-eeprom-unlocked #x1f)

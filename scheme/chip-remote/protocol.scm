@@ -3,23 +3,23 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote protocol)
-  :use-module (chip-remote io)
-  :use-module (srfi srfi-1)
-  :export (bye
-           features
-           focus
-           has-feature?
-           hi
-           init
-           line
-           lines
-           modes
-           port
-           ports
-           protocol-version
-           set
-           transmit
-           update-capabilities))
+  #:use-module (chip-remote io)
+  #:use-module (srfi srfi-1)
+  #:export (bye
+            features
+            focus
+            has-feature?
+            hi
+            init
+            line
+            lines
+            modes
+            port
+            ports
+            protocol-version
+            set
+            transmit
+            update-capabilities))
 
 (define (protocol-tokenize string)
   (string-tokenize string protocol-char-set))

@@ -3,17 +3,17 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices ti cdce72010 decode)
-  :export (decode-register-by-value
-           decode-specific-register-by-value
-           fuzz-register
-           pll-lock?
-           signal-exists?))
+  #:use-module (ice-9 format)
+  #:use-module (bitops)
+  #:use-module (chip-remote devices ti cdce72010 messages)
+  #:use-module (chip-remote devices ti cdce72010 tables)
+  #:use-module (chip-remote devices ti cdce72010 validate)
+  #:export (decode-register-by-value
+            decode-specific-register-by-value
+            fuzz-register
+            pll-lock?
+            signal-exists?))
 
-(use-modules (ice-9 format)
-             (bitops)
-             (chip-remote devices ti cdce72010 messages)
-             (chip-remote devices ti cdce72010 tables)
-             (chip-remote devices ti cdce72010 validate))
 
 (define (pll-lock? regval)
   (logbit? 10 regval))

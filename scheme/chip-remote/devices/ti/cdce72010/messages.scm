@@ -3,12 +3,12 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices ti cdce72010 messages)
-  :export (error-divider
-           error-invalid-r-divider
-           error-invalid-reg-index
-           error-mn-divider-value
-           error-not-boolean
-           error-output-index))
+  #:export (error-divider
+            error-invalid-r-divider
+            error-invalid-reg-index
+            error-mn-divider-value
+            error-not-boolean
+            error-output-index))
 
 (define (error-divider x)
   (display "`divider' needs to be an integer 1..8.\n")
