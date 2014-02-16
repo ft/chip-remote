@@ -4,6 +4,7 @@
 *.tmp
 *.orig
 *.o
+*.go
 *.a
 *.pro
 *.tar.*
