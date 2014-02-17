@@ -71,9 +71,6 @@ enum cr_port_modes {
     CR_MODE_INVALID
 };
 
-struct cr_mode_spi {
-};
-
 /**
  * Description of a line (or pin) within chip-remote
  *
