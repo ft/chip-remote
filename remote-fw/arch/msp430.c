@@ -97,6 +97,7 @@ XINTERRUPT(USART0RX_VECTOR, uart_rx_interrupt)
 {
     static int inputlen = 0;
     static int state = CR_RX_STATE_COPY;
+    uint8_t devnull;
 
     switch (state) {
     case CR_RX_STATE_COPY:
@@ -114,7 +115,8 @@ XINTERRUPT(USART0RX_VECTOR, uart_rx_interrupt)
         }
         break;
     default:
-        if (U0RXBUF == '\n') {
+        devnull = U0RXBUF;
+        if (devnull == '\n') {
             xcr_send_host("WTF Input too long and therefore ignored.");
             state = CR_RX_STATE_COPY;
         }
