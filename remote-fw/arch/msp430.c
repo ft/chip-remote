@@ -8,14 +8,29 @@
 
 #include "../chip-remote.h"
 #include "../platform.h"
+#include "../protocol.h"
+#include "../utils.h"
 #include "../config.msp430.h"
 
 #include "cr-msp430.h"
 
+#define SETUP_PIN_READ(mask) (BITMASK_CLEAR(P5DIR, mask))
+#define SETUP_PIN_WRITE(mask) (BITMASK_SET(P5DIR, mask))
+#define PIN_WRITE(mask, value) (value ? BITMASK_SET(P5OUT, mask) \
+                                      : BITMASK_CLEAR(P5OUT, mask))
+#define PIN_READ(mask) ((P5IN | mask) ? 1 : 0)
+
 int
-access_port1(struct cr_line *line, enum cr_access_mode mode, int value)
+access_port5(struct cr_line *line, enum cr_access_mode mode, int value)
 {
-    return 0;
+    if (mode == CR_ACCESS_READ) {
+        SETUP_PIN_READ(line->bitmask);
+        return PIN_READ(line->bitmask);
+    } else {
+        SETUP_PIN_WRITE(line->bitmask);
+        PIN_WRITE(line->bitmask, value);
+        return 0;
+    }
 }
 
 void
@@ -41,9 +56,24 @@ xcr_post_bye(void)
      */
 }
 
+#define SEND_BYTE(byte)                         \
+    do {                                        \
+        while (!(IFG1 & UTXIFG0))               \
+            /* NOP */;                          \
+        U0TXBUF = byte;                         \
+    } while (0)
+
 void
 xcr_send_host(char *buf)
 {
+    char *ptr;
+
+    ptr = buf;
+    while (*ptr != '\0') {
+        SEND_BYTE(*ptr);
+        ptr++;
+    }
+    SEND_BYTE('\n');
 }
 
 void
@@ -52,5 +82,41 @@ xcr_wait(uint32_t n)
     uint32_t i;
 
     for (i = 0; i < n; ++i)
-        /* NOP */;
+        asm(" nop");
+}
+
+#define CR_RX_STATE_COPY 0
+#define CR_RX_STATE_IGNORE 1
+
+#ifndef MSPGCC_BUILD
+/* Pragma for supporting TI's CodeComposerStudio */
+#pragma vector=USART0RX_VECTOR
+#endif /* NOT MSPGCC_BUILD */
+
+XINTERRUPT(USART0RX_VECTOR, uart_rx_interrupt)
+{
+    static int inputlen = 0;
+    static int state = CR_RX_STATE_COPY;
+
+    switch (state) {
+    case CR_RX_STATE_COPY:
+        if (inputlen >= CR_MAX_LINE) {
+            xcr_send_host(
+                "WTF Input too long! Ignoring everything until next newline!");
+            inputlen = 0;
+            state = CR_RX_STATE_IGNORE;
+        } else if (U0RXBUF == '\n') {
+            rxbuf[inputlen] = '\0';
+            inputlen = 0;
+            cr_set_line_pending(1);
+        } else {
+            rxbuf[inputlen] = U0RXBUF;
+            inputlen++;
+        }
+        break;
+    default:
+        if (U0RXBUF == '\n')
+            state = CR_RX_STATE_COPY;
+    }
+    return;
 }
