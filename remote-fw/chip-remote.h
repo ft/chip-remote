@@ -102,7 +102,7 @@ struct cr_line {
     cr_pin_mask bitmask;
     char rolestr[CR_MAX_ROLE_STRING + 1];
     enum cr_pin_role role;
-    size_t index;
+    int index;
     int mutable_p;
 };
 
