@@ -15,9 +15,9 @@
 (define tty (open-io-file serial-device))
 (define ts (make-termios-struct))
 
-;; This is 8N1 with 921600bd symbol-rate.
+;; This is 8N1 with 19200bd symbol-rate.
 (cf-make-raw! ts)
-(cf-set-speed! ts termios-B921600)
+(cf-set-speed! ts termios-B19200)
 (tc-set-attr tty ts)
 
 (close-port tty)
