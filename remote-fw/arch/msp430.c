@@ -101,8 +101,7 @@ XINTERRUPT(USART0RX_VECTOR, uart_rx_interrupt)
     switch (state) {
     case CR_RX_STATE_COPY:
         if (inputlen >= CR_MAX_LINE) {
-            xcr_send_host(
-                "WTF Input too long! Ignoring everything until next newline!");
+            /* Input too long! Ignoring everything until next newline! */
             inputlen = 0;
             state = CR_RX_STATE_IGNORE;
         } else if (U0RXBUF == '\n') {
@@ -115,8 +114,10 @@ XINTERRUPT(USART0RX_VECTOR, uart_rx_interrupt)
         }
         break;
     default:
-        if (U0RXBUF == '\n')
+        if (U0RXBUF == '\n') {
+            xcr_send_host("WTF Input too long and therefore ignored.");
             state = CR_RX_STATE_COPY;
+        }
     }
     return;
 }
