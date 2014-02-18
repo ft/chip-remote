@@ -18,7 +18,7 @@
 #define SETUP_PIN_WRITE(mask) (BITMASK_SET(P5DIR, mask))
 #define PIN_WRITE(mask, value) (value ? BITMASK_SET(P5OUT, mask) \
                                       : BITMASK_CLEAR(P5OUT, mask))
-#define PIN_READ(mask) ((P5IN | mask) ? 1 : 0)
+#define PIN_READ(mask) ((P5IN & mask) ? 1 : 0)
 
 int
 access_port5(struct cr_line *line, enum cr_access_mode mode, int value)
