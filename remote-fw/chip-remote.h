@@ -40,8 +40,8 @@ enum cr_access_mode {
 };
 
 struct cr_state {
-    int cr_active;
-    int line_pending;
+    volatile int cr_active;
+    volatile int line_pending;
     int fport;
 };
 
