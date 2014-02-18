@@ -135,7 +135,7 @@ cr_spi_transmit(struct cr_port *port, uint32_t data)
             scan = (uint32_t)1 << (map->frame_length - (i+1));
 
         /* Setup the current bit on MOSI */
-        cr_line_write(map->mosi, (data & scan));
+        cr_line_write(map->mosi, (data & scan) ? 1 : 0);
 
         if (map->clk_phase_delay) {
             spi_wait(CR_T_SPI_BIT_DURATION / 2);
