@@ -108,7 +108,7 @@ end of the function."
                (< ridx 16))
     (throw 'register-index-out-of-range ridx))
   ;; Tell the chip which register's data to send:
-  (write-register conn #x0e ridx)
+  (write-register conn #x0e (ash ridx 4))
   ;; Collect the data (with the hardware bug-fix):
   (logior (write-register conn 0 0) ridx))
 
