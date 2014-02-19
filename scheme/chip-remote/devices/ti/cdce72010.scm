@@ -73,14 +73,17 @@ address (it actually uses the full four bits, to implement things like reading
 registers and writing the current configuration to EEPROM). Hence, you write 32
 Bits to it via SPI LSB-first, with data aligned like this:
 
-  vvvvvvvvvvvvvvvvvvvvvvvvvvvvAAAA   (v: value; A: address)"
+  vvvvvvvvvvvvvvvvvvvvvvvvvvvvAAAA   (v: value; A: address)
+
+The VALUE parameter to this function it the whole 32 bits, in which the lower
+four Bits are replaced by the register index from RIDX."
   (unless (and (>= value 0)
-               (< value (ash 1 28)))
+               (< value (ash 1 32)))
     (throw 'value-out-of-range value))
   (unless (and (>= ridx 0)
                (< ridx 16))
     (throw 'register-index-out-of-range ridx))
-  (transmit conn (logior (ash value 4) ridx)))
+  (transmit conn (logior (clear-bits value 4 0) ridx)))
 
 (define (read-register conn ridx)
   "Read the value of register RIDX.
