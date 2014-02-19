@@ -383,6 +383,8 @@ more colloquial term for the project, this specification is part of, is
     - Minor Version: 0
     - Micro Version: 0
 
+  Current status of the specification: Draft
+
 ** Major Version Number
 
    A mismatch in the major version number indicates differences in the
