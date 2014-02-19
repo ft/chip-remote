@@ -273,15 +273,15 @@ end of the function."
   (change-power-down-pll conn clear-pll-power-down-bit))
 
 (define (change-power-down-device conn with-what)
-  (let ((device-pd-reg 10))
+  (let ((device-pd-reg 12))
     (write-register conn device-pd-reg
                          (with-what (read-register conn device-pd-reg)))))
 
 (define (power-down-device conn)
-  (change-power-down-device conn set-device-power-down-bit))
+  (change-power-down-device conn clear-device-power-down-bit))
 
 (define (power-up-device conn)
-  (change-power-down-device conn clear-device-power-down-bit))
+  (change-power-down-device conn set-device-power-down-bit))
 
 (define (decode-register conn idx)
   (cond

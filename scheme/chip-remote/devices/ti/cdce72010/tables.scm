@@ -381,6 +381,7 @@
      (1 . aux-in-present)
      (1 . vcxo-in-present)
      (1 . pll-lock-status)
+     (1 . device-sleep)
      (1 . software-hold-reset)
      (1 . general-test-mode-enable)
      (3 . revision-control)
