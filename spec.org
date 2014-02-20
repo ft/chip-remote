@@ -435,7 +435,7 @@ more colloquial term for the project, this specification is part of, is
 
 * Full Copyright Statement
 
-   Copyright (c) 2013 Frank Terbeck <ft@bewatermyfriend.org>.
+   Copyright (c) 2013-2014 Frank Terbeck <ft@bewatermyfriend.org>.
    All Rights Reserved.
 
    This document and translations of it may be copied and furnished to
