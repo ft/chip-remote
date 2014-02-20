@@ -286,9 +286,16 @@
 (define (port-mode str)
   (return-allowed-symbol '(spi) str))
 
+(define (reply->boolean str)
+  (let ((reply (reply->symbol str)))
+    (case reply
+      ((true on) #t)
+      ((false off) #f)
+      (else (throw 'protocol-not-a-boolean str reply)))))
+
 (define parse-port-table
   `((bit-order . ,port-bit-order)
-    (clk-phase-delay . ,hexstring->int)
+    (clk-phase-delay . ,reply->boolean)
     (clk-polarity . ,port-clk-polarity)
     (cs-lines . ,hexstring->int)
     (cs-polarity . ,port-cs-polarity)

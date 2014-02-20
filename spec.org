@@ -354,8 +354,9 @@ more colloquial term for the project, this specification is part of, is
       - "CLK-POLARITY <RISING-EDGE|FALLING-EDGE>": Indicates whether the clock
         line triggers data transfer on its rising or its falling edge.
 
-      - "CLK-PHASE-DELAY <0|1>": A value of "1" indicates that phase delay is
-        used on the clock line. A value if "0" indicates that it is not used.
+      - "CLK-PHASE-DELAY <FALSE|TRUE>": A value of "TRUE" indicates that phase
+        delay is used on the clock line. A value if "FALSE" indicates that it
+        is not used.
 
       - "BIT-ORDER <MSB-FIRST|LSB-FIRST>": Indicates whether serial data
         transmission is done starting that the most-significant bit or at the
