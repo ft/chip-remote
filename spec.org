@@ -388,26 +388,18 @@ more colloquial term for the project, this specification is part of, is
 ** Major Version Number
 
    A mismatch in the major version number indicates differences in the
-   protocol's basics as described in section [[sec:proto-basics]]. Communication
-   should not be attempted under any circumstances.
+   protocol's basics as described in section [[sec:proto-basics]].
 
 ** Minor Version Number
 
    Changes in the minor version number indicate changes in previously existing
-   features or the list of mandatory implemented features. Communication might
-   be possible, depending on the client-side protocol implementation. Using a
-   client-side implementation of the correct minor version number is
-   recommended in any case.
+   features or the list of mandatory implemented features.
 
 ** Micro Version Number
 
    Changes in the micro version number indicate the addition of new optional
    features within the protocol or changes in the specification that do not
-   require changes in the protocols in the implementation. Communication with
-   client-side protocol implementations of a lower micro version number should
-   work. With higher micro version number on the client side, there will be
-   issues with the newly added features should they be used without querying
-   for their availability first.
+   require changes in the protocols in the implementation.
 
    For best interoperability, the client-side's protocol version and the remote
    controller's protocol version should match in all three parts of the version
