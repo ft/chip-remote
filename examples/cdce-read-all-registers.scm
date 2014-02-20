@@ -115,10 +115,7 @@
        (clk-polarity . rising-edge)
        ;; The Chip-Select (in the datasheet: latch-enable) polarity is active
        ;; low (which also means, that it idles high).
-       (cs-polarity . active-low)
-       ;; In this example, let's assume that there is only one chip connected
-       ;; to the firmware's port indexed by ‘port-index’.
-       (cs-lines . 1)))
+       (cs-polarity . active-low)))
 
 ;; After a port's mode is configured, its lines (or pins or whatever you want
 ;; to call them) can be assigned a job. Let's do that quickly:

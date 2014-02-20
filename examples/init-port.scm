@@ -23,8 +23,7 @@
        (bit-order . lsb-first)
        (clk-phase-delay . 1)
        (clk-polarity . rising-edge)
-       (cs-polarity . active-low)
-       (cs-lines . 1)))
+       (cs-polarity . active-low)))
 
 (map (lambda (x) (line connection port-index (cdr x) (car x)))
      `((cs . ,pin-chip-select)
