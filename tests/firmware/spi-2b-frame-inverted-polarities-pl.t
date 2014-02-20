@@ -12,7 +12,7 @@ cr_test_title q{SPI: 2 Bit frame with default settings works};
 
 cr_run_script [ spi_default_setup,
                 cr_request("SET 0 FRAME-LENGTH 2", "OK"),
-                cr_request("SET 0 CLK-POLARITY IDLE-HIGH", "OK"),
+                cr_request("SET 0 CLK-POLARITY FALLING-EDGE", "OK"),
                 cr_request("SET 0 CS-POLARITY ACTIVE-HIGH", "OK"),
                 cr_request_io("INIT 0", "OK",
                           [ cs_low, clk_high ] ),

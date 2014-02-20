@@ -351,8 +351,8 @@ more colloquial term for the project, this specification is part of, is
       - "CS-POLARITY <ACTIVE-HIGH|ACTIVE-LOW>": Indicates whether the
         chip-select lines operate as active-high or active-low pins.
 
-      - "CLK-POLARITY <IDLE-HIGH|IDLE-LOW>": Indicates whether or not the clock
-        line idles in high or low state.
+      - "CLK-POLARITY <RISING-EDGE|FALLING-EDGE>": Indicates whether the clock
+        line triggers data transfer on its rising or its falling edge.
 
       - "CLK-PHASE-DELAY <0|1>": A value of "1" indicates that phase delay is
         used on the clock line. A value if "0" indicates that it is not used.

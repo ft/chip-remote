@@ -22,7 +22,7 @@ cr_run_script [
                "RATE 0 FIXED",
                "BIT-ORDER MSB-FIRST",
                "CLK-PHASE-DELAY TRUE",
-               "CLK-POLARITY IDLE-LOW",
+               "CLK-POLARITY RISING-EDGE",
                "CS-LINES 1 FIXED",
                "CS-POLARITY ACTIVE-LOW",
                "FRAME-LENGTH 8") ];

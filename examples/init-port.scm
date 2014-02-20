@@ -22,7 +22,7 @@
        (frame-length . 32)
        (bit-order . lsb-first)
        (clk-phase-delay . 1)
-       (clk-polarity . idle-low)
+       (clk-polarity . rising-edge)
        (cs-polarity . active-low)
        (cs-lines . 1)))
 

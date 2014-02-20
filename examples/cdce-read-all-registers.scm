@@ -112,7 +112,7 @@
        ;; The datasheet recommends a phase delay.
        (clk-phase-delay . 1)
        ;; The CLK idles low, which means that it trigger on its rising edge.
-       (clk-polarity . idle-low)
+       (clk-polarity . rising-edge)
        ;; The Chip-Select (in the datasheet: latch-enable) polarity is active
        ;; low (which also means, that it idles high).
        (cs-polarity . active-low)

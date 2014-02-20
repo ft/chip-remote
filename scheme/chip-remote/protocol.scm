@@ -278,7 +278,7 @@
   (return-allowed-symbol '(msb-first lsb-first) str))
 
 (define (port-clk-polarity str)
-  (return-allowed-symbol '(idle-high idle-low) str))
+  (return-allowed-symbol '(rising-edge falling-edge) str))
 
 (define (port-cs-polarity str)
   (return-allowed-symbol '(active-high active-low) str))

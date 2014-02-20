@@ -179,8 +179,8 @@ cr_spi_init(struct cr_port *port)
         { NULL, -1 }
     };
     static struct cr_symb_tab clk_polarity_tab[] = {
-        { "IDLE-LOW", 0 },
-        { "IDLE-HIGH", 1 },
+        { "RISING-EDGE", 0 },
+        { "FALLING-EDGE", 1 },
         { NULL, -1 }
     };
     static struct cr_symb_tab bit_order_tab[] = {
@@ -268,7 +268,7 @@ cr_spi_params(struct cr_port *port)
 
     cr_param_init(new, 0, "BIT-ORDER", "MSB-FIRST");
     cr_param_init(new, 1, "CLK-PHASE-DELAY", "TRUE");
-    cr_param_init(new, 2, "CLK-POLARITY", "IDLE-LOW");
+    cr_param_init(new, 2, "CLK-POLARITY", "RISING-EDGE");
     n = port->lines - 3;
     uint2str((uint32_t)n, buf);
     cr_param_init(new, 3, "CS-LINES", buf);

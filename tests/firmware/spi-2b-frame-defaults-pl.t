@@ -22,9 +22,8 @@ cr_run_script [ spi_default_setup,
                 # CLK-PHASE-DELAY being active means, that MOSI is set, then
                 # the firmware waits half a CLK cycle and then toggles CLK.
                 #
-                # CLK-POLARITY determines two things: IDLE-LOW means that the
-                # pin is low while idling, which means that its rising edge
-                # latches data.
+                # CLK-POLARITY determines which of the two edges (rising or
+                # falling) latches data.
                 #
                 # The simulator version of the firmware currently alternates
                 # between 0 and one, when reading from pins. So, the returned
