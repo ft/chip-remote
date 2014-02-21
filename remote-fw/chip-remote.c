@@ -203,6 +203,10 @@ cr_in_conv_process(void)
     cr_split_request(rxbuf, &words);
     switch (state) {
     case CR_SINGLE_LINE:
+        if (cr_word_eq(&words, 0, "HI")) {
+            cr_fail("Unexpected command");
+            return 0;
+        }
         curreq = cr_string_to_request(&words, 0);
         if (words.count == 0) {
             cr_fail("Empty request");
@@ -223,8 +227,10 @@ cr_in_conv_process(void)
         } else
             requests[curreq].cb(0, &words);
 
-        if (curreq == REQUEST_BYE)
+        if (curreq == REQUEST_BYE) {
             xcr_post_bye();
+            return 1;
+        }
 
         break;
     case CR_MULTI_LINE:
