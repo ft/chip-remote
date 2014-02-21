@@ -205,11 +205,10 @@ this:
    (minor . 42)
    (micro . 666))"
   (io-write conn "VERSION")
-  (zip2 '(major minor micro)
-        (cdr (with-read-raw-string (conn reply)
-              (push-capability-and-return
-               conn 'version (expect-read reply
-                                          '("VERSION" int int int)))))))
+  (push-capability-and-return
+   conn 'version (zip2 '(major minor micro)
+                       (cdr (with-read-raw-string (conn reply)
+                             (expect-read reply '("VERSION" int int int)))))))
 
 ;; A set of commands return more than one reply. The host triggers the 2nd to
 ;; the N-th reply by saying "MORE". The board will reply with DONE when there
