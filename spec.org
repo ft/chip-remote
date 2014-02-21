@@ -47,7 +47,7 @@ more colloquial term for the project, this specification is part of, is
 
     A Port is an interface between the Remote Controller and a Slave Device.
     Ports consist of one or more lines and are set to a Mode that specifies its
-    specific operation.
+    operation.
 
 *** Modes
 
@@ -83,7 +83,8 @@ more colloquial term for the project, this specification is part of, is
    The remote controller of the system is never engages communication with the
    client[fn:listen-extension]. Every transmission in one direction must be met
    with a reply in the opposite direction. In case a request does not trigger a
-   meaningful response value, the string "OK" shall be used.
+   meaningful response value, the string "OK" shall be used to acknowledge that
+   the request was processed.
 
    Requests that trigger multiline replies shall only transmit the first line
    of the reply and only transmit with subsequent lines when requested using
@@ -96,9 +97,12 @@ more colloquial term for the project, this specification is part of, is
      - integers
 
    Strings are used as literal requests, responses and symbolic values.
+
    Integers represent numeric values within the protocol. They are transmitted
    in strings of hexadecimal digits. The "a-f" range of a hexadecimal digit may
-   be represented in upper or lower case and may also be mixed.
+   be represented in upper or lower case and may also be mixed. The byte-order
+   used in the hexadecimal strings representing integers is big-endian, with
+   the most significant digit being placed at the left.
 
    Lines of the protocol consist of multiple tokens. A line is split into
    tokens if one or more consecutive ASCII space bytes (hex: 0x20) are
@@ -146,8 +150,8 @@ more colloquial term for the project, this specification is part of, is
 
      - "WTF [reason]": Like "OK", but used whenever the request in question
        could not be carried out. The reason the request was rejected may be
-       returned as the second token of the reply's line. Returning a reason is
-       optional.
+       returned as the remaining tokens of the reply's line. Returning a reason
+       is optional.
 
      - "MALFORMED-COMMAND": Used in case the last command could not be
        processed.
@@ -186,7 +190,7 @@ more colloquial term for the project, this specification is part of, is
 
 *** BYE Request
 
-    This request take no argument.
+    This request takes no argument.
 
     This reply puts the remote controller back into Idle State. The remote
     controller's reply to this request shall be:
@@ -195,7 +199,7 @@ more colloquial term for the project, this specification is part of, is
 
 *** VERSION Request
 
-    This request take no argument.
+    This request takes no argument.
 
     This request returns the protocol version the remote controller implements.
     The reply shall be formatted like this:
@@ -203,24 +207,23 @@ more colloquial term for the project, this specification is part of, is
       - "VERSION <int> <int> <int>"
 
     Where the three integers describe major, minor and micro version of the
-    implemented protocol in the order specified.
+    implemented protocol in the order specified (see section
+    [[sec:version-number]] for details).
 
 *** FEATURES Request
 
-    This request take no argument.
+    This request takes no argument.
 
     The FEATURES request returns a multiline reply. Each line names one
     optional protocol feature the remote controller implements.
 
 *** MODES Request
 
-    This request take no argument.
+    This request takes no argument.
 
     The MODES request returns a multiline reply. Each line names one mode the
-    remote controller's ports may be set to dynamically (in case the port's
-    mode is configurable) or statically (in case the port's mode is fixed).
-
-    Possible modes are documented in section [[sec:port-modes]].
+    remote controller implements. Possible modes are documented in section
+    [[sec:port-modes]].
 
 *** TRANSMIT Request
 
@@ -243,6 +246,8 @@ more colloquial term for the project, this specification is part of, is
     Default focus is implementation defined.
 
 *** PORTS Request
+
+    This request takes no argument.
 
     The PORTS request returns a multiline reply. The lines shall contain the
     following:
@@ -272,7 +277,10 @@ more colloquial term for the project, this specification is part of, is
         symbol-rate.
 
     All properties that return a "FIXED" as their last argument are read-only
-    values. The request may return other mode-specific properties.
+    values.
+
+    The request may return other mode-specific properties (see section
+    [[secport-modes]]).
 
 *** LINES Request
 
@@ -307,7 +315,8 @@ more colloquial term for the project, this specification is part of, is
     <port:int> is the index of the port to configure. <key> is the property's
     name to set. <value> is the new value for the property.
 
-    Non-mode-specific parameters that the SET request may be able to modify:
+    Non-mode-specific parameters that the SET request is able to modify (unless
+    marked as FIXED):
 
       - MODE: Sets the port's mode of operation to <value>.
 
@@ -330,8 +339,9 @@ more colloquial term for the project, this specification is part of, is
     This request takes no argument.
 
     This request causes the next line of a multiline reply to be returned. When
-    there are no more lines left in the multiline reply, the request will return
-    a "DONE" reply and the remote controller will return to its previous state.
+    there are no more replies left in a multiline reply, the request will
+    return a "DONE" reply and the remote controller will return to its previous
+    state.
 
 * Port Modes <<sec:port-modes>>
 
@@ -374,7 +384,7 @@ more colloquial term for the project, this specification is part of, is
     - MISO: Master-In-Slave-Out, the unidirectional SPI line from slave to
       master.
 
-* Version
+* Version <<sec:version-number>>
 
   This documents specifies version 2.0.0 of the protocol. The VERSION request
   would therefore cause a "VERSION 2 0 0" reply with remote controllers, that
@@ -414,8 +424,8 @@ more colloquial term for the project, this specification is part of, is
 
    The protocol's major version number starts at version "2" in this
    specification. The reason for that is that version "1" was a previous
-   protocol, that was never specified. That version used to use a lot more
-   device-specific logic in the remote controller.
+   protocol, that was never specified. That version used in connection with an
+   a lot more device-specific logic in the remote controller.
 
    In order to make the protocol more generic and to reduce the complexity of
    the remote controller's firmware, any device-specific operation was shifted
