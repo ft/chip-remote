@@ -5,19 +5,13 @@ simple interfaces like SPI or I2C. In prototyping, revising and testing, it is
 useful to be able to control these chips from a computer, preferably via a high
 level programming language.
 
-With SPI, I2C and so on, you don't have readily available interfaces to general
-personal computers. That is why `chip-remote' actually defines an ASCII protocol
-of which the remote part can be implemented in low-cost micro-controllers, that
-can be equipped with cheap USB/UART converters. That way you can talk to the
-micro-controller, that looks like a serial device to your OS. You will be able
-to open and write to that device almost as if you are writing to a file (except
-for serial-line setup like baud-rate, parity generation, word width, number of
-stop-bits and all that).
+This project specifies a protocol, that a common personal computer can talk to
+a controller, that can actually talk to such configurable slave devices. The
+protocol design attempts to support multiple configurable chips on different
+interfaces with a single controller connection.
 
-The protocol design attempts to support multiple configurable chips on different
-interfaces on a single USB/micro-controller connection. Much of the protocol is
-supposed to be optional for micro-controllers to implement, to be able to the
-most low-cost micro-controllers available.
+Much of the protocol is optional, to be able to implement compliant firmwares
+for the most low-cost micro-controllers available.
 
 The reference client implementation is done in Guile scheme. Scheme is a very
 high-level programming language of the Lisp variety, that has (even though it is
@@ -25,12 +19,10 @@ one of the oldest programming languages available) a host of very powerful
 features. Guile scheme is a free software implementation of the language, with a
 lot of extensions, that is readily available on many platforms.
 
-The remote-board implemenation has been done in C in the past; and a more
-featureful reference implemenation is in the planning phase. The target language
-is going to be ANSI C, with as little micro-controller dependent code as
-possible.
-
-All of this is still VERY MUCH work in progress.
+The remote-board firmware implementation has been done in C. It implements all
+features of the protocol specification. A prototype board featuring an
+MSP430f1481 micro controller from Texas Instruments has been built and
+successfully tested.
 
 
 Current contents:
@@ -73,9 +65,21 @@ Current contents:
   - Makefile: In chip-remote, the top-level Makefile is only used run the
     test-suite.
 
+  - compile: A helper script to byte-compile the client library, that is
+    written in GNU Guile Scheme. "make byte-compile" uses this file.
+
   - cr-valgrind: This is a wrapper around ‘valgrind’ with a set of options
     suitable for chip-remote's ‘remote-fw’ example firmware, to find possible
     memory leaks.
+
+  - install: This installs the project to the system. "make install" uses this.
+
+  - install-scheme: This script installs the client library to the system's
+    module path.
+
+  - LICENCE: The file contains the licence used with all software of the
+    project. Note that “spec.org” uses a different licence that is contained at
+    the bottom of the file.
 
   - README: This file...
 
