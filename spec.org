@@ -409,10 +409,13 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 *** SPI Addressing
 
     The ADDRESS request with the SPI protocol controls the state of an SPI
-    port's chip-select lines. The request's argument is interpreted as a
-    bit-mask representing the intended values of all chip-select lines. The
-    lines are mapped to the bit-mask in order of their index with CS:0 being
-    mapped to the least significant bit of the address.
+    port's chip-select lines for the following data transmissions. The
+    request's argument is interpreted as a bit-mask representing the intended
+    values of all chip-select lines. The lines are mapped to the bit-mask in
+    order of their index with CS:0 being mapped to the least significant bit of
+    the address.
+
+    Default SPI chip-select addressing is implementation dependent.
 
 * Version <<sec:version-number>>
 
