@@ -79,11 +79,8 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 *** Roles
 
     Roles are specific to Modes. A Role specifies which part of a Mode a given
-    Line implements. One common Role is the clock signal of any given
-    communication scheme, commonly called CLK.
-
-    If a Role is made up of multiple lines, then lines are indexed in the
-    following format:
+    Line implements. If a Role is made up of multiple lines, then lines are
+    indexed in the following format:
 
       - "<line-name>:<int>": <line-name> is the name specifing the base role a
         line uses. <int> is the role index of the specific line. Indexing
