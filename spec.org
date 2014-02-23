@@ -187,6 +187,13 @@ more colloquial term for the project, this specification is part of, is
 
    The Active State is the remote controller's most basic state during
    operation. All controlling requests will be processed in this state.
+*** ADDRESS Request
+
+    The ADDRESS request takes one non-optional argument. The request is used to
+    handle slave addressing with protocols, that employ explicit addressing
+    schemes. The actual effect of the request is dependent of the mode the
+    given port is set to. Modes that use in-band addressing may chose to ignore
+    ADDRESS requests altogether. See section [[sec:port-modes]] for details.
 
 *** BYE Request
 
@@ -197,53 +204,12 @@ more colloquial term for the project, this specification is part of, is
 
       - "Have a nice day."
 
-*** VERSION Request
-
-    This request takes no argument.
-
-    This request returns the protocol version the remote controller implements.
-    The reply shall be formatted like this:
-
-      - "VERSION <int> <int> <int>"
-
-    Where the three integers describe major, minor and micro version of the
-    implemented protocol in the order specified (see section
-    [[sec:version-number]] for details).
-
 *** FEATURES Request
 
     This request takes no argument.
 
     The FEATURES request returns a multiline reply. Each line names one
     optional protocol feature the remote controller implements.
-
-*** MODES Request
-
-    This request takes no argument.
-
-    The MODES request returns a multiline reply. Each line names one mode the
-    remote controller implements. Possible modes are documented in section
-    [[sec:port-modes]].
-
-*** ADDRESS Request
-
-    The ADDRESS request takes one non-optional argument. The request is used to
-    handle slave addressing with protocols, that employ explicit addressing
-    schemes. The actual effect of the request is dependent of the mode the
-    given port is set to. Modes that use in-band addressing may chose to ignore
-    ADDRESS requests altogether. See section [[sec:port-modes]] for details.
-
-*** TRANSMIT Request
-
-    The TRANSMIT request takes one non-optional argument: The value to transmit
-    to the currently focused port. The value has to be an integer. In case the
-    given integer is larger than the frame-length configured for the port's
-    current mode, it is truncated to that size. In case it is smaller, the
-    value is padded with zeros towards the most-significant bit.
-
-    The request returns an integer, which contains a possible reply from the
-    attached slave device. If no meaningful reply is received, the return value
-    shall be set to 0.
 
 *** FOCUS Request
 
@@ -252,6 +218,44 @@ more colloquial term for the project, this specification is part of, is
     carried out by using the specified port.
 
     Default focus is implementation defined.
+
+*** INIT Request
+
+    The INIT request takes one non-optional argument: The index of the port to
+    initialise. This request is required initially for configurable ports and
+    then after any changes with the port's properties.
+
+*** LINES Request
+
+    The LINES request takes one non-optional argument: In index if the port to
+    query information about.
+
+    This request returns a multiline reply. Each line shows to which role the
+    line of a given index assigned to:
+
+      - "<int> <role-string> [FIXED]"
+
+    Roles are specific to modes. The default role assignment of a port is
+    implementation defined. If FIXED is specified, the role assignment of that
+    line cannot be changed.
+
+*** LINE Request
+
+    The LINE request takes three non-optional arguments:
+
+      - "LINE <port:int> <line:int> <role>"
+
+    <port:int> specifies the index of the port to configure. <line:int>
+    specifies the index of the line within the port to configure. <role>
+    describes the role within the active mode the line is to be set to.
+
+*** MODES Request
+
+    This request takes no argument.
+
+    The MODES request returns a multiline reply. Each line names one mode the
+    remote controller implements. Possible modes are documented in section
+    [[sec:port-modes]].
 
 *** PORTS Request
 
@@ -290,30 +294,6 @@ more colloquial term for the project, this specification is part of, is
     The request may return other mode-specific properties (see section
     [[secport-modes]]).
 
-*** LINES Request
-
-    The LINES request takes one non-optional argument: In index if the port to
-    query information about.
-
-    This request returns a multiline reply. Each line shows to which role the
-    line of a given index assigned to:
-
-      - "<int> <role-string> [FIXED]"
-
-    Roles are specific to modes. The default role assignment of a port is
-    implementation defined. If FIXED is specified, the role assignment of that
-    line cannot be changed.
-
-*** LINE Request
-
-    The LINE request takes three non-optional arguments:
-
-      - "LINE <port:int> <line:int> <role>"
-
-    <port:int> specifies the index of the port to configure. <line:int>
-    specifies the index of the line within the port to configure. <role>
-    describes the role within the active mode the line is to be set to.
-
 *** SET Request
 
     The SET request takes three non-optional arguments:
@@ -328,11 +308,30 @@ more colloquial term for the project, this specification is part of, is
 
       - MODE: Sets the port's mode of operation to <value>.
 
-*** INIT Request
+*** TRANSMIT Request
 
-    The INIT request takes one non-optional argument: The index of the port to
-    initialise. This request is required initially for configurable ports and
-    then after any changes with the port's properties.
+    The TRANSMIT request takes one non-optional argument: The value to transmit
+    to the currently focused port. The value has to be an integer. In case the
+    given integer is larger than the frame-length configured for the port's
+    current mode, it is truncated to that size. In case it is smaller, the
+    value is padded with zeros towards the most-significant bit.
+
+    The request returns an integer, which contains a possible reply from the
+    attached slave device. If no meaningful reply is received, the return value
+    shall be set to 0.
+
+*** VERSION Request
+
+    This request takes no argument.
+
+    This request returns the protocol version the remote controller implements.
+    The reply shall be formatted like this:
+
+      - "VERSION <int> <int> <int>"
+
+    Where the three integers describe major, minor and micro version of the
+    implemented protocol in the order specified (see section
+    [[sec:version-number]] for details).
 
 ** Multiline State
 
