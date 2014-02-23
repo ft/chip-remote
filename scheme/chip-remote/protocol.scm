@@ -6,6 +6,7 @@
   #:use-module (chip-remote io)
   #:use-module (srfi srfi-1)
   #:export (bye
+            client-version
             features
             focus
             has-feature?
@@ -20,6 +21,11 @@
             set
             transmit
             update-capabilities))
+
+;; Protocol version of this implementation
+(define client-version '((major . 2)
+                         (minor . 0)
+                         (micro . 0)))
 
 (define (protocol-tokenize string)
   "Take STRING and return a list of tokens."
