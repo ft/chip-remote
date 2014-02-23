@@ -25,9 +25,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 ** Basic Structure
 
-   A RCCEP system consists of a controlling client, a remote controller and one
-   or more ports to which slave devices are attached. The client talks to the
-   controller using the protocol described herein.
+   A RCCEP system consists of a controlling client and a remote controller that
+   possesses one or more ports to which slave devices are attached to it. The
+   client talks to the controller using the protocol described herein.
 
 *** Controlling Client
 
