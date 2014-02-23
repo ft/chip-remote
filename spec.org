@@ -171,10 +171,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
      - "OK": It is used whenever a request does not prompt another more
        meaningful reply.
 
-     - "WTF [reason]": Like "OK", but used whenever the request in question
-       could not be carried out. The reason the request was rejected may be
-       returned as the remaining tokens of the reply's line. Returning a reason
-       is optional.
+     - "WTF [reason]": Used if a request could not be carried out. The reason
+       the request was rejected may be returned as the remaining tokens of the
+       reply's line. Returning a reason is optional.
 
      - "MALFORMED-REQUEST [reason]": Used in case the last request could not be
        processed. The reply may provide a reason as th rest of the reply's
