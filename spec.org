@@ -135,6 +135,8 @@ prototyping, revisioning and trouble-shooting with hardware projects.
    The protocol reserves the namespace of requests starting with an ASCII plus
    sign (hex: 0x2b) for implementation defined purposes.
 
+   Messages starting with an ASCII colon (hex: 3a) are reserved for later use.
+
 * Protocol Details
 
   The very basics of the protocol are specified in section [[sec:proto-basics]].
