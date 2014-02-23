@@ -419,7 +419,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 * Version <<sec:version-number>>
 
-  This documents specifies version 2.0.0 of the protocol. The VERSION request
+  This document specifies version 2.0.0 of the protocol. The VERSION request
   would therefore cause a "VERSION 2 0 0" reply with remote controllers, that
   implement this version of the protocol. In detail that means:
 
