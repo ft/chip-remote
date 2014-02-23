@@ -25,21 +25,21 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 ** Basic Structure
 
-   A RCCEP system consists of a controlling client and a remote controller that
-   possesses one or more ports to which slave devices are attached to it. The
-   client talks to the controller using the protocol described herein.
+   An RCCEP system consists of a controlling client and a remote controller
+   that possesses one or more ports to which slave devices are attached to it.
+   The client talks to the controller using the protocol described herein.
 
 *** Controlling Client
 
-    The Controlling Client is one of the subscribers of a RCCEP communication.
+    The Controlling Client is one of the subscribers of an RCCEP communication.
     It is a logic connected to the Remote Controller, that sends requests and
     processes replies.
 
 *** Remote Controller
 
-    The Remote Controller is the second subscriber of a RCCEP communication. It
-    is a logic the Controlling Client can connect to. It receives requests and
-    emits replies.
+    The Remote Controller is the second subscriber of an RCCEP communication.
+    It is a logic the Controlling Client can connect to. It receives requests
+    and emits replies.
 
     It is equipped with a number of ports it uses to turn client requests into
     electronic signaling to control electronic parts attached to the port as a
