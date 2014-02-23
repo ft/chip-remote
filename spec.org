@@ -485,8 +485,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
    The limited permissions granted above are perpetual and will not be
    revoked by the authors or their successors or assigns.
 
-   This document and the information contained herein is provided on an
-   “AS IS” basis and THE AUTHORS DISCLAIMS ALL WARRANTIES, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
-   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES
-   OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+   This document and the information contained herein is provided on
+   an “AS IS” basis and THE AUTHORS DISCLAIM ALL WARRANTIES, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE
+   OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY
+   IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR
+   PURPOSE.
