@@ -4,15 +4,22 @@
 #+OPTIONS: num:t toc:3
 #+ATTR_ASCII: width 79
 
+#+LATEX: \vspace{2cm}
+
 #+BEGIN_ABSTRACT
-This documents specifies the text protocol for communication between a client
+
+This document specifies a text protocol for communication between a client
 (commonly a personal computer) and a remote controller, for the purpose of
 interfacing configurable electronic parts such as analog digital converters or
-clock distribution blocks with connections such as SPI or I2C via much more
-common personal computer interfaces (in particular the universal serial bus). A
-more colloquial term for the project, this specification is part of, is
-`chip-remote'.
+clock distribution blocks with slave interface protocols such as SPI or I2C via
+more common personal computer interfaces (in particular the universal serial
+bus or TCP/IP links). The goal is to specify an interface on top of which
+systems can be built, that enable tasks like experimentation, rapid
+prototyping, revisioning and trouble-shooting with hardware projects.
+
 #+END_ABSTRACT
+
+#+LATEX: \newpage
 
 * RCCEP Model
 
