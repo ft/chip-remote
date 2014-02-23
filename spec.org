@@ -73,8 +73,8 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 *** Lines
 
     A Line is a single electronic signaling device, that represents a logical
-    value. In microcontroller terms a line is often called a "pin". Every line
-    is assigned a Role.
+    value. In microcontroller terms a line is often called a "pin". A line can
+    be assigned a Role to implement a Mode.
 
 *** Roles
 
