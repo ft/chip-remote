@@ -133,7 +133,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
      - Multiline State
 
    The protocol reserves the namespace of requests starting with an ASCII plus
-   sign (hey: 0x2b) for implementation defined purposes.
+   sign (hex: 0x2b) for implementation defined purposes.
 
 * Protocol Details
 
