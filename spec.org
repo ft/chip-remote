@@ -97,10 +97,10 @@ prototyping, revisioning and trouble-shooting with hardware projects.
    maximum length of any such line is limited to 127 bytes.
 
    The remote controller of the system is never engages communication with the
-   client[fn:listen-extension]. Every transmission in one direction must be met
-   with a reply in the opposite direction. In case a request does not trigger a
-   meaningful response value, the string "OK" shall be used to acknowledge that
-   the request was processed.
+   client. Every transmission in one direction must be met with a reply in the
+   opposite direction. In case a request does not trigger a meaningful response
+   value, the string "OK" shall be used to acknowledge that the request was
+   processed.
 
    Requests that trigger multiline replies shall only transmit the first line
    of the reply and only transmit with subsequent lines when requested using
@@ -137,12 +137,6 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
    The protocol reserves the namespace of requests starting with an ASCII plus
    sign (hey: 0x2b) for implementation defined purposes.
-
-* Footnotes
-
-[fn:listen-extension] It is possible, that later versions of the protocol
-  introduce a listen-mode for the client. Even in that case, the client will
-  initialise that mode, never the controller.
 
 * Protocol Details
 
