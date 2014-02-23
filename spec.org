@@ -225,6 +225,14 @@ more colloquial term for the project, this specification is part of, is
     remote controller implements. Possible modes are documented in section
     [[sec:port-modes]].
 
+*** ADDRESS Request
+
+    The ADDRESS request takes one non-optional argument. The request is used to
+    handle slave addressing with protocols, that employ explicit addressing
+    schemes. The actual effect of the request is dependent of the mode the
+    given port is set to. Modes that use in-band addressing may chose to ignore
+    ADDRESS requests altogether. See section [[sec:port-modes]] for details.
+
 *** TRANSMIT Request
 
     The TRANSMIT request takes one non-optional argument: The value to transmit
@@ -383,6 +391,14 @@ more colloquial term for the project, this specification is part of, is
 
     - MISO: Master-In-Slave-Out, the unidirectional SPI line from slave to
       master.
+
+*** SPI Addressing
+
+    The ADDRESS request with the SPI protocol controls the state of an SPI
+    port's chip-select lines. The request's argument is interpreted as a
+    bit-mask representing the intended values of all chip-select lines. The
+    lines are mapped to the bit-mask in order of their index with CS:0 being
+    mapped to the least significant bit of the address.
 
 * Version <<sec:version-number>>
 
