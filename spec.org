@@ -408,8 +408,7 @@ more colloquial term for the project, this specification is part of, is
     - Major Version: 2
     - Minor Version: 0
     - Micro Version: 0
-
-  Current status of the specification: Draft
+    - Current status of the specification: Draft
 
 ** Major Version Number
 
