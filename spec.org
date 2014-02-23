@@ -281,7 +281,8 @@ prototyping, revisioning and trouble-shooting with hardware projects.
       - "PORTS <int>": Where <int> indicates the number of ports available on
         the remote controller.
 
-      - "FOCUS <int>": Where <int> indicates the currently focused port.
+      - "FOCUS <int|NONE>": Where <int> indicates the currently focused port.
+        If no port is currently focused, the string "NONE" is returned.
 
 *** PORT Request
 
