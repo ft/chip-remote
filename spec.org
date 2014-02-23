@@ -102,6 +102,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
      - strings
      - integers
+     - booleans
 
    Strings are used as literal requests, responses and symbolic values.
 
@@ -110,6 +111,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
    be represented in upper or lower case and may also be mixed. The byte-order
    used in the hexadecimal strings representing integers is big-endian, with
    the most significant digit being placed at the left.
+
+   In boolean contexts, the symbol "TRUE" represents a true value; and the
+   symbol "FALSE" represents a false value.
 
    Lines of the protocol consist of multiple tokens. A line is split into
    tokens if one or more consecutive ASCII space bytes (hex: 0x20) are
@@ -378,9 +382,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
       - "CLK-POLARITY <RISING-EDGE|FALLING-EDGE>": Indicates whether the clock
         line triggers data transfer on its rising or its falling edge.
 
-      - "CLK-PHASE-DELAY <FALSE|TRUE>": A value of "TRUE" indicates that phase
-        delay is used on the clock line. A value if "FALSE" indicates that it
-        is not used.
+      - "CLK-PHASE-DELAY <boolean>": A true value indicates that phase delay is
+        used on the clock line. Otherwise a false value indicates that it is
+        not used.
 
       - "BIT-ORDER <MSB-FIRST|LSB-FIRST>": Indicates whether serial data
         transmission is done starting that the most-significant bit or at the
