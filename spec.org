@@ -190,7 +190,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 *** HI Request
 
-    This request take no argument.
+    This request takes no argument.
 
     The "HI" request puts the remote controller into Active State. The reply to
     this request shall be:
