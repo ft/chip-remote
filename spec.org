@@ -126,6 +126,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
      - Active State
      - Multiline State
 
+   The protocol reserves the namespace of requests starting with an ASCII plus
+   sign (hey: 0x2b) for implementation defined purposes.
+
 * Footnotes
 
 [fn:listen-extension] It is possible, that later versions of the protocol
