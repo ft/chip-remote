@@ -159,7 +159,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
    These are the generic replies of the protocol:
 
-     - "OK": It is used whenever a request does not prompt another more
+     - "OK": This reply is used whenever a request does not prompt another more
        meaningful reply.
 
      - "WTF [reason]": Used if a request could not be carried out. The reason
