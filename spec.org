@@ -50,6 +50,15 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     A Slave Device is an electronic part with a configuration interface, that
     is connected to a port of the Remote Controller.
 
+*** Requests
+
+    A request is a message from the controlling client to the remote
+    controller.
+
+*** Replies
+
+    A reply is a message from the remote controller to the controlling client.
+
 *** Ports
 
     A Port is an interface between the Remote Controller and a Slave Device.
