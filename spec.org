@@ -176,7 +176,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
        returned as the remaining tokens of the reply's line. Returning a reason
        is optional.
 
-     - "MALFORMED-COMMAND": Used in case the last command could not be
+     - "MALFORMED-REQUEST": Used in case the last request could not be
        processed.
 
      - "BROKEN-VALUE [value]": Used if an unexpected value was encountered. The
