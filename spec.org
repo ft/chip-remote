@@ -183,7 +183,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
        broken value may be retured as the second token of the reply's line.
        Returning the offending value is optional.
 
-     - "VALUE-OUT-OF-RANGE <value>": Used if a numeric value was encountered,
+     - "VALUE-OUT-OF-RANGE [value]": Used if a numeric value was encountered,
        but its value does not fall into the valid range for the request in
        question. The invalid value may be retured as the second token of the
        reply's line. Returning the offending value is optional.
