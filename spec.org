@@ -135,7 +135,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
    The protocol reserves the namespace of requests starting with an ASCII plus
    sign (hex: 0x2b) for implementation defined purposes.
 
-   Messages starting with an ASCII colon (hex: 3a) are reserved for later use.
+   Messages starting with an ASCII colon (hex: 3a) are reserved for the
+   optional Hashed-Messages extension of the protocol (see section
+   [[sec:hashed-messages]] for details).
 
 * Protocol Details
 
@@ -234,6 +236,25 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     carried out by using the specified port.
 
     Default focus is implementation defined.
+
+*** HASHED Request
+
+    This request takes one optional boolean argument.
+
+    The HASHED request enables or disables the Hashed-Messages extension (see
+    section [[sec:hashed-messages]] for details). The boolean argument to the
+    request decides whether or not the extension is enabled by the request. A
+    true value enables the extension; conversely, a false value disables it.
+    The reply to the request depends on the value of that argument as well:
+
+      - ~TRUE~: ~:e0aa021e21dddbd6d8cecec71e9cf564:OK~
+      - ~FALSE~: ~OK~
+
+    This is true independently of the active state of the extension.
+
+    If called without argument, the controller will return either ~TRUE~ or
+    ~FALSE~ depending on whether or not the extension is currently active in
+    the controller.
 
 *** INIT Request
 
@@ -418,6 +439,29 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     the address.
 
     Default SPI chip-select addressing is implementation dependent.
+
+* Hashed-Messages Extension <<sec:hashed-messages>>
+
+  The Hashed-Messages extension changes the usual layout of messages, that are
+  exchanged between the subscribers of the protocol in a way that the original
+  messages (ORIGMSG) are prefixed by two ASCII colons (hex: 0x3a) in between of
+  which the MD5 sum of the original message is contained:
+
+    - ~:md5(ORIGMSG):ORIGMSG~
+
+  An MD5 sum (as defined by RFC 1321) is a 128-bit fingerprint of a message. In
+  the Hashed-Messages extension these 128 Bits are encoded as 32 hexadecimal
+  digits (the format is the same as with the integer encoding of the protocol
+  as described in section [[sec:proto-basics]]; leading zeros may not be left out,
+  however).
+
+  The maximum length of the original message (as described in section
+  [[sec:proto-basics]]) is not changed by the extension. That means, that messages
+  that adhere to the extension may be a maximum of 161 (= 2 + 32 + 127)
+  characters long. The HI and BYE requests do not produce md5-prefixed replies.
+
+  The extension can be enabled, disabled and its state within the controller
+  can be queried by the HASHED request.
 
 * Version <<sec:version-number>>
 
