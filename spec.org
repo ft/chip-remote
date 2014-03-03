@@ -11,10 +11,10 @@
 This document specifies a text protocol for communication between a client
 (commonly a personal computer) and a remote controller, for the purpose of
 interfacing configurable electronic parts such as analog digital converters or
-clock distribution blocks with slave interface protocols such as SPI or I2C via
-more common personal computer interfaces (in particular the universal serial
-bus or TCP/IP links). The goal is to specify an interface on top of which
-systems can be built, that enable tasks like experimentation, rapid
+clock distribution blocks with slave interface protocols such as ~SPI~ or ~I2C~
+via more common personal computer interfaces (in particular the universal
+serial bus or TCP/IP links). The goal is to specify an interface on top of
+which systems can be built, that enable tasks like experimentation, rapid
 prototyping, revisioning and trouble-shooting with hardware projects.
 
 #+END_ABSTRACT
@@ -25,105 +25,107 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 ** Basic Structure <<sec:basic-structure>>
 
-   An RCCEP system consists of a controlling client and a remote controller
-   that possesses one or more ports to which slave devices are attached to it.
-   The client talks to the controller using the protocol described herein.
+   An ~RCCEP~ system consists of a /controlling client/ and a /remote
+   controller/ that possesses one or more /Ports/ to which /Slave Devices/ are
+   attached to it. The client talks to the controller using the protocol
+   described herein.
 
 *** Controlling Client
 
-    The Controlling Client is one of the subscribers of an RCCEP communication.
-    It is a logic connected to the Remote Controller, that sends requests and
-    processes replies.
+    The /Controlling Client/ is one of the subscribers of an ~RCCEP~
+    communication. It is a logic connected to the /Remote Controller/, that
+    sends requests and processes replies.
 
 *** Remote Controller
 
-    The Remote Controller is the second subscriber of an RCCEP communication.
-    It is a logic the Controlling Client can connect to. It receives requests
-    and emits replies.
+    The /Remote Controller/ is the second subscriber of an ~RCCEP~
+    communication. It is a logic the /Controlling Client/ can connect to. It
+    receives /Requests/ and emits /Replies/.
 
-    It is equipped with a number of ports it uses to turn client requests into
-    electronic signaling to control electronic parts attached to the port as a
-    slave.
+    It is equipped with a number of /Ports/ it uses to turn client requests
+    into electronic signaling to control electronic parts attached to the port
+    as a slave.
 
 *** Slave Device
 
-    A Slave Device is an electronic part with a configuration interface, that
-    is connected to a port of the Remote Controller.
+    A /Slave Device/ is an electronic part with a configuration interface, that
+    is connected to a port of the /Remote Controller/.
 
 *** Requests
 
-    A request is a message from the controlling client to the remote
-    controller.
+    A /Request/ is a message from the /Controlling Client/ to the /Remote
+    Controller/.
 
 *** Replies
 
-    A reply is a message from the remote controller to the controlling client.
+    A /Reply/ is a message from the /Remote Controller/ to the /Controlling
+    Client/.
 
 *** Ports
 
-    A Port is an interface between the Remote Controller and a Slave Device.
-    Ports consist of one or more lines and are set to a Mode that specifies its
-    operation.
+    A /Port/ is an interface between the /Remote Controller/ and a /Slave
+    Device/. /Ports/ consist of one or more /Lines/ and are set to a /Mode/
+    that specifies its operation.
 
 *** Modes
 
-    Modes specify how a Port communicates with a Slave Device. Possible Modes
-    are documented in section [[sec:port-modes]].
+    /Modes/ specify how a /Port/ communicates with a /Slave Device/. Possible
+    /Modes/ are documented in section [[sec:port-modes]].
 
 *** Lines
 
-    A Line is a single electronic signaling device, that represents a logical
-    value. In microcontroller terms a line is often called a "pin". A line can
-    be assigned a Role to implement a Mode.
+    A /Line/ is a single electronic signaling device, that represents a logical
+    value. In microcontroller terms a line is often called a “pin”. A /Line/
+    can be assigned a /Role/ to implement a /Mode/.
 
 *** Roles
 
-    Roles are specific to Modes. A Role specifies which part of a Mode a given
-    Line implements. If a Role is made up of multiple lines, then lines are
-    indexed in the following format:
+    /Roles/ are specific to /Modes/. A /Role/ specifies which part of a /Mode/
+    a given /Line/ implements. If a /Role/ is made up of multiple /Lines/, then
+    /Lines/ are indexed in the following format:
 
-      - "<line-name>:<int>": <line-name> is the name specifing the base role a
-        line uses. <int> is the role index of the specific line. Indexing
-        starts at zero. Examples would be "DATA:0", "DATA:1" etc.; in this case
-        "DATA" and "DATA:0" are equivalent.
+      - ~<line-name>:<int>~: ~<line-name>~ is the name specifing the base role
+        a line uses. ~<int>~ is the role index of the specific line. Indexing
+        starts at zero. Examples would be ~DATA:0~, ~DATA:1~ etc.; in which
+        case ~DATA~ and ~DATA:0~ are equivalent.
 
 ** Protocol Basics <<sec:proto-basics>>
 
 *** Protocol Character Set
 
-    Communication is done in seven bit ASCII strings and only its printable
-    subset (the byte range from 0x20 to 0x7E) shall be used to constitute
-    messages of the protocol. The only other character allowed in an RCCEP
+    Communication is done in seven bit ~ASCII~ strings and only its /printable
+    subset/ (the byte range from ~0x20~ to ~0x7E~) shall be used to constitute
+    messages of the protocol. The only other character allowed in an ~RCCEP~
     communication channel is the line-feed character (see section
     [[sec:proto-basics-messages]] for details).
 
 *** Messages <<sec:proto-basics-messages>>
 
-    The RCCEP protocol itself is of line-based design. Any message between the
-    subscribers of an RCCEP communication is a string of characters of its
-    character set, that end in an ASCII line-feed (hex: 0x0a). The line-feed
-    itself is not part of the message. The maximum length of any such line is
-    limited to 127 bytes.
+    The ~RCCEP~ protocol itself is of line-based design. Any message between
+    the subscribers of an ~RCCEP~ communication is a string of characters of
+    its character set, that end in an ASCII line-feed (hex: ~0x0a~). The
+    line-feed itself is not part of the message. The maximum length of any such
+    message is limited to 127 bytes.
 
     Messages of the protocol (/Requests/ and /Replies/; see section
     [[sec:basic-structure]] for details) consist of multiple tokens. A line is
-    split into tokens if one or more consecutive ASCII space bytes (hex: 0x20)
-    are encountered. Other ASCII whitespace bytes are *NOT* considered for
-    tokenisation. The first token of a message (/Request/ and /Reply/)
-    identifies the type of message.
+    split into tokens if one or more consecutive ~ASCII~ space bytes (hex:
+    ~0x20~) are encountered. Other ~ASCII~ whitespace bytes are *not*
+    considered for tokenisation. The first token of a message (/Request/ and
+    /Reply/) identifies the type of message.
 
 *** Message Exchange
 
     The remote controller of the system is never engages communication with the
     client. Every transmission in one direction must be met with a reply in the
     opposite direction. In case a request does not trigger a meaningful
-    response value, the string "OK" shall be used to acknowledge that the
+    response value, the string ~OK~ shall be used to acknowledge that the
     request was processed.
 
     Requests that trigger multiline replies shall only transmit the first line
     of the reply and only transmit with subsequent lines when requested using
-    the "MORE" request. In case there are no more lines in a multiline
-    response, the final response shall be "DONE".
+    the ~MORE~ request. In case there are no more lines in a multiline
+    response, the final response shall be ~DONE~.
 
 *** Encoding of Data Types
 
@@ -136,14 +138,14 @@ prototyping, revisioning and trouble-shooting with hardware projects.
      Strings are used as literal requests, responses and symbolic values.
 
      Integers represent numeric values within the protocol. They are
-     transmitted in strings of hexadecimal digits. The "a-f" range of a
+     transmitted in strings of hexadecimal digits. The ~a-f~ range of a
      hexadecimal digit may be represented in upper or lower case and may also
      be mixed. The byte-order used in the hexadecimal strings representing
-     integers is big-endian, with the most significant digit being placed at
+     integers is /big-endian/, with the most significant digit being placed at
      the left.
 
-     In boolean contexts, the symbol "TRUE" represents a true value; and the
-     symbol "FALSE" represents a false value.
+     In boolean contexts, the symbol ~TRUE~ represents a true value; and the
+     symbol ~FALSE~ represents a false value.
 
 *** Protocol States
 
@@ -157,19 +159,19 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 **** Implementation Defined Purposes
 
-    The protocol reserves the namespace of requests starting with an ASCII plus
-    sign (hex: 0x2b) for implementation defined purposes.
+    The protocol reserves the namespace of requests starting with an ~ASCII~
+    plus sign (hex: ~0x2b~) for implementation defined purposes.
 
 **** Hashed Messages
 
-    Messages starting with an ASCII colon (hex: 3a) are reserved for the
-    optional Hashed-Messages extension of the protocol (see section
+    Messages starting with an ~ASCII~ colon (hex: ~0x3a~) are reserved for the
+    optional /Hashed-Messages/ extension of the protocol (see section
     [[sec:hashed-messages]] for details).
 
 * Protocol Details
 
   The very basics of the protocol are specified in section [[sec:proto-basics]].
-  They always apply. This section specifies all requests and replies the
+  They /always/ apply. This section specifies all requests and replies the
   protocol can exchange.
 
 ** Mandatory Requests
@@ -177,40 +179,40 @@ prototyping, revisioning and trouble-shooting with hardware projects.
    The protocol defines the following requests as mandatory for every
    controller implementation to implement:
 
-     - HI
-     - BYE
-     - TRANSMIT
-     - VERSION
-     - FEATURES
+     - ~HI~
+     - ~BYE~
+     - ~VERSION~
+     - ~FEATURES~
+     - ~TRANSMIT~
 
    All other requests are optional. A list of optional features a remote
-   controller implements can be queried using the "FEATURES" request.
+   controller implements can be queried using the ~FEATURES~ request.
 
 ** Types of Replies
 
    These are the generic replies of the protocol:
 
-     - "OK": This reply is used whenever a request does not prompt another more
+     - "~OK~": This reply is used whenever a request does not prompt another more
        meaningful reply.
 
-     - "WTF [reason]": Used if a request could not be carried out. The reason
+     - "~WTF [reason]~": Used if a request could not be carried out. The reason
        the request was rejected may be returned as the remaining tokens of the
        reply's line. Returning a reason is optional.
 
-     - "MALFORMED-REQUEST [reason]": Used in case the last request could not be
+     - "~MALFORMED-REQUEST [reason]~": Used in case the last request could not be
        processed. The reply may provide a reason as th rest of the reply's
        tokens. Returning the reason is optional.
 
-     - "BROKEN-VALUE [value]": Used if an unexpected value was encountered. The
+     - "~BROKEN-VALUE [value]~": Used if an unexpected value was encountered. The
        broken value may be retured as the second token of the reply's line.
        Returning the offending value is optional.
 
-     - "VALUE-OUT-OF-RANGE [value]": Used if a numeric value was encountered,
+     - "~VALUE-OUT-OF-RANGE [value]~": Used if a numeric value was encountered,
        but its value does not fall into the valid range for the request in
        question. The invalid value may be retured as the second token of the
        reply's line. Returning the offending value is optional.
 
-     - "DONE": Used as the final reply at the end of a multiline reply.
+     - "~DONE~": Used as the final reply at the end of a multiline reply.
 
    Other replies are request-dependent. Their format is documented with the
    specific request.
@@ -223,43 +225,44 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
     This request takes no argument.
 
-    The "HI" request puts the remote controller into Active State. The reply to
-    this request shall be:
+    The ~HI~ request puts the remote controller into /Active State/. The reply
+    to this request shall be:
 
-      - "Hi there, stranger."
+      - "~Hi there, stranger.~"
 
 ** Active State
 
-   The Active State is the remote controller's most basic state during
+   The /Active State/ is the remote controller's most basic state during
    operation. All controlling requests will be processed in this state.
+
 *** ADDRESS Request
 
-    The ADDRESS request takes one non-optional argument. The request is used to
-    handle slave addressing with protocols, that employ explicit addressing
+    The ~ADDRESS~ request takes one non-optional argument. The request is used
+    to handle slave addressing with protocols, that employ explicit addressing
     schemes. The actual effect of the request is dependent of the mode the
     given port is set to. Modes that use in-band addressing may chose to ignore
-    ADDRESS requests altogether. See section [[sec:port-modes]] for details.
+    ~ADDRESS~ requests altogether. See section [[sec:port-modes]] for details.
 
 *** BYE Request
 
     This request takes no argument.
 
-    This reply puts the remote controller back into Idle State. The remote
+    This reply puts the remote controller back into /Idle State/. The remote
     controller's reply to this request shall be:
 
-      - "Have a nice day."
+      - "~Have a nice day.~"
 
 *** FEATURES Request
 
     This request takes no argument.
 
-    The FEATURES request returns a multiline reply. Each line names one
+    The ~FEATURES~ request returns a multiline reply. Each line names one
     optional protocol feature the remote controller implements.
 
 *** FOCUS Request
 
-    The FOCUS request takes one non-optional argument: The index of the port to
-    focus. Focussing a port means that subsequent data transmissions are
+    The ~FOCUS~ request takes one non-optional argument: The index of the port
+    to focus. Focussing a port means that subsequent data transmissions are
     carried out by using the specified port.
 
     Default focus is implementation defined.
@@ -268,7 +271,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
     This request takes one optional boolean argument.
 
-    The HASHED request enables or disables the Hashed-Messages extension (see
+    The ~HASHED~ request enables or disables the Hashed-Messages extension (see
     section [[sec:hashed-messages]] for details). The boolean argument to the
     request decides whether or not the extension is enabled by the request. A
     true value enables the extension; conversely, a false value disables it.
@@ -285,75 +288,73 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 *** INIT Request
 
-    The INIT request takes one non-optional argument: The index of the port to
-    initialise. This request is required initially for configurable ports and
-    then after any changes with the port's properties.
+    The ~INIT~ request takes one non-optional argument: The index of the port
+    to initialise. This request is required initially for configurable ports
+    and then after any changes with the port's properties.
 
 *** LINES Request
 
-    The LINES request takes one non-optional argument: In index if the port to
-    query information about.
+    The ~LINES~ request takes one non-optional argument: In index if the port
+    to query information about.
 
     This request returns a multiline reply. Each line shows to which role the
     line of a given index assigned to:
 
-      - "<int> <role-string> [FIXED]"
+      - "~<int> <role-string> [FIXED]~"
 
     Roles are specific to modes. The default role assignment of a port is
-    implementation defined. If FIXED is specified, the role assignment of that
-    line cannot be changed.
+    implementation defined. If ~FIXED~ is specified, the role assignment of
+    that line cannot be changed.
 
 *** LINE Request
 
-    The LINE request takes three non-optional arguments:
+    The ~LINE~ request takes three non-optional arguments:
 
-      - "LINE <port:int> <line:int> <role>"
+      - "~LINE <port:int> <line:int> <role>~"
 
-    <port:int> specifies the index of the port to configure. <line:int>
-    specifies the index of the line within the port to configure. <role>
+    ~<port:int>~ specifies the index of the port to configure. ~<line:int>~
+    specifies the index of the line within the port to configure. ~<role>~
     describes the role within the active mode the line is to be set to.
 
 *** MODES Request
 
-    This request takes no argument.
-
-    The MODES request returns a multiline reply. Each line names one mode the
-    remote controller implements. Possible modes are documented in section
-    [[sec:port-modes]].
+    This request takes no argument. The ~MODES~ request returns a multiline
+    reply. Each line names one mode the remote controller implements. Possible
+    modes are documented in section [[sec:port-modes]].
 
 *** PORTS Request
 
     This request takes no argument.
 
-    The PORTS request returns a multiline reply. The lines shall contain the
+    The ~PORTS~ request returns a multiline reply. The lines shall contain the
     following:
 
-      - "PORTS <int>": Where <int> indicates the number of ports available on
+      - "~PORTS <int>~": Where <int> indicates the number of ports available on
         the remote controller.
 
-      - "FOCUS <int|NONE>": Where <int> indicates the currently focused port.
-        If no port is currently focused, the string "NONE" is returned.
+      - "~FOCUS <int|NONE>~": Where ~<int>~ indicates the currently focused
+        port. If no port is currently focused, the string ~NONE~ is returned.
 
 *** PORT Request
 
-    The PORT request takes one non-optional argument: The index of the port to
+    The ~PORT~ request takes one non-optional argument: The index of the port to
     query information about.
 
     This request returns a multiline reply. The lines contain key-value pairs
     of properties for the port in question. These are the generic properties
     that may be returned:
 
-      - "LINES <int> [FIXED]": <int> defines the number of lines the port has
-        access to.
+      - "~LINES <int> [FIXED]~": ~<int>~ defines the number of lines the port
+        has access to.
 
-      - "MODE <mode-string> [FIXED]": Indicates the mode the port is currently
-        running in.
+      - "~MODE <mode-string> [FIXED]~": Indicates the mode the port is
+        currently running in.
 
-      - "RATE <int> [FIXED]": Indicates the symbol-rate with which the port
+      - "~RATE <int> [FIXED]~": Indicates the symbol-rate with which the port
         operates. A value of zero indicates an implementation-defined default
         symbol-rate.
 
-    All properties that return a "FIXED" as their last argument are read-only
+    All properties that return a ~FIXED~ as their last argument are read-only
     values.
 
     The request may return other mode-specific properties (see section
@@ -361,29 +362,29 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 *** SET Request
 
-    The SET request takes three non-optional arguments:
+    The ~SET~ request takes three non-optional arguments:
 
-      - "SET <port:int> <key> <value>"
+      - "~SET <port:int> <key> <value>~"
 
-    <port:int> is the index of the port to configure. <key> is the property's
-    name to set. <value> is the new value for the property.
+    ~<port:int>~ is the index of the port to configure. ~<key>~ is the
+    property's name to set. ~<value>~ is the new value for the property.
 
-    Non-mode-specific parameters that the SET request is able to modify (unless
-    marked as FIXED):
+    Non-mode-specific parameters that the ~SET~ request is able to modify
+    (unless marked as ~FIXED~):
 
-      - MODE: Sets the port's mode of operation to <value>.
+      - ~MODE~: Sets the port's mode of operation to ~<value>~.
 
 *** TRANSMIT Request
 
-    The TRANSMIT request takes one non-optional argument: The value to transmit
-    to the currently focused port. The value has to be an integer. In case the
-    given integer is larger than the frame-length configured for the port's
-    current mode, it is truncated to that size. In case it is smaller, the
-    value is padded with zeros towards the most-significant bit.
+    The ~TRANSMIT~ request takes one non-optional argument: The value to
+    transmit to the currently focused port. The value has to be an integer. In
+    case the given integer is larger than the frame-length configured for the
+    port's current mode, it is truncated to that size. In case it is smaller,
+    the value is padded with zeros towards the most-significant bit.
 
     The request returns an integer, which contains a possible reply from the
     attached slave device. If no meaningful reply is received, the return value
-    shall be set to 0.
+    shall be set to ~0~.
 
 *** VERSION Request
 
@@ -392,11 +393,11 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     This request returns the protocol version the remote controller implements.
     The reply shall be formatted like this:
 
-      - "VERSION <int> <int> <int>"
+      - "~VERSION <int> <int> <int>~"
 
     Where the three integers describe major, minor and micro version of the
-    implemented protocol in the order specified (see section
-    [[sec:version-number]] for details).
+    implemented protocol in the order specified (see section [[sec:version-number]]
+    for details).
 
 ** Multiline State
 
@@ -404,7 +405,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
    entered. The format of the actual lines is specific to the request and is
    specified alongside it. The request's initial reply will be the first line
    of the multiline reply. Subsequent replies must be requested using the
-   "MORE" request.
+   ~MORE~ request.
 
 *** MORE Request
 
@@ -412,7 +413,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
     This request causes the next line of a multiline reply to be returned. When
     there are no more replies left in a multiline reply, the request will
-    return a "DONE" reply and the remote controller will return to its previous
+    return a ~DONE~ reply and the remote controller will return to its previous
     state.
 
 * Port Modes <<sec:port-modes>>
@@ -421,85 +422,86 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 *** SPI Specific Properties
 
-    What follows is a list of properties the PORT request may return with ports
-    configured for SPI mode.
+    What follows is a list of properties the ~PORT~ request may return with
+    ports configured for ~SPI~ mode.
 
-      - "FRAME-LENGTH <int>": Indicates the number of bits that are used per
+      - ~FRAME-LENGTH <int>~: Indicates the number of bits that are used per
         transmission.
 
-      - "CS-LINES <int>": Indicates the number of chip-select lines the port
+      - ~CS-LINES <int>~: Indicates the number of chip-select lines the port
         offers.
 
-      - "CS-POLARITY <ACTIVE-HIGH|ACTIVE-LOW>": Indicates whether the
+      - ~CS-POLARITY <ACTIVE-HIGH|ACTIVE-LOW>~: Indicates whether the
         chip-select lines operate as active-high or active-low pins.
 
-      - "CLK-POLARITY <RISING-EDGE|FALLING-EDGE>": Indicates whether the clock
+      - ~CLK-POLARITY <RISING-EDGE|FALLING-EDGE>~: Indicates whether the clock
         line triggers data transfer on its rising or its falling edge.
 
-      - "CLK-PHASE-DELAY <boolean>": A true value indicates that phase delay is
+      - ~CLK-PHASE-DELAY <boolean>~: A true value indicates that phase delay is
         used on the clock line. Otherwise a false value indicates that it is
         not used.
 
-      - "BIT-ORDER <MSB-FIRST|LSB-FIRST>": Indicates whether serial data
+      - ~BIT-ORDER <MSB-FIRST|LSB-FIRST>~: Indicates whether serial data
         transmission is done starting that the most-significant bit or at the
         least-significant bit.
 
 *** SPI Line Roles
 
-    - CLK: Clock signal of the SPI bus
+    - ~CLK~: Clock signal of the ~SPI~ bus
 
-    - CS: Chip-Select; this may be a multi-line role.
+    - ~CS~: Chip-Select; this may be a multi-line role.
 
-    - MOSI: Master-Out-Slave-In, the unidirectional SPI line from master to
+    - ~MOSI~: Master-Out-Slave-In, the unidirectional ~SPI~ line from master to
       slave.
 
-    - MISO: Master-In-Slave-Out, the unidirectional SPI line from slave to
+    - ~MISO~: Master-In-Slave-Out, the unidirectional ~SPI~ line from slave to
       master.
 
 *** SPI Addressing
 
-    The ADDRESS request with the SPI protocol controls the state of an SPI
-    port's chip-select lines for the following data transmissions. The
+    The ~ADDRESS~ request with the ~SPI~ protocol controls the state of an
+    ~SPI~ port's chip-select lines for the following data transmissions. The
     request's argument is interpreted as a bit-mask representing the intended
     values of all chip-select lines. The lines are mapped to the bit-mask in
-    order of their index with CS:0 being mapped to the least significant bit of
-    the address.
+    order of their index with ~CS:0~ being mapped to the least significant bit
+    of the address.
 
-    Default SPI chip-select addressing is implementation dependent.
+    Default ~SPI~ chip-select addressing is implementation dependent.
 
 * Hashed-Messages Extension <<sec:hashed-messages>>
 
   The Hashed-Messages extension changes the usual layout of messages, that are
   exchanged between the subscribers of the protocol in a way that the original
-  messages (ORIGMSG) are prefixed by two ASCII colons (hex: 0x3a) in between of
-  which the MD5 sum of the original message is contained:
+  messages (~ORIGMSG~) are prefixed by two ~ASCII~ colons (hex: ~0x3a~) in
+  between of which the ~MD5~ sum of the original message is contained:
 
     - ~:md5(ORIGMSG):ORIGMSG~
 
-  An MD5 sum (as defined by RFC 1321) is a 128-bit fingerprint of a message. In
-  the Hashed-Messages extension these 128 Bits are encoded as 32 hexadecimal
-  digits (the format is the same as with the integer encoding of the protocol
-  as described in section [[sec:proto-basics]]; leading zeros may not be left out,
-  however).
+  An ~MD5~ sum (as defined by ~RFC-1321~) is a 128-bit fingerprint of a
+  message. In the Hashed-Messages extension these 128 Bits are encoded as 32
+  hexadecimal digits (the format is the same as with the integer encoding of
+  the protocol as described in section [[sec:proto-basics]]; *leading zeros may not
+  be left out*, however).
 
   The maximum length of the original message (as described in section
   [[sec:proto-basics]]) is not changed by the extension. That means, that messages
   that adhere to the extension may be a maximum of 161 (= 2 + 32 + 127)
-  characters long. The HI and BYE requests do not produce md5-prefixed replies.
+  characters long. The ~HI~ and ~BYE~ requests do not produce ~MD5~-prefixed
+  replies.
 
   The extension can be enabled, disabled and its state within the controller
-  can be queried by the HASHED request.
+  can be queried by the ~HASHED~ request.
 
 * Version <<sec:version-number>>
 
-  This document specifies version 2.0.0 of the protocol. The VERSION request
-  would therefore cause a "VERSION 2 0 0" reply with remote controllers, that
+  This document specifies version 2.0.0 of the protocol. The ~VERSION~ request
+  would therefore cause a "~VERSION 2 0 0~" reply with remote controllers, that
   implement this version of the protocol. In detail that means:
 
-    - Major Version: 2
-    - Minor Version: 0
-    - Micro Version: 0
-    - Current status of the specification: Draft
+    - Major Version: *2*
+    - Minor Version: *0*
+    - Micro Version: *0*
+    - Current status of the specification: *Draft*
 
 ** Major Version Number
 
@@ -527,8 +529,8 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 ** Major Version Numer One
 
-   The protocol's major version number starts at version "2" in this
-   specification. The reason for that is that version "1" was a previous
+   The protocol's major version number starts at version "~2~" in this
+   specification. The reason for that is that version "~1~" was a previous
    protocol, that was never specified. That version used in connection with an
    a lot more device-specific logic in the remote controller.
 
@@ -539,13 +541,13 @@ prototyping, revisioning and trouble-shooting with hardware projects.
    The basic operation of that historic version was quite similar to that of
    version number two, but the shift in the operational paradigm made it
    impossible to keep the new protocol backwards compatible in any way. Thus,
-   this specification starts out at major version number "2".
+   this specification starts out at major version number "~2~".
 
 #+LATEX: \newpage
 
 * Full Copyright Statement
 
-   Copyright (c) 2013-2014 Frank Terbeck <ft@bewatermyfriend.org>.
+   Copyright © 2013-2014 ~Frank Terbeck <ft@bewatermyfriend.org>~.
    All Rights Reserved.
 
    This document and translations of it may be copied and furnished to
