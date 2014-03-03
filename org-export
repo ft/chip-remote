@@ -1,0 +1,36 @@
+#!/bin/sh
+
+mode="$1"
+input="$2"
+intermediate="${input%.*}"
+output="$3"
+
+case "$mode" in
+pdf)
+    emacs -Q --batch --visit="$input" --funcall org-latex-export-to-pdf || exit 1
+    rm -f "${intermediate}.tex"
+    rm -f "${intermediate}.tex~"
+    ;;
+html)
+    emacs -Q --batch --visit="$input" --funcall org-html-export-to-html || exit 1
+    ;;
+txt)
+    emacs -Q --batch --visit="$input" \
+          --eval "(require 'org)" \
+          --eval "(require 'ox)" \
+          --eval "(require 'ox-ascii)" \
+          --eval "(setq org-ascii-charset 'utf-8)" \
+          --eval '(setq-default org-ascii-verbatim-format "%s")' \
+          --eval '(defun org-ascii-italic (it c in) (format "%s" c))' \
+          --eval '(defun org-ascii-bold (b c in) (format "%s" c))' \
+          --funcall org-ascii-export-to-ascii || exit 1
+    ;;
+*)
+    printf 'org-export: Unknown mode: `%s'\''. Giving up.\n' "$mode"
+    exit 1
+    ;;
+esac
+
+mv "${intermediate}"."$mode" "$output" || exit 1
+rm -f "${intermediate}.${mode}~"
+exit 0
