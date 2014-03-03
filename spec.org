@@ -4,7 +4,7 @@
 #+OPTIONS: num:t toc:3
 #+ATTR_ASCII: width 79
 
-#+LATEX: \vspace{2cm}
+#+LATEX: \newpage
 
 #+BEGIN_ABSTRACT
 
@@ -532,6 +532,8 @@ prototyping, revisioning and trouble-shooting with hardware projects.
    version number two, but the shift in the operational paradigm made it
    impossible to keep the new protocol backwards compatible in any way. Thus,
    this specification starts out at major version number "2".
+
+#+LATEX: \newpage
 
 * Full Copyright Statement
 
