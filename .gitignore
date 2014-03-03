@@ -16,9 +16,10 @@ tags
 TAGS
 core
 core.*
-spec.pdf
-spec.tex
-spec.txt
+rccep-spec.pdf
+rccep-spec.tex
+rccep-spec.txt
+rccep-spec.html
 auto/*
 remote-fw/Makefile
 remote-fw/config.*.h
