@@ -2,7 +2,7 @@
 #+AUTHOR: Frank Terbeck
 #+EMAIL: ft@bewatermyfriend.org
 #+OPTIONS: num:t toc:3
-#+ATTR_ASCII: width 79
+#+ATTR_ASCII: :width 79
 
 #+LATEX: \newpage
 
