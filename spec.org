@@ -23,7 +23,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 * RCCEP Model
 
-** Basic Structure
+** Basic Structure <<sec:basic-structure>>
 
    An RCCEP system consists of a controlling client and a remote controller
    that possesses one or more ports to which slave devices are attached to it.
@@ -89,55 +89,74 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 ** Protocol Basics <<sec:proto-basics>>
 
-   The RCCEP protocol itself is of line-based design. Communication is done in
-   seven bit ASCII strings, that end in an ASCII line-feed (hex: 0x0a). The
-   maximum length of any such line is limited to 127 bytes.
+*** Protocol Character Set
 
-   The remote controller of the system is never engages communication with the
-   client. Every transmission in one direction must be met with a reply in the
-   opposite direction. In case a request does not trigger a meaningful response
-   value, the string "OK" shall be used to acknowledge that the request was
-   processed.
+    The RCCEP protocol itself is of line-based design. Communication is done in
+    seven bit ASCII strings, that end in an ASCII line-feed (hex: 0x0a). The
+    maximum length of any such line is limited to 127 bytes.
 
-   Requests that trigger multiline replies shall only transmit the first line
-   of the reply and only transmit with subsequent lines when requested using
-   the "MORE" request. In case there are no more lines in a multiline response,
-   the final response shall be "DONE".
+*** Messages
 
-   The protocol uses these data types:
+    Messages of the protocol (/Requests/ and /Replies/; see section
+    [[sec:basic-structure]] for details) consist of multiple tokens. A line is
+    split into tokens if one or more consecutive ASCII space bytes (hex: 0x20)
+    are encountered. Other ASCII whitespace bytes are *NOT* considered for
+    tokenisation. The first token of a message (/Request/ and /Reply/)
+    identifies the type of message.
+
+*** Message Exchange
+
+    The remote controller of the system is never engages communication with the
+    client. Every transmission in one direction must be met with a reply in the
+    opposite direction. In case a request does not trigger a meaningful
+    response value, the string "OK" shall be used to acknowledge that the
+    request was processed.
+
+    Requests that trigger multiline replies shall only transmit the first line
+    of the reply and only transmit with subsequent lines when requested using
+    the "MORE" request. In case there are no more lines in a multiline
+    response, the final response shall be "DONE".
+
+*** Encoding of Data Types
+
+    The protocol uses these data types:
 
      - strings
      - integers
      - booleans
 
-   Strings are used as literal requests, responses and symbolic values.
+     Strings are used as literal requests, responses and symbolic values.
 
-   Integers represent numeric values within the protocol. They are transmitted
-   in strings of hexadecimal digits. The "a-f" range of a hexadecimal digit may
-   be represented in upper or lower case and may also be mixed. The byte-order
-   used in the hexadecimal strings representing integers is big-endian, with
-   the most significant digit being placed at the left.
+     Integers represent numeric values within the protocol. They are
+     transmitted in strings of hexadecimal digits. The "a-f" range of a
+     hexadecimal digit may be represented in upper or lower case and may also
+     be mixed. The byte-order used in the hexadecimal strings representing
+     integers is big-endian, with the most significant digit being placed at
+     the left.
 
-   In boolean contexts, the symbol "TRUE" represents a true value; and the
-   symbol "FALSE" represents a false value.
+     In boolean contexts, the symbol "TRUE" represents a true value; and the
+     symbol "FALSE" represents a false value.
 
-   Lines of the protocol consist of multiple tokens. A line is split into
-   tokens if one or more consecutive ASCII space bytes (hex: 0x20) are
-   encountered. Other ASCII whitespace bytes are NOT considered for
-   tokenisation.
+*** Protocol States
 
-   The protocol operates in the following set of basic states:
+    The protocol operates in the following set of basic states:
 
      - Idle State
      - Active State
      - Multiline State
 
-   The protocol reserves the namespace of requests starting with an ASCII plus
-   sign (hex: 0x2b) for implementation defined purposes.
+*** Extensions
 
-   Messages starting with an ASCII colon (hex: 3a) are reserved for the
-   optional Hashed-Messages extension of the protocol (see section
-   [[sec:hashed-messages]] for details).
+**** Implementation Defined Purposes
+
+    The protocol reserves the namespace of requests starting with an ASCII plus
+    sign (hex: 0x2b) for implementation defined purposes.
+
+**** Hashed Messages
+
+    Messages starting with an ASCII colon (hex: 3a) are reserved for the
+    optional Hashed-Messages extension of the protocol (see section
+    [[sec:hashed-messages]] for details).
 
 * Protocol Details
 
