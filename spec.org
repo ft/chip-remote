@@ -111,8 +111,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     [[sec:basic-structure]] for details) consist of multiple tokens. A line is
     split into tokens if one or more consecutive ~ASCII~ space bytes (hex:
     ~0x20~) are encountered. Other ~ASCII~ whitespace bytes are *not*
-    considered for tokenisation. The first token of a message (/Request/ and
-    /Reply/) identifies the type of message.
+    considered for tokenisation.
 
 *** Message Exchange
 
