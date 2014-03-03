@@ -91,11 +91,19 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 *** Protocol Character Set
 
-    The RCCEP protocol itself is of line-based design. Communication is done in
-    seven bit ASCII strings, that end in an ASCII line-feed (hex: 0x0a). The
-    maximum length of any such line is limited to 127 bytes.
+    Communication is done in seven bit ASCII strings and only its printable
+    subset (the byte range from 0x20 to 0x7E) shall be used to constitute
+    messages of the protocol. The only other character allowed in an RCCEP
+    communication channel is the line-feed character (see section
+    [[sec:proto-basics-messages]] for details).
 
-*** Messages
+*** Messages <<sec:proto-basics-messages>>
+
+    The RCCEP protocol itself is of line-based design. Any message between the
+    subscribers of an RCCEP communication is a string of characters of its
+    character set, that end in an ASCII line-feed (hex: 0x0a). The line-feed
+    itself is not part of the message. The maximum length of any such line is
+    limited to 127 bytes.
 
     Messages of the protocol (/Requests/ and /Replies/; see section
     [[sec:basic-structure]] for details) consist of multiple tokens. A line is
