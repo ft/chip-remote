@@ -353,8 +353,8 @@ prototyping, revisioning and trouble-shooting with hardware projects.
         operates. A value of zero indicates an implementation-defined default
         symbol-rate.
 
-    All properties that return a ~FIXED~ as their last argument are read-only
-    values.
+    All properties that return a ~FIXED~ as their third and final token are
+    read-only values.
 
     The request may return other mode-specific properties (see section
     [[secport-modes]]).
