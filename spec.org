@@ -1,10 +1,10 @@
 #+TITLE: Remote Control for Configurable Electronic Parts (RCCEP)
 #+AUTHOR: Frank Terbeck
 #+EMAIL: ft@bewatermyfriend.org
-#+OPTIONS: num:t toc:3
+#+OPTIONS: num:t toc:nil
 #+ATTR_ASCII: :width 79
 
-#+LATEX: \newpage
+#+LATEX: \vspace{6cm}
 
 #+BEGIN_ABSTRACT
 
@@ -18,6 +18,10 @@ which systems can be built, that enable tasks like experimentation, rapid
 prototyping, revisioning and trouble-shooting with hardware projects.
 
 #+END_ABSTRACT
+
+#+LATEX: \newpage
+
+#+TOC: headlines 3
 
 #+LATEX: \newpage
 
