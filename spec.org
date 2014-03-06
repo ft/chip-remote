@@ -330,9 +330,10 @@ projects.
 
     The ~HASHED~ request enables or disables the Hashed-Messages extension (see
     section [[sec:hashed-messages]] for details). The boolean argument to the
-    request decides whether or not the extension is enabled by the request. A
-    true value enables the extension; conversely, a false value disables it.
-    The reply to the request depends on the value of that argument as well:
+    request decides whether the extension is enabled or disabled by the
+    request. A true value enables the extension; conversely, a false value
+    disables it. The reply to the request depends on the value of that argument
+    as well:
 
       - ~TRUE~: ~:e0aa021e21dddbd6d8cecec71e9cf564:OK~
       - ~FALSE~: ~OK~
