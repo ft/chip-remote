@@ -173,7 +173,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
      - integers
      - booleans
 
-     Strings are used as literal requests, responses and symbolic values.
+     Strings are used as literal requests, responses and symbolic values. They
+     are *case-sensitive*, which means that "~foo~" and "~Foo~" are not the
+     same value.
 
      Integers represent numeric values within the protocol. They are
      transmitted in strings of hexadecimal digits. The ~a-f~ range of a
