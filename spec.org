@@ -123,10 +123,10 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     a given /Line/ implements. If a /Role/ is made up of multiple /Lines/, then
     /Lines/ are indexed in the following format:
 
-      - ~<line-name>:<int>~: ~<line-name>~ is the name specifing the base role
-        a line uses. ~<int>~ is the role index of the specific line. Indexing
-        starts at zero. Examples would be ~DATA:0~, ~DATA:1~ etc.; in which
-        case ~DATA~ and ~DATA:0~ are equivalent.
+      - ~<line-name>:<integer>~: ~<line-name>~ is the name specifing the base
+        role a line uses. ~<integer>~ is the role index of the specific line.
+        Indexing starts at zero. Examples would be ~DATA:0~, ~DATA:1~ etc.; in
+        which case ~DATA~ and ~DATA:0~ are equivalent.
 
 ** Protocol Basics <<sec:proto-basics>>
 
@@ -233,13 +233,13 @@ prototyping, revisioning and trouble-shooting with hardware projects.
      - "~OK~": This reply is used whenever a request does not prompt another more
        meaningful reply.
 
-     - "~WTF [reason]~": Used if a request could not be carried out. The reason
-       the request was rejected may be returned as the remaining tokens of the
-       reply's line. Returning a reason is optional.
+     - "~WTF [reason...]~": Used if a request could not be carried out. The
+       reason the request was rejected may be returned as the remaining tokens
+       of the reply's line. Returning a reason is optional.
 
-     - "~MALFORMED-REQUEST [reason]~": Used in case the last request could not be
-       processed. The reply may provide a reason as th rest of the reply's
-       tokens. Returning the reason is optional.
+     - "~MALFORMED-REQUEST [reason...]~": Used in case the last request could
+       not be processed. The reply may provide a reason as th rest of the
+       reply's tokens. Returning the reason is optional.
 
      - "~BROKEN-VALUE [value]~": Used if an unexpected value was encountered. The
        broken value may be retured as the second token of the reply's line.
@@ -338,7 +338,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     This request returns a multiline reply. Each line shows to which role the
     line of a given index assigned to:
 
-      - "~<int> <role-string> [FIXED]~"
+      - "~<index:integer> <role:string> [FIXED]~"
 
     Roles are specific to modes. The default role assignment of a port is
     implementation defined. If ~FIXED~ is specified, the role assignment of
@@ -348,11 +348,11 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
     The ~LINE~ request takes three non-optional arguments:
 
-      - "~LINE <port:int> <line:int> <role>~"
+      - "~LINE <port:integer> <line:integer> <role:string>~"
 
-    ~<port:int>~ specifies the index of the port to configure. ~<line:int>~
-    specifies the index of the line within the port to configure. ~<role>~
-    describes the role within the active mode the line is to be set to.
+    ~port~ specifies the index of the port to configure. ~line~ specifies the
+    index of the line within the port to configure. ~<role>~ describes the role
+    within the active mode the line is to be set to.
 
 *** MODES Request
 
@@ -367,11 +367,12 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     The ~PORTS~ request returns a multiline reply. The lines shall contain the
     following:
 
-      - "~PORTS <int>~": Where <int> indicates the number of ports available on
-        the remote controller.
+      - "~PORTS <integer>~": Where ~<integer>~ indicates the number of ports
+        available on the remote controller.
 
-      - "~FOCUS <int|NONE>~": Where ~<int>~ indicates the currently focused
-        port. If no port is currently focused, the string ~NONE~ is returned.
+      - "~FOCUS <integer|NONE>~": Where ~<integer>~ indicates the currently
+        focused port. If no port is currently focused, the string ~NONE~ is
+        returned.
 
 *** PORT Request
 
@@ -382,15 +383,15 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     of properties for the port in question. These are the generic properties
     that may be returned:
 
-      - "~LINES <int> [FIXED]~": ~<int>~ defines the number of lines the port
-        has access to.
+      - "~LINES <integer> [FIXED]~": ~<integer>~ defines the number of lines
+        the port has access to.
 
-      - "~MODE <mode-string> [FIXED]~": Indicates the mode the port is
+      - "~MODE <mode:string> [FIXED]~": Indicates the ~mode~ the port is
         currently running in.
 
-      - "~RATE <int> [FIXED]~": Indicates the symbol-rate with which the port
-        operates. A value of zero indicates an implementation-defined default
-        symbol-rate.
+      - "~RATE <integer> [FIXED]~": Indicates the symbol-rate with which the
+        port operates. A value of zero indicates an implementation-defined
+        default symbol-rate.
 
     All properties that return a ~FIXED~ as their third and final token are
     read-only values.
@@ -402,15 +403,15 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
     The ~SET~ request takes three non-optional arguments:
 
-      - "~SET <port:int> <key> <value>~"
+      - "~SET <port:integer> <key:string> <value>~"
 
-    ~<port:int>~ is the index of the port to configure. ~<key>~ is the
-    property's name to set. ~<value>~ is the new value for the property.
+    ~port~ is the index of the port to configure. ~key~ is the property's name
+    to set. ~value~ is the new value for the property.
 
     Non-mode-specific parameters that the ~SET~ request is able to modify
     (unless marked as ~FIXED~):
 
-      - ~MODE~: Sets the port's mode of operation to ~<value>~.
+      - ~MODE~: Sets the port's mode of operation to ~value~.
 
 *** TRANSMIT Request
 
@@ -431,7 +432,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     This request returns the protocol version the remote controller implements.
     The reply shall be formatted like this:
 
-      - "~VERSION <int> <int> <int>~"
+      - "~VERSION <integer> <integer> <integer>~"
 
     Where the three integers describe major, minor and micro version of the
     implemented protocol in the order specified (see section [[sec:version-number]]
@@ -469,19 +470,21 @@ prototyping, revisioning and trouble-shooting with hardware projects.
       - ~CS-LINES <int>~: Indicates the number of chip-select lines the port
         offers.
 
-      - ~CS-POLARITY <ACTIVE-HIGH|ACTIVE-LOW>~: Indicates whether the
-        chip-select lines operate as active-high or active-low pins.
+      - ~CS-POLARITY <ACTIVE-HIGH|ACTIVE-LOW>~: Use of either of the listed
+        symbols indicates whether the chip-select lines operate as ~ACTIVE-HIGH~
+        or ~ACTIVE-LOW~ pins.
 
       - ~CLK-POLARITY <RISING-EDGE|FALLING-EDGE>~: Indicates whether the clock
-        line triggers data transfer on its rising or its falling edge.
+        line triggers data transfer on its rising (~RISING-EDGE~) or its
+        falling edge (~FALLING-EDGE~).
 
       - ~CLK-PHASE-DELAY <boolean>~: A true value indicates that phase delay is
         used on the clock line. Otherwise a false value indicates that it is
         not used.
 
       - ~BIT-ORDER <MSB-FIRST|LSB-FIRST>~: Indicates whether serial data
-        transmission is done starting that the most-significant bit or at the
-        least-significant bit.
+        transmission is done starting at the most-significant bit (~MSB-FIRST~)
+        or at the least-significant bit (~LSB-FIRST~).
 
 *** SPI Line Roles
 
