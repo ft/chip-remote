@@ -172,10 +172,11 @@ projects.
     response value, the string ~OK~ shall be used to acknowledge that the
     request was processed.
 
-    Requests that trigger multiline replies shall only transmit the first line
-    of the reply and only transmit with subsequent lines when requested using
-    the ~MORE~ request. In case there are no more lines in a multiline
-    response, the final response shall be ~DONE~.
+    A requests that triggers a multiline reply shall only transmit the first
+    line of its potentially longer reply and *only* transmit its subsequent
+    lines when they are requested one by one using the ~MORE~ request. In case
+    there are no more lines in a multiline response, the final response shall
+    be ~DONE~.
 
 *** Encoding of Data Types
 
