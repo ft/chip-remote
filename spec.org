@@ -3,6 +3,9 @@
 #+EMAIL: ft@bewatermyfriend.org
 #+OPTIONS: num:t toc:nil
 #+ATTR_ASCII: :width 79
+#+LATEX_CLASS_OPTIONS: [a4paper]
+# #+LATEX_HEADER: \textwidth 13cm
+# #+LATEX_HEADER: \hoffset 0cm
 
 #+LATEX: \vspace{6cm}
 
@@ -199,8 +202,6 @@ projects.
 
      In boolean contexts, the symbol ~TRUE~ represents a true value; and the
      symbol ~FALSE~ represents a false value.
-
-#+LATEX: \newpage
 
 *** Protocol States
 
@@ -610,7 +611,7 @@ projects.
    impossible to keep the new protocol backwards compatible in any way. Thus,
    this specification starts out at major version number "~2~".
 
-#+LATEX: \newpage
+# #+LATEX: \newpage
 
 * Full Copyright Statement
 
