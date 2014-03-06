@@ -120,13 +120,18 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 *** Roles <<sec:rccep-roles>>
 
     /Roles/ are specific to /Modes/. A /Role/ specifies which part of a /Mode/
-    a given /Line/ implements. If a /Role/ is made up of multiple /Lines/, then
-    /Lines/ are indexed in the following format:
+    a given /Line/ implements. Its syntax is a string in the sense of the
+    protocol in which the colon character (hex: ~0x3a~) is disallowed.
 
-      - ~<line-name>:<integer>~: ~<line-name>~ is the name specifing the base
-        role a line uses. ~<integer>~ is the role index of the specific line.
-        Indexing starts at zero. Examples would be ~DATA:0~, ~DATA:1~ etc.; in
-        which case ~DATA~ and ~DATA:0~ are equivalent.
+    If a /Role/ is made up of multiple /Lines/, then they are indexed in the
+    following format:
+
+      - ~<role:string>:<integer>~: ~role~ is the name specifing the base role a
+        line uses. ~<integer>~ is the role index of the specific line. Indexing
+        starts at zero. Examples would be ~DATA:0~, ~DATA:1~ etc.
+
+    If the index of a role is omitted, ~0~ is assumed (~DATA~ and ~DATA:0~ are
+    equivalent).
 
 ** Protocol Basics <<sec:proto-basics>>
 
