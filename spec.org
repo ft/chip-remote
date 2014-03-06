@@ -255,8 +255,9 @@ projects.
        of the reply's line. Returning a reason is optional.
 
      - "~MALFORMED-REQUEST [reason...]~": Used in case the last request could
-       not be processed. The reply may provide a reason as th rest of the
-       reply's tokens. Returning the reason is optional.
+       not be processed. The reply may provide a reason as to why processing
+       failed as the rest of the reply's tokens. Returning a reason is
+       optional.
 
      - "~BROKEN-VALUE [value]~": Used if an unexpected value was encountered. The
        broken value may be retured as the second token of the reply's line.
