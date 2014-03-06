@@ -198,6 +198,8 @@ prototyping, revisioning and trouble-shooting with hardware projects.
      In boolean contexts, the symbol ~TRUE~ represents a true value; and the
      symbol ~FALSE~ represents a false value.
 
+#+LATEX: \newpage
+
 *** Protocol States
 
     The protocol operates in the following set of basic states:
