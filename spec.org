@@ -416,11 +416,12 @@ projects.
         port operates. A value of zero indicates an implementation-defined
         default symbol-rate.
 
-    All properties that return a ~FIXED~ as their third and final token are
-    read-only values.
-
     The request may return other mode-specific properties (see section
     [[sec:port-modes]]).
+
+    All properties that return a ~FIXED~ as their third and final token are
+    read-only values. This is true for generic as well as mode-specific
+    properties.
 
 *** SET Request
 
