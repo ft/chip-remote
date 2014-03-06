@@ -134,8 +134,8 @@ projects.
     following format:
 
       - ~<role:string>:<integer>~: ~role~ is the name specifing the base role a
-        line uses. ~<integer>~ is the role index of the specific line. Indexing
-        starts at zero. Examples would be ~DATA:0~, ~DATA:1~ etc.
+        line is assigned. ~<integer>~ is the role index of the specific line.
+        Indexing starts at zero. Examples would be ~DATA:0~, ~DATA:1~ etc.
 
     If the index of a role is omitted, ~0~ is assumed (~DATA~ and ~DATA:0~ are
     equivalent).
