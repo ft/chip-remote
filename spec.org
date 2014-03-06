@@ -15,7 +15,8 @@ clock distribution blocks with slave interface protocols such as ~SPI~ or ~I2C~
 via more common personal computer interfaces (in particular the universal
 serial bus or ~TCP/IP~ links). The goal is to specify an interface on top of
 which systems can be built, that enable tasks like experimentation, rapid
-prototyping, revisioning and trouble-shooting with hardware projects.
+prototyping, automated testing, revisioning and trouble-shooting with hardware
+projects.
 
 #+END_ABSTRACT
 
