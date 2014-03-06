@@ -585,11 +585,11 @@ projects.
 
    Changes in the micro version number indicate the addition of new optional
    features within the protocol or changes in the specification that do not
-   require changes in the protocols in the implementation.
+   introduce incompatibilities with previous versions.
 
-   For best interoperability, the client-side's protocol version and the remote
-   controller's protocol version should match in all three parts of the version
-   number.
+   Note: For best interoperability, the client-side's protocol version and the
+   remote controller's protocol version should match in all three parts of the
+   version number.
 
 ** Version History
 
