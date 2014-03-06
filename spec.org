@@ -291,8 +291,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     The ~ADDRESS~ request takes one non-optional argument. The request is used
     to handle slave addressing with protocols, that employ explicit addressing
     schemes. The actual effect of the request is dependent of the mode the
-    given port is set to. Modes that use in-band addressing may chose to ignore
-    ~ADDRESS~ requests altogether. See section [[sec:port-modes]] for details.
+    given port is set to. Modes that use in-band addressing may choose to
+    ignore ~ADDRESS~ requests altogether. See section [[sec:port-modes]] for
+    details.
 
 *** BYE Request
 
