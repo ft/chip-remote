@@ -518,11 +518,11 @@ projects.
 
     - ~CS~: Chip-Select; this may be a multi-line role.
 
-    - ~MOSI~: Master-Out-Slave-In, the unidirectional ~SPI~ line from master to
-      slave.
+    - ~MOSI~: Master-Out-Slave-In, the unidirectional ~SPI~ data line from
+      master to slave.
 
-    - ~MISO~: Master-In-Slave-Out, the unidirectional ~SPI~ line from slave to
-      master.
+    - ~MISO~: Master-In-Slave-Out, the unidirectional ~SPI~ data line from
+      slave to master.
 
 *** SPI Addressing
 
