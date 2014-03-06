@@ -533,7 +533,7 @@ projects.
     order of their index with ~CS:0~ being mapped to the least significant bit
     of the address.
 
-    Default ~SPI~ chip-select addressing is implementation dependent.
+    Default ~SPI~ chip-select addressing is implementation defined.
 
 * Hashed-Messages Extension <<sec:hashed-messages>>
 
