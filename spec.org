@@ -166,7 +166,7 @@ projects.
 
 *** Message Exchange
 
-    The remote controller of the system is never engages communication with the
+    The remote controller of the system never engages communication with the
     client. Every transmission in one direction must be met with a reply in the
     opposite direction. In case a request does not trigger a meaningful
     response value, the string ~OK~ shall be used to acknowledge that the
