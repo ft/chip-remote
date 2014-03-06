@@ -19,6 +19,12 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 #+END_ABSTRACT
 
+#+ASCII:
+
+#+ASCII:
+
+#+ASCII:
+
 #+LATEX: \newpage
 
 #+TOC: headlines 3
