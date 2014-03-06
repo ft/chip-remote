@@ -25,6 +25,41 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 #+LATEX: \newpage
 
+* Notation <<sec:notation>>
+
+  The specification of elements that constitute messages of the protocol that
+  is defined in the remainder of this document adheres to the conventions
+  described in this section.
+
+  Elements of the protocol are either /literal/, /mandatory/ or /optional/.
+
+  Mandatory elements are enclosed by angle brackets (~<...>~), optional ones
+  are enclosed by square brackets (~[...]~) and all other elements are literal.
+  Thus a string like "~FOO <bar> [baz]~" specifies that the first element has
+  to be the literal symbol ~FOO~, followed by a mandatory element (named “bar”
+  for later reference), followed by an optional element (named “baz” for later
+  reference). Mandatory and optional elements may also contain tags to hint at
+  the allowed type of data for the element (example: "~[foo:integer]~"
+  specifies an optional element named ~foo~, that has to be an integer). When a
+  data type is specified, the name may be omitted if the specification is able
+  to reference the element uniquely without a name (example:
+  "~PORTS <integer>~"). Valid type tags are ~string~, ~integer~ and ~boolean~.
+
+  Mandatory and optional elements may also enumerate different possible names
+  and types by joining them by vertical bars (~|~). Example: The string
+  "~<name:string|id:integer|INVALID>~" specifies a mandatory element, that may
+  either be referenced by ~name~ (in which case it has to be a string) or ~id~
+  (in which case it has to be an integer) or ~INVALID~. The latter case doesn't
+  specify a data type; the specification has to clarify how this version of the
+  element would be used (example: ~INVALID~ could be a literal symbol that may
+  be used by the protocol in the given position of the specified message).
+
+  An element does not necessarily refer to a single token in the sense of the
+  protocol. If it does refer to multiple tokens, the element's entry shall end
+  in three dots (example: "~MALFORMED-REQUEST [reason...]~").
+
+#+LATEX: \newpage
+
 * RCCEP Model
 
 ** Basic Structure <<sec:basic-structure>>
