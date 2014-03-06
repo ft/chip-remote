@@ -419,7 +419,7 @@ projects.
     read-only values.
 
     The request may return other mode-specific properties (see section
-    [[secport-modes]]).
+    [[sec:port-modes]]).
 
 *** SET Request
 
