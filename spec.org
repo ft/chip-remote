@@ -348,8 +348,9 @@ projects.
 *** INIT Request
 
     The ~INIT~ request takes one non-optional argument: The index of the port
-    to initialise. This request is required initially for configurable ports
-    and then after any changes with the port's properties.
+    to initialise. If a port has even a single configurable property, this
+    request is required initially before any other operation with that port and
+    then again after any set of changes with the port's properties.
 
 *** LINES Request
 
