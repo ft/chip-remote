@@ -9,6 +9,8 @@
 
 #+LATEX: \vspace{6cm}
 
+#+LATEX: \thispagestyle{empty}
+
 #+BEGIN_ABSTRACT
 
 This document specifies a text protocol for communication between a client
