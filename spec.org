@@ -434,6 +434,9 @@ projects.
     (unless marked as ~FIXED~):
 
       - ~MODE~: Sets the port's mode of operation to ~value~.
+      - ~LINES~: Defines the the number of lines a port has access to to to
+        ~value~.
+      - ~RATE~: Defines the symbol rate a port operates at.
 
 *** TRANSMIT Request
 
