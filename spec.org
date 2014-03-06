@@ -573,8 +573,8 @@ projects.
 
 ** Major Version Number
 
-   A mismatch in the major version number indicates differences in the
-   protocol's basics as described in section [[sec:proto-basics]].
+   The major version number will be changed *only* to indicate differences in
+   the protocol's basics as described in section [[sec:proto-basics]].
 
 ** Minor Version Number
 
