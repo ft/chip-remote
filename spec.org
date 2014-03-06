@@ -117,7 +117,7 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     value. In microcontroller terms a line is often called a “pin”. A /Line/
     can be assigned a /Role/ to implement a /Mode/.
 
-*** Roles
+*** Roles <<sec:rccep-roles>>
 
     /Roles/ are specific to /Modes/. A /Role/ specifies which part of a /Mode/
     a given /Line/ implements. If a /Role/ is made up of multiple /Lines/, then
@@ -340,9 +340,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
       - "~<index:integer> <role:string> [FIXED]~"
 
-    Roles are specific to modes. The default role assignment of a port is
-    implementation defined. If ~FIXED~ is specified, the role assignment of
-    that line cannot be changed.
+    Roles are specific to modes (see section [[sec:port-modes]]). The default role
+    assignment of a port is implementation defined. If ~FIXED~ is specified,
+    the role assignment of that line cannot be changed.
 
 *** LINE Request
 
@@ -352,7 +352,9 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
     ~port~ specifies the index of the port to configure. ~line~ specifies the
     index of the line within the port to configure. ~<role>~ describes the role
-    within the active mode the line is to be set to.
+    within the active mode the line is to be set to. Roles are specific to
+    modes (see section [[sec:port-modes]]). The general syntax of a role string is
+    specified in section [[sec:rccep-roles]].
 
 *** MODES Request
 
