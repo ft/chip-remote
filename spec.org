@@ -587,6 +587,8 @@ projects.
    features within the protocol or changes in the specification that do not
    introduce incompatibilities with previous versions.
 
+#+LATEX: \vspace{0.5cm}
+
    Note: For best interoperability, the client-side's protocol version and the
    remote controller's protocol version should match in all three parts of the
    version number.
