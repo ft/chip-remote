@@ -551,6 +551,8 @@ prototyping, revisioning and trouble-shooting with hardware projects.
 
 * Version <<sec:version-number>>
 
+    - Current status of the specification: *Draft*
+
   This document specifies version 2.0.0 of the protocol. The ~VERSION~ request
   would therefore cause a "~VERSION 2 0 0~" reply with remote controllers, that
   implement this version of the protocol. In detail that means:
@@ -558,7 +560,6 @@ prototyping, revisioning and trouble-shooting with hardware projects.
     - Major Version: *2*
     - Minor Version: *0*
     - Micro Version: *0*
-    - Current status of the specification: *Draft*
 
 ** Major Version Number
 
