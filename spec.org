@@ -601,8 +601,9 @@ projects.
 
    The protocol's major version number starts at version "~2~" in this
    specification. The reason for that is that version "~1~" was a previous
-   protocol, that was never specified. That version used in connection with an
-   a lot more device-specific logic in the remote controller.
+   protocol, that was never specified. That version was used in connection with
+   a logic in the remote controller that was a lot more device-specific than
+   the current specification.
 
    In order to make the protocol more generic and to reduce the complexity of
    the remote controller's firmware, any device-specific operation was shifted
