@@ -77,8 +77,8 @@ projects.
 ** Basic Structure <<sec:basic-structure>>
 
    An ~RCCEP~ system consists of a /controlling client/ and a /remote
-   controller/ that possesses one or more /Ports/ to which /Slave Devices/ are
-   attached to it. The client talks to the controller using the protocol
+   controller/ that possesses one or more /Ports/ through which /Slave Devices/
+   are attached to it. The client talks to the controller using the protocol
    described herein.
 
 *** Controlling Client
