@@ -180,10 +180,7 @@ number)."
   (reg/set-enable-lvds-swing-bits regval #b00))
 
 (define (set-offset-pedestal regval value)
-  (with-constraints (value (>= -32) (<= 31))
-    ;; VALUE is encoded as a 6-bit signed integer, with the negative values
-    ;; encoded using twos-complement.
-    (reg/set-offset-pedestal-bits regval (value->twos-complement value 6))))
+  (reg/set-offset-pedestal-bits regval (value->twos-complement value 6)))
 
 (define (enable-freeze-offset-correction regval)
   (set-logic-active-high reg/set-freeze-offset-correction-bits regval))
