@@ -15,10 +15,10 @@
 (define-syntax with-constraints
   (lambda (x)
     (syntax-case x ()
-      ((_ (v (pred lim) ...) exp0 exp ...)
-       #'(if (not (and (pred v lim) ...))
+      ((_ (v (pred lim ...) ...) exp0 exp ...)
+       #'(if (not (and (pred v lim ...) ...))
              (throw 'cr-out-of-limit
-                    `(v . ,v) (quote (pred v lim)) ...)
+                    `(v . ,v) (quasiquote (pred v ,lim ...)) ...)
              (begin exp0 exp ...))))))
 
 (define (value->bits tab sym)
