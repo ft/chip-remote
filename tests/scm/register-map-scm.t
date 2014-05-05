@@ -27,11 +27,13 @@
 
 (with-fs-test-bundle
  (plan 19)
+
  (define-test "register-default finds first address"
    (pass-if-no-exception (register-default foo-bar-register-map #x0)))
  (define-test "register-default first default-value is correct"
    (pass-if-= (register-default foo-bar-register-map #x0)
               #x54))
+
  (define-test "register-default finds third address"
    (pass-if-no-exception (register-default foo-bar-register-map #x2)))
  (define-test "register-default third default-value is correct"
@@ -44,8 +46,7 @@
                 #x4))
    (define-test "#x0: n-divider: #x5"
      (pass-if-= (get-n-divider-bits reg-0)
-                #x5))
-   )
+                #x5)))
 
  (let ((reg-1 (register-default foo-bar-register-map #x1)))
    (define-test "#x1: power-safe: #x0"
@@ -53,8 +54,7 @@
                 #x0))
    (define-test "#x1: reference-divider: #xd"
      (pass-if-= (get-reference-divider-bits reg-1)
-                #xd))
-   )
+                #xd)))
 
  (let ((reg-2 (register-default foo-bar-register-map #x2)))
    (define-test "#x2: gain: #x30"
@@ -62,8 +62,7 @@
                 #x30))
    (define-test "#x2: rate: #x3"
      (pass-if-= (get-rate-bits reg-2)
-                #x3))
-   )
+                #x3)))
 
  (let ((reg-f (register-default foo-bar-register-map #xf)))
    (define-test "#xf: self-destruct: #x0"
