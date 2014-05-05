@@ -55,7 +55,8 @@
 ;;   - register-address-power-save
 
 (define-module (chip-remote register-map)
-  #:export (define-register-map))
+  #:export (define-register-map
+            register-default))
 
 (define (generate-setter c kw)
   (datum->syntax
@@ -108,3 +109,12 @@
          #'(begin exp ...
                   (define-public variable-name
                     (syntax->datum #'(register ...)))))))))
+
+(define (register-default regmap address)
+  (let ((reg (assoc address regmap)))
+    (if (not reg)
+        (throw 'cr-no-such-register address)
+        (let ((value (assq 'default-value (cdr reg))))
+          (if value
+              (cadr value)
+              0)))))
