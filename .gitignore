@@ -1,6 +1,7 @@
 .*
 !.gitignore
 *~
+\#*
 *.tmp
 *.orig
 *.o
