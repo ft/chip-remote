@@ -56,7 +56,8 @@
 
 (define-module (chip-remote register-map)
   #:export (define-register-map
-            register-default))
+            register-default
+            =>))
 
 (define (generate-setter c kw)
   (datum->syntax
@@ -108,7 +109,7 @@
                                            (syntax->datum #'(register ...)))))
          #'(begin exp ...
                   (define-public variable-name
-                    (syntax->datum #'(register ...)))))))))
+                    (syntax->datum #`(register ...)))))))))
 
 (define (register-default regmap address)
   (let ((reg (assoc address regmap)))
@@ -118,3 +119,8 @@
           (if value
               (cadr value)
               0)))))
+
+(define-syntax =>
+  (lambda (x)
+    (syntax-case x ()
+      ((_ n) #'(module-variable (current-module) (quote n))))))
