@@ -117,7 +117,7 @@
         (throw 'cr-no-such-register address)
         (let ((value (assq 'default-value (cdr reg))))
           (if value
-              (cadr value)
+              (cdr value)
               0)))))
 
 (define-syntax =>
