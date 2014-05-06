@@ -123,4 +123,4 @@
 (define-syntax =>
   (lambda (x)
     (syntax-case x ()
-      ((_ n) #'(module-variable (current-module) (quote n))))))
+      ((_ n) #'(cons (quote n) (module-variable (current-module) (quote n)))))))
