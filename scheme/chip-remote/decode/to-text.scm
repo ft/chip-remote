@@ -143,6 +143,7 @@
                 (decoded-value->text dec colour?)))))
           decoded-data))))
 
-(define (register->text regmap address width value)
-  (append! (text-decode-header address value width)
-           (decode->text (decode regmap address value))))
+(define* (register->text #:key register-map address width value
+                         (colour? (isatty? (current-output-port))))
+  (append! (text-decode-header address value width #:colour? colour?)
+           (decode->text (decode register-map address value) #:colour? colour?)))
