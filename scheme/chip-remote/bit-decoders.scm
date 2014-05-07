@@ -8,7 +8,11 @@
             logic-active-high
             logic-active-low
             reverse-lookup
-            twos-complement))
+            twos-complement
+            unsigned-integer))
+
+(define (unsigned-integer n o w value)
+  value)
 
 (define (twos-complement name offset width value)
   (let* ((top-bit (ash 1 (- width 1)))
