@@ -10,6 +10,7 @@
             disable-clkout-rise-control
             disable-freeze-offset-correction
             disable-gain
+            disable-high-performance-mode-1
             disable-high-performance-mode-2
             disable-low-latency
             disable-offset-correction
@@ -21,6 +22,7 @@
             enable-clkout-rise-control
             enable-freeze-offset-correction
             enable-gain
+            enable-high-performance-mode-1
             enable-high-performance-mode-2
             enable-low-latency
             enable-offset-correction
@@ -37,7 +39,6 @@
             set-data-format
             set-enable-lvds-swing
             set-gain
-            set-high-performance-mode-1
             set-low-speed
             set-lvds-clkout-strength
             set-lvds-cmos
@@ -58,6 +59,9 @@
 
 (define (disable-gain regval)
   (unset-logic-active-low set-disable-gain-bits regval))
+
+(define (disable-high-performance-1 regval)
+  (set-high-performance-mode-1-bits regval #b00))
 
 (define (disable-high-performance-mode-2 regval)
   (unset-logic-active-high set-high-performance-mode-2-bits regval))
@@ -91,6 +95,9 @@
 
 (define (enable-gain regval)
   (set-logic-active-low set-disable-gain-bits regval))
+
+(define (enable-high-performance-1 regval)
+  (set-high-performance-mode-1-bits regval #b11))
 
 (define (enable-high-performance-mode-2 regval)
   (set-logic-active-high set-high-performance-mode-2-bits regval))
@@ -152,9 +159,6 @@
 steps. VALUE has to be an exact number (i.e. an integer or an exact rational
 number)."
   (set-gain-bits regval (value->bits gain-map value)))
-
-(define (set-high-performance-mode-1 regval value)
-  (set-high-performance-mode-1-bits regval (value->bits high-performace-mode-map value)))
 
 (define (set-low-speed regval value)
   (set-low-speed-bits regval (value->bits low-speed-map value)))
