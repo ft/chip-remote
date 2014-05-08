@@ -13,6 +13,7 @@
             disable-high-performance-mode-1
             disable-high-performance-mode-2
             disable-low-latency
+            disable-lvds-swing-control
             disable-offset-correction
             disable-power-down-global
             disable-power-down-outputs
@@ -25,6 +26,7 @@
             enable-high-performance-mode-1
             enable-high-performance-mode-2
             enable-low-latency
+            enable-lvds-swing-control
             enable-offset-correction
             enable-power-down-global
             enable-power-down-outputs
@@ -37,7 +39,6 @@
             set-custom-pattern-high
             set-custom-pattern-low
             set-data-format
-            set-enable-lvds-swing
             set-gain
             set-low-speed
             set-lvds-clkout-strength
@@ -68,6 +69,9 @@
 
 (define (disable-low-latency regval)
   (unset-logic-active-low set-disable-low-latency-bits regval))
+
+(define (disable-lvds-swing-control regval)
+  (set-enable-lvds-swing-bits regval #b00))
 
 (define (disable-offset-correction regval)
   (unset-logic-active-high set-enable-offset-correction-bits regval))
@@ -104,6 +108,9 @@
 
 (define (enable-low-latency regval)
   (set-logic-active-low set-disable-low-latency-bits regval))
+
+(define (enable-lvds-swing-control regval)
+  (set-enable-lvds-swing-bits regval #b11))
 
 (define (enable-offset-correction regval)
   (set-logic-active-high set-enable-offset-correction-bits regval))
@@ -150,9 +157,6 @@
 
 (define (set-data-format regval value)
   (set-data-format-bits regval (value->bits data-format-map value)))
-
-(define (set-enable-lvds-swing regval value)
-  (set-enable-lvds-swing-bits regval (value->bits lvds-swing-control-map value)))
 
 (define (set-gain regval value)
   "Set the device's gain to VALUE. The valid range is from 0 to 6dB in half-dB
