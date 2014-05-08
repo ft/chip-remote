@@ -180,7 +180,9 @@ number)."
   (set-lvds-swing-bits regval (value->bits lvds-swing-map value)))
 
 (define (set-offset-correction-time-constant regval value)
-  (set-offset-correction-time-constant-bits regval (value->bits correction-time-map value)))
+  (set-offset-correction-time-constant-bits regval
+                                            (value->bits correction-time-map
+                                                         value)))
 
 (define (set-offset-pedestal regval value)
   (set-offset-pedestal-bits regval (value->twos-complement value)))
