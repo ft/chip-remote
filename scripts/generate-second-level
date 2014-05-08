@@ -1,0 +1,169 @@
+;; -*- scheme -*-
+
+;; Copyright (c) 2014 chip-remote workers, All rights reserved.
+;;
+;; Terms for redistribution and use can be found in LICENCE.
+
+;; This script can help generate most second-level access code for a new
+;; device, given that the corresponding register-map is annotated in the
+;; greatest possible detail.
+;;
+;; The generated code has to be proof-read, before it can be added to the
+;; project, in any case. This is just a tool, that is meant to reduce manual
+;; typing. The whole script only works properly if the modules for the new
+;; device follow the usual conventions for device-support modules.
+;;
+;; The generated functions are sorted alphabetically.
+
+(when (not (= 3 (length (command-line))))
+  (format #t "usage: generate-second-level <base-module> <name>~%")
+  (format #t "example:~%  generate-second-level \"chip-remote devices ti")
+  (format #t " lmk04828\" lmk04828~%~%")
+  (format #t "That will generate second-level access code for the device")
+  (format #t " defined~%in the register-map named lmk04828-register-map in ")
+  (format #t "the~%~%    (chip-remote devices ti lmk04828)~%~%namespace.~%")
+  (quit 1))
+
+(use-modules (chip-remote register-map)
+             (srfi srfi-1))
+
+(define base-module
+  (call-with-input-string (format #f "(~a)" (cadr (command-line)))
+                          read))
+
+(define registers-module (append base-module '(registers)))
+
+(eval-string (format #f "(use-modules ~a)" registers-module)
+             (current-module))
+
+(define map-name (caddr (command-line)))
+
+(define regmap (eval-string (format #f "~a-register-map" map-name)
+                            (current-module)))
+
+(define export-join-string
+  (string-concatenate (list (string #\newline) "            ")))
+
+(define code-join-string (string #\newline))
+
+;; We'll dump the generated code into `code'. It'll be an alist, that maps
+;; function name to function definition. It'll be used to generate the export
+;; list for the generated module as well as the actual code.
+(define code '())
+
+;; This is a short hand to add entries to the `code' list.
+(define (add-code entry)
+  (set! code (cons entry code)))
+
+;; This function handles the default case, if a register entry doesn't have an
+;; annotation.
+(define (resolve-annotation a)
+  (if (null? a)
+      (cons 'function 'literal-binary)
+      (let ((name (caar a))
+            (v (variable-ref (cdar a))))
+        (cons (cond ((procedure? v) 'function)
+                    ((list? v) 'list)
+                    (else 'unknown))
+              name))))
+
+;; Here are a few functions, that generate function definition text.
+
+(define (add-set-fnc-unhandled name type var)
+  (add-code (cons (symbol-append 'set- name)
+                  (format #f
+"(define (set-~a regval value)
+  (format #t \"WARNING: Unhandled second level access function!~~%\")
+  (format #t \"         `set-~a' generated with:~~%\")
+  (format #t \"             type: ~a~~%\")
+  (format #t \"             var:  ~a~~%\")
+  (format #t \"You probably want to write a special-purpose function instead!~~%\")
+  (format #t \"This function falls back to the first-level access function!~~%\")
+  (set-~a-bits regval value))~%"
+  name name type var name))))
+
+(define (add-set-fnc-literal name width)
+  (add-code (cons (symbol-append 'set- name)
+                  (format #f
+"(define (set-~a regval value)
+  (with-constraints (value (>= 0) (<= #b~b))
+    (set-~a-bits regval value)))~%"
+  name (- (ash 1 width) 1) name))))
+
+(define (add-enable-fnc name type)
+  (add-code (cons (symbol-append 'enable- name)
+                  (format #f
+"(define (enable-~a regval)
+  (set-~a set-~a-bits regval))~%" name type name))))
+
+(define (add-disable-fnc name type)
+  (add-code (cons (symbol-append 'disable- name)
+                  (format #f
+"(define (disable-~a regval)
+  (unset-~a set-~a-bits regval))~%" name type name))))
+
+(define (add-set-fnc-with-lookup name map-name)
+  (add-code (cons (symbol-append 'set- name)
+                  (format #f
+"(define (set-~a regval value)
+  (set-~a-bits regval (value->bits ~a value)))~%" name name map-name))))
+
+(define (add-set-fnc-with-conversion name convert)
+  (add-code (cons (symbol-append 'set- name)
+                  (format #f
+"(define (set-~a regval value)
+  (set-~a-bits regval (~a value)))~%" name name convert))))
+
+;; This function looks at a register-map entry, and determines what type of
+;; function body should be generated.
+(define (add-appropriate entry)
+  (let ((name (car entry))
+        (offset (cadr entry))
+        (width (caddr entry))
+        (annotation (resolve-annotation (cdddr entry))))
+    (cond ((and (= width 1)
+                (eq? (car annotation) 'function)
+                (or (eq? (cdr annotation) 'logic-active-high)
+                    (eq? (cdr annotation) 'logic-active-low)))
+           (add-enable-fnc name (cdr annotation))
+           (add-disable-fnc name (cdr annotation)))
+          ((and (eq? (car annotation) 'function)
+                (eq? (cdr annotation) 'literal-binary))
+           (add-set-fnc-literal name width))
+          ((and (eq? (car annotation) 'function)
+                (eq? (cdr annotation) 'twos-complement))
+           (add-set-fnc-with-conversion name 'value->twos-complement))
+          ((eq? (car annotation) 'list)
+           (add-set-fnc-with-lookup name (cdr annotation)))
+          (else
+           (add-set-fnc-unhandled name (car annotation) (cdr annotation))))))
+
+;; Call `add-appropriate' for every single content entry in the register map.
+(map-across (lambda (a i) (map add-appropriate i))
+            'contents regmap)
+
+;; Print header with copyright, module definition, imports and export list.
+(format #t ";; Copyright (c) ~d chip-remote workers, All rights reserved.~%"
+        (+ 1900 (tm:year (localtime (current-time)))))
+(format #t ";;~%")
+(format #t ";; Terms for redistribution and use can be found in LICENCE.~%~%")
+(format #t "(define-module ~a~%" (append base-module '(program)))
+(format #t "  #:use-module (chip-remote assemble)~%")
+(format #t "  #:use-module ~a~%" registers-module)
+(format #t "  #:use-module ~a~%" (append base-module '(tables)))
+(format #t "  #:export (")
+
+;; Fill in the export list.
+(display (string-join (sort (map (lambda (x)
+                                   (symbol->string (car x))) code)
+                            string<)
+                      export-join-string))
+
+(format #t "))~%~%")
+
+;; And finally dump the generated code as well.
+(display (string-join (map cdr (sort code
+                                     (lambda (x y)
+                                       (string< (symbol->string (car x))
+                                                (symbol->string (car y))))))
+                      code-join-string))
