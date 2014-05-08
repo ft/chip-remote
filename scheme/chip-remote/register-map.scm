@@ -55,9 +55,11 @@
 ;;   - register-address-power-save
 
 (define-module (chip-remote register-map)
+  #:use-module (srfi srfi-1)
   #:export (define-register-map
             register-default
-            =>))
+            =>
+            map-across))
 
 (define (generate-setter c kw)
   (datum->syntax
@@ -124,3 +126,11 @@
   (lambda (x)
     (syntax-case x ()
       ((_ n) #'(cons (quote n) (module-variable (current-module) (quote n)))))))
+
+(define (map-across fnc what regmap)
+  (fold (lambda (x acc)
+          (let ((address (car x))
+                (item (assq what (cdr x))))
+            (if item (cons (fnc address (cdr item)) acc))))
+        '()
+        regmap))
