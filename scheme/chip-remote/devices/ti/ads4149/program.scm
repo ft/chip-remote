@@ -152,6 +152,9 @@
   (set-enable-lvds-swing-bits regval (value->bits lvds-swing-control-map value)))
 
 (define (set-gain regval value)
+  "Set the device's gain to VALUE. The valid range is from 0 to 6dB in half-dB
+steps. VALUE has to be an exact number (i.e. an integer or an exact rational
+number)."
   (set-gain-bits regval (value->bits gain-map value)))
 
 (define (set-high-performance-mode-1 regval value)
