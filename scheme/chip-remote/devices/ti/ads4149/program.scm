@@ -16,7 +16,6 @@
             disable-power-down-global
             disable-power-down-outputs
             disable-readout
-            disable-reset
             disable-standby
             enable-clkout-fall-control
             enable-clkout-rise-control
@@ -28,8 +27,8 @@
             enable-power-down-global
             enable-power-down-outputs
             enable-readout
-            enable-reset
             enable-standby
+            reset-device
             set-clkout-fall-posn
             set-clkout-rise-posn
             set-cmos-clkout-strength
@@ -78,9 +77,6 @@
 (define (disable-readout regval)
   (unset-logic-active-high set-readout-bits regval))
 
-(define (disable-reset regval)
-  (unset-logic-active-high set-reset-bits regval))
-
 (define (disable-standby regval)
   (unset-logic-active-high set-standby-bits regval))
 
@@ -114,11 +110,11 @@
 (define (enable-readout regval)
   (set-logic-active-high set-readout-bits regval))
 
-(define (enable-reset regval)
-  (set-logic-active-high set-reset-bits regval))
-
 (define (enable-standby regval)
   (set-logic-active-high set-standby-bits regval))
+
+(define (reset-device regval)
+  (set-logic-active-high set-reset-bits regval))
 
 (define (set-clkout-fall-posn regval mode value)
   (with-constraints (mode (memq '(cmos lvds)))
