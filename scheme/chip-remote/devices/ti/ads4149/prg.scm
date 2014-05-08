@@ -5,8 +5,7 @@
 (define-module (chip-remote devices ti ads4149 prg)
   #:use-module (chip-remote assemble)
   #:use-module (chip-remote devices ti ads4149 tables)
-  #:use-module ((chip-remote devices ti ads4149 registers)
-                #:renamer (symbol-prefix-proc 'reg/))
+  #:use-module (chip-remote devices ti ads4149 registers))
   #:export (disable-clkout-fall-control
             disable-clkout-rise-control
             disable-freeze-offset-correction
@@ -52,145 +51,145 @@
             set-offset-pedestal
             set-test-pattern))
 
-(define (enable-serial-readout regval)
-  (set-logic-active-high reg/set-readout-bits regval))
+(define (disable-clkout-fall-control regval)
+  (unset-logic-active-high set-enable-clkout-fall-bits))
 
-(define (disable-serial-readout regval)
-  (unset-logic-active-high reg/set-readout-bits regval))
+(define (disable-clkout-rise-control regval)
+  (unset-logic-active-high set-enable-clkout-rise-bits))
 
-(define (reset-device regval)
-  (set-logic-active-high reg/set-reset-bits regval))
+(define (disable-freeze-offset-correction regval)
+  (unset-logic-active-high set-freeze-offset-correction-bits regval))
 
-(define (set-lvds-swing regval level)
-  (reg/set-lvds-swing-bits regval (value->bits lvds-swing-map level)))
-
-(define (enable-high-performance-1 regval)
-  (reg/set-high-performance-mode-1-bits regval #b11))
+(define (disable-gain regval)
+  (unset-logic-active-low set-disable-gain-bits regval))
 
 (define (disable-high-performance-1 regval)
-  (reg/set-high-performance-mode-1-bits regval #b00))
-
-(define (enable-high-performance-2 regval)
-  (set-logic-active-high reg/set-high-performance-mode-2-bits regval))
+  (set-high-performance-mode-1-bits regval #b00))
 
 (define (disable-high-performance-2 regval)
-  (unset-logic-active-high reg/set-high-performance-mode-2-bits regval))
+  (unset-logic-active-high set-high-performance-mode-2-bits regval))
+
+(define (disable-low-latency regval)
+  (unset-logic-active-low set-disable-low-latency-bits regval))
+
+(define (disable-lvds-swing-control regval)
+  (set-enable-lvds-swing-bits regval #b00))
+
+(define (disable-offset-correction regval value)
+  (unset-logic-active-high set-enable-offset-correction-bits))
+
+(define (disable-powerdown-global regval)
+  (unset-logic-active-high set-power-down-global regval))
+
+(define (disable-powerdown-outputs regval)
+  (unset-logic-active-high set-power-down-outputs regval))
+
+(define (disable-serial-readout regval)
+  (unset-logic-active-high set-readout-bits regval))
+
+(define (disable-standby regval)
+  (unset-logic-active-high set-standby-bits regval))
+
+(define (enable-clkout-fall-control regval)
+  (set-logic-active-high set-enable-clkout-fall-bits))
+
+(define (enable-clkout-rise-control regval)
+  (set-logic-active-high set-enable-clkout-rise-bits))
+
+(define (enable-freeze-offset-correction regval)
+  (set-logic-active-high set-freeze-offset-correction-bits regval))
+
+(define (enable-gain regval)
+  (set-logic-active-low set-disable-gain-bits regval))
+
+(define (enable-powerdown-global regval)
+  (set-logic-active-high set-power-down-global regval))
+
+(define (enable-powerdown-outputs regval)
+  (set-logic-active-high set-power-down-outputs regval))
+
+(define (enable-high-performance-1 regval)
+  (set-high-performance-mode-1-bits regval #b11))
+
+(define (enable-high-performance-2 regval)
+  (set-logic-active-high set-high-performance-mode-2-bits regval))
+
+(define (enable-lvds-swing-control regval)
+  (set-enable-lvds-swing-bits regval #b11))
+
+(define (enable-low-latency regval)
+  (set-logic-active-low set-disable-low-latency-bits regval))
+
+(define (enable-offset-correction regval value)
+  (set-logic-active-high set-enable-offset-correction-bits))
+
+(define (enable-serial-readout regval)
+  (set-logic-active-high set-readout-bits regval))
+
+(define (enable-standby regval)
+  (set-logic-active-high set-standby-bits regval))
+
+(define (reset-device regval)
+  (set-logic-active-high set-reset-bits regval))
+
+(define (set-clkout-cmos-strength regval value)
+  (set-cmos-clkout-strength regval (value->bits cmos-clkout-strength-map
+                                                    value)))
+
+(define (set-clkout-lvds-strength regval value)
+  (set-lvds-clkout-strength regval (value->bits lvds-strength-map value)))
+
+(define (set-clkout-rise-pos-lvds regval value)
+  (set-clkout-rise-posn-bits regval (value->bits clkout-pos-rise-lvds
+                                                     value)))
+
+(define (set-clkout-rise-pos-cmos regval value)
+  (set-clkout-rise-posn-bits regval (value->bits clkout-pos-rise-cmos
+                                                     value)))
+
+(define (set-clkout-fall-pos-lvds regval value)
+  (set-clkout-fall-posn-bits regval (value->bits clkout-pos-fall-lvds
+                                                     value)))
+
+(define (set-clkout-fall-pos-cmos regval value)
+  (set-clkout-fall-posn-bits regval (value->bits clkout-pos-fall-cmos
+
+(define (set-custom-pattern-high regval value)
+  (with-constraints (value (>= 0) (<= #b11111111))
+    (set-custom-pattern-high-bits regval value)))
+
+(define (set-custom-pattern-low regval value)
+  (with-constraints (value (>= 0) (<= #b111111))
+    (set-custom-pattern-low-bits regval value)))
+
+(define (set-data-format regval value)
+  (set-data-format-bits regval (value->bits data-format-map value)))
+
+(define (set-data-lvds-strength regval value)
+  (set-lvds-data-strength regval (value->bits lvds-strength-map value)))
+
+(define (set-lvds-swing regval level)
+  (set-lvds-swing-bits regval (value->bits lvds-swing-map level)))
 
 (define (set-gain regval value)
   "Set the device's gain to VALUE. The valid range is from 0 to 6dB in half-dB
 steps. VALUE has to be an exact number (i.e. an integer or an exact rational
 number)."
-  (reg/set-gain-bits regval (value->bits gain-map value)))
-
-(define (enable-gain regval)
-  (set-logic-active-low reg/set-disable-gain-bits regval))
-
-(define (disable-gain regval)
-  (unset-logic-active-low reg/set-disable-gain-bits regval))
-
-(define (set-test-pattern regval value)
-  (reg/set-test-pattern-bits regval (value->bits test-pattern-map value)))
-
-(define (set-clkout-lvds-strength regval value)
-  (reg/set-lvds-clkout-strength regval (value->bits lvds-strength-map value)))
-
-(define (set-data-lvds-strength regval value)
-  (reg/set-lvds-data-strength regval (value->bits lvds-strength-map value)))
-
-(define (set-data-format regval value)
-  (reg/set-data-format-bits regval (value->bits data-format-map value)))
-
-(define (enable-offset-correction regval value)
-  (set-logic-active-high reg/set-enable-offset-correction-bits))
-
-(define (disable-offset-correction regval value)
-  (unset-logic-active-high reg/set-enable-offset-correction-bits))
-
-(define (set-custom-pattern-high regval value)
-  (with-constraints (value (>= 0) (<= #b11111111))
-    (reg/set-custom-pattern-high-bits regval value)))
-
-(define (set-custom-pattern-low regval value)
-  (with-constraints (value (>= 0) (<= #b111111))
-    (reg/set-custom-pattern-low-bits regval value)))
-
-(define (set-lvds-cmos-select regval value)
-  (reg/set-lvds-cmos-bits regval (value->bits lvds-cmos-select-map value)))
-
-(define (set-cmos-clkout-strength regval value)
-  (reg/set-cmos-clkout-strength regval (value->bits cmos-clkout-strength-map
-                                                    value)))
-
-(define (enable-clkout-rise-control regval)
-  (set-logic-active-high reg/set-enable-clkout-rise-bits))
-
-(define (disable-clkout-rise-control regval)
-  (unset-logic-active-high reg/set-enable-clkout-rise-bits))
-
-(define (enable-clkout-fall-control regval)
-  (set-logic-active-high reg/set-enable-clkout-fall-bits))
-
-(define (disable-clkout-fall-control regval)
-  (unset-logic-active-high reg/set-enable-clkout-fall-bits))
-
-(define (set-clkout-rise-pos-lvds regval value)
-  (reg/set-clkout-rise-posn-bits regval (value->bits clkout-pos-rise-lvds
-                                                     value)))
-
-(define (set-clkout-rise-pos-cmos regval value)
-  (reg/set-clkout-rise-posn-bits regval (value->bits clkout-pos-rise-cmos
-                                                     value)))
-
-(define (set-clkout-fall-pos-lvds regval value)
-  (reg/set-clkout-fall-posn-bits regval (value->bits clkout-pos-fall-lvds
-                                                     value)))
-
-(define (set-clkout-fall-pos-cmos regval value)
-  (reg/set-clkout-fall-posn-bits regval (value->bits clkout-pos-fall-cmos
-                                                     value)))
-
-(define (enable-low-latency regval)
-  (set-logic-active-low reg/set-disable-low-latency-bits regval))
-
-(define (disable-low-latency regval)
-  (unset-logic-active-low reg/set-disable-low-latency-bits regval))
-
-(define (enable-standby regval)
-  (set-logic-active-high reg/set-standby-bits regval))
-
-(define (disable-standby regval)
-  (unset-logic-active-high reg/set-standby-bits regval))
-
-(define (enable-powerdown-global regval)
-  (set-logic-active-high reg/set-power-down-global regval))
-
-(define (disable-powerdown-global regval)
-  (unset-logic-active-high reg/set-power-down-global regval))
-
-(define (enable-powerdown-outputs regval)
-  (set-logic-active-high reg/set-power-down-outputs regval))
-
-(define (disable-powerdown-outputs regval)
-  (unset-logic-active-high reg/set-power-down-outputs regval))
-
-(define (enable-lvds-swing-control regval)
-  (reg/set-enable-lvds-swing-bits regval #b11))
-
-(define (disable-lvds-swing-control regval)
-  (reg/set-enable-lvds-swing-bits regval #b00))
-
-(define (set-offset-pedestal regval value)
-  (reg/set-offset-pedestal-bits regval (value->twos-complement value 6)))
-
-(define (enable-freeze-offset-correction regval)
-  (set-logic-active-high reg/set-freeze-offset-correction-bits regval))
-
-(define (disable-freeze-offset-correction regval)
-  (unset-logic-active-high reg/set-freeze-offset-correction-bits regval))
-
-(define (set-offset-correction-time-constant regval value)
-  (reg/set-offset-correction-time-constant-bits (value->bits correction-time-map
-                                                             value)))
+  (set-gain-bits regval (value->bits gain-map value)))
 
 (define (set-low-speed-mode regval value)
-  (reg/set-low-speed-bits regval (value->bits low-speed-map value)))
+  (set-low-speed-bits regval (value->bits low-speed-map value)))
+                                                     value)))
+
+(define (set-lvds-cmos-select regval value)
+  (set-lvds-cmos-bits regval (value->bits lvds-cmos-select-map value)))
+
+(define (set-offset-pedestal regval value)
+  (set-offset-pedestal-bits regval (value->twos-complement value 6)))
+
+(define (set-offset-correction-time-constant regval value)
+  (set-offset-correction-time-constant-bits (value->bits correction-time-map
+                                                             value)))
+
+(define (set-test-pattern regval value)
+  (set-test-pattern-bits regval (value->bits test-pattern-map value)))
