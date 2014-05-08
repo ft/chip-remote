@@ -6,25 +6,25 @@
   #:use-module (chip-remote assemble)
   #:use-module (chip-remote devices ti ads4149 registers)
   #:use-module (chip-remote devices ti ads4149 tables)
-  #:export (disable-disable-gain
-            disable-disable-low-latency
-            disable-enable-clkout-fall
-            disable-enable-clkout-rise
-            disable-enable-offset-correction
+  #:export (disable-clkout-fall-control
+            disable-clkout-rise-control
             disable-freeze-offset-correction
+            disable-gain
             disable-high-performance-mode-2
+            disable-low-latency
+            disable-offset-correction
             disable-power-down-global
             disable-power-down-outputs
             disable-readout
             disable-reset
             disable-standby
-            enable-disable-gain
-            enable-disable-low-latency
-            enable-enable-clkout-fall
-            enable-enable-clkout-rise
-            enable-enable-offset-correction
+            enable-clkout-fall-control
+            enable-clkout-rise-control
             enable-freeze-offset-correction
+            enable-gain
             enable-high-performance-mode-2
+            enable-low-latency
+            enable-offset-correction
             enable-power-down-global
             enable-power-down-outputs
             enable-readout
@@ -48,26 +48,26 @@
             set-offset-pedestal
             set-test-pattern))
 
-(define (disable-disable-gain regval)
-  (unset-logic-active-high set-disable-gain-bits regval))
-
-(define (disable-disable-low-latency regval)
-  (unset-logic-active-high set-disable-low-latency-bits regval))
-
-(define (disable-enable-clkout-fall regval)
+(define (disable-clkout-fall-control regval)
   (unset-logic-active-high set-enable-clkout-fall-bits regval))
 
-(define (disable-enable-clkout-rise regval)
+(define (disable-clkout-rise-control regval)
   (unset-logic-active-high set-enable-clkout-rise-bits regval))
-
-(define (disable-enable-offset-correction regval)
-  (unset-logic-active-high set-enable-offset-correction-bits regval))
 
 (define (disable-freeze-offset-correction regval)
   (unset-logic-active-high set-freeze-offset-correction-bits regval))
 
+(define (disable-gain regval)
+  (unset-logic-active-low set-disable-gain-bits regval))
+
 (define (disable-high-performance-mode-2 regval)
   (unset-logic-active-high set-high-performance-mode-2-bits regval))
+
+(define (disable-low-latency regval)
+  (unset-logic-active-low set-disable-low-latency-bits regval))
+
+(define (disable-offset-correction regval)
+  (unset-logic-active-high set-enable-offset-correction-bits regval))
 
 (define (disable-power-down-global regval)
   (unset-logic-active-high set-power-down-global-bits regval))
@@ -84,26 +84,26 @@
 (define (disable-standby regval)
   (unset-logic-active-high set-standby-bits regval))
 
-(define (enable-disable-gain regval)
-  (set-logic-active-high set-disable-gain-bits regval))
-
-(define (enable-disable-low-latency regval)
-  (set-logic-active-high set-disable-low-latency-bits regval))
-
-(define (enable-enable-clkout-fall regval)
+(define (enable-clkout-fall regval)
   (set-logic-active-high set-enable-clkout-fall-bits regval))
 
-(define (enable-enable-clkout-rise regval)
+(define (enable-clkout-rise regval)
   (set-logic-active-high set-enable-clkout-rise-bits regval))
-
-(define (enable-enable-offset-correction regval)
-  (set-logic-active-high set-enable-offset-correction-bits regval))
 
 (define (enable-freeze-offset-correction regval)
   (set-logic-active-high set-freeze-offset-correction-bits regval))
 
+(define (enable-gain regval)
+  (set-logic-active-low set-disable-gain-bits regval))
+
 (define (enable-high-performance-mode-2 regval)
   (set-logic-active-high set-high-performance-mode-2-bits regval))
+
+(define (enable-low-latency regval)
+  (set-logic-active-low set-disable-low-latency-bits regval))
+
+(define (enable-offset-correction regval)
+  (set-logic-active-high set-enable-offset-correction-bits regval))
 
 (define (enable-power-down-global regval)
   (set-logic-active-high set-power-down-global-bits regval))
