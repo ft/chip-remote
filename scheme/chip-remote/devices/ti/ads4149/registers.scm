@@ -6,7 +6,8 @@
   #:use-module (bitops)
   #:use-module (chip-remote bit-decoders)
   #:use-module (chip-remote devices ti ads4149 tables)
-  #:use-module (chip-remote register-map))
+  #:use-module (chip-remote register-map)
+  #:export (register-width))
 
 (define (posn-decode width value get cmos lvds)
   (let ((v (get value)))
@@ -26,6 +27,8 @@
                get-clkout-fall-posn-bits
                clkout-pos-fall-cmos
                clkout-pos-fall-lvds))
+
+(define register-width 8)
 
 (define-register-map ads4149
   (#x0 (default-value . #x0)

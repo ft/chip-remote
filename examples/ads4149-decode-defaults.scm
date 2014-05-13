@@ -20,8 +20,7 @@
        (display-list
         (register->text #:register-map ads4149-register-map
                         #:address x
-                        #:width
-                        8
+                        #:width register-width
                         #:value (register-default ads4149-register-map x)
                         #:colour? #t)))
      (map car ads4149-register-map))
