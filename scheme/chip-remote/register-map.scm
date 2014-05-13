@@ -61,6 +61,56 @@
             =>
             map-across))
 
+(define (get-variable name)
+  (let ((var (module-variable (current-module) name)))
+    (or var (throw 'cr-unknown-variable name))
+    var))
+
+(define (get-value name)
+  (variable-ref (get-variable name)))
+
+(define (assemble-decoder name)
+  (let* ((var (get-variable name))
+         (val (variable-ref var)))
+    (list (list var (cond ((procedure? val) 'function)
+                          ((list? val) 'list)
+                          (else (throw 'cr-unsupported-decoder-at name)))
+                name))))
+
+(define (expand-rest name rest)
+  (cond ((null? rest)
+         (assemble-decoder 'literal-binary))
+        ((or (not (list? rest))
+             (not (= (length rest) 2))
+             (not (eq? (car rest) '=>)))
+         (throw 'cr-dubious-register-map-entry name))
+        (else (assemble-decoder (cadr rest)))))
+
+(define (expand-entry item)
+  (let* ((name (car item))
+         (offset (cadr item))
+         (width (caddr item))
+         (rest (cdddr item))
+         (getter (get-value (symbol-append 'get- name '-bits)))
+         (setter (get-value (symbol-append 'set- name '-bits))))
+    (cons name
+          (cons offset
+                (cons width
+                      (cons getter
+                            (cons setter (expand-rest name rest))))))))
+
+(define (expand-registers lst)
+  (map (lambda (reg)
+         (cons (car reg)
+               (map (lambda (a)
+                      (cond ((not (eq? (car a) 'contents)) a)
+                            (else (cons 'contents
+                                        (map (lambda (i)
+                                               (expand-entry i))
+                                             (cdr a))))))
+                    (cdr reg))))
+       lst))
+
 (define (generate-setter c kw)
   (datum->syntax
    kw (let* ((name (car c))
@@ -111,7 +161,7 @@
                                            (syntax->datum #'(register ...)))))
          #'(begin exp ...
                   (define-public variable-name
-                    (syntax->datum #`(register ...)))))))))
+                    (expand-registers (syntax->datum #`(register ...))))))))))
 
 (define (register-default regmap address)
   (let ((reg (assoc address regmap)))

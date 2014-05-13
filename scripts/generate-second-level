@@ -58,14 +58,7 @@
 ;; This function handles the default case, if a register entry doesn't have an
 ;; annotation.
 (define (resolve-annotation a)
-  (if (null? a)
-      (cons 'function 'literal-binary)
-      (let ((name (caar a))
-            (v (variable-ref (cdar a))))
-        (cons (cond ((procedure? v) 'function)
-                    ((list? v) 'list)
-                    (else 'unknown))
-              name))))
+  (cons (cadr a) (caddr a)))
 
 ;; Here are a few functions, that generate function definition text.
 
@@ -120,7 +113,7 @@
   (let ((name (car entry))
         (offset (cadr entry))
         (width (caddr entry))
-        (annotation (resolve-annotation (cdddr entry))))
+        (annotation (resolve-annotation (list-ref entry 5))))
     (cond ((and (= width 1)
                 (eq? (car annotation) 'function)
                 (or (eq? (cdr annotation) 'logic-active-high)
