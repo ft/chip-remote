@@ -1,0 +1,171 @@
+;; -*- scheme -*-
+
+;; Copyright (c) 2014 chip-remote workers, All rights reserved.
+;;
+;; Terms for redistribution and use can be found in LICENCE.
+
+;; When proper care has been taken to implement the second-level access module
+;; for any given device, often the code required for third-level access can be
+;; very much generated on the fly, because the pattern in the common case is
+;; always the same: You read a register from the controlled device, change that
+;; original register value using the second-level API, and then write the
+;; amended register value back to the device.
+;;
+;; The ‘define-bit-field-frontends’ macro from the (chip-remote level-3) module
+;; expands into function definitions of exactly that kind. And when a
+;; configuration bit-field is limited to a single register, then that just
+;; works.
+;;
+;; Still, filling the table that provides ‘define-bit-field-frontends’ macro
+;; with the information it needs to expand into useful code, is rather boring.
+;; The functions that frontends are needed for are in the second-level access
+;; module, and the corresponding register-address variable (defined in the
+;; registers module for the device) can be derived from the second-level code
+;; as well.
+;;
+;; So what this script does it *reading* scheme expressions from the source
+;; code file that houses the second-level module. Then it traverses through the
+;; source code to find the first-level access functions used, from which the
+;; corresponding register address can be derived. That course of action also
+;; allows the script to find out the argument list for the second-level
+;; functions. Without that, no sensible third-level code could be generated.
+;;
+;; Using that approach, the author of the support for a new target device only
+;; has to implement a ‘write-register’ function, a ‘read-register’ functions
+;; and front-ends for functionality that does not fall within the common case.
+;; In particular, that would be frontends for setting bit-fields that span
+;; across multiple registers.
+
+(when (not (= 3 (length (command-line))))
+  (format #t "usage: generate-second-level <lvl2-module-file> <name>~%")
+  (quit 1))
+
+(use-modules (ice-9 control)
+             (ice-9 format)
+             (srfi srfi-1))
+
+(define input-file (cadr (command-line)))
+(define regmap-name (caddr (command-line)))
+
+(define lvl2/export-list #f)
+
+(define (lvl3/process:header hdr)
+  (let* ((lvl2-module (car hdr))
+         (base-module (take lvl2-module (- (length lvl2-module) 1))))
+    (format #t ";; Copyright (c) ~d chip-remote workers, All rights reserved.~%"
+            (+ 1900 (tm:year (localtime (current-time)))))
+    (format #t ";;~%")
+    (format #t ";; Terms for redistribution and use can be found in LICENCE.~%~%")
+    (format #t "(define-module ~a~%" base-module)
+    (format #t "  #:use-module (ice-9 optargs)~%")
+    (format #t "  #:use-module (chip-remote level-3)~%")
+    (format #t "  #:use-module (chip-remote protocol)~%")
+    (format #t "  #:use-module (~a~%" (append base-module '(program)))
+    (format #t "                #:renamer (symbol-prefix-proc 'lvl2/))~%")
+    (format #t "  #:use-module ~a~%" (append base-module '(registers)))
+    (format #t "  #:export (decode-device~%")
+    (format #t "            decode-register~%")
+    (format #t "            decode-register-value~%")
+    (format #t "            read-register~%")
+    (format #t "            setup-connection~%")
+    (format #t "            write-register))~%"))
+  (newline)
+  (format #t "(define (setup-connection conn index)~%")
+  (format #t "  (throw 'cr-setup-connection-not-implemented-yet))~%")
+  (newline)
+  (format #t "(define (read-register conn addr)~%")
+  (format #t "  (throw 'cr-read-register-not-implemented-yet))~%")
+  (newline)
+  (format #t "(define (write-register conn addr value)~%")
+  (format #t "  (throw 'cr-write-register-not-implemented-yet))~%")
+  (newline)
+  (format #t "(define* (decode-register-value addr value #:key")
+  (format #t " (colour? (to-tty?)))~%")
+  (format #t "  (value-decoder ~a-register-map" regmap-name)
+  (format #t " register-width addr value colour?))~%")
+  (newline)
+  (format #t "(define* (decode-register conn addr #:key")
+  (format #t " (colour? (to-tty?)))~%")
+  (format #t "  (decode-register-value (read-register conn addr)")
+  (format #t " addr #:colour? colour?))~%")
+  (newline)
+  (format #t "(define* (decode-device conn #:key (colour? (to-tty?)))~%")
+  (format #t "  (device-decoder ~a-register-map" regmap-name)
+  (format #t " decoder-register conn colour?))~%")
+  (newline)
+  (format #t "(define-bit-field-frontends")
+  (let next ((exp (cdr hdr)))
+    (cond ((null? exp) #f)
+          ((and (keyword? (car exp))
+                (eq? #:export (car exp)))
+           (set! lvl2/export-list (cadr exp)))
+          (else (next (cdr exp))))))
+
+(define (dump-arglist al)
+  (let next ((rest al))
+    (if (null? rest)
+        #t
+        (begin (format #t " ~a" (car rest))
+               (next (cdr rest))))))
+
+(define (is-setter? exp)
+  (and (symbol? exp)
+       (let ((s (symbol->string exp)))
+         (and (string-prefix? "set-" s)
+              (string-suffix? "-bits" s)))))
+
+(define (find-setter exp)
+  (call/ec
+   (lambda (return)
+     (let search ((rest exp))
+       (cond ((null? rest) #f)
+             ((list? rest)
+              (search (car rest))
+              (search (cdr rest)))
+             (else
+              (and (is-setter? rest)
+                  (return rest))))))))
+
+(define (make-regaddr-from-setter exp)
+  (symbol-append 'register-address-
+                 (string->symbol (let ((s (symbol->string exp)))
+                                   (substring s 4 (- (string-length s) 5))))))
+
+(define (find-register-address exp)
+  (let* ((setter (find-setter exp)))
+    (if (not setter)
+        '(throw 'could-not-find-register-address)
+        (make-regaddr-from-setter setter))))
+
+(define (lvl3/process:procedure exp)
+  (let ((name (caar exp))
+        (lvl2 (symbol-append 'lvl2/ (caar exp)))
+        (addr (find-register-address (cdr exp)))
+        (arglist (cdar exp)))
+    (format #t "~%  (~a ~a~%" name addr)
+    (format #t "   ~v_ ~a" (string-length (symbol->string name)) lvl2)
+    (if (> (length arglist) 1)
+        (format #t " ~a" (cdr arglist)))
+    (display ")")))
+
+(define (lvl3/process exp)
+  (let ((head (car exp))
+        (rest (cdr exp)))
+    (cond ((eq? head 'define-module)
+           (lvl3/process:header rest))
+          ((eq? head 'define)
+           (and (list? (car rest))
+                (memq (caar rest) lvl2/export-list)
+                (lvl3/process:procedure rest)))
+          (else #t))))
+
+
+(call-with-input-file input-file
+  (lambda (p)
+    (let next ((exp (read p)))
+      (if (eof-object? exp)
+          #t
+          (begin (lvl3/process exp)
+                 (next (read p)))))))
+(display ")")
+(newline)
