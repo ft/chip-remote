@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote level-3)
+  #:use-module (srfi srfi-1)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote decode to-text)
   #:export (define-bit-field-frontends
