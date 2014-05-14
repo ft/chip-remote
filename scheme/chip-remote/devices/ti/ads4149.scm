@@ -166,13 +166,13 @@ API for experimentation purposes."
                     lvl2/set-test-pattern (value)))
 
 (define (enable-readout conn)
-  (write-register conn 0 (lvl2/enable-readout 0)))
+  (write-register conn register-address-readout (lvl2/enable-readout 0)))
 
 (define (disable-readout conn)
-  (write-register conn 0 (lvl2/disable-readout 0)))
+  (write-register conn register-address-readout (lvl2/disable-readout 0)))
 
 (define (reset-device conn)
-  (write-register conn 0 (lvl2/reset-device 0)))
+  (write-register conn register-address-reset (lvl2/reset-device 0)))
 
 (define (enable-high-performance-mode conn)
   (replay-register conn register-address-high-performance-mode-1
