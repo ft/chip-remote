@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices ti ads4149)
+  #:use-module (srfi srfi-1)
   #:use-module (ice-9 optargs)
   #:use-module (bitops)
   #:use-module (chip-remote level-3)
@@ -102,7 +103,9 @@ API for experimentation purposes."
   (decode-register-value (read-register conn addr) addr #:colour? colour?))
 
 (define* (decode-device conn #:key (colour? (to-tty?)))
-  (device-decoder ads4149-register-map decoder-register conn colour?))
+  (fold + 0 (map (lambda (a) (decode-register conn a))
+                 (filter (lambda (x) (not (= x 0)))
+                         (map car ads4149-register-map)))))
 
 (define-bit-field-frontends
   (disable-clkout-fall-control register-address-enable-clkout-fall
