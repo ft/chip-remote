@@ -24,7 +24,7 @@
     (syntax-case x ()
       ((_ name addr lvl2 (args ...))
        #'(define-public (name conn args ...)
-           (replay-register conn addr (lvl2 args ...))))
+           (replay-register conn addr lvl2 (args ...))))
       ((_ name addr lvl2)
        #'(define-bit-field-frontend name addr lvl2 ())))))
 
