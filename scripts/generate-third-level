@@ -91,7 +91,7 @@
   (newline)
   (format #t "(define* (decode-device conn #:key (colour? (to-tty?)))~%")
   (format #t "  (device-decoder ~a-register-map" regmap-name)
-  (format #t " decoder-register conn colour?))~%")
+  (format #t " decode-register conn colour?))~%")
   (newline)
   (format #t "(define-bit-field-frontends")
   (let next ((exp (cdr hdr)))
