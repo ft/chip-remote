@@ -45,7 +45,7 @@ the given index. However, it does NOT switch focus to the configured port."
   (init conn 0))
 
 (define (valid-readback-address? a)
-  (and (! (= a 0))
+  (and (not (= a 0))
        (valid-register-address? a)))
 
 (define (read-register conn addr)
