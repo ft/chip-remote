@@ -100,7 +100,7 @@ API for experimentation purposes."
   (value-decoder ads4149-register-map register-width addr value colour?))
 
 (define* (decode-register conn addr #:key (colour? (to-tty?)))
-  (decode-register-value (read-register conn addr) addr #:colour? colour?))
+  (decode-register-value addr (read-register conn addr) #:colour? colour?))
 
 (define* (decode-device conn #:key (colour? (to-tty?)))
   (fold + 0 (map (lambda (a) (decode-register conn a))
