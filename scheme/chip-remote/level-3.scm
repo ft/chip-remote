@@ -15,7 +15,9 @@
     (syntax-case x ()
       ((_ c a l2 (args ...))
        #'(let ((conn c) (addr a))
-           (write-register conn addr (l2 (read-register conn addr) args ...)))))))
+           (write-register conn addr (l2 (read-register conn addr) args ...))))
+      ((_ c a l2)
+       #'(replay-register c a l2 ())))))
 
 (define-syntax define-bit-field-frontend
   (lambda (x)
