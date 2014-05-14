@@ -4,6 +4,7 @@
 
 (define-module (chip-remote devices ti ads4149)
   #:use-module (ice-9 optargs)
+  #:use-module (bitops)
   #:use-module (chip-remote level-3)
   #:use-module (chip-remote protocol)
   #:use-module ((chip-remote devices ti ads4149 program)
@@ -140,10 +141,6 @@ API for experimentation purposes."
                         lvl2/set-clkout-rise-posn (mode value))
   (set-cmos-clkout-strength register-address-cmos-clkout-strength
                             lvl2/set-cmos-clkout-strength (value))
-  (set-custom-pattern-high register-address-custom-pattern-high
-                           lvl2/set-custom-pattern-high (value))
-  (set-custom-pattern-low register-address-custom-pattern-low
-                          lvl2/set-custom-pattern-low (value))
   (set-data-format register-address-data-format
                    lvl2/set-data-format (value))
   (set-gain register-address-gain
@@ -180,3 +177,11 @@ API for experimentation purposes."
                    lvl2/enable-high-performance-1)
   (replay-register conn register-address-high-performance-mode-2
                    lvl2/enable-high-performance-2))
+
+(define (set-custom-pattern conn value)
+  (let ((l (logand #x3f value))
+        (h (bit-extract-width value 6 8)))
+    (write-register conn register-address-custom-pattern-high
+                          (lvl2/set-custom-pattern-high 0 h))
+    (write-register conn register-address-custom-pattern-low
+                          (lvl2/set-custom-pattern-low 0 l))))
