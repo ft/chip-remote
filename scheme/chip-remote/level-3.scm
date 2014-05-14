@@ -6,6 +6,7 @@
   #:use-module (chip-remote decode)
   #:use-module (chip-remote decode to-text)
   #:export (define-bit-field-frontends
+            device-decoder
             replay-register
             to-tty?
             value-decoder))
