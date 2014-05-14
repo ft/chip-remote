@@ -74,7 +74,7 @@ API for experimentation purposes."
   (if (not (valid-readback-address? addr))
       (throw 'cr-invalid-address addr))
   (enable-readout conn)
-  (let ((return-value (write-register* addr 0)))
+  (let ((return-value (write-register* conn addr 0)))
     (disable-readout conn)
     (logand #xff return-value)))
 
