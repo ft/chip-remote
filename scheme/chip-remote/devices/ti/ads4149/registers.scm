@@ -7,7 +7,11 @@
   #:use-module (chip-remote bit-decoders)
   #:use-module (chip-remote devices ti ads4149 tables)
   #:use-module (chip-remote register-map)
-  #:export (register-width))
+  #:export (register-width
+            valid-register-address?))
+
+(define (valid-register-address? a)
+  (member a (map car ads4149-register-map)))
 
 (define (posn-decode width value get cmos lvds)
   (let ((v (get value)))
