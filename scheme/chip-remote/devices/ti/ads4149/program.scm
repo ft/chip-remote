@@ -62,7 +62,7 @@
 (define (disable-gain regval)
   (unset-logic-active-low set-disable-gain-bits regval))
 
-(define (disable-high-performance-1 regval)
+(define (disable-high-performance-mode-1 regval)
   (set-high-performance-mode-1-bits regval #b00))
 
 (define (disable-high-performance-mode-2 regval)
@@ -104,7 +104,7 @@
 (define (enable-gain regval)
   (set-logic-active-low set-disable-gain-bits regval))
 
-(define (enable-high-performance-1 regval)
+(define (enable-high-performance-mode-1 regval)
   (set-high-performance-mode-1-bits regval #b11))
 
 (define (enable-high-performance-mode-2 regval)
