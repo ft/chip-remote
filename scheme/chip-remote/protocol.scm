@@ -445,6 +445,9 @@ connected to via CONN.
 TODO: Needs caching to capabilities structure."
   (map parse-port (list-more-done conn (request-with-index "PORT" index))))
 
+(define (boolean->protocol-string bool)
+  (if bool "TRUE" "FALSE"))
+
 (define (symbol->protocol-string sym)
   "Turn a symbol used by the client library into a string used by RCCEP.
 
@@ -459,6 +462,7 @@ The value for KEY will be set to VALUE."
   (let ((key-str (symbol->protocol-string key))
         (idx-str (int->hexstring pidx))
         (val (cond ((symbol? value) (symbol->protocol-string value))
+                   ((boolean? value) (boolean->protocol-string value))
                    ((integer? value) (int->hexstring value))
                    ((string? value) value)
                    (else (throw 'protocol-set-unknown-value-type value)))))
