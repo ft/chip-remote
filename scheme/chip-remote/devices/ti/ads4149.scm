@@ -118,8 +118,6 @@ API for experimentation purposes."
                              lvl2/disable-power-down-global)
   (disable-power-down-outputs register-address-power-down-outputs
                               lvl2/disable-power-down-outputs)
-  (disable-readout register-address-readout
-                   lvl2/disable-readout)
   (disable-standby register-address-standby
                    lvl2/disable-standby)
   (enable-freeze-offset-correction register-address-freeze-offset-correction
@@ -138,12 +136,8 @@ API for experimentation purposes."
                             lvl2/enable-power-down-global)
   (enable-power-down-outputs register-address-power-down-outputs
                              lvl2/enable-power-down-outputs)
-  (enable-readout register-address-readout
-                  lvl2/enable-readout)
   (enable-standby register-address-standby
                   lvl2/enable-standby)
-  (reset-device register-address-reset
-                lvl2/reset-device)
   (set-clkout-fall-posn register-address-clkout-fall-posn
                         lvl2/set-clkout-fall-posn (mode value))
   (set-clkout-rise-posn register-address-clkout-rise-posn
@@ -174,3 +168,12 @@ API for experimentation purposes."
                        lvl2/set-offset-pedestal (value))
   (set-test-pattern register-address-test-pattern
                     lvl2/set-test-pattern (value)))
+
+(define (enable-readout conn)
+  (write-register conn 0 (lvl2/enable-readout 0)))
+
+(define (disable-readout conn)
+  (write-register conn 0 (lvl2/disable-readout 0)))
+
+(define (reset-device conn)
+  (write-register conn 0 (lvl2/reset-device 0)))
