@@ -106,8 +106,6 @@ API for experimentation purposes."
                                     lvl2/disable-freeze-offset-correction)
   (disable-gain register-address-disable-gain
                 lvl2/disable-gain)
-  (disable-high-performance-mode-2 register-address-high-performance-mode-2
-                                   lvl2/disable-high-performance-mode-2)
   (disable-low-latency register-address-disable-low-latency
                        lvl2/disable-low-latency)
   (disable-lvds-swing-control register-address-enable-lvds-swing
@@ -124,8 +122,6 @@ API for experimentation purposes."
                                    lvl2/enable-freeze-offset-correction)
   (enable-gain register-address-disable-gain
                lvl2/enable-gain)
-  (enable-high-performance-mode-2 register-address-high-performance-mode-2
-                                  lvl2/enable-high-performance-mode-2)
   (enable-low-latency register-address-disable-low-latency
                       lvl2/enable-low-latency)
   (enable-lvds-swing-control register-address-enable-lvds-swing
@@ -178,3 +174,9 @@ API for experimentation purposes."
 
 (define (reset-device conn)
   (write-register conn 0 (lvl2/reset-device 0)))
+
+(define (enable-high-performance-mode conn)
+  (replay-register conn register-address-high-performance-mode-1
+                   lvl2/enable-high-performance-1)
+  (replay-register conn register-address-high-performance-mode-2
+                   lvl2/enable-high-performance-2))
