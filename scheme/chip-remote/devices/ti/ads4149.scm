@@ -109,6 +109,8 @@ API for experimentation purposes."
                 lvl2/disable-gain)
   (disable-low-latency register-address-disable-low-latency
                        lvl2/disable-low-latency)
+  (disable-low-speed register-address-low-speed
+                     lvl2/disable-low-speed)
   (disable-lvds-swing-control register-address-enable-lvds-swing
                               lvl2/disable-lvds-swing-control)
   (disable-offset-correction register-address-enable-offset-correction
@@ -125,6 +127,8 @@ API for experimentation purposes."
                lvl2/enable-gain)
   (enable-low-latency register-address-disable-low-latency
                       lvl2/enable-low-latency)
+  (enable-low-speed register-address-low-speed
+                    lvl2/enable-low-speed)
   (enable-lvds-swing-control register-address-enable-lvds-swing
                              lvl2/enable-lvds-swing-control)
   (enable-offset-correction register-address-enable-offset-correction
@@ -145,8 +149,6 @@ API for experimentation purposes."
                    lvl2/set-data-format (value))
   (set-gain register-address-gain
             lvl2/set-gain (value))
-  (set-low-speed register-address-low-speed
-                 lvl2/set-low-speed (value))
   (set-lvds-clkout-strength register-address-lvds-clkout-strength
                             lvl2/set-lvds-clkout-strength (value))
   (set-lvds-cmos register-address-lvds-cmos
