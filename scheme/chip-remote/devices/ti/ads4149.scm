@@ -15,7 +15,13 @@
             decode-register-value
             read-register
             setup-connection
-            write-register))
+            write-register
+
+            enable-readout
+            disable-readout
+            reset-device
+            enable-high-performance
+            set-custom-pattern))
 
 (define (setup-connection conn index)
   "Set up a port in the remote controller to work with the ADS4149 ADC.
