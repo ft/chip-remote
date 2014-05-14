@@ -162,8 +162,9 @@ API for experimentation purposes."
                           lvl2/set-lvds-data-strength (value))
   (set-lvds-swing register-address-lvds-swing
                   lvl2/set-lvds-swing (value))
-  (set-offset-correction-time-constant register-address-offset-correction-time-constant
-                                       lvl2/set-offset-correction-time-constant (value))
+  (set-offset-correction-time-constant
+   register-address-offset-correction-time-constant
+   lvl2/set-offset-correction-time-constant (value))
   (set-offset-pedestal register-address-offset-pedestal
                        lvl2/set-offset-pedestal (value))
   (set-test-pattern register-address-test-pattern
