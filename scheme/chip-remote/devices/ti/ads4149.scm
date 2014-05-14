@@ -17,13 +17,76 @@
             write-register))
 
 (define (setup-connection conn index)
-  (throw 'cr-setup-connection-not-implemented-yet))
+  "Set up a port in the remote controller to work with the ADS4149 ADC.
+
+The ADS4149 uses an SPI interface for configuration. It transmits data in
+frames of 16 bits, that are build like this:
+
+  <REGISTER-ADDRESS><VALUE>
+
+Where both REGISTER-ADDRESS and VALUE are eight bit values aligned within the
+frame like this like this:
+
+  A7:A6:A5:A4:A3:A2:A1:A0:V7:V6:V5:V4:V3:V2:V1:V0
+
+That frame is then transmitted from left to right (ie. MSB-FIRST).
+
+The chip-select pin works as active-low and data is latched at the falling edge
+of the clock-pin (with no further phase delay on the clock line).
+
+This procedure performs the according configuration and initialises the port at
+the given index. However, it does NOT switch focus to the configured port."
+  (set conn index 'mode 'spi)
+  (set conn index 'frame-length 16)
+  (set conn index 'bit-order 'msb-first)
+  (set conn index 'clk-polarity 'falling-edge)
+  (set conn index 'clk-phase-delay #f)
+  (init conn 0))
+
+(define (valid-readback-address? a)
+  (and (! (= a 0))
+       (valid-register-address? a)))
 
 (define (read-register conn addr)
-  (throw 'cr-read-register-not-implemented-yet))
+  "Read the value of a register back from an ADS4149 device.
+
+Unfortunately, register-readback is a bit of a mess with this ADC. Its
+overrange pin can be made to perform the task of SPI's MISO pin.
+
+To make it do that, the `enable-readout' function can be used. After that, the
+chip ONLY allows writes to the register at address 0 (where the READOUT bit
+resides), which also CANNOT be read back.
+
+In readback-mode the VALUE bits on SPI's MOSI pin are ignored by the device.
+
+So, what this procedure does is this:
+
+  - Enable register readout.
+  - Read the requested register value back from the device.
+  - Disable register readout mode again.
+  - Return the retrieved register value.
+
+So, for initial setup it is probably best to assemble complete register values
+using the second-level access API from the (... ads4149 program) module and
+transmit those using `write-register' directly; and only keep the third-level
+API for experimentation purposes."
+  (if (not (valid-readback-address? addr))
+      (throw 'cr-invalid-address addr))
+  (enable-readout conn)
+  (let ((return-value (write-register* addr 0)))
+    (disable-readout conn)
+    (logand #xff return-value)))
+
+(define (build-frame address value)
+  (logior (ash address 8) value))
+
+(define (write-register* conn addr value)
+  (transmit conn (build-frame addr value)))
 
 (define (write-register conn addr value)
-  (throw 'cr-write-register-not-implemented-yet))
+  (if (not (valid-register-address? addr))
+      (throw 'cr-invalid-address addr))
+  (write-register* conn addr value))
 
 (define* (decode-register-value addr value #:key (colour? (to-tty?)))
   (value-decoder ads4149-register-map register-width addr value colour?))
