@@ -31,6 +31,8 @@ txt)
     ;;
 esac
 
-mv "${intermediate}"."$mode" "$output" || exit 1
+if [ "${intermediate}"."$mode" != "$output" ]; then
+    mv "${intermediate}"."$mode" "$output" || exit 1
+fi
 rm -f "${intermediate}.${mode}~"
 exit 0
