@@ -22,6 +22,7 @@
             disable-readout
             reset-device
             enable-high-performance-mode
+            disable-high-performance-mode
             set-custom-pattern))
 
 (define (setup-connection conn index)
@@ -188,6 +189,12 @@ API for experimentation purposes."
                    lvl2/enable-high-performance-mode-1)
   (replay-register conn register-address-high-performance-mode-2
                    lvl2/enable-high-performance-mode-2))
+
+(define (disable-high-performance-mode conn)
+  (replay-register conn register-address-high-performance-mode-1
+                   lvl2/disable-high-performance-mode-1)
+  (replay-register conn register-address-high-performance-mode-2
+                   lvl2/disable-high-performance-mode-2))
 
 (define (set-custom-pattern conn value)
   (let ((l (logand #x3f value))
