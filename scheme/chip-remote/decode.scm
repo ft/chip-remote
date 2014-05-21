@@ -14,11 +14,11 @@
          (extract (cadddr content))
          (bits (extract value))
          (decoder* (list-ref content 5))
-         (decoder (variable-ref (car decoder*)))
+         (decoder (caddr decoder*))
          (decoder-type (cadr decoder*)))
     (list name
           (cons 'decoded (if (eq? decoder-type 'list)
-                             (reverse-lookup decoder bits)
+                             (reverse-lookup (decoder) bits)
                              (decoder name offset width bits)))
           (cons 'bits bits)
           (cons 'offset offset)

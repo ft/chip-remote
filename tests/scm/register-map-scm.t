@@ -12,16 +12,16 @@
 ;; Define a register map for our fictional ‘foo-bar’ device. It has four
 ;; eight-bit registers. Not all bits are used for configuration.
 (define-register-map foo-bar
-  (#x0 (default-value . #x54)
+  (#x0 (default-value #x54)
        (contents (m-divider 0 4)
                  (n-divider 4 4)))
-  (#x1 (default-value . #xd0)
+  (#x1 (default-value #xd0)
        (contents (power-save 0 1)
                  (reference-divider 4 4)))
-  (#x2 (default-value . #xf0)
+  (#x2 (default-value #xf0)
        (contents (gain 0 6)
                  (rate 6 2)))
-  (#xf (default-value . #xc8)
+  (#xf (default-value #xc8)
        (contents (self-destruct 0 1)
                  (deploy-coffee 2 3)
                  (read-paper 7 1))))
