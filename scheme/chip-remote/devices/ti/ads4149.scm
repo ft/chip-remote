@@ -109,97 +109,83 @@ API for experimentation purposes."
                          (map car ads4149-register-map)))))
 
 (define-bit-field-frontends
-  (disable-clkout-fall-control register-address-enable-clkout-fall
+  (disable-clkout-fall-control regaddr:enable-clkout-fall
                                lvl2/disable-clkout-fall-control)
-  (disable-clkout-rise-control register-address-enable-clkout-rise
+  (disable-clkout-rise-control regaddr:enable-clkout-rise
                                lvl2/disable-clkout-rise-control)
-  (disable-freeze-offset-correction register-address-freeze-offset-correction
+  (disable-freeze-offset-correction regaddr:freeze-offset-correction
                                     lvl2/disable-freeze-offset-correction)
-  (disable-gain register-address-disable-gain
-                lvl2/disable-gain)
-  (disable-low-latency register-address-disable-low-latency
-                       lvl2/disable-low-latency)
-  (disable-low-speed register-address-low-speed
-                     lvl2/disable-low-speed)
-  (disable-lvds-swing-control register-address-enable-lvds-swing
+  (disable-gain regaddr:disable-gain lvl2/disable-gain)
+  (disable-low-latency regaddr:disable-low-latency lvl2/disable-low-latency)
+  (disable-low-speed regaddr:low-speed lvl2/disable-low-speed)
+  (disable-lvds-swing-control regaddr:enable-lvds-swing
                               lvl2/disable-lvds-swing-control)
-  (disable-offset-correction register-address-enable-offset-correction
+  (disable-offset-correction regaddr:enable-offset-correction
                              lvl2/disable-offset-correction)
-  (disable-power-down-global register-address-power-down-global
+  (disable-power-down-global regaddr:power-down-global
                              lvl2/disable-power-down-global)
-  (disable-power-down-outputs register-address-power-down-outputs
+  (disable-power-down-outputs regaddr:power-down-outputs
                               lvl2/disable-power-down-outputs)
-  (disable-standby register-address-standby
-                   lvl2/disable-standby)
-  (enable-freeze-offset-correction register-address-freeze-offset-correction
+  (disable-standby regaddr:standby lvl2/disable-standby)
+  (enable-freeze-offset-correction regaddr:freeze-offset-correction
                                    lvl2/enable-freeze-offset-correction)
-  (enable-gain register-address-disable-gain
-               lvl2/enable-gain)
-  (enable-low-latency register-address-disable-low-latency
-                      lvl2/enable-low-latency)
-  (enable-low-speed register-address-low-speed
-                    lvl2/enable-low-speed)
-  (enable-lvds-swing-control register-address-enable-lvds-swing
+  (enable-gain regaddr:disable-gain lvl2/enable-gain)
+  (enable-low-latency regaddr:disable-low-latency lvl2/enable-low-latency)
+  (enable-low-speed regaddr:low-speed lvl2/enable-low-speed)
+  (enable-lvds-swing-control regaddr:enable-lvds-swing
                              lvl2/enable-lvds-swing-control)
-  (enable-offset-correction register-address-enable-offset-correction
+  (enable-offset-correction regaddr:enable-offset-correction
                             lvl2/enable-offset-correction)
-  (enable-power-down-global register-address-power-down-global
+  (enable-power-down-global regaddr:power-down-global
                             lvl2/enable-power-down-global)
-  (enable-power-down-outputs register-address-power-down-outputs
+  (enable-power-down-outputs regaddr:power-down-outputs
                              lvl2/enable-power-down-outputs)
-  (enable-standby register-address-standby
-                  lvl2/enable-standby)
-  (set-clkout-fall-posn register-address-clkout-fall-posn
+  (enable-standby regaddr:standby lvl2/enable-standby)
+  (set-clkout-fall-posn regaddr:clkout-fall-posn
                         lvl2/set-clkout-fall-posn (mode value))
-  (set-clkout-rise-posn register-address-clkout-rise-posn
+  (set-clkout-rise-posn regaddr:clkout-rise-posn
                         lvl2/set-clkout-rise-posn (mode value))
-  (set-cmos-clkout-strength register-address-cmos-clkout-strength
+  (set-cmos-clkout-strength regaddr:cmos-clkout-strength
                             lvl2/set-cmos-clkout-strength (value))
-  (set-data-format register-address-data-format
-                   lvl2/set-data-format (value))
-  (set-gain register-address-gain
-            lvl2/set-gain (value))
-  (set-lvds-clkout-strength register-address-lvds-clkout-strength
+  (set-data-format regaddr:data-format lvl2/set-data-format (value))
+  (set-gain regaddr:gain lvl2/set-gain (value))
+  (set-lvds-clkout-strength regaddr:lvds-clkout-strength
                             lvl2/set-lvds-clkout-strength (value))
-  (set-lvds-cmos register-address-lvds-cmos
-                 lvl2/set-lvds-cmos (value))
-  (set-lvds-data-strength register-address-lvds-data-strength
+  (set-lvds-cmos regaddr:lvds-cmos lvl2/set-lvds-cmos (value))
+  (set-lvds-data-strength regaddr:lvds-data-strength
                           lvl2/set-lvds-data-strength (value))
-  (set-lvds-swing register-address-lvds-swing
-                  lvl2/set-lvds-swing (value))
+  (set-lvds-swing regaddr:lvds-swing lvl2/set-lvds-swing (value))
   (set-offset-correction-time-constant
-   register-address-offset-correction-time-constant
+   regaddr:offset-correction-time-constant
    lvl2/set-offset-correction-time-constant (value))
-  (set-offset-pedestal register-address-offset-pedestal
-                       lvl2/set-offset-pedestal (value))
-  (set-test-pattern register-address-test-pattern
-                    lvl2/set-test-pattern (value)))
+  (set-offset-pedestal regaddr:offset-pedestal lvl2/set-offset-pedestal (value))
+  (set-test-pattern regaddr:test-pattern lvl2/set-test-pattern (value)))
 
 (define (enable-readout conn)
-  (write-register conn register-address-readout (lvl2/enable-readout 0)))
+  (write-register conn regaddr:readout (lvl2/enable-readout 0)))
 
 (define (disable-readout conn)
-  (write-register conn register-address-readout (lvl2/disable-readout 0)))
+  (write-register conn regaddr:readout (lvl2/disable-readout 0)))
 
 (define (reset-device conn)
-  (write-register conn register-address-reset (lvl2/reset-device 0)))
+  (write-register conn regaddr:reset (lvl2/reset-device 0)))
 
 (define (enable-high-performance-mode conn)
-  (replay-register conn register-address-high-performance-mode-1
+  (replay-register conn regaddr:high-performance-mode-1
                    lvl2/enable-high-performance-mode-1)
-  (replay-register conn register-address-high-performance-mode-2
+  (replay-register conn regaddr:high-performance-mode-2
                    lvl2/enable-high-performance-mode-2))
 
 (define (disable-high-performance-mode conn)
-  (replay-register conn register-address-high-performance-mode-1
+  (replay-register conn regaddr:high-performance-mode-1
                    lvl2/disable-high-performance-mode-1)
-  (replay-register conn register-address-high-performance-mode-2
+  (replay-register conn regaddr:high-performance-mode-2
                    lvl2/disable-high-performance-mode-2))
 
 (define (set-custom-pattern conn value)
   (let ((l (logand #x3f value))
         (h (bit-extract-width value 6 8)))
-    (write-register conn register-address-custom-pattern-high
+    (write-register conn regaddr:custom-pattern-high
                           (lvl2/set-custom-pattern-high 0 h))
-    (write-register conn register-address-custom-pattern-low
+    (write-register conn regaddr:custom-pattern-low
                           (lvl2/set-custom-pattern-low 0 l))))

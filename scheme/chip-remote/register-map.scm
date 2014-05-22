@@ -49,10 +49,10 @@
 ;; that contains the entire register-map for later reference. And a few
 ;; back-references to register addresses:
 ;;
-;;   - register-address-m-divider
-;;   - register-address-n-divider
-;;   - register-address-reference-divider
-;;   - register-address-power-save
+;;   - regaddr:m-divider
+;;   - regaddr:n-divider
+;;   - regaddr:reference-divider
+;;   - regaddr:power-save
 
 (define-module (chip-remote register-map)
   #:use-module (srfi srfi-1)
@@ -160,7 +160,7 @@
     (syntax-case x ()
       ((kw a n o w)
        (with-syntax ((name (datum->syntax
-                            #'kw (symbol-append 'register-address-
+                            #'kw (symbol-append 'regaddr:
                                                 (syntax->datum #'n)))))
          #'(define-public name a))))))
 

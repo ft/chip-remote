@@ -127,7 +127,7 @@
                   (return rest))))))))
 
 (define (make-regaddr-from-setter exp)
-  (symbol-append 'register-address-
+  (symbol-append 'regaddr:
                  (string->symbol (let ((s (symbol->string exp)))
                                    (substring s 4 (- (string-length s) 5))))))
 

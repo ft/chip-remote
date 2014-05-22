@@ -299,7 +299,7 @@
 
       (set-blast-radius-bits regval bits)
       (get-blast-radius-bits regval)
-      (define register-address-blast-radius #x0)
+      (define regaddr:blast-radius #x0)
 
     And it does this for all bit fields. You get the first-level access
     functions for free.
