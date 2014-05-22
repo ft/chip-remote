@@ -47,6 +47,11 @@ Current contents:
     This directory holds the reference implementation of the client library
     written in GNU Guile scheme.
 
+  - scripts/
+
+    Here, you can find some helper scripts, that may be useful when hacking on
+    chip-remote source code.
+
   - simulator/
 
     The ‘simulator’ sub-directory contains a Perl script that opens a pseudo
@@ -65,6 +70,16 @@ Current contents:
   - Makefile: In chip-remote, the top-level Makefile is only used run the
     test-suite.
 
+  - LICENCE: The file contains the licence used with all software of the
+    project. Note that “spec.org” uses a different licence that is contained at
+    the bottom of the file.
+
+  - README: This file...
+
+  - client-library.org: This is a text-file, that describes the organisation of
+    the client library in a little detail, so that one has an idea of how to
+    approach the code.
+
   - compile: A helper script to byte-compile the client library, that is
     written in GNU Guile Scheme. "make byte-compile" uses this file.
 
@@ -72,16 +87,20 @@ Current contents:
     suitable for chip-remote's ‘remote-fw’ example firmware, to find possible
     memory leaks.
 
+  - dev-env: Use this to set some environment variables, so that you can work
+    with the scheme code directly from the source-tree instead of having to
+    install everything to the system first. Very useful during development.
+
+  - guile-in-here: Starts a guile instance, that points its load-path to the
+    code in the source tree via the use of ‘dev-env’.
+
   - install: This installs the project to the system. "make install" uses this.
 
   - install-scheme: This script installs the client library to the system's
     module path.
 
-  - LICENCE: The file contains the licence used with all software of the
-    project. Note that “spec.org” uses a different licence that is contained at
-    the bottom of the file.
-
-  - README: This file...
+  - org-export: This script uses emacs with org-mode to turn org-mode markup
+    into html, plain-text and pdf files.
 
   - single-test: Using this wrapper, you can run single “.t” files from the
     test-suite.
