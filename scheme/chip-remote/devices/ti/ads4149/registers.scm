@@ -3,7 +3,6 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices ti ads4149 registers)
-  #:use-module (bitops)
   #:use-module (chip-remote bit-decoders)
   #:use-module (chip-remote devices ti ads4149 tables)
   #:use-module (chip-remote register-map)

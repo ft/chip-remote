@@ -3,8 +3,6 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
-             (bitops)
-             (chip-remote bit-decoders)
              (chip-remote register-map))
 
 (primitive-load "tests/test-tap-cfg.scm")

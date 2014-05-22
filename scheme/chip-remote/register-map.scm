@@ -71,7 +71,9 @@
   (lambda (x)
     (syntax-case x ()
       ((_ name)
-       #'(list (quote name)
+       #'(list (if (list? 'name)
+                   (last 'name)
+                   (quote name))
                (cond ((procedure? name) 'function)
                      ((list? name) 'list)
                      (else (throw 'cr-unsupported-decoder-at name)))
@@ -101,7 +103,8 @@
          #'(list 'name offset width gname sname
                  (expand-annotation annotation))))
       ((_ (name offset width))
-       #'(expand-content (name offset width => literal-binary))))))
+       #'(expand-content (name offset width => (@ (chip-remote bit-decoders)
+                                                  literal-binary)))))))
 
 ;; This one actually adds information to the bits of a register definition.
 (define-syntax expand-datum
@@ -136,7 +139,7 @@
                                                 (syntax->datum #'n)
                                                 '-bits))))
          #'(define-public (name register)
-             (bit-extract-width register o w)))))))
+             ((@ (bitops) bit-extract-width) register o w)))))))
 
 ;; Expand into Level-1 setter code for a given register entry.
 (define-syntax reg-expand-setter
@@ -148,7 +151,8 @@
                                                 (syntax->datum #'n)
                                                 '-bits))))
          #'(define-public (name register value)
-             (set-bits register (logand value (- (ash 1 w) 1)) w o)))))))
+             ((@ (bitops) set-bits) register
+                                    (logand value (- (ash 1 w) 1)) w o)))))))
 
 ;; Expand into a variable definition that links a name to a register address.
 (define-syntax reg-expand-address

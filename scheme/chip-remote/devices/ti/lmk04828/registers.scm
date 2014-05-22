@@ -3,7 +3,6 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices ti lmk04828 registers)
-  #:use-module (bitops)
   #:use-module (chip-remote register-map))
 
 (define-register-map lmk04828
