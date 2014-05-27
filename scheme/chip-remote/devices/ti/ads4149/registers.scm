@@ -31,20 +31,51 @@
                clkout-pos-fall-cmos
                clkout-pos-fall-lvds))
 
+;; ‘sym-or-picosecs’ is a little more involved, since the decoders, that are
+;; implemented above return lists, representing the different possible decoded
+;; values. The actual value depends on some other item in another register. So,
+;; if we see a list as the decoded value, hand down a function that decides
+;; wether or not to append a unit when the list of different possibilities is
+;; processed. That's what ‘sym-or-picosecs*’ is for.
+(define (sym-or-picosecs* value)
+  (cond ((symbol? value) #f)
+        (else 'ps)))
+
+(define (sym-or-picosecs data)
+  (let ((value (assq-ref data 'decoded)))
+    (if (list? value)
+        sym-or-picosecs*
+        (sym-or-picosecs* value))))
+
+;; The unit-functions using ‘maybe-unit’ here are much simpler. They are used
+;; in cases in which the decoded value is either a symbol or a numeric scalar.
+;; If it's the symbol, don't add the requested unit, otherwise do add it.
+(define (maybe-unit data unit)
+  (let ((value (assq-ref data 'decoded)))
+    (if (symbol? value) #f unit)))
+
+(define (maybe-dB data)
+  (maybe-unit data 'dB))
+
+(define (maybe-M data)
+  (maybe-unit data 'M))
+
+;; The width of every register:
 (define register-width 8)
 
+;; Here is the actual register map:
 (define-register-map ads4149
   (#x0 (default-value #x0)
        (contents (readout 0 1 => logic-active-high)
                  (reset 1 1 => logic-active-high)))
   (#x1 (default-value #x0)
-       (contents (lvds-swing 2 6 => lvds-swing-map)))
+       (contents (lvds-swing 2 6 => lvds-swing-map 'mV)))
   (#x3 (default-value #x0)
        (contents (high-performance-mode-1 0 2 => high-performace-mode-map)))
   (#x25 (default-value #x0)
         (contents (test-pattern 0 3 => test-pattern-map)
                   (disable-gain 3 1 => logic-active-high)
-                  (gain 4 4 => gain-map)))
+                  (gain 4 4 => gain-map maybe-dB)))
   (#x26 (default-value #x0)
         (contents (lvds-data-strength 0 1 => lvds-strength-map)
                   (lvds-clkout-strength 1 1 => lvds-strength-map)))
@@ -57,14 +88,14 @@
         (contents (custom-pattern-low 2 6)))
   (#x41 (default-value #x0)
         (contents (enable-clkout-fall 0 1 => logic-active-high)
-                  (clkout-rise-posn 1 2 => rise-posn-decode)
+                  (clkout-rise-posn 1 2 => rise-posn-decode sym-or-picosecs)
                   (enable-clkout-rise 3 1 => logic-active-high)
                   (cmos-clkout-strength 4 2 => lvds-strength-map)
                   (lvds-cmos 6 2 => lvds-cmos-select-map)))
   (#x42 (default-value #x0)
         (contents (standby 2 1 => logic-active-high)
                   (disable-low-latency 3 1 => logic-active-high)
-                  (clkout-fall-posn 6 2 => fall-posn-decode)))
+                  (clkout-fall-posn 6 2 => fall-posn-decode sym-or-picosecs)))
   (#x43 (default-value #x0)
         (contents (enable-lvds-swing 0 2 => lvds-swing-control-map)
                   (power-down-outputs 4 1 => logic-active-high)
@@ -74,7 +105,8 @@
   (#xbf (default-value #x0)
         (contents (offset-pedestal 2 6 => twos-complement)))
   (#xcf (default-value #x0)
-        (contents (offset-correction-time-constant 2 4 => correction-time-map)
+        (contents (offset-correction-time-constant
+                   2 4 => correction-time-map maybe-M)
                   (freeze-offset-correction 7 1 => logic-active-high)))
   (#xdf (default-value #x0)
         (contents (low-speed 4 2 => low-speed-map))))

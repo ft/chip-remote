@@ -80,19 +80,25 @@
           (w 'green (format #f "~v,'0b" width value) #:bold? #t)
           "b]"))))
 
-(define (format-with-prefix prefix item colour?)
+(define (attach-unit v u)
+  (let ((unit (if (procedure? u) (u v) u)))
+    (if unit
+        (format #f "~a~a" v unit)
+        v)))
+
+(define (format-with-prefix prefix item unit colour?)
   (let ((w (if colour? wrap-in no-wrap)))
     (format #f
             "~a~a => ~a"
             prefix
             (w 'cyan (scalar->text (car item) colour? #f))
-            (scalar->text (cdr item) colour? #t))))
+            (scalar->text (attach-unit (cdr item) unit) colour? #t))))
 
-(define (format-first item colour?)
-  (format-with-prefix "    Decoded: " item colour?))
+(define (format-first item unit colour?)
+  (format-with-prefix "    Decoded: " item unit colour?))
 
-(define (format-other item colour?)
-  (format-with-prefix "             " item colour?))
+(define (format-other item unit colour?)
+  (format-with-prefix "             " item unit colour?))
 
 (define (scalar->text item colour? wrap?)
   (let ((w (if (and colour? wrap?) wrap-in no-wrap)))
@@ -104,18 +110,19 @@
            (w 'magenta (symbol->string item)))
           (else (w 'magenta (format #f "~a" item))))))
 
-(define (decoded-value->text value colour?)
+(define (decoded-value->text value unit colour?)
   (cond ((list? value)
          (let next ((v value) (first #t))
            (cond ((null? v)
                   '())
-                 (first (cons (format-first (car v) colour?)
+                 (first (cons (format-first (car v) unit colour?)
                               (next (cdr v) #f)))
-                 (else (cons (format-other (car v) colour?)
+                 (else (cons (format-other (car v) unit colour?)
                              (next (cdr v) #f))))))
-        (else (list (format #f "    Decoded: ~a" (scalar->text value
-                                                               colour?
-                                                               #t))))))
+        (else (list (format #f "    Decoded: ~a"
+                            (scalar->text (attach-unit value unit)
+                                          colour?
+                                          #t))))))
 
 (define* (decode->text decoded-data
                        #:key
@@ -130,6 +137,7 @@
                    (off (assq-ref data 'offset))
                    (bw (assq-ref data 'width))
                    (hw (binwidth->hexwidth bw))
+                   (unit (assq-ref data 'unit))
                    (hex-string (format #f "~v'0x" hw bits))
                    (bin-string (format #f "~v,'0b" bw bits)))
               (cons
@@ -140,7 +148,7 @@
                         (w 'green bin-string #:bold? #t)
                         (w 'blue (number->string bw 10) #:bold? #t)
                         (w 'blue (number->string off 10) #:bold? #t))
-                (decoded-value->text dec colour?)))))
+                (decoded-value->text dec unit colour?)))))
           decoded-data))))
 
 (define* (register->text #:key register-map address width value

@@ -72,6 +72,8 @@
   (lambda (x)
     (syntax-case x ()
       ((_ name)
+       #'(expand-annotation name #f))
+      ((_ name unit-information)
        #'(list (if (list? 'name)
                    (last 'name)
                    (quote name))
@@ -80,7 +82,8 @@
                      (else (throw 'cr-unsupported-decoder-at name)))
                (if (procedure? name)
                    name
-                   (lambda () name)))))))
+                   (lambda () name))
+               (cons 'unit unit-information))))))
 
 ;; The user provides ‘name’, ‘offset’, ‘width’ and possibly ‘annotation’ (if
 ;; that's missing, it should default to ‘literal-binary’). However, the actual
@@ -92,7 +95,7 @@
 (define-syntax expand-content
   (lambda (x)
     (syntax-case x (=>)
-      ((kw (name offset width => annotation))
+      ((kw (name offset width => annotation ...))
        (with-syntax ((sname (datum->syntax
                              #'kw (symbol-append 'set-
                                                  (syntax->datum #'name)
@@ -102,7 +105,7 @@
                                                  (syntax->datum #'name)
                                                  '-bits))))
          #'(list 'name offset width gname sname
-                 (expand-annotation annotation))))
+                 (expand-annotation annotation ...))))
       ((_ (name offset width))
        #'(expand-content (name offset width => (@ (chip-remote bit-decoders)
                                                   literal-binary)))))))

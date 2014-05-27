@@ -19,13 +19,13 @@
             lvds-swing-map
             test-pattern-map))
 
-(define lvds-swing-map
-  '((350mV . #b000000)
-    (410mV . #b011011)
-    (465mV . #b110010)
-    (570mV . #b010100)
-    (200mV . #b111110)
-    (125mV . #b001111)))
+(define lvds-swing-map ;; mV
+  '((350 . #b000000)
+    (410 . #b011011)
+    (465 . #b110010)
+    (570 . #b010100)
+    (200 . #b111110)
+    (125 . #b001111)))
 
 (define lvds-strength-map
   '((default . #b0)
@@ -48,23 +48,23 @@
     (low      . #b10)
     (very-low . #b11)))
 
-(define clkout-pos-rise-lvds
+(define clkout-pos-rise-lvds ;; ps
   '((default . #b00)
-    (500ps   . #b01)
+    (500   . #b01)
     (aligned . #b10)
-    (200ps   . #b11)))
+    (200   . #b11)))
 
-(define clkout-pos-rise-cmos
+(define clkout-pos-rise-cmos ;; ps
   '((default . #b00)
-    (100ps   . #b01)
-    (200ps   . #b10)
-    (1.5ns   . #b11)))
+    (100   . #b01)
+    (200   . #b10)
+    (1500  . #b11)))
 
-(define clkout-pos-fall-lvds
+(define clkout-pos-fall-lvds ;; ps
   '((default . #b00)
-    (400ps   . #b01)
+    (400   . #b01)
     (aligned . #b10)
-    (200ps   . #b11)))
+    (200   . #b11)))
 
 (define clkout-pos-fall-cmos clkout-pos-rise-cmos)
 
@@ -72,7 +72,7 @@
   '((off . #b00)
     (on  . #b11)))
 
-(define gain-map
+(define gain-map ;; dB
   '((0    . #b0000)
     (1/2  . #b0001)
     (1    . #b0010)
@@ -99,19 +99,19 @@
   '((disabled . #b00)
     (enabled  . #b11)))
 
-(define correction-time-map
-  '((1M   . #b0000)
-    (2M   . #b0001)
-    (4M   . #b0010)
-    (8M   . #b0011)
-    (16M  . #b0100)
-    (32M  . #b0101)
-    (64M  . #b0110)
-    (128M . #b0111)
-    (256M . #b1000)
-    (512M . #b1001)
-    (1G   . #b1010)
-    (2G   . #b1011)))
+(define correction-time-map ;; M
+  '((1    . #b0000)
+    (2    . #b0001)
+    (4    . #b0010)
+    (8    . #b0011)
+    (16   . #b0100)
+    (32   . #b0101)
+    (64   . #b0110)
+    (128  . #b0111)
+    (256  . #b1000)
+    (512  . #b1001)
+    (1014 . #b1010)
+    (2048 . #b1011)))
 
 (define low-speed-map
   '((disabled . #b00)
