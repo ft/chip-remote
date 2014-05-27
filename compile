@@ -11,6 +11,6 @@ for dir in scheme/*/*/*/*/*/ scheme/*/*/*/*/ \
                       [ ! -f "$input" ] && continue
                       output="${input%.*}.go"
                       [ "$input" -nt "$output" ] || continue
-                      guild compile -o "$output" "$input"
-                  done; )
+                      guild compile -o "$output" "$input" || exit 1
+                  done; ) || exit 1
 done
