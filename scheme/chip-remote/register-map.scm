@@ -56,7 +56,8 @@
 
 (define-module (chip-remote register-map)
   #:use-module (srfi srfi-1)
-  #:export (define-register-map
+  #:export (define-register-interconns
+            define-register-map
             register-default
             map-across))
 
@@ -226,3 +227,117 @@
             (if item (cons (fnc address (cdr item)) acc))))
         '()
         regmap))
+
+;; The following part implements the ‘define-register-interconns’ macro.
+
+;; This is a little helper for the clause-handler functions below.
+(define (need data raw kw)
+  (if (not (memq kw raw))
+      (syntax-violation 'define-register-interconns
+                        (format #f "Mandatory keyword missing: ~a" kw)
+                        data)))
+
+;; The (combine ...) handler. Except for #:logic, which defaults to ‘word’, all
+;; arguments are mandatory.
+(define (parse-combine-args args)
+
+  (define defaults '((#:logic . 'word)))
+
+  (define (check data opts)
+    (let ((raw (syntax->datum data)))
+      (need data raw #:combine)
+      (need data raw #:finally)
+      (need data raw #:into)
+      (need data raw #:split)
+      (let loop ((rest opts))
+        (if (null? rest)
+            data
+            (let ((cur (car rest)))
+              (cons (datum->syntax (car args) cur)
+                    (cons (datum->syntax (car args)
+                                         (cdr (assq cur defaults)))
+                          (loop (cdr rest)))))))))
+
+  (let loop ((in args)
+             (out '())
+             (opts '(#:logic)))
+    (syntax-case in ()
+      (()
+       ;; Wrap the whole thing into a (list ...) expression, that the rest of
+       ;; the final expression can be consed onto in ‘expand-clause’.
+       (cons #'list (check out opts)))
+      ((#:into arg . args)
+       (loop #'args (cons #:into (cons #''arg out)) opts))
+      ((#:logic arg . args)
+       (loop #'args (cons #:logic (cons #''arg out)) (delq #:logic opts)))
+      ((#:split arg . args)
+       (loop #'args (cons #:split (cons #'arg out)) opts))
+      ((#:combine arg . args)
+       (loop #'args (cons #:combine (cons #'arg out)) opts))
+      ((#:finally arg . args)
+       (loop #'args (cons #:finally (cons #'arg out)) opts))
+      ((kw arg . args)
+       (syntax-violation 'define-register-interconns
+                         "Unknown keyword or malformed argument"
+                         #'kw
+                         #'arg)))))
+
+;; The (depends ...) handler. The #:on keyword can have a list and a single
+;; symbol argument. This function turns the latter into the former. Both #:on
+;; and #:finally are mandatory arguments.
+(define (parse-depends-args args)
+
+  (define (check data)
+    (let ((raw (syntax->datum data)))
+      (need data raw #:on)
+      (need data raw #:finally))
+    data)
+
+  (let loop ((in args) (out '()))
+    (syntax-case in ()
+      (()
+       (cons #'list (check out)))
+      ((#:on (d ...) . args)
+       (loop #'args (cons #:on (cons #'(list 'd ...) out))))
+      ((#:on d . args)
+       (loop #'args (cons #:on (cons #'(list 'd) out))))
+      ((#:finally arg . args)
+       (loop #'args (cons #:finally (cons #'arg out))))
+      ((kw arg . args)
+       (syntax-violation 'define-register-interconns
+                         "Unknown keyword or malformed argument"
+                         #'kw
+                         #'arg)))))
+
+;; This handles all clauses in the ‘define-register-interconns’ macro-call.
+;; Each clause has its own handler function, that iterates through the clause
+;; arguments to makes sure everything is in order.
+(define-syntax expand-clause
+  (lambda (x)
+    (syntax-case x (combine depends)
+      ((_ (combine (source ...) arg ...))
+       (with-syntax ((parsed-args (parse-combine-args #'(arg ...))))
+         #'(cons 'combine
+                 (cons #:sources
+                       (cons (list 'source ...) parsed-args)))))
+      ((_ (depends target arg ...))
+       (with-syntax ((parsed-args (parse-depends-args #'(arg ...))))
+         #'(cons 'depends
+                 (cons #:target
+                       (cons 'target parsed-args))))))))
+
+;; This is the main entry for this macro. It defines a variable
+;; ‘<name>-register-interconnections’, dispatches every clause defined in the
+;; macro-call off to ‘expand-clause’ and catches all the entries that returns
+;; in a (list ...).
+(define-syntax define-register-interconns
+  (lambda (x)
+    (syntax-case x ()
+      ((_ name clause ...)
+       (with-syntax
+           ((var-name (datum->syntax
+                       #'kw (symbol-append
+                             (syntax->datum #'name)
+                             '-regmap-interconnections))))
+         #'(define-public var-name
+             (list (expand-clause clause) ...)))))))
