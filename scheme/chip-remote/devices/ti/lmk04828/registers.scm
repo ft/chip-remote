@@ -6,6 +6,7 @@
   #:use-module ((chip-remote devices ti lmk04828 conversions)
                 #:renamer (symbol-prefix-proc 'conv:))
   #:use-module (chip-remote devices ti lmk04828 tables)
+  #:use-module (chip-remote bit-decoders)
   #:use-module (chip-remote register-map))
 
 (define register-width 8)
