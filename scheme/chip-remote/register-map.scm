@@ -56,6 +56,7 @@
 
 (define-module (chip-remote register-map)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-11)
   #:export (define-register-interconns
             define-register-map
             register-default
@@ -329,18 +330,86 @@
                  (cons #:target
                        (cons 'target parsed-args))))))))
 
+(define (sort-clauses unsorted)
+  ;; First sort all ‘depends’ clauses to the back of the list and then sort the
+  ;; ‘depends’ clauses so that all dependencies resolve incrementally. That way
+  ;; the decoding code doesn't have to perform a lot of work resolving
+  ;; dependencies.
+  (define (get-target x)
+    (cadr (memq #:target x)))
+
+  (define (get-deps x)
+    (cadr (memq #:on x)))
+
+  (define (deps-are-done? deps done)
+    (let loop ((d deps))
+      (cond ((null? d) #t)
+            ((not (memq (car d) done)) #f)
+            (else (loop (cdr d))))))
+
+  (define (filter-dependency-symbols lst)
+    (map get-target (filter (lambda (x)
+                              (eq? (car x) 'depends))
+                            lst)))
+
+  (define (find-candidate deps lst done)
+    (let ((done-deps (filter-dependency-symbols done)))
+      (let loop ((d lst))
+        (if (null? d)
+            (begin
+              (format (current-error-port)
+                      "define-register-interconns:~%")
+              (format (current-error-port)
+                      "  Could not find a candidate to eliminate!~%")
+              (format (current-error-port)
+                      "  Possible circular dependency?~%")
+              (format (current-error-port)
+                      "  Done dependencies: ~a~%" done-deps)
+              #f)
+            (let* ((c (car d))
+                   (real-deps (filter (lambda (x) (memq x deps))
+                                      (get-deps c))))
+              (if (deps-are-done? real-deps done-deps)
+                  c
+                  (loop (cdr d))))))))
+
+  (define (resolve-deps deps remaining done)
+    (let ((candidate (find-candidate deps remaining done)))
+      (if candidate
+          (values (delete! candidate remaining) (cons candidate done))
+          (values remaining done))))
+
+  (let ((deps (filter-dependency-symbols unsorted)))
+    (let loop ((in (sort unsorted
+                         (lambda (a b)
+                           (if (eq? (car a) 'depends) #f #t))))
+               (out '()))
+      (cond ((null? in) (reverse! out))
+            ((eq? (caar in) 'combine)
+             (loop (cdr in) (cons (car in) out)))
+            (else (let-values (((new-in new-out) (resolve-deps deps in out)))
+                    (if (and (equal? new-in in)
+                             (equal? new-out out))
+                        (begin (format (current-error-port)
+                                       "  Remaining dependencies: ~%    ~a~%"
+                                       in)
+                               (throw 'cr-cannot-resolve-dependencies))
+                        (loop new-in new-out))))))))
+
 ;; This is the main entry for this macro. It defines a variable
 ;; ‘<name>-register-interconnections’, dispatches every clause defined in the
-;; macro-call off to ‘expand-clause’ and catches all the entries that returns
-;; in a (list ...).
+;; macro-call off to ‘expand-clause’ and catches and sorts all the entries that
+;; returns in a (list ...).
+;;
+;; XXX: Make sure that the expansion is done entirely at compile time, which it
+;;      currently isn't.
 (define-syntax define-register-interconns
   (lambda (x)
     (syntax-case x ()
-      ((_ name clause ...)
+      ((kw name clause ...)
        (with-syntax
            ((var-name (datum->syntax
-                       #'kw (symbol-append
-                             (syntax->datum #'name)
-                             '-regmap-interconnections))))
-         #'(define-public var-name
-             (list (expand-clause clause) ...)))))))
+                       #'kw (symbol-append (syntax->datum #'name)
+                                           '-regmap-interconnections)))
+            (clauses #'(sort-clauses (list (expand-clause clause) ...))))
+         #'(define-public var-name clauses))))))
