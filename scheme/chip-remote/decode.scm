@@ -7,7 +7,7 @@
   #:use-module (chip-remote bit-decoders)
   #:export (decode))
 
-(define (decode-content renamer value content)
+(define (decode-content value content)
   (let* ((name (car content))
          (offset (cadr content))
          (width (caddr content))
@@ -34,10 +34,10 @@
                                              (decoded . ,decoded))))
                             (else decoder-unit))))))
 
-(define* (decode regmap address value #:key (renamer (lambda (x) x)))
+(define (decode regmap address value)
   (let ((reg (assoc address regmap)))
     (if (not reg)
         (throw 'cr-no-such-register address)
         (map (lambda (x)
-               (decode-content renamer value x))
+               (decode-content value x))
              (assq-ref (cdr reg) 'contents)))))
