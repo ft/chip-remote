@@ -59,7 +59,11 @@
   #:use-module (srfi srfi-11)
   #:export (define-register-interconns
             define-register-map
-            register-default
+
+            get-register
+            get-register-item
+            get-register-entry
+            regmap->entry
             map-across))
 
 ;; This macro gets a value that points to the piece of data (map or function)
@@ -215,14 +219,27 @@
              (define-public var-name
                (list (expand-register register) ...))))))))
 
-(define (register-default regmap address)
+(define (get-register regmap address)
   (let ((reg (assoc address regmap)))
-    (if (not reg)
-        (throw 'cr-no-such-register address)
-        (let ((value (assq 'default-value (cdr reg))))
-          (if value
-              (cdr value)
-              0)))))
+    (if reg
+        (cdr reg)
+        (throw 'cr-no-such-register address))))
+
+(define (get-register-item register item)
+  (let ((value (assq item register)))
+    (if value
+        (cdr value)
+        (throw 'cr-no-such-item item register))))
+
+(define (get-register-entry register entry)
+  (let* ((cont (get-register-item register 'contents))
+         (lst (assq entry cont)))
+    (if lst
+        (cdr lst)
+        (throw 'cr-no-such-entry entry cont))))
+
+(define (regmap->entry regmap address entry)
+  (get-register-entry (get-register regmap address) entry))
 
 (define (map-across fnc what regmap)
   (fold (lambda (x acc)
