@@ -258,6 +258,17 @@
                         (format #f "Mandatory keyword missing: ~a" kw)
                         data)))
 
+(define-syntax name->pair
+  (lambda (x)
+    (syntax-case x ()
+      ((_ (name address))
+       #'(cons 'name address))
+      ((_ name)
+       (with-syntax ((var-name
+                      (datum->syntax
+                       #'kw (symbol-append 'regaddr: (syntax->datum #'name)))))
+         #'(cons 'name var-name))))))
+
 ;; The (combine ...) handler. Except for #:logic, which defaults to ‘word’, all
 ;; arguments are mandatory.
 (define (parse-combine-args args)
@@ -322,9 +333,11 @@
       (()
        (cons #'list (check out)))
       ((#:on (d ...) . args)
-       (loop #'args (cons #:on (cons #'(list 'd ...) out))))
+       (loop #'args (cons #:on (cons
+                                #'(list (name->pair d) ...)
+                                out))))
       ((#:on d . args)
-       (loop #'args (cons #:on (cons #'(list 'd) out))))
+       (loop #'args (cons #:on (cons #'(list (name->pair d)) out))))
       ((#:finally arg . args)
        (loop #'args (cons #:finally (cons #'arg out))))
       ((kw arg . args)
@@ -343,12 +356,13 @@
        (with-syntax ((parsed-args (parse-combine-args #'(arg ...))))
          #'(cons 'combine
                  (cons #:sources
-                       (cons (list 'source ...) parsed-args)))))
+                       (cons (list (name->pair source) ...)
+                             parsed-args)))))
       ((_ (depends target arg ...))
        (with-syntax ((parsed-args (parse-depends-args #'(arg ...))))
          #'(cons 'depends
                  (cons #:target
-                       (cons 'target parsed-args))))))))
+                       (cons (name->pair target) parsed-args))))))))
 
 (define (sort-clauses unsorted)
   ;; First sort all ‘depends’ clauses to the back of the list and then sort the
