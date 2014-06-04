@@ -245,7 +245,8 @@
 ;; arguments are mandatory.
 (define (parse-combine-args args)
 
-  (define defaults '((#:logic . 'word)))
+  (define defaults '((#:logic . 'word)
+                     (#:width . #f)))
 
   (define (check data opts)
     (let ((raw (syntax->datum data)))
@@ -264,7 +265,7 @@
 
   (let loop ((in args)
              (out '())
-             (opts '(#:logic)))
+             (opts '(#:logic #:width)))
     (syntax-case in ()
       (()
        ;; Wrap the whole thing into a (list ...) expression, that the rest of
@@ -278,6 +279,8 @@
        (loop #'args (cons #:split (cons #'arg out)) opts))
       ((#:combine arg . args)
        (loop #'args (cons #:combine (cons #'arg out)) opts))
+      ((#:width arg . args)
+       (loop #'args (cons #:width (cons #'arg out)) (delq #:width opts)))
       ((#:finally arg . args)
        (loop #'args (cons #:finally (cons #'arg out)) opts))
       ((kw arg . args)
