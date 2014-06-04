@@ -25,7 +25,12 @@
           (cons 'bits bits)
           (cons 'offset offset)
           (cons 'width width)
-          (cons 'unit (cond ((thunk? decoder-unit)
+          (cons 'unit (cond ((and (thunk? decoder)
+                                  (eq? decoded 'undefined))
+                             ;; The values was retrieved by `reverse-lookup',
+                             ;; but that failed. No unit then.
+                             #f)
+                            ((thunk? decoder-unit)
                              (decoder-unit))
                             ((procedure? decoder-unit)
                              (decoder-unit `((name . ,name)
