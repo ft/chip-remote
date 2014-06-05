@@ -64,6 +64,7 @@
             get-register-item
             get-register-entry
             regmap->entry
+            regmap->item
             map-across))
 
 ;; This macro gets a value that points to the piece of data (map or function)
@@ -237,6 +238,9 @@
     (if lst
         (cdr lst)
         (throw 'cr-no-such-entry entry cont))))
+
+(define (regmap->item regmap address item)
+  (get-register-item (get-register regmap address) item))
 
 (define (regmap->entry regmap address entry)
   (get-register-entry (get-register regmap address) entry))
