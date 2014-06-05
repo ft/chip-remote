@@ -3,9 +3,12 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote decode)
+  #:use-module (srfi srfi-1)
   #:use-module (ice-9 optargs)
+  #:use-module (chip-remote register-map)
   #:use-module (chip-remote bit-decoders)
-  #:export (decode))
+  #:export (decode
+            decode-many))
 
 (define (decode-content value content)
   (let* ((name (car content))
@@ -46,3 +49,147 @@
         (map (lambda (x)
                (decode-content value x))
              (assq-ref (cdr reg) 'contents)))))
+
+;; That's all for decoding a register. The rest of the module is about decoding
+;; data that spans across multiple registers or where the values of an entry
+;; can only be decoded in connections with the values of other entries.
+
+(define (get kw-lst kw)
+  (let ((m (memq kw kw-lst)))
+    (if (not m)
+        (throw 'cr-missing-keyword-entry kw-lst kw)
+        (cadr m))))
+
+(define (get-entry register-values address)
+  (assoc-ref register-values address))
+
+(define (get-bits entry values)
+  (assq-ref (assq-ref values entry) 'bits))
+
+(define (get-decoded entry values)
+  (assq-ref (assq-ref values entry) 'decoded))
+
+(define (get-value register-values address entry)
+  (get-bits entry (get-entry register-values address)))
+
+(define (get-decoded-value register-values address entry)
+  (get-decoded entry (get-entry register-values address)))
+
+(define (get-width regmap address entry)
+  (cadr (regmap->entry regmap address entry)))
+
+(define (fill-combination regmap entry values)
+  (let* ((name (get entry #:into))
+         (srcs (get entry #:sources))
+         (width (get entry #:width))
+         (source-values (map (lambda (x)
+                               (let ((name (car x))
+                                     (addr (cdr x)))
+                                 (list name
+                                       (get-value values addr name)
+                                       (get-width regmap addr name)
+                                       addr)))
+                             srcs))
+         (combiner (get entry #:combine))
+         (combined (combiner source-values))
+         (decoder (get entry #:finally))
+         (decoded (decoder name combined)))
+    (list (cons 'combined-value name)
+          (cons 'sources source-values)
+          (list 'combined combined (if width
+                                       width
+                                       (fold (lambda (x acc)
+                                               (+ (caddr x) acc))
+                                             0
+                                             source-values)))
+          (cons 'decoded decoded))))
+
+(define (fill-depends regmap entry data unresolved resolved)
+  (define (get-resolved name)
+    (let loop ((rest resolved))
+      (cond ((null? rest) #f)
+            ((eq? (cdaar rest) name) (car rest))
+            (else (loop (cdr rest))))))
+  (define (get-raw v)
+    (let ((type (caar v)))
+      (cond ((eq? type 'combined-value)
+             (assq-ref v 'combined))
+            (else (assq-ref v 'raw)))))
+  (define (lookup-raw name addr)
+    (if addr
+        (get-value data addr name)
+        (get-raw res)))
+  (define (lookup-decoded name addr)
+    (if addr
+        (get-decoded-value data addr name)
+        (assq-ref res 'decoded)))
+  (let ((type (car entry)))
+    (cond ((eq? type 'depends)
+           (let* ((target (get entry #:target))
+                  (name (car target))
+                  (addr (cdr target))
+                  (deps (get entry #:on))
+                  (raw (lookup-raw name addr))
+                  (dep-raw (map (lambda (x)
+                                  (let ((name (car x))
+                                        (addr (cdr x)))
+                                    (list x
+                                          (lookup-raw name addr)
+                                          (get-width regmap addr name))))
+                                deps))
+                  (dep-decoded (map (lambda (x)
+                                      (let ((name (caar x))
+                                            (addr (cdar x)))
+                                        (cons name (lookup-decoded name addr))))
+                                    dep-raw))
+                  (decoder (get entry #:finally))
+                  (decoded (decoder name raw dep-raw dep-decoded)))
+             (list (cons 'dependent-value name)
+                   (cons 'address addr)
+                   (cons 'dependencies deps)
+                   (cons 'dep-raw (map (lambda (x)
+                                         (cons (caar x) (cdr x)))
+                                       dep-raw))
+                   (cons 'dep-decoded dep-decoded)
+                   (list 'raw raw (get-width regmap addr name))
+                   (cons 'decoded decoded))))
+          (else entry))))
+
+(define (fill-interconnections regmap inter values)
+  (let loop ((in inter) (out '()))
+    (if (null? in)
+        out
+        (loop (cdr in)
+              (append! out
+                       (cond ((eq? (caar in) 'combine)
+                              (list (fill-combination regmap
+                                                      (car in)
+                                                      values)))
+                             ((eq? (caar in) 'depends)
+                              (list (fill-depends regmap
+                                                  (car in)
+                                                  values
+                                                  in
+                                                  out)))
+                             (else (throw 'cr-unknown-interconnection-type
+                                          (caar in)))))))))
+
+(define* (decode-many #:key
+                      register-map
+                      reader
+                      decoder
+                      (filter-predicate #f)
+                      (interconnections '()))
+  (let* ((all-addresses (map car register-map))
+         (wanted-addresses (if (not (procedure? filter-predicate))
+                               all-addresses
+                               (filter filter-predicate all-addresses)))
+         (v (map reader wanted-addresses))
+         (decoded-values (map (lambda (x)
+                                (cons (car x) (decoder (car x) (cadr x))))
+                              (zip wanted-addresses v))))
+    (values v
+            decoded-values
+            (fill-interconnections register-map
+                                   interconnections
+                                   decoded-values))))
