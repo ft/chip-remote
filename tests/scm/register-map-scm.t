@@ -24,6 +24,12 @@
                  (deploy-coffee 2 3)
                  (read-paper 7 1))))
 
+;; ‘register-default’ is an old API, that is used in parts of this script. We
+;; could rewrite the whole script to use ‘regmap->item’ instead. Ooor, we
+;; introduce a wrapper like this:
+(define (register-default rm addr)
+  (regmap->item rm addr 'default-value))
+
 (with-fs-test-bundle
  (plan 19)
 
