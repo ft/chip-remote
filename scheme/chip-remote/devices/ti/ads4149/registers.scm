@@ -110,3 +110,58 @@
                   (freeze-offset-correction 7 1 => logic-active-high)))
   (#xdf (default-value #x0)
         (contents (low-speed 4 2 => low-speed-map))))
+
+;; When the third-level API decodes the entire device, it needs to know how
+;; some of the entries from the register-map are connected in order to make a
+;; final decoding.
+
+(define (decode-hpm name combined)
+  (if (= combined #b111)
+      #t
+      #f))
+
+(define (combine-hpm x)
+  (let ((a (car (assq-ref x 'high-performance-mode-1)))
+        (b (car (assq-ref x 'high-performance-mode-2))))
+    (logior (ash b 2) a)))
+
+(define (decode-custom-pattern name values)
+  (literal-binary 'custom-pattern 0 (+ 8 6) values))
+
+(define (combine-custom-pattern x)
+  (let ((low (car (assq-ref x 'custom-pattern-low)))
+        (high (car (assq-ref x 'custom-pattern-high))))
+    (logior (ash high 6) low)))
+
+(define (decode-clkout-fall-posn name bits raw decoded)
+  (let ((type (assq-ref decoded 'lvds-cmos)))
+    (cond ((eq? type 'dfs-pin) 'dfs-pin-decides)
+          ((eq? type 'lvds) (list (reverse-lookup clkout-pos-fall-lvds bits)
+                                  'ps))
+          (else (list (reverse-lookup clkout-pos-fall-cmos bits) 'ps)))))
+
+(define (decode-clkout-rise-posn name bits raw decoded)
+  (let* ((type (assq-ref decoded 'lvds-cmos))
+         (v (cond ((eq? type 'dfs-pin) 'dfs-pin-decides)
+                  ((eq? type 'lvds) (reverse-lookup clkout-pos-rise-lvds bits))
+                  (else (list (reverse-lookup clkout-pos-rise-cmos bits) 'ps)))))
+    (if (number? v)
+        (list v 'ps)
+        v)))
+
+(define-register-interconns ads4149
+  (combine (high-performance-mode-1 high-performance-mode-2)
+           #:into high-performance-mode
+           #:combine combine-hpm
+           #:logic boolean
+           #:finally decode-hpm)
+  (combine (custom-pattern-high custom-pattern-low)
+           #:into custom-pattern
+           #:combine combine-custom-pattern
+           #:finally decode-custom-pattern)
+  (depends clkout-rise-posn
+           #:on lvds-cmos
+           #:finally decode-clkout-rise-posn)
+  (depends clkout-fall-posn
+           #:on lvds-cmos
+           #:finally decode-clkout-fall-posn))
