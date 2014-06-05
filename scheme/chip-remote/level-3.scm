@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote level-3)
+  #:use-module (ice-9 optargs)
   #:use-module (srfi srfi-1)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote decode to-text)
@@ -43,9 +44,29 @@
                                 #:value value
                                 #:colour? colour?)))
 
-(define (device-decoder regmap decoder conn colour?)
-  (fold + 0 (map (lambda (a) (decoder conn a))
-                 (map car regmap))))
+(define* (device-decoder #:key
+                         register-map
+                         reader
+                         decoder
+                         width
+                         (colour? to-tty?)
+                         (interconnections '())
+                         (filter-predicate #f))
+  (let ((data (registers->text #:register-map register-map
+                               #:reader reader
+                               #:decoder decoder
+                               #:width width
+                               #:colour? colour?
+                               #:interconnections interconnections
+                               #:filter-predicate filter-predicate)))
+    (fold (lambda (x acc)
+            (+ 1 x acc))
+          0
+          (map (lambda (x)
+                 (let ((ret (display-list x)))
+                   (newline)
+                   ret))
+               data))))
 
 (define (to-tty?)
   (isatty? (current-output-port)))
