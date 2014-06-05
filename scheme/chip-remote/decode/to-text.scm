@@ -2,20 +2,31 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
+;; This module implements rendering decoded register data to plain text and
+;; unix terminals (on which output colourisation is supported).
+
 (define-module (chip-remote decode to-text)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-11)
   #:use-module (ice-9 format)
   #:use-module (ice-9 optargs)
   #:use-module (chip-remote decode)
   #:export (decode->text
             display-list
             register->text
+            registers->text
             text-decode-header))
 
 (define-syntax cat
   (lambda (x)
     (syntax-case x ()
       ((_ exp ...) #'(string-concatenate (list exp ...))))))
+
+(define (flatten lst)
+  (cond ((null? lst) '())
+        ((not (pair? lst)) (list lst))
+        (else (append (flatten (car lst))
+                      (flatten (cdr lst))))))
 
 (define colour-map '((black . "30")
                      (blue . "34")
@@ -155,3 +166,127 @@
                          (colour? (isatty? (current-output-port))))
   (append! (text-decode-header address value width #:colour? colour?)
            (decode->text (decode register-map address value) #:colour? colour?)))
+
+(define (pp-raw v w wrap)
+  (let ((hw (binwidth->hexwidth w)))
+    (cat "[hex: 0x"
+         (wrap 'green (format #f "~v,'0x" hw v) #:bold? #t)
+         "] [bin: "
+         (wrap 'green (format #f "~v,'0b" w v) #:bold? #t)
+         "b]")))
+
+(define (combined->text value colour?)
+  (let ((w (if colour? wrap-in no-wrap))
+        (name (cdar value))
+        (raw (assq-ref value 'combined))
+        (decoded (assq-ref value 'decoded))
+        (sources (assq-ref value 'sources)))
+    (define (pp-src-value x)
+      (let* ((name (car x))
+             (v (cadr x))
+             (width (caddr x))
+             (h-width (binwidth->hexwidth width))
+             (addr (cadddr x)))
+        (cat "   - "
+             (w 'yellow (symbol->string (car x)))
+             (if addr
+                 (cat " (addr: 0x"
+                      (w 'blue (number->string addr 16) #:bold? #t)
+                      "): ")
+                 ": ")
+             (pp-raw v width w))))
+    (flatten (list (cat (w 'red "Decoding combined value" #:bold? #t)
+                        ": "
+                        (w 'yellow (symbol->string name)))
+                   (w 'white "  Sources:" #:bold? #t)
+                   (map pp-src-value sources)
+                   (cat (w 'magenta "  Combined")
+                        ": "
+                        (pp-raw (car raw) (cadr raw) w))
+                   (cat (w 'white "  Decoded" #:bold? #t)
+                        ": "
+                        (scalar->text decoded colour? #t))))))
+
+(define (dependent->text value colour?)
+  (let ((w (if colour? wrap-in no-wrap))
+        (name (cdar value))
+        (addr (assq-ref value 'address))
+        (raw (assq-ref value 'raw))
+        (decoded (assq-ref value 'decoded))
+        (deps (assq-ref value 'dependencies))
+        (dep-raw (assq-ref value 'dep-raw))
+        (dep-decoded (assq-ref value 'dep-decoded)))
+    (define (pp-dep-value dep)
+      (let* ((name (car dep))
+             (addr (cdr dep))
+             (r (assq-ref dep-raw name))
+             (d (assq-ref dep-decoded name))
+             (v (car r))
+             (width (cadr r))
+             (h-width (binwidth->hexwidth width)))
+        (cat "   - "
+             (w 'yellow (symbol->string name))
+             (if addr
+                 (cat " (addr: 0x"
+                      (w 'blue (number->string addr 16) #:bold? #t)
+                      "): ")
+                 ": ")
+             (scalar->text d colour? #t)
+             " "
+             (pp-raw v width w))))
+    (flatten (list (cat (w 'red "Decoding dependent value" #:bold? #t)
+                        ": "
+                        (w 'yellow (symbol->string name))
+                        (if addr
+                            (cat " (addr: 0x"
+                                 (w 'blue (number->string addr 16) #:bold? #t)
+                                 ")")
+                            ""))
+                   (w 'white "  Dependencies:" #:bold? #t)
+                   (map pp-dep-value deps)
+                   (cat "  Value: "
+                        (pp-raw (car raw) (cadr raw) w))
+                   (cat (w 'white "  Final decoding" #:bold? #t)
+                        ": "
+                        (scalar->text (if (list? decoded)
+                                          (format #f "~a~a"
+                                                  (car decoded)
+                                                  (cadr decoded))
+                                          decoded)
+                                      colour? #t))))))
+
+(define* (interconnection->text value
+                                #:key
+                                (colour? (isatty? (current-output-port))))
+  (let ((type (caar value)))
+    (cond ((eq? type 'combined-value)
+           (combined->text value colour?))
+          ((eq? type 'dependent-value)
+           (dependent->text value colour?))
+          (else (throw 'cr-unknown-interconnection-type type)))))
+
+(define* (registers->text #:key
+                          register-map
+                          reader
+                          decoder
+                          width
+                          (interconnections '())
+                          (filter-predicate #f)
+                          (colour? (isatty? (current-output-port))))
+  (let-values (((v regs interconns)
+                (decode-many #:register-map register-map
+                             #:interconnections interconnections
+                             #:filter-predicate filter-predicate
+                             #:reader reader
+                             #:decoder decoder)))
+    (append! (map (lambda (x)
+                    (append! (text-decode-header (caar x) (cadr x) width
+                                                 #:colour? colour?)
+                             (decode->text (cdar x) #:colour? colour?)))
+                  (zip regs v))
+             (if (null? interconns)
+                 '()
+                 (list (list "Processing interconnected registers...")))
+             (map (lambda (x)
+                    (interconnection->text x #:colour? colour?))
+                  interconns))))
