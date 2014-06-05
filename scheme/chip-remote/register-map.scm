@@ -274,6 +274,7 @@
 (define (parse-combine-args args)
 
   (define defaults '((#:logic . 'word)
+                     (#:split . #f)
                      (#:width . #f)))
 
   (define (check data opts)
@@ -281,7 +282,6 @@
       (need data raw #:combine)
       (need data raw #:finally)
       (need data raw #:into)
-      (need data raw #:split)
       (let loop ((rest opts))
         (if (null? rest)
             data
@@ -293,7 +293,7 @@
 
   (let loop ((in args)
              (out '())
-             (opts '(#:logic #:width)))
+             (opts '(#:logic #:split #:width)))
     (syntax-case in ()
       (()
        ;; Wrap the whole thing into a (list ...) expression, that the rest of
@@ -304,7 +304,7 @@
       ((#:logic arg . args)
        (loop #'args (cons #:logic (cons #''arg out)) (delq #:logic opts)))
       ((#:split arg . args)
-       (loop #'args (cons #:split (cons #'arg out)) opts))
+       (loop #'args (cons #:split (cons #'arg out)) (delq #:split opts)))
       ((#:combine arg . args)
        (loop #'args (cons #:combine (cons #'arg out)) opts))
       ((#:width arg . args)
