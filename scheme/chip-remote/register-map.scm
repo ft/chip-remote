@@ -119,12 +119,18 @@
 ;; This one actually adds information to the bits of a register definition.
 (define-syntax expand-datum
   (lambda (x)
-    (syntax-case x (default-value contents)
+    (syntax-case x (default-value contents post-process)
       ;; ‘default-value’ can be a simple pair, but the users shouldn't have to
       ;; type (default-value . 23) for no good reason.
       ((_ (default-value v)) #'(cons 'default-value v))
       ;; ‘contents’ is actually the fun one. ‘expand-content’ does the work.
       ((_ (contents entry ...)) #'(list 'contents (expand-content entry) ...))
+      ;; ‘post-process’ is either a function name or a list of change
+      ;; directives.
+      ((_ (post-process (directive value) ...))
+       #'(list 'post-process (cons 'directive value) ...))
+      ((_ (post-process fnc))
+       #'(list 'post-process fnc 'fnc))
       ;; Everything else can just go out as it came in.
       ((_ (exp ...)) #'(list exp ...)))))
 
