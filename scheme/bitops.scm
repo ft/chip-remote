@@ -39,3 +39,9 @@ extract from VALUE is addressed by START and WIDTH:
   (bit-extract      #b01101010 3 7) => #b1101
   (bit-extract-with #b01101010 3 4) => #b1101"
   (bit-extract value start (+ start width)))
+
+(define (logclear value bits)
+  "Clear BITS in VALUE.
+
+  (logclear #xff #b11000011) => #b111100"
+  (logand (lognot bits) value))
