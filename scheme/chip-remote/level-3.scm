@@ -16,9 +16,15 @@
 (define-syntax replay-register
   (lambda (x)
     (syntax-case x ()
+      ((_ c a l2 (args ...) pp)
+       #'(let ((conn c) (addr a))
+           (write-register conn addr
+                           (pp (l2 (read-register conn addr) args ...)))))
       ((_ c a l2 (args ...))
        #'(let ((conn c) (addr a))
            (write-register conn addr (l2 (read-register conn addr) args ...))))
+      ((_ c a l2 pp)
+       #'(replay-register c a l2 () pp))
       ((_ c a l2)
        #'(replay-register c a l2 ())))))
 
