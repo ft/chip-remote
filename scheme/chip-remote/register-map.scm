@@ -67,6 +67,43 @@
             regmap->item
             map-across))
 
+;; Functions, that work on register-maps:
+
+(define (get-register regmap address)
+  (let ((reg (assoc address regmap)))
+    (if reg
+        (cdr reg)
+        (throw 'cr-no-such-register address))))
+
+(define (get-register-item register item)
+  (let ((value (assq item register)))
+    (if value
+        (cdr value)
+        (throw 'cr-no-such-item item register))))
+
+(define (get-register-entry register entry)
+  (let* ((cont (get-register-item register 'contents))
+         (lst (assq entry cont)))
+    (if lst
+        (cdr lst)
+        (throw 'cr-no-such-entry entry cont))))
+
+(define (regmap->item regmap address item)
+  (get-register-item (get-register regmap address) item))
+
+(define (regmap->entry regmap address entry)
+  (get-register-entry (get-register regmap address) entry))
+
+(define (map-across fnc what regmap)
+  (fold (lambda (x acc)
+          (let ((address (car x))
+                (item (assq what (cdr x))))
+            (if item (cons (fnc address (cdr item)) acc))))
+        '()
+        regmap))
+
+;; ‘define-register-map’:
+
 ;; This macro gets a value that points to the piece of data (map or function)
 ;; that is able to decode a register-entry. Add its name and its type to the
 ;; register map to enable better diagnostics in case something goes wrong. In
@@ -226,40 +263,7 @@
              (define-public var-name
                (list (expand-register register) ...))))))))
 
-(define (get-register regmap address)
-  (let ((reg (assoc address regmap)))
-    (if reg
-        (cdr reg)
-        (throw 'cr-no-such-register address))))
-
-(define (get-register-item register item)
-  (let ((value (assq item register)))
-    (if value
-        (cdr value)
-        (throw 'cr-no-such-item item register))))
-
-(define (get-register-entry register entry)
-  (let* ((cont (get-register-item register 'contents))
-         (lst (assq entry cont)))
-    (if lst
-        (cdr lst)
-        (throw 'cr-no-such-entry entry cont))))
-
-(define (regmap->item regmap address item)
-  (get-register-item (get-register regmap address) item))
-
-(define (regmap->entry regmap address entry)
-  (get-register-entry (get-register regmap address) entry))
-
-(define (map-across fnc what regmap)
-  (fold (lambda (x acc)
-          (let ((address (car x))
-                (item (assq what (cdr x))))
-            (if item (cons (fnc address (cdr item)) acc))))
-        '()
-        regmap))
-
-;; The following part implements the ‘define-register-interconns’ macro.
+;; ‘define-register-interconns’:
 
 ;; This is a little helper for the clause-handler functions below.
 (define (need data raw kw)
