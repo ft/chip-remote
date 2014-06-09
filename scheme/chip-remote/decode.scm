@@ -6,6 +6,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 optargs)
   #:use-module (chip-remote register-map)
+  #:use-module (chip-remote keyword-assoc)
   #:use-module (chip-remote bit-decoders)
   #:export (decode
             decode-many))
@@ -54,12 +55,6 @@
 ;; data that spans across multiple registers or where the values of an entry
 ;; can only be decoded in connections with the values of other entries.
 
-(define (get kw-lst kw)
-  (let ((m (memq kw kw-lst)))
-    (if (not m)
-        (throw 'cr-missing-keyword-entry kw-lst kw)
-        (cadr m))))
-
 (define (get-entry register-values address)
   (assoc-ref register-values address))
 
@@ -79,9 +74,9 @@
   (cadr (regmap->entry regmap address entry)))
 
 (define (fill-combination regmap entry values)
-  (let* ((name (get entry #:into))
-         (srcs (get entry #:sources))
-         (width (get entry #:width))
+  (let* ((name (kwa-ref entry #:into))
+         (srcs (kwa-ref entry #:sources))
+         (width (kwa-ref entry #:width))
          (source-values (map (lambda (x)
                                (let ((name (car x))
                                      (addr (cdr x)))
@@ -90,9 +85,9 @@
                                        (get-width regmap addr name)
                                        addr)))
                              srcs))
-         (combiner (get entry #:combine))
+         (combiner (kwa-ref entry #:combine))
          (combined (combiner source-values))
-         (decoder (get entry #:finally))
+         (decoder (kwa-ref entry #:finally))
          (decoded (decoder name combined)))
     (list (cons 'combined-value name)
           (cons 'sources source-values)
@@ -125,10 +120,10 @@
         (assq-ref res 'decoded)))
   (let ((type (car entry)))
     (cond ((eq? type 'depends)
-           (let* ((target (get entry #:target))
+           (let* ((target (kwa-ref entry #:target))
                   (name (car target))
                   (addr (cdr target))
-                  (deps (get entry #:on))
+                  (deps (kwa-ref entry #:on))
                   (raw (lookup-raw name addr))
                   (dep-raw (map (lambda (x)
                                   (let ((name (car x))
@@ -142,7 +137,7 @@
                                             (addr (cdar x)))
                                         (cons name (lookup-decoded name addr))))
                                     dep-raw))
-                  (decoder (get entry #:finally))
+                  (decoder (kwa-ref entry #:finally))
                   (decoded (decoder name raw dep-raw dep-decoded)))
              (list (cons 'dependent-value name)
                    (cons 'address addr)
