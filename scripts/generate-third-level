@@ -40,18 +40,26 @@
   (format #t "usage: generate-second-level <lvl2-module-file> <name>~%")
   (quit 1))
 
-(use-modules (ice-9 control)
+(use-modules (chip-remote keyword-assoc)
+             (ice-9 control)
              (ice-9 format)
              (srfi srfi-1))
 
 (define input-file (cadr (command-line)))
 (define regmap-name (caddr (command-line)))
 
+(define registers-module #f)
+(define combined #f)
+(define postproc #f)
+(define regmap #f)
+(define interconns #f)
+
 (define lvl2/export-list #f)
 
 (define (lvl3/process:header hdr)
   (let* ((lvl2-module (car hdr))
          (base-module (take lvl2-module (- (length lvl2-module) 1))))
+    (set! registers-module (append base-module '(registers)))
     (format #t ";; Copyright (c) ~d chip-remote workers, All rights reserved.~%"
             (+ 1900 (tm:year (localtime (current-time)))))
     (format #t ";;~%")
@@ -62,7 +70,7 @@
     (format #t "  #:use-module (chip-remote protocol)~%")
     (format #t "  #:use-module (~a~%" (append base-module '(program)))
     (format #t "                #:renamer (symbol-prefix-proc 'lvl2/))~%")
-    (format #t "  #:use-module ~a~%" (append base-module '(registers)))
+    (format #t "  #:use-module ~a~%" registers-module)
     (format #t "  #:export (decode-device~%")
     (format #t "            decode-register~%")
     (format #t "            decode-register-value~%")
@@ -149,10 +157,40 @@
     (display ")")))
 
 (define (lvl3/process exp)
+  (define (has-pp? x)
+    (assq 'post-process (cdr x)))
   (let ((head (car exp))
         (rest (cdr exp)))
     (cond ((eq? head 'define-module)
-           (lvl3/process:header rest))
+           (lvl3/process:header rest)
+           ;; The following lines will make some people cringe; but we need
+           ;; some strings from the command line to be part of the evaluation
+           ;; in this script. Yes, it's ugly. But it's not part of the library
+           ;; and also, it works.
+           (eval-string (format #f "(use-modules ~a)" registers-module)
+                        (current-module))
+           (eval-string (format #f
+                                "(set! interconns ~a-regmap-interconnections)"
+                                regmap-name)
+                        (current-module))
+           (eval-string (format #f "(set! regmap ~a-register-map)" regmap-name)
+                        (current-module))
+           ;; If an entry is a combined value, it needs special treatment. So
+           ;; let's get a list of them, so we can later check easily for them.
+           (set! combined (concatenate!
+                           (map (lambda (x)
+                                  (map car (kwa-ref x #:sources)))
+                                (filter (lambda (x)
+                                          (eq? (car x)
+                                               'combine))
+                                        interconns))))
+           ;; When changing entries from registers that include a post-process
+           ;; clause, that post-process clause needs to be handled every time.
+           ;; This is a record of registers that have such clauses: It maps the
+           ;; register's address to its post-process clause.
+           (set! postproc (map (lambda (x)
+                                 (cons (car x) (assq-ref (cdr x) 'post-process)))
+                               (filter has-pp? regmap))))
           ((eq? head 'define)
            (and (list? (car rest))
                 (memq (caar rest) lvl2/export-list)
