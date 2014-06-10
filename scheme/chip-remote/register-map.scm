@@ -288,7 +288,7 @@
 (define (parse-combine-args args)
 
   (define defaults '((#:logic . 'word)
-                     (#:split . #f)
+                     (#:split . '(#f #f))
                      (#:width . #f)))
 
   (define (check data opts)
@@ -318,7 +318,9 @@
       ((#:logic arg . args)
        (loop #'args (cons #:logic (cons #''arg out)) (delq #:logic opts)))
       ((#:split arg . args)
-       (loop #'args (cons #:split (cons #'arg out)) (delq #:split opts)))
+       (loop #'args
+             (cons #:split (cons #'(list arg 'arg) out))
+             (delq #:split opts)))
       ((#:combine arg . args)
        (loop #'args (cons #:combine (cons #'arg out)) opts))
       ((#:width arg . args)
