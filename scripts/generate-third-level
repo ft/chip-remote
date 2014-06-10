@@ -56,6 +56,8 @@
 (define postproc #f)
 (define regmap #f)
 (define interconns #f)
+(define regwidth #f)
+(define read-only-regs #f)
 
 (define lvl2/export-list #f)
 
@@ -165,7 +167,10 @@
          (literal-addr (eval addr (current-module)))
          (indent (string-length (symbol->string name))))
     (let ((cmb (combined-name name)))
-      (cond ((and cmb (string-prefix? "disable-" (symbol->string name)))
+      (cond ((and read-only-regs (member literal-addr read-only-regs))
+             (format #t "~%  ;; Register #x~x is readonly, skipping: ~a"
+                     literal-addr name))
+            ((and cmb (string-prefix? "disable-" (symbol->string name)))
              (format #t "~%  ;; Skipped due to combined entry: ~a" name))
             (cmb (set! combined-srcs-w/lvl2
                        (cons (list cmb name lvl2 addr literal-addr arglist)
@@ -226,6 +231,16 @@
                         (current-module))
            (eval-string (format #f "(set! regmap ~a-register-map)" regmap-name)
                         (current-module))
+           (eval-string (format #f "(set! regwidth ~a-register-width)"
+                                regmap-name)
+                        (current-module))
+           (catch #t
+             (lambda ()
+               (eval-string
+                (format #f "(set! read-only-regs ~a-read-only-registers)"
+                        regmap-name)
+                (current-module)))
+             (lambda (k . a) #t))
            ;; If an entry is a combined value, it needs special treatment. So
            ;; let's get a list of them, so we can later check easily for them.
            (set! combined (map (lambda (x)
