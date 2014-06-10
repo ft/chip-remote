@@ -98,7 +98,7 @@ API for experimentation purposes."
   (write-register* conn addr value))
 
 (define* (decode-register-value addr value #:key (colour? (to-tty?)))
-  (value-decoder ads4149-register-map register-width addr value colour?))
+  (value-decoder ads4149-register-map ads4149-register-width addr value colour?))
 
 (define* (decode-register conn addr #:key (colour? (to-tty?)))
   (decode-register-value addr (read-register conn addr) #:colour? colour?))

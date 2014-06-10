@@ -18,7 +18,7 @@
 
 ;; Shorthands:
 (define rm ads4149-register-map)
-(define rw register-width)
+(define rw ads4149-register-width)
 (define ic ads4149-regmap-interconnections)
 
 (device-decoder #:register-map rm

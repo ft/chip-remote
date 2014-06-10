@@ -6,7 +6,7 @@
   #:use-module (chip-remote bit-decoders)
   #:use-module (chip-remote devices ti ads4149 tables)
   #:use-module (chip-remote register-map)
-  #:export (register-width
+  #:export (ads4149-register-width
             valid-register-address?))
 
 (define (valid-register-address? a)
@@ -61,7 +61,7 @@
   (maybe-unit data 'M))
 
 ;; The width of every register:
-(define register-width 8)
+(define ads4149-register-width 8)
 
 ;; Here is the actual register map:
 (define-register-map ads4149

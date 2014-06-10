@@ -7,11 +7,12 @@
                 #:renamer (symbol-prefix-proc 'conv:))
   #:use-module (chip-remote devices ti lmk04828 tables)
   #:use-module (chip-remote bit-decoders)
-  #:use-module (chip-remote register-map))
+  #:use-module (chip-remote register-map)
+  #:export (lmk04828-register-width))
 
-(define register-width 8)
+(define lmk04828-register-width 8)
 
-(define read-only-registers
+(define lmk04828-read-only-registers
   '(#x3 #x4 #x5 #x6 #xc #xd))
 
 (define-register-map lmk04828
