@@ -43,6 +43,7 @@
 (use-modules (chip-remote keyword-assoc)
              (ice-9 control)
              (ice-9 format)
+             (ice-9 pretty-print)
              (srfi srfi-1))
 
 (define input-file (cadr (command-line)))
@@ -50,6 +51,8 @@
 
 (define registers-module #f)
 (define combined #f)
+(define combined-srcs #f)
+(define combined-srcs-w/lvl2 '())
 (define postproc #f)
 (define regmap #f)
 (define interconns #f)
@@ -144,26 +147,43 @@
         '(throw 'could-not-find-register-address)
         (make-regaddr-from-setter setter))))
 
+(define (addr->pp addr)
+  (format #f "postproc:x~x" addr))
+
 (define (lvl3/process:procedure exp)
+  (define (symbol-strip x n)
+    (string->symbol (substring (symbol->string x) n)))
+  (define (combined-name x)
+    (let ((res (or (memq (symbol-strip x 4) combined-srcs)
+                   (memq (symbol-strip x 7) combined-srcs)
+                   (memq (symbol-strip x 8) combined-srcs))))
+      (if res (car res) #f)))
   (let* ((name (caar exp))
          (lvl2 (symbol-append 'lvl2/ (caar exp)))
          (addr (find-register-address (cdr exp)))
          (arglist (cdar exp))
          (literal-addr (eval addr (current-module)))
          (indent (string-length (symbol->string name))))
-    (format #t "~%  (~a ~a~%" name addr)
-    (format #t "   ~v_ ~a" indent lvl2)
-    (if (> (length arglist) 1)
-        (format #t " ~a" (cdr arglist)))
-    (let ((pp (assoc literal-addr postproc)))
-      (if pp
-          (format #t
-                  "~%   ~v_ ~a"
-                  indent
-                  (if (procedure? (cadr pp))
-                      (caddr pp)
-                      (format #f "postproc:x~x" literal-addr)))))
-    (display ")")))
+    (let ((cmb (combined-name name)))
+      (cond ((and cmb (string-prefix? "disable-" (symbol->string name)))
+             (format #t "~%  ;; Skipped due to combined entry: ~a" name))
+            (cmb (set! combined-srcs-w/lvl2
+                       (cons (list cmb name lvl2 addr literal-addr arglist)
+                             combined-srcs-w/lvl2))
+                 (format #t "~%  ;; Skipped due to combined entry: ~a" name))
+            (else (format #t "~%  (~a ~a~%" name addr)
+                  (format #t "   ~v_ ~a" indent lvl2)
+                  (if (> (length arglist) 1)
+                      (format #t " ~a" (cdr arglist)))
+                  (let ((pp (assoc literal-addr postproc)))
+                    (if pp
+                        (format #t
+                                "~%   ~v_ ~a"
+                                indent
+                                (if (procedure? (cadr pp))
+                                    (caddr pp)
+                                    (addr->pp literal-addr)))))
+                  (display ")"))))))
 
 (define (lvl3/generate-post-processors lst)
   (format #t ";; Register post-processors:~%")
@@ -208,13 +228,24 @@
                         (current-module))
            ;; If an entry is a combined value, it needs special treatment. So
            ;; let's get a list of them, so we can later check easily for them.
-           (set! combined (concatenate!
-                           (map (lambda (x)
-                                  (map car (kwa-ref x #:sources)))
-                                (filter (lambda (x)
-                                          (eq? (car x)
-                                               'combine))
-                                        interconns))))
+           (set! combined (map (lambda (x)
+                                 (let ((dest (kwa-ref x #:into))
+                                       (srcs (kwa-ref x #:sources))
+                                       (logic (kwa-ref x #:logic))
+                                       (splitter (kwa-ref x #:split)))
+                                   (list dest
+                                         (cons 'sources srcs)
+                                         (cons 'logic logic)
+                                         (cons 'split splitter))))
+                               (filter (lambda (x)
+                                         (eq? (car x)
+                                              'combine))
+                                       interconns)))
+           (set! combined-srcs (map car
+                                    (concatenate
+                                     (map (lambda (x)
+                                            (assq-ref (cdr x) 'sources))
+                                          combined))))
            ;; When changing entries from registers that include a post-process
            ;; clause, that post-process clause needs to be handled every time.
            ;; This is a record of registers that have such clauses: It maps the
@@ -231,6 +262,90 @@
                 (lvl3/process:procedure rest)))
           (else #t))))
 
+(define (lvl3/replay-register name idx l2 aname anum args)
+  (let* ((s0 "    (replay-register ")
+         (l0 (string-length s0))
+         (pp (assoc anum postproc)))
+    (newline)
+    (format #t "~aconn ~a~%" s0 aname)
+    (format #t "~v_~a~%" l0 l2)
+    (format #t "~v_((list-ref data ~a))" l0 idx)
+    (if pp
+        (format #t " ~a)" (addr->pp (car pp)))
+        (format #t ")"))))
+
+(define (lvl3/replay-register-boolean name type aname anum args)
+  (let* ((s0 "    (replay-register ")
+         (l0 (string-length s0))
+         (pp (assoc anum postproc)))
+    (newline)
+    (format #t "~aconn ~a~%" s0 aname)
+    (format #t "~v_lvl2/~a-~a" l0 type name)
+    (if pp
+        (format #t " ~a)" (addr->pp (car pp)))
+        (format #t ")"))))
+
+(define (lvl3/generate-word-combined x)
+  (let* ((name (car x))
+         (data (cdr x))
+         (srcs (assq-ref data 'sources))
+         (split (cadr (assq-ref data 'split))))
+    (newline)
+    (format #t "(define-public (set-~a conn value)~%" name)
+    (format #t "  (let ((data (~a value)))" split)
+    (fold (lambda (a acc)
+            (let* ((name (car a))
+                   (data (assq name combined-srcs-w/lvl2)))
+              (if (not data)
+                  (begin (format #t ";; No data for ~a...~%" name)
+                         (format #t ";; Entry:~%")
+                         (pretty-print x #:per-line-prefix ";; ")
+                         (format #t ";; combined-data:")
+                         (pretty-print combined-srcs-w/lvl2
+                                       #:per-line-prefix ";; "))
+                  (let ((lvl2 (list-ref data 2))
+                        (addr-name (list-ref data 3))
+                        (addr-num (list-ref data 4))
+                        (arglst (list-ref data 5)))
+                    (lvl3/replay-register name acc lvl2
+                                          addr-name addr-num
+                                          arglst))))
+            (+ 1 acc))
+          0
+          srcs)
+    (display "))")
+    (newline)))
+
+(define (lvl3/generate-boolean-combined* x type)
+  (let* ((name (car x))
+         (data (cdr x))
+         (srcs (assq-ref data 'sources)))
+    (format #t "(define-public (~a-~a conn)" type name)
+    (map (lambda (a)
+           (let* ((name (car a))
+                  (data (assq name combined-srcs-w/lvl2)))
+             (if (not data)
+                 (begin (format #t ";; No data for ~a...~%" name)
+                        (format #t ";; Entry:~%")
+                        (pretty-print x #:per-line-prefix ";; ")
+                        (format #t ";; combined-data:")
+                        (pretty-print combined-srcs-w/lvl2
+                                      #:per-line-prefix ";; "))
+                 (let ((addr-name (list-ref data 3))
+                       (addr-num (list-ref data 4))
+                       (arglst (list-ref data 5)))
+                   (lvl3/replay-register-boolean name type
+                                                 addr-name addr-num
+                                                 arglst)))))
+         srcs))
+  (display ")")
+  (newline))
+
+(define (lvl3/generate-boolean-combined x)
+  (newline)
+  (lvl3/generate-boolean-combined* x 'disable)
+  (newline)
+  (lvl3/generate-boolean-combined* x 'enable))
 
 (call-with-input-file input-file
   (lambda (p)
@@ -241,3 +356,13 @@
                  (next (read p)))))))
 (display ")")
 (newline)
+(when (not (null? combined))
+  (map (lambda (x)
+         (let ((name (car x))
+               (logic (assq-ref (cdr x) 'logic)))
+           (cond ((eq? logic 'word) (lvl3/generate-word-combined x))
+                 ((eq? logic 'boolean) (lvl3/generate-boolean-combined x))
+                 (else (format #t "~%;; Unknown logic: ~a~%" logic)
+                       (format #t ";; Valid logic keys: boolean, word~%")
+                       (pretty-print x #:per-line-prefix ";; ")))))
+       combined))
