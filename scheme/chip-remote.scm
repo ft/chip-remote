@@ -78,13 +78,13 @@ situations:
         (use-modules ((chip-remote devices xxx foo registers)
                       #:renamer (symbol-prefix-proc 'bar/)))
 
-        (register-address-of 'gain #:renamer (symbol-prefix-proc 'bar/)
+        (register-address-of 'gain #:renamer (symbol-prefix-proc 'bar/))
           => 0
 
   3. You want the address of `gain' from a module, you didn't import:
 
         (register-address-of 'gain
-          #:module (chip-remote devices xxx foo registers)
+          #:module (resolve-module '(chip-remote devices xxx foo registers)))
           => 0"
   (variable-of name module
                (lambda (x) (symbol-append 'regaddr: x))
