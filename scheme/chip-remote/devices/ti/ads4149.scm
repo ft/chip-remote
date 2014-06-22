@@ -6,6 +6,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 optargs)
   #:use-module (bitops)
+  #:use-module (chip-remote decode)
   #:use-module (chip-remote level-3)
   #:use-module (chip-remote protocol)
   #:use-module ((chip-remote devices ti ads4149 program)
@@ -104,9 +105,13 @@ API for experimentation purposes."
   (decode-register-value addr (read-register conn addr) #:colour? colour?))
 
 (define* (decode-device conn #:key (colour? (to-tty?)))
-  (fold + 0 (map (lambda (a) (decode-register conn a))
-                 (filter (lambda (x) (not (= x 0)))
-                         (map car ads4149-register-map)))))
+  (device-decoder #:register-map ads4149-register-map
+                  #:reader (lambda (a) (read-register conn a))
+                  #:decoder (lambda (a v) (decode ads4149-register-map a v))
+                  #:interconnections ads4149-regmap-interconnections
+                  #:filter-predicate valid-readback-address?
+                  #:width ads4149-register-width
+                  #:colour? colour?))
 
 (define-bit-field-frontends
   (disable-clkout-fall-control regaddr:enable-clkout-fall
