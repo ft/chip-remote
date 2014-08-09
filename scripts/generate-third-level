@@ -158,7 +158,7 @@
 (define (find-register-address exp)
   (let* ((setter (find-setter exp)))
     (if (not setter)
-        '(throw 'could-not-find-register-address)
+        'WARNING-no-such-address
         (make-regaddr-from-setter setter))))
 
 (define (addr->pp addr)
@@ -176,7 +176,9 @@
          (lvl2 (symbol-append 'lvl2/ (caar exp)))
          (addr (find-register-address (cdr exp)))
          (arglist (cdar exp))
-         (literal-addr (eval addr (current-module)))
+         (literal-addr (if (eq? addr 'WARNING-no-such-address)
+                           'WARNING-no-such-address
+                           (eval addr (current-module))))
          (indent (string-length (symbol->string name))))
     (let ((cmb (combined-name name)))
       (cond ((and read-only-regs (member literal-addr read-only-regs))
