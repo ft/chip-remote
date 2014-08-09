@@ -119,7 +119,7 @@
   (format #t "~v_#:decoder (lambda (a v) (decode ~a-register-map a v))~%"
           ddi regmap-name)
   (when interconns
-    (format #t "~v_#:interconnections ~a-register-interconns~%"
+    (format #t "~v_#:interconnections ~a-regmap-interconnections~%"
             ddi regmap-name))
   (format #t "~v_#:filter-predicate #f~%" ddi)
   (format #t "~v_#:width ~a-register-width~%" ddi regmap-name)
