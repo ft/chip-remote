@@ -5,6 +5,7 @@
 (define-module (chip-remote level-3)
   #:use-module (ice-9 optargs)
   #:use-module (srfi srfi-1)
+  #:use-module (bitops)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote decode to-text)
   #:export (define-bit-field-frontends
@@ -81,3 +82,13 @@
 
 (define (to-tty?)
   (isatty? (current-output-port)))
+
+(define (split-word data . widths)
+  (cdr (fold (lambda (x acc)
+               (let ((offset (car acc))
+                     (rest (cdr acc)))
+                 (cons (+ x offset)
+                       (cons (bit-extract-width data offset x)
+                             rest))))
+             (list 0)
+             (reverse widths))))
