@@ -4,6 +4,7 @@
 
 (define-module (chip-remote devices ti lmk04828)
   #:use-module (ice-9 optargs)
+  #:use-module (bitops)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote level-3)
   #:use-module (chip-remote protocol)
@@ -916,176 +917,149 @@
                lvl2/set-vco-mux (value)))
 
 (define-public (set-sysref-divider conn value)
-  (let ((data (split-word value 5 8)))
-;; WARNING: sysref-divider has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:sysref-div-high
-                     lvl2/set-sysref-div-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:sysref-div-low
-                     lvl2/set-sysref-div-low
-                     ((list-ref data 1)))))
+  ;; 0..7 are not allowed.
+  (with-constraints (value (>= 8) (<= (one-bits 13)))
+    (let ((data (split-word value 5 8)))
+      (replay-register conn regaddr:sysref-div-high
+                       lvl2/set-sysref-div-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:sysref-div-low
+                       lvl2/set-sysref-div-low
+                       ((list-ref data 1))))))
 
 (define-public (set-sysref-digital-delay conn value)
-  (let ((data (split-word value 5 8)))
-;; WARNING: sysref-digital-delay has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:sysref-ddly-high
-                     lvl2/set-sysref-ddly-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:sysref-ddly-low
-                     lvl2/set-sysref-ddly-low
-                     ((list-ref data 1)))))
+  ;; Again, 0..7 are not allowed.
+  (with-constraints (value (>= 8) (<= (one-bits 13)))
+    (let ((data (split-word value 5 8)))
+      (replay-register conn regaddr:sysref-ddly-high
+                       lvl2/set-sysref-ddly-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:sysref-ddly-low
+                       lvl2/set-sysref-ddly-low
+                       ((list-ref data 1))))))
 
 (define-public (set-manual-dac conn value)
-  (let ((data (split-word value 2 8)))
-;; WARNING: manual-dac has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:manual-dac-high
-                     lvl2/set-manual-dac-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:manual-dac-low
-                     lvl2/set-manual-dac-low
-                     ((list-ref data 1)))))
+  (with-constraints (value (>= 0) (<= (one-bits 10)))
+    (let ((data (split-word value 2 8)))
+      (replay-register conn regaddr:manual-dac-high
+                       lvl2/set-manual-dac-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:manual-dac-low
+                       lvl2/set-manual-dac-low
+                       ((list-ref data 1))))))
 
 (define-public (set-holdover-dld-cnt conn value)
-  (let ((data (split-word value 6 8)))
-;; WARNING: holdover-dld-cnt has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:holdover-dld-cnt-high
-                     lvl2/set-holdover-dld-cnt-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:holdover-dld-cnt-low
-                     lvl2/set-holdover-dld-cnt-low
-                     ((list-ref data 1)))))
+  (with-constraints (value (>= 0) (<= (one-bits 14)))
+    (let ((data (split-word value 6 8)))
+      (replay-register conn regaddr:holdover-dld-cnt-high
+                       lvl2/set-holdover-dld-cnt-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:holdover-dld-cnt-low
+                       lvl2/set-holdover-dld-cnt-low
+                       ((list-ref data 1))))))
 
 (define-public (set-pll2-r-divider conn value)
-  (let ((data (split-word value 4 8)))
-;; WARNING: pll2-r-divider has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:pll2-r-divider-high
-                     lvl2/set-pll2-r-divider-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:pll2-r-divider-low
-                     lvl2/set-pll2-r-divider-low
-                     ((list-ref data 1)))))
+  ;; value := 0 is not allowed
+  (with-constraints (value (>= 1) (<= (one-bits 12)))
+    (let ((data (split-word value 4 8)))
+      (replay-register conn regaddr:pll2-r-divider-high
+                       lvl2/set-pll2-r-divider-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:pll2-r-divider-low
+                       lvl2/set-pll2-r-divider-low
+                       ((list-ref data 1))))))
 
 (define-public (set-pll2-n-divider conn value)
-  (let ((data (split-word value 2 8 8)))
-;; WARNING: pll2-n-divider has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:pll2-n-divider-high
-                     lvl2/set-pll2-n-divider-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:pll2-n-divider-mid
-                     lvl2/set-pll2-n-divider-mid
-                     ((list-ref data 1)))
-    (replay-register conn regaddr:pll2-n-divider-low
-                     lvl2/set-pll2-n-divider-low
-                     ((list-ref data 2)))))
+  ;; Again, value := 0 is not allowed
+  (with-constraints (value (>= 1) (<= (one-bits 18)))
+    (let ((data (split-word value 2 8 8)))
+      (replay-register conn regaddr:pll2-n-divider-high
+                       lvl2/set-pll2-n-divider-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:pll2-n-divider-mid
+                       lvl2/set-pll2-n-divider-mid
+                       ((list-ref data 1)))
+      (replay-register conn regaddr:pll2-n-divider-low
+                       lvl2/set-pll2-n-divider-low
+                       ((list-ref data 2))))))
 
 (define-public (set-pll2-n-calibration-phase conn value)
-  (let ((data (split-word value 2 8 8)))
-;; WARNING: pll2-n-calibration-phase has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:pll2-n-calibration-phase-high
-                     lvl2/set-pll2-n-calibration-phase-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:pll2-n-calibration-phase-mid
-                     lvl2/set-pll2-n-calibration-phase-mid
-                     ((list-ref data 1)))
-    (replay-register conn regaddr:pll2-n-calibration-phase-low
-                     lvl2/set-pll2-n-calibration-phase-low
-                     ((list-ref data 2)))))
+  ;; Again, value := 0 is not allowed
+  (with-constraints (value (>= 1) (<= (one-bits 18)))
+    (let ((data (split-word value 2 8 8)))
+      (replay-register conn regaddr:pll2-n-calibration-phase-high
+                       lvl2/set-pll2-n-calibration-phase-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:pll2-n-calibration-phase-mid
+                       lvl2/set-pll2-n-calibration-phase-mid
+                       ((list-ref data 1)))
+      (replay-register conn regaddr:pll2-n-calibration-phase-low
+                       lvl2/set-pll2-n-calibration-phase-low
+                       ((list-ref data 2))))))
 
 (define-public (set-pll2-dld-cnt conn value)
-  (let ((data (split-word value 6 8)))
-;; WARNING: pll2-dld-cnt has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:pll2-dld-cnt-high
-                     lvl2/set-pll2-dld-cnt-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:pll2-dld-cnt-low
-                     lvl2/set-pll2-dld-cnt-low
-                     ((list-ref data 1)))))
+  ;; Again, value := 0 is not allowed
+  (with-constraints (value (>= 1) (<= 14))
+    (let ((data (split-word value 6 8)))
+      (replay-register conn regaddr:pll2-dld-cnt-high
+                       lvl2/set-pll2-dld-cnt-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:pll2-dld-cnt-low
+                       lvl2/set-pll2-dld-cnt-low
+                       ((list-ref data 1))))))
 
 (define-public (set-pll1-dld-cnt conn value)
-  (let ((data (split-word value 6 8)))
-;; WARNING: pll1-dld-cnt has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:pll1-dld-cnt-high
-                     lvl2/set-pll1-dld-cnt-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:pll1-dld-cnt-low
-                     lvl2/set-pll1-dld-cnt-low
-                     ((list-ref data 1)))))
+  ;; Again, value := 0 is not allowed
+  (with-constraints (value (>= 1) (<= 14))
+    (let ((data (split-word value 6 8)))
+      (replay-register conn regaddr:pll1-dld-cnt-high
+                       lvl2/set-pll1-dld-cnt-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:pll1-dld-cnt-low
+                       lvl2/set-pll1-dld-cnt-low
+                       ((list-ref data 1))))))
 
+;; TODO: -n-r-divider? seems wrong.
 (define-public (set-pll1-n-r-divider conn value)
-  (let ((data (split-word value 6 8)))
-;; WARNING: pll1-n-r-divider has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:pll1-n-divider-high
-                     lvl2/set-pll1-n-divider-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:pll1-n-divider-low
-                     lvl2/set-pll1-n-divider-low
-                     ((list-ref data 1)))))
+  ;; Again, value := 0 is not allowed
+  (with-constraints (value (>= 1) (<= 14))
+    (let ((data (split-word value 6 8)))
+      (replay-register conn regaddr:pll1-n-divider-high
+                       lvl2/set-pll1-n-divider-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:pll1-n-divider-low
+                       lvl2/set-pll1-n-divider-low
+                       ((list-ref data 1))))))
 
 (define-public (set-clkin2-r-divider conn value)
-  (let ((data (split-word value 6 8)))
-;; WARNING: clkin2-r-divider has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:clkin2-r-divider-high
-                     lvl2/set-clkin2-r-divider-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:clkin2-r-divider-low
-                     lvl2/set-clkin2-r-divider-low
-                     ((list-ref data 1)))))
+  ;; Again, value := 0 is not allowed
+  (with-constraints (value (>= 1) (<= 14))
+    (let ((data (split-word value 6 8)))
+      (replay-register conn regaddr:clkin2-r-divider-high
+                       lvl2/set-clkin2-r-divider-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:clkin2-r-divider-low
+                       lvl2/set-clkin2-r-divider-low
+                       ((list-ref data 1))))))
 
 (define-public (set-clkin1-r-divider conn value)
-  (let ((data (split-word value 6 8)))
-;; WARNING: clkin1-r-divider has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:clkin1-r-divider-high
-                     lvl2/set-clkin1-r-divider-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:clkin1-r-divider-low
-                     lvl2/set-clkin1-r-divider-low
-                     ((list-ref data 1)))))
+  ;; Again, value := 0 is not allowed
+  (with-constraints (value (>= 1) (<= 14))
+    (let ((data (split-word value 6 8)))
+      (replay-register conn regaddr:clkin1-r-divider-high
+                       lvl2/set-clkin1-r-divider-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:clkin1-r-divider-low
+                       lvl2/set-clkin1-r-divider-low
+                       ((list-ref data 1))))))
 
 (define-public (set-clkin0-r-divider conn value)
-  (let ((data (split-word value 6 8)))
-;; WARNING: clkin0-r-divider has no #:split function!
-;;          Inserted generic splitter! Make sure that's OK!
-;; The generic splitter does not do any sanitising on `data'.
-;; Consider using (with-constraints ...)
-    (replay-register conn regaddr:clkin0-r-divider-high
-                     lvl2/set-clkin0-r-divider-high
-                     ((list-ref data 0)))
-    (replay-register conn regaddr:clkin0-r-divider-low
-                     lvl2/set-clkin0-r-divider-low
-                     ((list-ref data 1)))))
+  ;; Again, value := 0 is not allowed
+  (with-constraints (value (>= 1) (<= 14))
+    (let ((data (split-word value 6 8)))
+      (replay-register conn regaddr:clkin0-r-divider-high
+                       lvl2/set-clkin0-r-divider-high
+                       ((list-ref data 0)))
+      (replay-register conn regaddr:clkin0-r-divider-low
+                       lvl2/set-clkin0-r-divider-low
+                       ((list-ref data 1))))))
