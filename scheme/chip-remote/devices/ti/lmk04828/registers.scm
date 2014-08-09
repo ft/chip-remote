@@ -628,7 +628,7 @@
            #:combine combine-id-vendor
            #:finally finally-id-hex)
   (combine (pll1-n-divider-high pll1-n-divider-low)
-           #:into pll1-n-r-divider
+           #:into pll1-n-divider
            #:combine combine-pll1-n-divider
            #:finally finally-divider-integer)
   (combine (pll1-dld-cnt-high pll1-dld-cnt-low)

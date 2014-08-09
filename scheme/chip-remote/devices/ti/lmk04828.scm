@@ -1011,8 +1011,7 @@
                        lvl2/set-pll1-dld-cnt-low
                        ((list-ref data 1))))))
 
-;; TODO: -n-r-divider? seems wrong.
-(define-public (set-pll1-n-r-divider conn value)
+(define-public (set-pll1-n-divider conn value)
   ;; Again, value := 0 is not allowed
   (with-constraints (value (>= 1) (<= 14))
     (let ((data (split-word value 6 8)))
