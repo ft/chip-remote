@@ -67,6 +67,7 @@
             regmap->item
             map-across
 
+            get-width
             sum-of-width))
 
 ;; Functions, that work on register-maps:
