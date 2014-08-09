@@ -39,7 +39,7 @@
                   #:reader (lambda (a) (read-register conn a))
                   #:decoder (lambda (a v) (decode lmk04828-register-map a v))
                   #:interconnections lmk04828-register-interconns
-                  #:filter-predicate #f
+                  #:filter-predicate (lambda (x) (< x #x1000))
                   #:width lmk04828-register-width
                   #:colour? colour?))
 
