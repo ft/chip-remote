@@ -65,7 +65,9 @@
             get-register-entry
             regmap->entry
             regmap->item
-            map-across))
+            map-across
+
+            sum-of-width))
 
 ;; Functions, that work on register-maps:
 
@@ -101,6 +103,15 @@
             (if item (cons (fnc address (cdr item)) acc))))
         '()
         regmap))
+
+;; Higher level utilities
+
+(define (get-width regmap address entry)
+  (cadr (regmap->entry regmap address entry)))
+
+(define (sum-of-width regmap names-and-addresses)
+  (apply + (map (lambda (x) (get-width regmap (cdr x) (car x)))
+                names-and-addresses)))
 
 ;; ‘define-register-map’:
 
