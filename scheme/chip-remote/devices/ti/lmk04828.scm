@@ -20,13 +20,72 @@
             write-register))
 
 (define (setup-connection conn index)
-  (throw 'cr-setup-connection-not-implemented-yet))
+  "Set up a port in the remote controller to work with the LMK04828.
+
+The LMK04828 supports different kinds of SPI interfaces. Namely 3-wire and
+4-wire (actual SPI) variants of the interface.
+
+The three access functions from this module (setup, read and write) implement
+support for 4-wire SPI (CLK, CS, MOSI, MISO).
+
+Frames look like this (24-bits, transmitted MSB-first):
+
+ RW:W1:W0:A12:A11:A10:A9:A8:A7:A6:A5:A4:A3:A2:A1:A0:D7:D6:D5:D4:D3:D2:D1:D0
+
+\"W1:W0\" is called the multibyte-field, that is not further specified, other
+than it shall written as 00.
+
+RW is the command bit, that determines if the transmission is a READ or a
+WRITE operation. The datasheet isn't quite clear about this, but the TI
+forums suggest this:
+
+  RW := 1 => READ
+  RW := 0 => WRITE
+
+Reference: http://e2e.ti.com/support/clocks/f/48/t/284825.aspx
+
+\"A12:...:A0\" is a 13-bit address for the desired registered.
+
+\"D7:...:D0\" is an 8-bit data-word. In case of a WRITE operation, it has to be
+applied on MOSI. With READ operations, it will be made available on MISO.
+
+Data is latched on the rising edge of CLK. Data should be stable when the
+CLK edge arrives (so CLK-PHASE-DELAY should be enabled).
+
+CS polarity is active-low (i.e. it idles HIGH)."
+  (set conn index 'mode 'spi)
+  (set conn index 'frame-length 24)
+  (set conn index 'bit-order 'msb-first)
+  (set conn index 'clk-polarity 'rising-edge)
+  (set conn index 'clk-phase-delay #t)
+  (init conn index))
+
+(define rw-offset 23)
+(define w1-offset 22)
+(define w0-offset 21)
+(define address-width 13)
+(define data-width 8)
+
+(define (make-frame* addr data)
+  ;; The ‘logand’ applications make sure that bits above the address-bits are
+  ;; definitely "0". Therefore there is no need to explicitly clear the W1 and
+  ;; W0 bits.
+  (logior (ash (logand addr (one-bits address-width)) data-width)
+          (logand data (one-bits data-width))))
+
+(define (make-write-frame addr data)
+  (logior (ash 1 rw-offset)
+          (make-frame* addr data)))
+
+(define (make-read-frame addr)
+  (make-frame* addr 0))
 
 (define (read-register conn addr)
-  (throw 'cr-read-register-not-implemented-yet))
+  (logand (one-bits data-width)
+          (transmit conn (make-read-frame addr))))
 
 (define (write-register conn addr value)
-  (throw 'cr-write-register-not-implemented-yet))
+  (transmit conn (make-write-frame addr value)))
 
 (define* (decode-register-value addr value #:key (colour? (to-tty?)))
   (value-decoder lmk04828-register-map lmk04828-register-width addr value colour?))
