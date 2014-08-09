@@ -630,14 +630,8 @@
                        lvl2/set-clkin-sel1-type (value))
   (set-clkin0-out-mux regaddr:clkin0-out-mux
                       lvl2/set-clkin0-out-mux (value))
-  ;; Skipped due to combined entry: set-clkin0-r-divider-high
-  ;; Skipped due to combined entry: set-clkin0-r-divider-low
   (set-clkin1-out-mux regaddr:clkin1-out-mux
                       lvl2/set-clkin1-out-mux (value))
-  ;; Skipped due to combined entry: set-clkin1-r-divider-high
-  ;; Skipped due to combined entry: set-clkin1-r-divider-low
-  ;; Skipped due to combined entry: set-clkin2-r-divider-high
-  ;; Skipped due to combined entry: set-clkin2-r-divider-low
   (set-clkout0-format regaddr:clkout0-format
                       lvl2/set-clkout0-format (value))
   (set-clkout1-format regaddr:clkout1-format
@@ -767,18 +761,8 @@
   (set-fixed-reg:0145 regaddr:fixed-reg:0145
                       lvl2/set-fixed-reg:0145 (value)
                       postproc:x145)
-  ;; Skipped due to combined entry: set-holdover-dld-cnt-high
-  ;; Skipped due to combined entry: set-holdover-dld-cnt-low
-  ;; Register #x3 is readonly, skipping: set-id-device-type
-  ;; Register #x6 is readonly, skipping: set-id-maskrev
-  ;; Register #x4 is readonly, skipping: set-id-product-high
-  ;; Register #x5 is readonly, skipping: set-id-product-low
-  ;; Register #xc is readonly, skipping: set-id-vendor-high
-  ;; Register #xd is readonly, skipping: set-id-vendor-low
   (set-los-timeout regaddr:los-timeout
                    lvl2/set-los-timeout (value))
-  ;; Skipped due to combined entry: set-manual-dac-high
-  ;; Skipped due to combined entry: set-manual-dac-low
   (set-opt-reg-1 regaddr:opt-reg-1
                  lvl2/set-opt-reg-1 (value)
                  postproc:x17c)
@@ -795,16 +779,12 @@
                     lvl2/set-pll1-cp-gain (value))
   (set-pll1-cp-polarity regaddr:pll1-cp-polarity
                         lvl2/set-pll1-cp-polarity (value))
-  ;; Skipped due to combined entry: set-pll1-dld-cnt-high
-  ;; Skipped due to combined entry: set-pll1-dld-cnt-low
   (set-pll1-ld-mux regaddr:pll1-ld-mux
                    lvl2/set-pll1-ld-mux (value))
   (set-pll1-ld-type regaddr:pll1-ld-type
                     lvl2/set-pll1-ld-type (value))
   (set-pll1-n-divider-dly regaddr:pll1-n-divider-dly
                           lvl2/set-pll1-n-divider-dly (value))
-  ;; Skipped due to combined entry: set-pll1-n-divider-high
-  ;; Skipped due to combined entry: set-pll1-n-divider-low
   (set-pll1-nclk-mux regaddr:pll1-nclk-mux
                      lvl2/set-pll1-nclk-mux (value))
   (set-pll1-r-divider-dly regaddr:pll1-r-divider-dly
@@ -817,8 +797,6 @@
   (set-pll2-cp-polarity regaddr:pll2-cp-polarity
                         lvl2/set-pll2-cp-polarity (value)
                         postproc:x169)
-  ;; Skipped due to combined entry: set-pll2-dld-cnt-high
-  ;; Skipped due to combined entry: set-pll2-dld-cnt-low
   (set-pll2-ld-mux regaddr:pll2-ld-mux
                    lvl2/set-pll2-ld-mux (value))
   (set-pll2-ld-type regaddr:pll2-ld-type
@@ -831,18 +809,10 @@
                           lvl2/set-pll2-loopfilter-r3 (value))
   (set-pll2-loopfilter-r4 regaddr:pll2-loopfilter-r4
                           lvl2/set-pll2-loopfilter-r4 (value))
-  ;; Skipped due to combined entry: set-pll2-n-calibration-phase-high
-  ;; Skipped due to combined entry: set-pll2-n-calibration-phase-low
-  ;; Skipped due to combined entry: set-pll2-n-calibration-phase-mid
-  ;; Skipped due to combined entry: set-pll2-n-divider-high
-  ;; Skipped due to combined entry: set-pll2-n-divider-low
-  ;; Skipped due to combined entry: set-pll2-n-divider-mid
   (set-pll2-nclk-mux regaddr:pll2-nclk-mux
                      lvl2/set-pll2-nclk-mux (value))
   (set-pll2-prescaler regaddr:pll2-prescaler
                       lvl2/set-pll2-prescaler (value))
-  ;; Skipped due to combined entry: set-pll2-r-divider-high
-  ;; Skipped due to combined entry: set-pll2-r-divider-low
   (set-pll2-window-size regaddr:pll2-window-size
                         lvl2/set-pll2-window-size (value)
                         postproc:x169)
@@ -938,10 +908,6 @@
                  lvl2/set-sync-mode (value))
   (set-sync-polarity regaddr:sync-polarity
                      lvl2/set-sync-polarity (value))
-  ;; Skipped due to combined entry: set-sysref-ddly-high
-  ;; Skipped due to combined entry: set-sysref-ddly-low
-  ;; Skipped due to combined entry: set-sysref-div-high
-  ;; Skipped due to combined entry: set-sysref-div-low
   (set-sysref-mux regaddr:sysref-mux
                   lvl2/set-sysref-mux (value))
   (set-sysref-pulse-cnt regaddr:sysref-pulse-cnt
