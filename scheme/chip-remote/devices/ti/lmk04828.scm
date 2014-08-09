@@ -43,18 +43,10 @@
                   #:colour? colour?))
 
 ;; Register post-processors:
-
-(define (postproc:x145 value)
-  #b1111111)
-
-(define (postproc:x169 value)
-  (logior value #b1))
-
-(define (postproc:x17c value)
-  #b10101)
-
-(define (postproc:x17d value)
-  #b110011)
+(define (postproc:x145 value) #b1111111)
+(define (postproc:x169 value) (logior value #b1))
+(define (postproc:x17c value) #b10101)
+(define (postproc:x17d value) #b110011)
 
 (define-bit-field-frontends
   (disable-clear-pll1-ld-lost regaddr:clear-pll1-ld-lost
