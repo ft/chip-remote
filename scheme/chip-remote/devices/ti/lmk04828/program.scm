@@ -72,44 +72,44 @@
             disable-dclkout8-ddly-powerdown
             disable-dclkout8-hs
             disable-dclkout8-hsg-powerdown
-            disable-disable-sync-0
-            disable-disable-sync-10
-            disable-disable-sync-12
-            disable-disable-sync-2
-            disable-disable-sync-4
-            disable-disable-sync-6
-            disable-disable-sync-8
-            disable-disable-sync-sysref
+            enable-sync-0
+            enable-sync-10
+            enable-sync-12
+            enable-sync-2
+            enable-sync-4
+            enable-sync-6
+            enable-sync-8
+            enable-sync-sysref
             disable-dlclkout10-adlyg-powerdown
-            disable-enable-clkin-0-auto-mode
-            disable-enable-clkin-1-auto-mode
-            disable-enable-clkin-2-auto-mode
-            disable-enable-ddlyd-sysref
-            disable-enable-ddlyd0
-            disable-enable-ddlyd10
-            disable-enable-ddlyd12
-            disable-enable-ddlyd2
-            disable-enable-ddlyd4
-            disable-enable-ddlyd6
-            disable-enable-ddlyd7
-            disable-enable-fb-mux
-            disable-enable-holdover
-            disable-enable-los
-            disable-enable-manual-dac
-            disable-enable-pll2-freq-calibration
-            disable-enable-pll2-ref-2x
-            disable-enable-pll2-xtal
-            disable-enable-sdcklout11-adly
-            disable-enable-sdclkout1-adly
-            disable-enable-sdclkout13-adly
-            disable-enable-sdclkout3-adly
-            disable-enable-sdclkout5-adly
-            disable-enable-sdclkout7-adly
-            disable-enable-sdclkout9-adly
-            disable-enable-spi-three-wire
-            disable-enable-sync
-            disable-enable-sync-1shot
-            disable-enable-track
+            disable-clkin-0-auto-mode
+            disable-clkin-1-auto-mode
+            disable-clkin-2-auto-mode
+            disable-ddlyd-sysref
+            disable-ddlyd0
+            disable-ddlyd10
+            disable-ddlyd12
+            disable-ddlyd2
+            disable-ddlyd4
+            disable-ddlyd6
+            disable-ddlyd7
+            disable-fb-mux
+            disable-holdover
+            disable-los
+            disable-manual-dac
+            disable-pll2-freq-calibration
+            disable-pll2-ref-2x
+            disable-pll2-xtal
+            disable-sdcklout11-adly
+            disable-sdclkout1-adly
+            disable-sdclkout13-adly
+            disable-sdclkout3-adly
+            disable-sdclkout5-adly
+            disable-sdclkout7-adly
+            disable-sdclkout9-adly
+            disable-spi-three-wire
+            disable-sync
+            disable-sync-1shot
+            disable-track
             disable-holdover-force
             disable-holdover-hitless-switch
             disable-holdover-los-detect
@@ -210,44 +210,44 @@
             enable-dclkout8-ddly-powerdown
             enable-dclkout8-hs
             enable-dclkout8-hsg-powerdown
-            enable-disable-sync-0
-            enable-disable-sync-10
-            enable-disable-sync-12
-            enable-disable-sync-2
-            enable-disable-sync-4
-            enable-disable-sync-6
-            enable-disable-sync-8
-            enable-disable-sync-sysref
+            disable-sync-0
+            disable-sync-10
+            disable-sync-12
+            disable-sync-2
+            disable-sync-4
+            disable-sync-6
+            disable-sync-8
+            disable-sync-sysref
             enable-dlclkout10-adlyg-powerdown
-            enable-enable-clkin-0-auto-mode
-            enable-enable-clkin-1-auto-mode
-            enable-enable-clkin-2-auto-mode
-            enable-enable-ddlyd-sysref
-            enable-enable-ddlyd0
-            enable-enable-ddlyd10
-            enable-enable-ddlyd12
-            enable-enable-ddlyd2
-            enable-enable-ddlyd4
-            enable-enable-ddlyd6
-            enable-enable-ddlyd7
-            enable-enable-fb-mux
-            enable-enable-holdover
-            enable-enable-los
-            enable-enable-manual-dac
-            enable-enable-pll2-freq-calibration
-            enable-enable-pll2-ref-2x
-            enable-enable-pll2-xtal
-            enable-enable-sdcklout11-adly
-            enable-enable-sdclkout1-adly
-            enable-enable-sdclkout13-adly
-            enable-enable-sdclkout3-adly
-            enable-enable-sdclkout5-adly
-            enable-enable-sdclkout7-adly
-            enable-enable-sdclkout9-adly
-            enable-enable-spi-three-wire
-            enable-enable-sync
-            enable-enable-sync-1shot
-            enable-enable-track
+            enable-clkin-0-auto-mode
+            enable-clkin-1-auto-mode
+            enable-clkin-2-auto-mode
+            enable-ddlyd-sysref
+            enable-ddlyd0
+            enable-ddlyd10
+            enable-ddlyd12
+            enable-ddlyd2
+            enable-ddlyd4
+            enable-ddlyd6
+            enable-ddlyd7
+            enable-fb-mux
+            enable-holdover
+            enable-los
+            enable-manual-dac
+            enable-pll2-freq-calibration
+            enable-pll2-ref-2x
+            enable-pll2-xtal
+            enable-sdcklout11-adly
+            enable-sdclkout1-adly
+            enable-sdclkout13-adly
+            enable-sdclkout3-adly
+            enable-sdclkout5-adly
+            enable-sdclkout7-adly
+            enable-sdclkout9-adly
+            enable-spi-three-wire
+            enable-sync
+            enable-sync-1shot
+            enable-track
             enable-holdover-force
             enable-holdover-hitless-switch
             enable-holdover-los-detect
@@ -657,118 +657,118 @@
 (define (disable-dclkout8-hsg-powerdown regval)
   (unset-logic-active-high set-dclkout8-hsg-powerdown-bits regval))
 
-(define (disable-disable-sync-0 regval)
+(define (enable-sync-0 regval)
   (unset-logic-active-high set-disable-sync-0-bits regval))
 
-(define (disable-disable-sync-10 regval)
+(define (enable-sync-10 regval)
   (unset-logic-active-high set-disable-sync-10-bits regval))
 
-(define (disable-disable-sync-12 regval)
+(define (enable-sync-12 regval)
   (unset-logic-active-high set-disable-sync-12-bits regval))
 
-(define (disable-disable-sync-2 regval)
+(define (enable-sync-2 regval)
   (unset-logic-active-high set-disable-sync-2-bits regval))
 
-(define (disable-disable-sync-4 regval)
+(define (enable-sync-4 regval)
   (unset-logic-active-high set-disable-sync-4-bits regval))
 
-(define (disable-disable-sync-6 regval)
+(define (enable-sync-6 regval)
   (unset-logic-active-high set-disable-sync-6-bits regval))
 
-(define (disable-disable-sync-8 regval)
+(define (enable-sync-8 regval)
   (unset-logic-active-high set-disable-sync-8-bits regval))
 
-(define (disable-disable-sync-sysref regval)
+(define (enable-sync-sysref regval)
   (unset-logic-active-high set-disable-sync-sysref-bits regval))
 
 (define (disable-dlclkout10-adlyg-powerdown regval)
   (unset-logic-active-high set-dlclkout10-adlyg-powerdown-bits regval))
 
-(define (disable-enable-clkin-0-auto-mode regval)
+(define (disable-clkin-0-auto-mode regval)
   (unset-logic-active-high set-enable-clkin-0-auto-mode-bits regval))
 
-(define (disable-enable-clkin-1-auto-mode regval)
+(define (disable-clkin-1-auto-mode regval)
   (unset-logic-active-high set-enable-clkin-1-auto-mode-bits regval))
 
-(define (disable-enable-clkin-2-auto-mode regval)
+(define (disable-clkin-2-auto-mode regval)
   (unset-logic-active-high set-enable-clkin-2-auto-mode-bits regval))
 
-(define (disable-enable-ddlyd-sysref regval)
+(define (disable-ddlyd-sysref regval)
   (unset-logic-active-high set-enable-ddlyd-sysref-bits regval))
 
-(define (disable-enable-ddlyd0 regval)
+(define (disable-ddlyd0 regval)
   (unset-logic-active-high set-enable-ddlyd0-bits regval))
 
-(define (disable-enable-ddlyd10 regval)
+(define (disable-ddlyd10 regval)
   (unset-logic-active-high set-enable-ddlyd10-bits regval))
 
-(define (disable-enable-ddlyd12 regval)
+(define (disable-ddlyd12 regval)
   (unset-logic-active-high set-enable-ddlyd12-bits regval))
 
-(define (disable-enable-ddlyd2 regval)
+(define (disable-ddlyd2 regval)
   (unset-logic-active-high set-enable-ddlyd2-bits regval))
 
-(define (disable-enable-ddlyd4 regval)
+(define (disable-ddlyd4 regval)
   (unset-logic-active-high set-enable-ddlyd4-bits regval))
 
-(define (disable-enable-ddlyd6 regval)
+(define (disable-ddlyd6 regval)
   (unset-logic-active-high set-enable-ddlyd6-bits regval))
 
-(define (disable-enable-ddlyd7 regval)
+(define (disable-ddlyd7 regval)
   (unset-logic-active-high set-enable-ddlyd7-bits regval))
 
-(define (disable-enable-fb-mux regval)
+(define (disable-fb-mux regval)
   (unset-logic-active-high set-enable-fb-mux-bits regval))
 
-(define (disable-enable-holdover regval)
+(define (disable-holdover regval)
   (unset-logic-active-high set-enable-holdover-bits regval))
 
-(define (disable-enable-los regval)
+(define (disable-los regval)
   (unset-logic-active-high set-enable-los-bits regval))
 
-(define (disable-enable-manual-dac regval)
+(define (disable-manual-dac regval)
   (unset-logic-active-high set-enable-manual-dac-bits regval))
 
-(define (disable-enable-pll2-freq-calibration regval)
+(define (disable-pll2-freq-calibration regval)
   (unset-logic-active-low set-enable-pll2-freq-calibration-bits regval))
 
-(define (disable-enable-pll2-ref-2x regval)
+(define (disable-pll2-ref-2x regval)
   (unset-logic-active-high set-enable-pll2-ref-2x-bits regval))
 
-(define (disable-enable-pll2-xtal regval)
+(define (disable-pll2-xtal regval)
   (unset-logic-active-high set-enable-pll2-xtal-bits regval))
 
-(define (disable-enable-sdcklout11-adly regval)
+(define (disable-sdcklout11-adly regval)
   (unset-logic-active-high set-enable-sdcklout11-adly-bits regval))
 
-(define (disable-enable-sdclkout1-adly regval)
+(define (disable-sdclkout1-adly regval)
   (unset-logic-active-high set-enable-sdclkout1-adly-bits regval))
 
-(define (disable-enable-sdclkout13-adly regval)
+(define (disable-sdclkout13-adly regval)
   (unset-logic-active-high set-enable-sdclkout13-adly-bits regval))
 
-(define (disable-enable-sdclkout3-adly regval)
+(define (disable-sdclkout3-adly regval)
   (unset-logic-active-high set-enable-sdclkout3-adly-bits regval))
 
-(define (disable-enable-sdclkout5-adly regval)
+(define (disable-sdclkout5-adly regval)
   (unset-logic-active-high set-enable-sdclkout5-adly-bits regval))
 
-(define (disable-enable-sdclkout7-adly regval)
+(define (disable-sdclkout7-adly regval)
   (unset-logic-active-high set-enable-sdclkout7-adly-bits regval))
 
-(define (disable-enable-sdclkout9-adly regval)
+(define (disable-sdclkout9-adly regval)
   (unset-logic-active-high set-enable-sdclkout9-adly-bits regval))
 
-(define (disable-enable-spi-three-wire regval)
+(define (disable-spi-three-wire regval)
   (unset-logic-active-low set-enable-spi-three-wire-bits regval))
 
-(define (disable-enable-sync regval)
+(define (disable-sync regval)
   (unset-logic-active-high set-enable-sync-bits regval))
 
-(define (disable-enable-sync-1shot regval)
+(define (disable-sync-1shot regval)
   (unset-logic-active-high set-enable-sync-1shot-bits regval))
 
-(define (disable-enable-track regval)
+(define (disable-track regval)
   (unset-logic-active-high set-enable-track-bits regval))
 
 (define (disable-holdover-force regval)
@@ -1071,118 +1071,118 @@
 (define (enable-dclkout8-hsg-powerdown regval)
   (set-logic-active-high set-dclkout8-hsg-powerdown-bits regval))
 
-(define (enable-disable-sync-0 regval)
+(define (disable-sync-0 regval)
   (set-logic-active-high set-disable-sync-0-bits regval))
 
-(define (enable-disable-sync-10 regval)
+(define (disable-sync-10 regval)
   (set-logic-active-high set-disable-sync-10-bits regval))
 
-(define (enable-disable-sync-12 regval)
+(define (disable-sync-12 regval)
   (set-logic-active-high set-disable-sync-12-bits regval))
 
-(define (enable-disable-sync-2 regval)
+(define (disable-sync-2 regval)
   (set-logic-active-high set-disable-sync-2-bits regval))
 
-(define (enable-disable-sync-4 regval)
+(define (disable-sync-4 regval)
   (set-logic-active-high set-disable-sync-4-bits regval))
 
-(define (enable-disable-sync-6 regval)
+(define (disable-sync-6 regval)
   (set-logic-active-high set-disable-sync-6-bits regval))
 
-(define (enable-disable-sync-8 regval)
+(define (disable-sync-8 regval)
   (set-logic-active-high set-disable-sync-8-bits regval))
 
-(define (enable-disable-sync-sysref regval)
+(define (disable-sync-sysref regval)
   (set-logic-active-high set-disable-sync-sysref-bits regval))
 
 (define (enable-dlclkout10-adlyg-powerdown regval)
   (set-logic-active-high set-dlclkout10-adlyg-powerdown-bits regval))
 
-(define (enable-enable-clkin-0-auto-mode regval)
+(define (enable-clkin-0-auto-mode regval)
   (set-logic-active-high set-enable-clkin-0-auto-mode-bits regval))
 
-(define (enable-enable-clkin-1-auto-mode regval)
+(define (enable-clkin-1-auto-mode regval)
   (set-logic-active-high set-enable-clkin-1-auto-mode-bits regval))
 
-(define (enable-enable-clkin-2-auto-mode regval)
+(define (enable-clkin-2-auto-mode regval)
   (set-logic-active-high set-enable-clkin-2-auto-mode-bits regval))
 
-(define (enable-enable-ddlyd-sysref regval)
+(define (enable-ddlyd-sysref regval)
   (set-logic-active-high set-enable-ddlyd-sysref-bits regval))
 
-(define (enable-enable-ddlyd0 regval)
+(define (enable-ddlyd0 regval)
   (set-logic-active-high set-enable-ddlyd0-bits regval))
 
-(define (enable-enable-ddlyd10 regval)
+(define (enable-ddlyd10 regval)
   (set-logic-active-high set-enable-ddlyd10-bits regval))
 
-(define (enable-enable-ddlyd12 regval)
+(define (enable-ddlyd12 regval)
   (set-logic-active-high set-enable-ddlyd12-bits regval))
 
-(define (enable-enable-ddlyd2 regval)
+(define (enable-ddlyd2 regval)
   (set-logic-active-high set-enable-ddlyd2-bits regval))
 
-(define (enable-enable-ddlyd4 regval)
+(define (enable-ddlyd4 regval)
   (set-logic-active-high set-enable-ddlyd4-bits regval))
 
-(define (enable-enable-ddlyd6 regval)
+(define (enable-ddlyd6 regval)
   (set-logic-active-high set-enable-ddlyd6-bits regval))
 
-(define (enable-enable-ddlyd7 regval)
+(define (enable-ddlyd7 regval)
   (set-logic-active-high set-enable-ddlyd7-bits regval))
 
-(define (enable-enable-fb-mux regval)
+(define (enable-fb-mux regval)
   (set-logic-active-high set-enable-fb-mux-bits regval))
 
-(define (enable-enable-holdover regval)
+(define (enable-holdover regval)
   (set-logic-active-high set-enable-holdover-bits regval))
 
-(define (enable-enable-los regval)
+(define (enable-los regval)
   (set-logic-active-high set-enable-los-bits regval))
 
-(define (enable-enable-manual-dac regval)
+(define (enable-manual-dac regval)
   (set-logic-active-high set-enable-manual-dac-bits regval))
 
-(define (enable-enable-pll2-freq-calibration regval)
+(define (enable-pll2-freq-calibration regval)
   (set-logic-active-low set-enable-pll2-freq-calibration-bits regval))
 
-(define (enable-enable-pll2-ref-2x regval)
+(define (enable-pll2-ref-2x regval)
   (set-logic-active-high set-enable-pll2-ref-2x-bits regval))
 
-(define (enable-enable-pll2-xtal regval)
+(define (enable-pll2-xtal regval)
   (set-logic-active-high set-enable-pll2-xtal-bits regval))
 
-(define (enable-enable-sdcklout11-adly regval)
+(define (enable-sdcklout11-adly regval)
   (set-logic-active-high set-enable-sdcklout11-adly-bits regval))
 
-(define (enable-enable-sdclkout1-adly regval)
+(define (enable-sdclkout1-adly regval)
   (set-logic-active-high set-enable-sdclkout1-adly-bits regval))
 
-(define (enable-enable-sdclkout13-adly regval)
+(define (enable-sdclkout13-adly regval)
   (set-logic-active-high set-enable-sdclkout13-adly-bits regval))
 
-(define (enable-enable-sdclkout3-adly regval)
+(define (enable-sdclkout3-adly regval)
   (set-logic-active-high set-enable-sdclkout3-adly-bits regval))
 
-(define (enable-enable-sdclkout5-adly regval)
+(define (enable-sdclkout5-adly regval)
   (set-logic-active-high set-enable-sdclkout5-adly-bits regval))
 
-(define (enable-enable-sdclkout7-adly regval)
+(define (enable-sdclkout7-adly regval)
   (set-logic-active-high set-enable-sdclkout7-adly-bits regval))
 
-(define (enable-enable-sdclkout9-adly regval)
+(define (enable-sdclkout9-adly regval)
   (set-logic-active-high set-enable-sdclkout9-adly-bits regval))
 
-(define (enable-enable-spi-three-wire regval)
+(define (enable-spi-three-wire regval)
   (set-logic-active-low set-enable-spi-three-wire-bits regval))
 
-(define (enable-enable-sync regval)
+(define (enable-sync regval)
   (set-logic-active-high set-enable-sync-bits regval))
 
-(define (enable-enable-sync-1shot regval)
+(define (enable-sync-1shot regval)
   (set-logic-active-high set-enable-sync-1shot-bits regval))
 
-(define (enable-enable-track regval)
+(define (enable-track regval)
   (set-logic-active-high set-enable-track-bits regval))
 
 (define (enable-holdover-force regval)
