@@ -330,10 +330,11 @@
             (let* ((name (car a))
                    (data (assq name combined-srcs-w/lvl2)))
               (if (not data)
-                  (begin (format #t ";; No data for ~a...~%" name)
+                  (begin (format #t "~%    'no-data")
+                         (format #t "~%;; WARNING: No data for ~a...~%" name)
                          (format #t ";; Entry:~%")
                          (pretty-print x #:per-line-prefix ";; ")
-                         (format #t ";; combined-data:")
+                         (format #t ";; combined-data:~%")
                          (pretty-print combined-srcs-w/lvl2
                                        #:per-line-prefix ";; "))
                   (let ((lvl2 (list-ref data 2))
