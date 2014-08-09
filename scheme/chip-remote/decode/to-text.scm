@@ -10,6 +10,7 @@
   #:use-module (srfi srfi-11)
   #:use-module (ice-9 format)
   #:use-module (ice-9 optargs)
+  #:use-module (chip-remote bit-decoders)
   #:use-module (chip-remote decode)
   #:export (decode->text
             display-list
@@ -62,10 +63,6 @@
                  (display x)
                  (newline))
                lst)))
-
-(define (binwidth->hexwidth n)
-  (let ((mod (modulo n 4)))
-    (+ (floor (/ n 4)) (if (> mod 0) 1 0))))
 
 (define* (text-decode-header address value width
                              #:key
