@@ -885,18 +885,6 @@
                           lvl2/set-sdclkout9-polarity (value))
   (set-sdio-readback-type regaddr:sdio-readback-type
                           lvl2/set-sdio-readback-type (value))
-  (enable-spi-lock-high WARNING-no-such-address
-                        lvl2/enable-spi-lock-high)
-  (disable-spi-lock-high WARNING-no-such-address
-                         lvl2/disable-spi-lock-high)
-  (enable-spi-lock-mid WARNING-no-such-address
-                       lvl2/enable-spi-lock-mid)
-  (disable-spi-lock-mid WARNING-no-such-address
-                        lvl2/disable-spi-lock-mid)
-  (enable-spi-lock-low WARNING-no-such-address
-                       lvl2/enable-spi-lock-low)
-  (disable-spi-lock-low WARNING-no-such-address
-                        lvl2/disable-spi-lock-low)
   (set-sync-mode regaddr:sync-mode
                  lvl2/set-sync-mode (value))
   (set-sync-polarity regaddr:sync-polarity
@@ -907,6 +895,16 @@
                         lvl2/set-sysref-pulse-cnt (value))
   (set-vco-mux regaddr:vco-mux
                lvl2/set-vco-mux (value)))
+
+(define-public (enable-spi-lock conn)
+  (write-register conn regaddr:spi-lock-high (lvl2/enable-spi-lock-high 0))
+  (write-register conn regaddr:spi-lock-mid (lvl2/enable-spi-lock-mid 0))
+  (write-register conn regaddr:spi-lock-low (lvl2/enable-spi-lock-low 0)))
+
+(define-public (disable-spi-lock conn)
+  (write-register conn regaddr:spi-lock-high (lvl2/disable-spi-lock-high 0))
+  (write-register conn regaddr:spi-lock-mid (lvl2/disable-spi-lock-mid 0))
+  (write-register conn regaddr:spi-lock-low (lvl2/disable-spi-lock-low 0)))
 
 (define-public (set-sysref-divider conn value)
   ;; 0..7 are not allowed.
