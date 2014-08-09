@@ -338,8 +338,6 @@ CS polarity is active-low (i.e. it idles HIGH)."
                                     lvl2/disable-pll2-prescaler-powerdown)
   (disable-powerdown regaddr:powerdown
                      lvl2/disable-powerdown)
-  (disable-reset regaddr:reset
-                 lvl2/disable-reset)
   (disable-sdclkout1-hs regaddr:sdclkout1-hs
                         lvl2/disable-sdclkout1-hs)
   (disable-sdclkout1-powerdown regaddr:sdclkout1-powerdown
@@ -615,8 +613,6 @@ CS polarity is active-low (i.e. it idles HIGH)."
                                    lvl2/enable-pll2-prescaler-powerdown)
   (enable-powerdown regaddr:powerdown
                     lvl2/enable-powerdown)
-  (enable-reset regaddr:reset
-                lvl2/enable-reset)
   (enable-sdclkout1-hs regaddr:sdclkout1-hs
                        lvl2/enable-sdclkout1-hs)
   (enable-sdclkout1-powerdown regaddr:sdclkout1-powerdown
@@ -955,6 +951,9 @@ CS polarity is active-low (i.e. it idles HIGH)."
                         lvl2/set-sysref-pulse-cnt (value))
   (set-vco-mux regaddr:vco-mux
                lvl2/set-vco-mux (value)))
+
+(define-public (reset-device conn)
+  (write-register conn regaddr:reset (set-reset-bits 0 1)))
 
 (define-public (enable-spi-lock conn)
   (write-register conn regaddr:spi-lock-high (lvl2/enable-spi-lock-high 0))
