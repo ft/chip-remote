@@ -3,8 +3,12 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote assemble)
+  #:use-module (srfi srfi-1)
+  #:use-module (ice-9 optargs)
   #:export (with-constraints
 
+            combine-words
+            combine-value-width-pairs
             value->bits
             value->twos-complement
             set-logic-active-high
@@ -48,3 +52,22 @@
       (if (< value 0)
           (logior base (logxor (- base 1) (- (* -1 value) 1)))
           value))))
+
+(define* (combine-words alist #:key (transform-list reverse))
+  (car (fold (lambda (x acc)
+               (let ((word (car x))
+                     (width (cdr x))
+                     (old (car acc))
+                     (shift (cdr acc)))
+                 (cons (logior (ash word shift) old)
+                       (+ shift width))))
+             (cons 0 0)
+             (transform-list alist))))
+
+(define (combine-value-width-pairs data names)
+  (combine-words (map (lambda (name)
+                         (let* ((entry (assq-ref data name))
+                                (data (car entry))
+                                (width (cadr entry)))
+                           (cons data width)))
+                       names)))
