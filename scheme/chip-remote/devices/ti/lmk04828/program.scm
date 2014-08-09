@@ -452,9 +452,12 @@
             set-sdclkout9-mux
             set-sdclkout9-polarity
             set-sdio-readback-type
-            set-spi-lock-high
-            set-spi-lock-low
-            set-spi-lock-mid
+            enable-spi-lock-high
+            disable-spi-lock-high
+            enable-spi-lock-mid
+            disable-spi-lock-mid
+            enable-spi-lock-low
+            disable-spi-lock-low
             set-sync-mode
             set-sync-polarity
             set-sysref-ddly-high
@@ -1845,32 +1848,12 @@
 (define (set-sdio-readback-type regval value)
   (set-sdio-readback-type-bits regval (value->bits sdio-readback-type-map value)))
 
-(define (set-spi-lock-high regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-spi-lock-high' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  decode-lock-word-high-mid~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-spi-lock-high-bits regval value))
-
-(define (set-spi-lock-low regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-spi-lock-low' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  decode-lock-word-low~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-spi-lock-low-bits regval value))
-
-(define (set-spi-lock-mid regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-spi-lock-mid' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  decode-lock-word-high-mid~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-spi-lock-mid-bits regval value))
+(define (enable-spi-lock-high regval) 255)
+(define (disable-spi-lock-high regval) 0)
+(define (enable-spi-lock-mid regval) 255)
+(define (disable-spi-lock-mid regval) 0)
+(define (enable-spi-lock-low regval) 255)
+(define (disable-spi-lock-low regval) 83)
 
 (define (set-sync-mode regval value)
   (set-sync-mode-bits regval (value->bits sync-mode-map value)))
