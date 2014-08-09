@@ -31,9 +31,14 @@
 (define-syntax define-bit-field-frontend
   (lambda (x)
     (syntax-case x ()
+      ((_ name addr lvl2 (args ...) pp)
+       #'(define-public (name conn args ...)
+           (replay-register conn addr lvl2 (args ...) pp)))
       ((_ name addr lvl2 (args ...))
        #'(define-public (name conn args ...)
            (replay-register conn addr lvl2 (args ...))))
+      ((_ name addr lvl2 pp)
+       #'(define-bit-field-frontend name addr lvl2 () pp))
       ((_ name addr lvl2)
        #'(define-bit-field-frontend name addr lvl2 ())))))
 
