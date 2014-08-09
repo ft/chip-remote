@@ -414,18 +414,6 @@
             set-pll2-r-divider-high
             set-pll2-r-divider-low
             set-pll2-window-size
-            set-rb-clkin0-los
-            set-rb-clkin0-sel
-            set-rb-clkin1-los
-            set-rb-clkin1-sel
-            set-rb-clkin2-sel
-            set-rb-dac-value-high
-            set-rb-dac-value-low
-            set-rb-holdover-active
-            set-rb-pll1-ld
-            set-rb-pll1-ld-lost
-            set-rb-pll2-ld
-            set-rb-pll2-ld-lost
             set-reset-mux
             set-reset-type
             set-sdclkout1-adly
@@ -1762,104 +1750,6 @@
 
 (define (set-pll2-window-size regval value)
   (set-pll2-window-size-bits regval (value->bits pll2-window-size-map value)))
-
-(define (set-rb-clkin0-los regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-rb-clkin0-los' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  boolean-status~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-rb-clkin0-los-bits regval value))
-
-(define (set-rb-clkin0-sel regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-rb-clkin0-sel' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  boolean-status~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-rb-clkin0-sel-bits regval value))
-
-(define (set-rb-clkin1-los regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-rb-clkin1-los' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  boolean-status~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-rb-clkin1-los-bits regval value))
-
-(define (set-rb-clkin1-sel regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-rb-clkin1-sel' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  boolean-status~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-rb-clkin1-sel-bits regval value))
-
-(define (set-rb-clkin2-sel regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-rb-clkin2-sel' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  boolean-status~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-rb-clkin2-sel-bits regval value))
-
-(define (set-rb-dac-value-high regval value)
-  (with-constraints (value (>= 0) (<= #b11))
-    (set-rb-dac-value-high-bits regval value)))
-
-(define (set-rb-dac-value-low regval value)
-  (with-constraints (value (>= 0) (<= #b11111111))
-    (set-rb-dac-value-low-bits regval value)))
-
-(define (set-rb-holdover-active regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-rb-holdover-active' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  boolean-status~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-rb-holdover-active-bits regval value))
-
-(define (set-rb-pll1-ld regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-rb-pll1-ld' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  boolean-status-inverted~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-rb-pll1-ld-bits regval value))
-
-(define (set-rb-pll1-ld-lost regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-rb-pll1-ld-lost' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  boolean-status~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-rb-pll1-ld-lost-bits regval value))
-
-(define (set-rb-pll2-ld regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-rb-pll2-ld' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  boolean-status-inverted~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-rb-pll2-ld-bits regval value))
-
-(define (set-rb-pll2-ld-lost regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-rb-pll2-ld-lost' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  boolean-status~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-rb-pll2-ld-lost-bits regval value))
 
 (define (set-reset-mux regval value)
   (set-reset-mux-bits regval (value->bits reset-mux-map value)))
