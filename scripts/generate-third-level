@@ -41,6 +41,7 @@
   (quit 1))
 
 (use-modules (chip-remote keyword-assoc)
+             (chip-remote register-map)
              (ice-9 control)
              (ice-9 format)
              (ice-9 pretty-print)
@@ -319,13 +320,29 @@
         (format #t ")"))))
 
 (define (lvl3/generate-word-combined x)
+  (define (widths->string lst)
+    (string-join (map number->string lst) " "))
   (let* ((name (car x))
          (data (cdr x))
          (srcs (assq-ref data 'sources))
          (split (cadr (assq-ref data 'split))))
     (newline)
     (format #t "(define-public (set-~a conn value)~%" name)
-    (format #t "  (let ((data (~a value)))" split)
+    (format #t "  (let ((data ~a))"
+            (if split
+                (format #f "(~a value)" split)
+                (format #f "(split-word value ~a)"
+                        (widths->string (map (lambda (x)
+                                               (get-width regmap
+                                                          (cdr x)
+                                                          (car x)))
+                                             srcs)))))
+    (unless split
+      (format #t "~%;; WARNING: ~a has no #:split function!" name)
+      (format #t "~%;;          Inserted generic splitter!")
+      (format #t " Make sure that's OK!")
+      (format #t "~%;; The generic splitter does not do any sanitising on `data'.")
+      (format #t "~%;; Consider using (with-constraints ...)"))
     (fold (lambda (a acc)
             (let* ((name (car a))
                    (data (assq name combined-srcs-w/lvl2)))
