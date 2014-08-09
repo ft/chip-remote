@@ -1309,7 +1309,8 @@
   (set-clkin-sel-mode-bits regval (value->bits clkin-sel-mode-map value)))
 
 (define (set-clkin-sel-polarity regval value)
-  (set-clkin-sel-polarity-bits regval (value->bits clkin-sel-polarity-map value)))
+  (set-clkin-sel-polarity-bits regval (value->bits clkin-sel-polarity-map
+                                                   value)))
 
 (define (set-clkin-sel0-mux regval value)
   (set-clkin-sel0-mux-bits regval (value->bits clkin-sel0-mux-map value)))
@@ -1417,7 +1418,8 @@
   (set-dclkout0-adly-bits regval (conv:analog-delay->bits value)))
 
 (define (set-dclkout0-ddly-cnt-high regval value)
-  (set-dclkout0-ddly-cnt-high-bits regval (conv:digital-delay-cnt->bits value)))
+  (set-dclkout0-ddly-cnt-high-bits regval (conv:digital-delay-cnt->bits
+                                           value)))
 
 (define (set-dclkout0-ddly-cnt-low regval value)
   (set-dclkout0-ddly-cnt-low-bits regval (conv:digital-delay-cnt->bits value)))
@@ -1435,10 +1437,12 @@
   (set-dclkout10-adly-bits regval (conv:analog-delay->bits value)))
 
 (define (set-dclkout10-ddly-cnt-high regval value)
-  (set-dclkout10-ddly-cnt-high-bits regval (conv:digital-delay-cnt->bits value)))
+  (set-dclkout10-ddly-cnt-high-bits regval
+                                    (conv:digital-delay-cnt->bits value)))
 
 (define (set-dclkout10-ddly-cnt-low regval value)
-  (set-dclkout10-ddly-cnt-low-bits regval (conv:digital-delay-cnt->bits value)))
+  (set-dclkout10-ddly-cnt-low-bits regval
+                                   (conv:digital-delay-cnt->bits value)))
 
 (define (set-dclkout10-div regval value)
   (set-dclkout10-div-bits regval (conv:clkout-divider->bits value)))
@@ -1453,10 +1457,12 @@
   (set-dclkout12-adly-bits regval (conv:analog-delay->bits value)))
 
 (define (set-dclkout12-ddly-cnt-high regval value)
-  (set-dclkout12-ddly-cnt-high-bits regval (conv:digital-delay-cnt->bits value)))
+  (set-dclkout12-ddly-cnt-high-bits regval
+                                    (conv:digital-delay-cnt->bits value)))
 
 (define (set-dclkout12-ddly-cnt-low regval value)
-  (set-dclkout12-ddly-cnt-low-bits regval (conv:digital-delay-cnt->bits value)))
+  (set-dclkout12-ddly-cnt-low-bits regval
+                                   (conv:digital-delay-cnt->bits value)))
 
 (define (set-dclkout12-div regval value)
   (set-dclkout12-div-bits regval (conv:clkout-divider->bits value)))
@@ -1471,7 +1477,8 @@
   (set-dclkout2-adly-bits regval (conv:analog-delay->bits value)))
 
 (define (set-dclkout2-ddly-cnt-high regval value)
-  (set-dclkout2-ddly-cnt-high-bits regval (conv:digital-delay-cnt->bits value)))
+  (set-dclkout2-ddly-cnt-high-bits regval
+                                   (conv:digital-delay-cnt->bits value)))
 
 (define (set-dclkout2-ddly-cnt-low regval value)
   (set-dclkout2-ddly-cnt-low-bits regval (conv:digital-delay-cnt->bits value)))
@@ -1489,7 +1496,8 @@
   (set-dclkout4-adly-bits regval (conv:analog-delay->bits value)))
 
 (define (set-dclkout4-ddly-cnt-high regval value)
-  (set-dclkout4-ddly-cnt-high-bits regval (conv:digital-delay-cnt->bits value)))
+  (set-dclkout4-ddly-cnt-high-bits regval
+                                   (conv:digital-delay-cnt->bits value)))
 
 (define (set-dclkout4-ddly-cnt-low regval value)
   (set-dclkout4-ddly-cnt-low-bits regval (conv:digital-delay-cnt->bits value)))
@@ -1507,7 +1515,8 @@
   (set-dclkout6-adly-bits regval (conv:analog-delay->bits value)))
 
 (define (set-dclkout6-ddly-cnt-high regval value)
-  (set-dclkout6-ddly-cnt-high-bits regval (conv:digital-delay-cnt->bits value)))
+  (set-dclkout6-ddly-cnt-high-bits regval
+                                   (conv:digital-delay-cnt->bits value)))
 
 (define (set-dclkout6-ddly-cnt-low regval value)
   (set-dclkout6-ddly-cnt-low-bits regval (conv:digital-delay-cnt->bits value)))
@@ -1525,7 +1534,8 @@
   (set-dclkout8-adly-bits regval (conv:analog-delay->bits value)))
 
 (define (set-dclkout8-ddly-cnt-high regval value)
-  (set-dclkout8-ddly-cnt-high-bits regval (conv:digital-delay-cnt->bits value)))
+  (set-dclkout8-ddly-cnt-high-bits regval
+                                   (conv:digital-delay-cnt->bits value)))
 
 (define (set-dclkout8-ddly-cnt-low regval value)
   (set-dclkout8-ddly-cnt-low-bits regval (conv:digital-delay-cnt->bits value)))
@@ -1675,16 +1685,20 @@
   (set-pll2-ld-type-bits regval (value->bits pll-ld-type-map value)))
 
 (define (set-pll2-loopfilter-c3 regval value)
-  (set-pll2-loopfilter-c3-bits regval (value->bits pll2-loopfilter-c3-map value)))
+  (set-pll2-loopfilter-c3-bits regval (value->bits pll2-loopfilter-c3-map
+                                                   value)))
 
 (define (set-pll2-loopfilter-c4 regval value)
-  (set-pll2-loopfilter-c4-bits regval (value->bits pll2-loopfilter-c4-map value)))
+  (set-pll2-loopfilter-c4-bits regval (value->bits pll2-loopfilter-c4-map
+                                                   value)))
 
 (define (set-pll2-loopfilter-r3 regval value)
-  (set-pll2-loopfilter-r3-bits regval (value->bits pll2-loopfilter-resistor-map value)))
+  (set-pll2-loopfilter-r3-bits regval (value->bits pll2-loopfilter-resistor-map
+                                                   value)))
 
 (define (set-pll2-loopfilter-r4 regval value)
-  (set-pll2-loopfilter-r4-bits regval (value->bits pll2-loopfilter-resistor-map value)))
+  (set-pll2-loopfilter-r4-bits regval (value->bits pll2-loopfilter-resistor-map
+                                                   value)))
 
 (define (set-pll2-n-calibration-phase-high regval value)
   (with-constraints (value (>= 0) (<= #b11))
@@ -1740,7 +1754,8 @@
   (set-sdclkout1-ddly-bits regval (value->bits sdclkout-ddelay-map value)))
 
 (define (set-sdclkout1-disable-mode regval value)
-  (set-sdclkout1-disable-mode-bits regval (value->bits sysref-output-state-map value)))
+  (set-sdclkout1-disable-mode-bits regval (value->bits sysref-output-state-map
+                                                       value)))
 
 (define (set-sdclkout1-mux regval value)
   (set-sdclkout1-mux-bits regval (value->bits devclk-sysref-map value)))
@@ -1755,13 +1770,15 @@
   (set-sdclkout11-ddly-bits regval (value->bits sdclkout-ddelay-map value)))
 
 (define (set-sdclkout11-disable-mode regval value)
-  (set-sdclkout11-disable-mode-bits regval (value->bits sysref-output-state-map value)))
+  (set-sdclkout11-disable-mode-bits regval (value->bits sysref-output-state-map
+                                                        value)))
 
 (define (set-sdclkout11-mux regval value)
   (set-sdclkout11-mux-bits regval (value->bits devclk-sysref-map value)))
 
 (define (set-sdclkout11-polarity regval value)
-  (set-sdclkout11-polarity-bits regval (value->bits output-polarity-map value)))
+  (set-sdclkout11-polarity-bits regval (value->bits output-polarity-map
+                                                    value)))
 
 (define (set-sdclkout13-adly regval value)
   (set-sdclkout13-adly-bits regval (conv:sysout-analog-delay->bits value)))
@@ -1770,13 +1787,15 @@
   (set-sdclkout13-ddly-bits regval (value->bits sdclkout-ddelay-map value)))
 
 (define (set-sdclkout13-disable-mode regval value)
-  (set-sdclkout13-disable-mode-bits regval (value->bits sysref-output-state-map value)))
+  (set-sdclkout13-disable-mode-bits regval (value->bits sysref-output-state-map
+                                                        value)))
 
 (define (set-sdclkout13-mux regval value)
   (set-sdclkout13-mux-bits regval (value->bits devclk-sysref-map value)))
 
 (define (set-sdclkout13-polarity regval value)
-  (set-sdclkout13-polarity-bits regval (value->bits output-polarity-map value)))
+  (set-sdclkout13-polarity-bits regval (value->bits output-polarity-map
+                                                    value)))
 
 (define (set-sdclkout3-adly regval value)
   (set-sdclkout3-adly-bits regval (conv:sysout-analog-delay->bits value)))
@@ -1785,7 +1804,8 @@
   (set-sdclkout3-ddly-bits regval (value->bits sdclkout-ddelay-map value)))
 
 (define (set-sdclkout3-disable-mode regval value)
-  (set-sdclkout3-disable-mode-bits regval (value->bits sysref-output-state-map value)))
+  (set-sdclkout3-disable-mode-bits regval (value->bits sysref-output-state-map
+                                                       value)))
 
 (define (set-sdclkout3-mux regval value)
   (set-sdclkout3-mux-bits regval (value->bits devclk-sysref-map value)))
@@ -1800,7 +1820,8 @@
   (set-sdclkout5-ddly-bits regval (value->bits sdclkout-ddelay-map value)))
 
 (define (set-sdclkout5-disable-mode regval value)
-  (set-sdclkout5-disable-mode-bits regval (value->bits sysref-output-state-map value)))
+  (set-sdclkout5-disable-mode-bits regval (value->bits sysref-output-state-map
+                                                       value)))
 
 (define (set-sdclkout5-mux regval value)
   (set-sdclkout5-mux-bits regval (value->bits devclk-sysref-map value)))
@@ -1815,7 +1836,8 @@
   (set-sdclkout7-ddly-bits regval (value->bits sdclkout-ddelay-map value)))
 
 (define (set-sdclkout7-disable-mode regval value)
-  (set-sdclkout7-disable-mode-bits regval (value->bits sysref-output-state-map value)))
+  (set-sdclkout7-disable-mode-bits regval (value->bits sysref-output-state-map
+                                                       value)))
 
 (define (set-sdclkout7-mux regval value)
   (set-sdclkout7-mux-bits regval (value->bits devclk-sysref-map value)))
@@ -1830,7 +1852,8 @@
   (set-sdclkout9-ddly-bits regval (value->bits sdclkout-ddelay-map value)))
 
 (define (set-sdclkout9-disable-mode regval value)
-  (set-sdclkout9-disable-mode-bits regval (value->bits sysref-output-state-map value)))
+  (set-sdclkout9-disable-mode-bits regval (value->bits sysref-output-state-map
+                                                       value)))
 
 (define (set-sdclkout9-mux regval value)
   (set-sdclkout9-mux-bits regval (value->bits devclk-sysref-map value)))
@@ -1839,7 +1862,8 @@
   (set-sdclkout9-polarity-bits regval (value->bits output-polarity-map value)))
 
 (define (set-sdio-readback-type regval value)
-  (set-sdio-readback-type-bits regval (value->bits sdio-readback-type-map value)))
+  (set-sdio-readback-type-bits regval (value->bits sdio-readback-type-map
+                                                   value)))
 
 (define (enable-spi-lock-high regval) 255)
 (define (disable-spi-lock-high regval) 0)
