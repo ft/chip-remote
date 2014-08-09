@@ -5,11 +5,18 @@
 (define-module (chip-remote decode)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 optargs)
+  #:use-module (ice-9 session)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote keyword-assoc)
   #:use-module (chip-remote bit-decoders)
   #:export (decode
             decode-many))
+
+(define (invoke-decoder decoder name offset width bits)
+  (let ((args (procedure-arguments decoder)))
+    (if (= 1 (length (assq-ref args 'required)))
+        (decoder bits)
+        (decoder name offset width bits))))
 
 (define (decode-content value content)
   (let* ((name (car content))
@@ -23,7 +30,7 @@
          (decoder-unit (cdr (cadddr decoder*)))
          (decoded (if (eq? decoder-type 'list)
                       (reverse-lookup (decoder) bits)
-                      (decoder name offset width bits))))
+                      (invoke-decoder decoder name offset width bits))))
     (list name
           (cons 'decoded decoded)
           (cons 'bits bits)
