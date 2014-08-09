@@ -2,6 +2,13 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
+;; TODO: With a number of entries, those entries are the only one within a
+;; register. Therefore, strictly speaking, there's no need to *replay* an
+;; amended register value, the code could just write into them.
+;;
+;; That would indeed be more elegant, but there's no convenient macro for
+;; expressing that yet. So there: A TODO for this module.
+
 (define-module (chip-remote devices ti lmk04828)
   #:use-module (ice-9 optargs)
   #:use-module (bitops)
