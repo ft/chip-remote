@@ -1880,14 +1880,13 @@
 (define (set-sysref-mux regval value)
   (set-sysref-mux-bits regval (value->bits sysref-mux-map value)))
 
+(define (power-of-two? x)
+  (= 1 (logcount x)))
+
 (define (set-sysref-pulse-cnt regval value)
-  (format #t "WARNING: Unhandled second level access function!~%")
-  (format #t "         `set-sysref-pulse-cnt' generated with:~%")
-  (format #t "             type: function~%")
-  (format #t "             var:  power-of-two~%")
-  (format #t "You probably want to write a special-purpose function instead!~%")
-  (format #t "This function falls back to the first-level access function!~%")
-  (set-sysref-pulse-cnt-bits regval value))
+  (with-constraints (value (>= 1) (<= 8) (power-of-two?))
+    (set-sysref-pulse-cnt-bits regval (inexact->exact (/ (log10 value)
+                                                         (log10 2))))))
 
 (define (set-vco-mux regval value)
   (set-vco-mux-bits regval (value->bits vco-mux-map value)))
