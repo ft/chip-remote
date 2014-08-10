@@ -1406,13 +1406,16 @@
 (define (multiple-of-1/64? x)
   (integer? (* x 64)))
 
+(define (value->dac-trip x)
+  (- (* 64 x) 1))
+
 (define (set-dac-trip-high regval value)
   (with-constraints (value (> 0) (<= 1) (multiple-of-1/64?))
-    (set-dac-trip-high-bits regval (- (* 64 value) 1))))
+    (set-dac-trip-high-bits regval (value->dac-trip value))))
 
 (define (set-dac-trip-low regval value)
   (with-constraints (value (> 0) (<= 1) (multiple-of-1/64?))
-    (set-dac-trip-low-bits regval value)))
+    (set-dac-trip-low-bits regval (value->dac-trip value))))
 
 (define (set-dclkout0-adly regval value)
   (set-dclkout0-adly-bits regval (conv:analog-delay->bits value)))
