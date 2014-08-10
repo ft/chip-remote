@@ -23,14 +23,20 @@
 int
 access_port5(struct cr_line *line, enum cr_access_mode mode, int value)
 {
-    if (mode == CR_ACCESS_READ) {
-        SETUP_PIN_READ(line->bitmask);
+    if (mode == CR_ACCESS_READ)
         return PIN_READ(line->bitmask);
-    } else {
-        SETUP_PIN_WRITE(line->bitmask);
+    else
         PIN_WRITE(line->bitmask, value);
         return 0;
-    }
+}
+
+void
+dir_port5(struct cr_line *line, enum cr_access_mode mode)
+{
+    if (mode == CR_ACCESS_READ)
+        SETUP_PIN_READ(line->bitmask);
+    else
+        SETUP_PIN_WRITE(line->bitmask);
 }
 
 void

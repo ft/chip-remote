@@ -16,12 +16,16 @@ use vars qw{ @EXPORT };
               cs_setup
               clk_high
               clk_low
+              clk_is_output
               cs_high
               cs_low
+              cs_is_output
               miso_high
               miso_low
+              miso_is_input
               mosi_high
-              mosi_low };
+              mosi_low
+              mosi_is_output };
 
 use Test::ChipRemote;
 
@@ -65,12 +69,20 @@ sub clk_low {
     return cr_line_trace_reply_out(\%clk, 0),
 }
 
+sub clk_is_output {
+    return cr_line_trace_reply_direction_write(\%clk),
+}
+
 sub cs_high {
     return cr_line_trace_reply_out(\%cs, 1),
 }
 
 sub cs_low {
     return cr_line_trace_reply_out(\%cs, 0),
+}
+
+sub cs_is_output {
+    return cr_line_trace_reply_direction_write(\%cs),
 }
 
 sub mosi_high {
@@ -81,10 +93,18 @@ sub mosi_low {
     return cr_line_trace_reply_out(\%mosi, 0),
 }
 
+sub mosi_is_output {
+    return cr_line_trace_reply_direction_write(\%mosi),
+}
+
 sub miso_high {
     return cr_line_trace_reply_in(\%miso, 1),
 }
 
 sub miso_low {
     return cr_line_trace_reply_in(\%miso, 0),
+}
+
+sub miso_is_input {
+    return cr_line_trace_reply_direction_read(\%miso),
 }

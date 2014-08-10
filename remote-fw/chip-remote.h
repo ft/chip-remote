@@ -99,6 +99,7 @@ enum cr_port_modes {
  */
 struct cr_line {
     int (*access)(struct cr_line *, enum cr_access_mode mode, int value);
+    void (*dir)(struct cr_line *, enum cr_access_mode mode);
     cr_pin_mask bitmask;
     char rolestr[CR_MAX_ROLE_STRING + 1];
     enum cr_pin_role role;

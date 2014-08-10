@@ -10,6 +10,7 @@
 #include "../config.msp430.h"
 
 int access_port5(struct cr_line *, enum cr_access_mode, int);
+void dir_port5(struct cr_line *, enum cr_access_mode);
 
 #ifdef MSPGCC_BUILD
 

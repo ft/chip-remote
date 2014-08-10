@@ -15,9 +15,10 @@
 #define DEFAULT_RATE { CR_IMMUTABLE, -1 }
 #define NO_RATE { CR_IMMUTABLE, 0 }
 
-#define NEW_LINE(a,m)      \
+#define NEW_LINE(a,d,m)   \
     {                      \
         a,                 \
+        d,                 \
         m,                 \
         { (char)0 },       \
         CR_ROLE_NONE,      \
@@ -26,7 +27,7 @@
     }
 
 #define LINE_LIST_END \
-    { NULL, 0, { (char)0 }, CR_ROLE_NONE, CR_NO_INDEX, CR_MUTABLE }
+    { NULL, NULL, 0, { (char)0 }, CR_ROLE_NONE, CR_NO_INDEX, CR_MUTABLE }
 
 #define NEW_PORT(n,l)                   \
     {                                   \
@@ -49,10 +50,10 @@
 #include "arch/cr-msp430.h"
 
 static struct cr_line port1_lines[] = {
-    NEW_LINE(access_port5, 1<<0),
-    NEW_LINE(access_port5, 1<<1),
-    NEW_LINE(access_port5, 1<<2),
-    NEW_LINE(access_port5, 1<<3),
+    NEW_LINE(access_port5, dir_port5, 1<<0),
+    NEW_LINE(access_port5, dir_port5, 1<<1),
+    NEW_LINE(access_port5, dir_port5, 1<<2),
+    NEW_LINE(access_port5, dir_port5, 1<<3),
     LINE_LIST_END
 };
 
@@ -67,28 +68,32 @@ struct cr_port cr_ports[] = {
 #include "arch/stdout.h"
 
 static struct cr_line port1_lines[] = {
-    NEW_LINE(access_portA, 1<<0),
-    NEW_LINE(access_portA, 1<<1),
-    NEW_LINE(access_portA, 1<<2),
-    NEW_LINE(access_portA, 1<<3),
+    NEW_LINE(access_portA, dir_portA, 1<<0),
+    NEW_LINE(access_portA, dir_portA, 1<<1),
+    NEW_LINE(access_portA, dir_portA, 1<<2),
+    NEW_LINE(access_portA, dir_portA, 1<<3),
     LINE_LIST_END
 };
 
 static struct cr_line port2_lines[] = {
-    NEW_LINE(access_portA, 1<<4),
-    NEW_LINE(access_portA, 1<<5),
-    NEW_LINE(access_portA, 1<<6),
-    NEW_LINE(access_portA, 1<<7),
-    NEW_LINE(access_portA, 1<<8),
-    NEW_LINE(access_portA, 1<<9),
-    NEW_LINE(access_portA, 1<<10),
-    NEW_LINE(access_portA, 1<<11),
+    NEW_LINE(access_portA, dir_portA, 1<<4),
+    NEW_LINE(access_portA, dir_portA, 1<<5),
+    NEW_LINE(access_portA, dir_portA, 1<<6),
+    NEW_LINE(access_portA, dir_portA, 1<<7),
+    NEW_LINE(access_portA, dir_portA, 1<<8),
+    NEW_LINE(access_portA, dir_portA, 1<<9),
+    NEW_LINE(access_portA, dir_portA, 1<<10),
+    NEW_LINE(access_portA, dir_portA, 1<<11),
+    NEW_LINE(access_portA, dir_portA, 1<<12),
+    NEW_LINE(access_portA, dir_portA, 1<<13),
+    NEW_LINE(access_portA, dir_portA, 1<<14),
+    NEW_LINE(access_portA, dir_portA, 1<<15),
     LINE_LIST_END
 };
 
 struct cr_port cr_ports[] = {
     NEW_PORT(4, port1_lines),
-    NEW_PORT(8, port2_lines),
+    NEW_PORT(12, port2_lines),
     PORT_LIST_END
 };
 

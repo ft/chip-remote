@@ -14,7 +14,9 @@ cr_run_script [ spi_default_setup,
                 cr_request("SET 0 FRAME-LENGTH 2", "OK"),
                 cr_request("SET 0 BIT-ORDER LSB-FIRST", "OK"),
                 cr_request_io("INIT 0", "OK",
-                          [ cs_high, clk_low ] ),
+                          [ cs_is_output, cs_high,
+                            clk_is_output, clk_low,
+                            mosi_is_output, miso_is_input ] ),
                 cr_request("FOCUS 0", "OK"),
                 # With LSB-FIRST data is send AND received in that mode, so the
                 # send-bit-stream is "01" and the receive-bit-stream is "10"

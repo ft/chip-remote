@@ -220,8 +220,13 @@ cr_spi_init(struct cr_port *port)
             return 0;
     }
     /* Bring CS and CLK to their idle states */
+    map->cs[map->cs_focused]->dir(map->cs[map->cs_focused], CR_ACCESS_WRITE);
     cr_unset_line_with_polarity(map->cs[map->cs_focused], map->cs_polarity);
+    map->clk->dir(map->clk, CR_ACCESS_WRITE);
     cr_unset_line_with_polarity(map->clk, map->clk_polarity);
+    /* Directions of MISO and MOSI */
+    map->mosi->dir(map->mosi, CR_ACCESS_WRITE);
+    map->miso->dir(map->miso, CR_ACCESS_READ);
     return 1;
 }
 

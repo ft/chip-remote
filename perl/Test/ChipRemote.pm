@@ -26,6 +26,8 @@ use vars qw{ @EXPORT };
 @EXPORT = qw{ cr_request
               cr_request_io
               cr_run_script
+              cr_line_trace_reply_direction_read
+              cr_line_trace_reply_direction_write
               cr_line_trace_reply_in
               cr_line_trace_reply_out
               cr_line_trace_wait
@@ -273,6 +275,16 @@ sub cr_line_trace_reply {
     $reply .= q|(| . $value . q|)|;
 }
 
+sub cr_line_trace_reply_direction {
+    my ($line, $direction) = @_;
+    my $reply = q{};
+
+    $reply .= $line->{port};
+    $reply .= $direction;
+    $reply .= sprintf q{[%04x]}, 1 << $line->{index};
+    $reply .= q|{| . $line->{role} . q|}|;
+}
+
 sub cr_line_trace_reply_in {
     my ($line, $value) = @_;
     cr_line_trace_reply($line, $value, q{>});
@@ -281,6 +293,16 @@ sub cr_line_trace_reply_in {
 sub cr_line_trace_reply_out {
     my ($line, $value) = @_;
     cr_line_trace_reply($line, $value, q{<});
+}
+
+sub cr_line_trace_reply_direction_read {
+    my ($line) = @_;
+    cr_line_trace_reply_direction($line, q{R});
+}
+
+sub cr_line_trace_reply_direction_write {
+    my ($line) = @_;
+    cr_line_trace_reply_direction($line, q{W});
 }
 
 sub cr_line_trace_wait {

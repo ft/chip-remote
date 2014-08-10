@@ -10,5 +10,6 @@
 #include "../config.sim.h"
 
 int access_portA(struct cr_line *, enum cr_access_mode, int);
+void dir_portA(struct cr_line *, enum cr_access_mode);
 
 #endif /* INC_STDOUT_H */

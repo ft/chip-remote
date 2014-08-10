@@ -13,7 +13,10 @@ cr_test_title q{SPI: 2 Bit frame without clk-phase-delay works};
 cr_run_script [ spi_default_setup,
                 cr_request("SET 0 FRAME-LENGTH 2", "OK"),
                 cr_request("SET 0 CLK-PHASE-DELAY FALSE", "OK"),
-                cr_request_io("INIT 0", "OK", [ cs_high, clk_low ] ),
+                cr_request_io("INIT 0", "OK",
+                          [ cs_is_output, cs_high,
+                            clk_is_output, clk_low,
+                            mosi_is_output, miso_is_input ] ),
                 cr_request("FOCUS 0", "OK"),
                 # This is similar to the line trace from
                 # “spi-2b-frame-defaults-pl.t”, except, that the clock phase

@@ -13,7 +13,9 @@ cr_test_title q{SPI: 2 Bit frame with default settings works};
 cr_run_script [ spi_default_setup,
                 cr_request("SET 0 FRAME-LENGTH 2", "OK"),
                 cr_request_io("INIT 0", "OK",
-                          [ cs_high, clk_low ] ),
+                          [ cs_is_output, cs_high,
+                            clk_is_output, clk_low,
+                            mosi_is_output, miso_is_input ] ),
                 cr_request("FOCUS 0", "OK"),
                 # FRAME-LENGTH is set to 2. BIT-ORDER is MSB-FIRST, so
                 # transmitting "2" is the bit-stream "10". So, MOSI is first

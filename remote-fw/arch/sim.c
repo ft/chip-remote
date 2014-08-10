@@ -35,6 +35,15 @@ access_portA(struct cr_line *line, enum cr_access_mode mode, int value)
 }
 
 void
+dir_portA(struct cr_line *line, enum cr_access_mode mode)
+{
+    if (mode == CR_ACCESS_READ)
+        printf("-!- AR[%04x]{%s}\n", line->bitmask, line->rolestr);
+    else
+        printf("-!- AW[%04x]{%s}\n", line->bitmask, line->rolestr);
+}
+
+void
 xcr_pre_top_level(void)
 {
     int ch, i, length_notice;
