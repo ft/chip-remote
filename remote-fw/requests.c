@@ -54,6 +54,7 @@
 
 static char *cr_modes[] = {
     [ CR_MODE_NONE ] = "NONE",
+    [ CR_MODE_PAREX ] = "PAR-EX",
     [ CR_MODE_SPI ] = "SPI",
     [ CR_MODE_INVALID ] = (char *)NULL
 };

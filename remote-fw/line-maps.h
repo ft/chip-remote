@@ -28,4 +28,10 @@ struct cr_spi_map {
     int bit_order;
 };
 
+struct cr_parex_map {
+    struct cr_line *clk;
+    struct cr_line **addr;
+    struct cr_line **data;
+};
+
 #endif /* INC_LINE_MAPS_H */

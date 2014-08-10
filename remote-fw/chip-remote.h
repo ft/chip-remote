@@ -31,7 +31,9 @@ enum cr_pin_role {
     CR_ROLE_CLK,
     CR_ROLE_CS,
     CR_ROLE_SPI_MISO,
-    CR_ROLE_SPI_MOSI
+    CR_ROLE_SPI_MOSI,
+    CR_ROLE_PAREX_ADDR,
+    CR_ROLE_PAREX_DATA
 };
 
 enum cr_access_mode {
@@ -67,6 +69,7 @@ struct cr_parameter {
 
 enum cr_port_modes {
     CR_MODE_NONE = 0,
+    CR_MODE_PAREX,
     CR_MODE_SPI,
     CR_MODE_INVALID
 };
@@ -120,6 +123,7 @@ struct cr_port_mode {
     enum cr_port_modes mode;
     union {
         struct cr_spi_map *spi;
+        struct cr_parex_map *parex;
     } map;
 };
 
