@@ -19,7 +19,7 @@
 ;; will cause an error, because divider 9 does not exist on the device.
 
 (define-module (chip-remote legacy ti cdce72010)
-  #:use-module (bitops)
+  #:use-module (chip-remote bitops)
   #:use-module (chip-remote protocol)
   #:use-module (chip-remote legacy ti cdce72010 decode)
   #:use-module (chip-remote legacy ti cdce72010 messages)

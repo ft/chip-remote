@@ -2,7 +2,7 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
-(define-module (bitops)
+(define-module (chip-remote bitops)
   #:export (bit-extract-width
             clear-bits
             one-bits

@@ -126,15 +126,7 @@
     a first version of the third level access code, which should help
     especially with devices that contain large register-maps.
 
-** Top-Level Modules
-
-*** (bitops)
-
-    This module implements a number of utilities that deal with manipulating
-    blocks of bits in integers, that are not implemented by the libraries
-    shipped with GNU Guile. These function are used in particular by the
-    first-level access functions, that are derived from a device's
-    register-map.
+** Top-Level Module
 
 *** (chip-remote)
 
@@ -174,6 +166,14 @@
     first, and possibly only, argument).
 
 ** Non-Device-Specific Modules
+
+*** (chip-remote bitops)
+
+    This module implements a number of utilities that deal with manipulating
+    blocks of bits in integers, that are not implemented by the libraries
+    shipped with GNU Guile. These function are used in particular by the
+    first-level access functions, that are derived from a device's
+    register-map.
 
 *** (chip-remote io)
 

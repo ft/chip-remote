@@ -3,7 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote legacy ti cdce72010 prg)
-  #:use-module (bitops)
+  #:use-module (chip-remote bitops)
   #:use-module (chip-remote legacy ti cdce72010 tables)
   #:export (clear-device-power-down-bit
            clear-odiv-enable-bit

@@ -4,7 +4,7 @@
 
 (define-module (chip-remote legacy ti cdce72010 decode)
   #:use-module (ice-9 format)
-  #:use-module (bitops)
+  #:use-module (chip-remote bitops)
   #:use-module (chip-remote legacy ti cdce72010 messages)
   #:use-module (chip-remote legacy ti cdce72010 tables)
   #:use-module (chip-remote legacy ti cdce72010 validate)

@@ -204,7 +204,7 @@
                                                 (syntax->datum #'n)
                                                 '-bits))))
          #'(define-public (name register)
-             ((@ (bitops) bit-extract-width) register o w)))))))
+             ((@ (chip-remote bitops) bit-extract-width) register o w)))))))
 
 ;; Expand into Level-1 setter code for a given register entry.
 (define-syntax reg-expand-setter
@@ -216,7 +216,7 @@
                                                 (syntax->datum #'n)
                                                 '-bits))))
          #'(define-public (name register value)
-             ((@ (bitops) set-bits) register
+             ((@ (chip-remote bitops) set-bits) register
                                     (logand value (- (ash 1 w) 1)) w o)))))))
 
 ;; Expand into a variable definition that links a name to a register address.

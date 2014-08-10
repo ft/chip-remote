@@ -11,7 +11,7 @@
 
 (define-module (chip-remote devices ti lmk04828)
   #:use-module (ice-9 optargs)
-  #:use-module (bitops)
+  #:use-module (chip-remote bitops)
   #:use-module (chip-remote assemble)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote level-3)
