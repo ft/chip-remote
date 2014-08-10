@@ -67,6 +67,7 @@
             regmap->item
             map-across
 
+            default-values
             get-width
             sum-of-width))
 
@@ -113,6 +114,13 @@
 (define (sum-of-width regmap names-and-addresses)
   (apply + (map (lambda (x) (get-width regmap (cdr x) (car x)))
                 names-and-addresses)))
+
+(define (default-values regmap)
+  (map (lambda (x)
+         (let ((addr (car x))
+               (dv (assq 'default-value (cdr x))))
+           (cons addr (if dv (cdr dv) 0))))
+       regmap))
 
 ;; ‘define-register-map’:
 
