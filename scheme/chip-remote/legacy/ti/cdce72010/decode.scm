@@ -2,12 +2,12 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
-(define-module (chip-remote devices ti cdce72010 decode)
+(define-module (chip-remote legacy ti cdce72010 decode)
   #:use-module (ice-9 format)
   #:use-module (bitops)
-  #:use-module (chip-remote devices ti cdce72010 messages)
-  #:use-module (chip-remote devices ti cdce72010 tables)
-  #:use-module (chip-remote devices ti cdce72010 validate)
+  #:use-module (chip-remote legacy ti cdce72010 messages)
+  #:use-module (chip-remote legacy ti cdce72010 tables)
+  #:use-module (chip-remote legacy ti cdce72010 validate)
   #:export (decode-register-by-value
             decode-specific-register-by-value
             fuzz-register

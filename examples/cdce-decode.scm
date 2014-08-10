@@ -2,12 +2,12 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
-(use-modules ((chip-remote devices ti cdce72010)
+(use-modules ((chip-remote legacy ti cdce72010)
               #:renamer (symbol-prefix-proc 'cdce/))
-             ((chip-remote devices ti cdce72010 decode)
+             ((chip-remote legacy ti cdce72010 decode)
               #:renamer (symbol-prefix-proc 'cdce/)))
 
-;; These are the factory-default values for CDCE72010 devices. You can
+;; These are the factory-default values for CDCE72010 legacy. You can
 ;; obviously takea look at the reference documentation about what these
 ;; register values represent...
 (define factory-defaults '(#x683c0ed0

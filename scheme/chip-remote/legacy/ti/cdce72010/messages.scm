@@ -2,7 +2,7 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
-(define-module (chip-remote devices ti cdce72010 messages)
+(define-module (chip-remote legacy ti cdce72010 messages)
   #:export (error-divider
             error-invalid-r-divider
             error-invalid-reg-index

@@ -5,7 +5,7 @@
 (use-modules (ice-9 format)
              (test tap)
              (bitops)
-             (chip-remote devices ti cdce72010 prg))
+             (chip-remote legacy ti cdce72010 prg))
 (primitive-load "tests/test-tap-cfg.scm")
 
 (load "divider-samples.scm")

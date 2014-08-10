@@ -7,7 +7,7 @@
 ;; you prefer the symbols from this module to have a `cdce/' prefix, use:
 ;;
 ;;      (use-modules
-;;       ((chip-remote devices ti cdce72010)
+;;       ((chip-remote legacy ti cdce72010)
 ;;        #:renamer (symbol-prefix-proc 'cdce/)))
 ;;
 ;; Note, that the code in this module assumes that the serial connection to
@@ -18,13 +18,13 @@
 ;; problems during interactive use. For example, trying to change divider 9
 ;; will cause an error, because divider 9 does not exist on the device.
 
-(define-module (chip-remote devices ti cdce72010)
+(define-module (chip-remote legacy ti cdce72010)
   #:use-module (bitops)
   #:use-module (chip-remote protocol)
-  #:use-module (chip-remote devices ti cdce72010 decode)
-  #:use-module (chip-remote devices ti cdce72010 messages)
-  #:use-module (chip-remote devices ti cdce72010 prg)
-  #:use-module (chip-remote devices ti cdce72010 validate)
+  #:use-module (chip-remote legacy ti cdce72010 decode)
+  #:use-module (chip-remote legacy ti cdce72010 messages)
+  #:use-module (chip-remote legacy ti cdce72010 prg)
+  #:use-module (chip-remote legacy ti cdce72010 validate)
   #:export (decode-device
             decode-register
             disable-output-divider
@@ -135,7 +135,7 @@ end of the function."
   (display "};\n"))
 
 (define (export-registers-scheme-script registers)
-  (display "(use-modules ((chip-remote devices ti cdce72010)\n")
+  (display "(use-modules ((chip-remote legacy ti cdce72010)\n")
   (display "              #:renamer (symbol-prefix-proc 'cdce/)))\n")
   (display "(use-modules ((chip-remote io)\n")
   (display "              (chip-remote protocol))\n\n")

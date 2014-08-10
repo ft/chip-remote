@@ -2,7 +2,7 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
-(define-module (chip-remote devices ti cdce72010 validate)
+(define-module (chip-remote legacy ti cdce72010 validate)
   #:export (divider?
             mn-divider-value?
             output-index?

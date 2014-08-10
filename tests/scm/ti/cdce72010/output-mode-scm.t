@@ -5,8 +5,8 @@
 (use-modules (ice-9 format)
              (test tap)
              (bitops)
-             (chip-remote devices ti cdce72010 tables)
-             (chip-remote devices ti cdce72010 prg))
+             (chip-remote legacy ti cdce72010 tables)
+             (chip-remote legacy ti cdce72010 prg))
 
 (define value-width 7)
 

@@ -431,7 +431,7 @@
 
 ** Legacy Code
 
-   The (chip-remote devices ti cdce72010) module and its children are based on
+   The (chip-remote legacy ti cdce72010) module and its children are based on
    code for a predecessor of chip-remote. It does not use the usual
    abstractions and conventions. While it works, it should not be used as an
    example of how to write modules for new devices.

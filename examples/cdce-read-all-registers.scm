@@ -31,7 +31,7 @@
  ;; module will be prefixed with ‘cdce/’, which would make more sense in a
  ;; script that talks to multiple different devices; but showing the
  ;; functionality makes sense in an example script.
- ((chip-remote devices ti cdce72010) #:renamer (symbol-prefix-proc 'cdce/)))
+ ((chip-remote legacy ti cdce72010) #:renamer (symbol-prefix-proc 'cdce/)))
 
 ;; The script is to be called like this:
 ;;
@@ -130,7 +130,7 @@
 ;; Focus the configured and initialised port:
 (focus connection port-index)
 
-;; The (chip-remote devices ti cdce72010) module features a number of very
+;; The (chip-remote legacy ti cdce72010) module features a number of very
 ;; high-level routines for handling the device. Reading and decoding all
 ;; registers inthe CDCE72010 device is achieved by one single procedure:
 (cdce/decode-device connection) ;; Note, that the way the cdce72010 module is
