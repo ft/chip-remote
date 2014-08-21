@@ -12,7 +12,8 @@
             device-decoder
             replay-register
             to-tty?
-            value-decoder))
+            value-decoder
+            split-word))
 
 (define-syntax replay-register
   (lambda (x)
