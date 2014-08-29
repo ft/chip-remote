@@ -12,13 +12,7 @@
 (define tiadc-register-width 8)
 
 (define (decode-length n o w value)
-  ;; The following currently triggers a bogus argument count warning in Guile.
-  ;; Reported at: http://debbugs.gnu.org/cgi/bugreport.cgi?bug=18299
-  ;;
-  ;;   (format #f "~d block~:p" value)
-  ;;
-  ;; So use this workaround for now instead:
-  (format #f "~d block~p" value value))
+  (format #f "~d block~:p" value))
 
 (define-register-map tiadc
   (0 (default-value 0)
