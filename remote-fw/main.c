@@ -220,11 +220,57 @@ main(void)
     /* Disable watchdog */
     WDTCTL = WDTPW + WDTHOLD;
 
-    /* clock initialisation */
-    DCOCTL = DCO2|DCO1|DCO0;
-    BCSCTL1 = XT2OFF|RSEL2|RSEL1|RSEL0;
-    /* DCOR == 1 means: "use an external resistor at P2.5" */
-    BITMASK_SET(BCSCTL2, DCOR);
+    /* P3.0-3 are connected to DIP switches: Inputs */
+    BITMASK_CLEAR(P3DIR, 0x0f);
+
+    /* P3.6-7 are connected to LEDs: Outputs */
+    BITMASK_SET(P3DIR, 0xc0);
+
+    /*
+     * Clock initialisation
+     *
+     * Upon bootup, the controller sources the master clock from the internal
+     * oscillator, that drifts pretty heavily with temperature. Since we'll be
+     * using an UART block (one of the requirements of an asynchronous
+     * interface is to have a stable clock source, from which to derive the
+     * interfaces baudrate), it makes sense to use an external crystal
+     * oscillator. We *could* just use it just for the auxiliary clock. But
+     * then, if it's there, it makes sense to use it for everything.
+     *
+     * slau049f, p.4-12 describes how to switch the master clock to the extenal
+     * crystal oscillator:
+     *
+     *   1. Turn the oscillator on.
+     *   2. Clear the OFIFG flag in IFG1.
+     *   3. Wait for *at* *least* 50 microseconds.
+     *   4. Test OFIFG and repeat steps 2 and 3 until it remains cleared.
+     *   5. Select LFXT1CLK in BCSCTL2.
+     */
+
+    /* Turn on LED0 while the oscillator is enabled: */
+    BITMASK_SET(P3OUT, P3_LED0);
+#if 0
+    /*
+     * The Status register is zero'd upon bootup. So the OSCOFF bit should be
+     * cleared by default. Thus this shouldn't be needed. _BIC_SR() doesn't
+     * sound too portable across compilers anyway.
+     */
+    _BIC_SR(OSCOFF); /* Turn oscillator on */
+#endif
+    BITMASK_SET(BCSCTL1, XT2OFF); /* Disable the XT2 input */
+    do {
+        unsigned char i;
+        BITMASK_SET(BCSCTL1, XTS); /* Enable high-frequency mode */
+        for (i = 0xff; i > 0; --i) /* Delay */
+            asm(" nop");
+    } while (IS_BITMASK_SET(IFG1, OFIFG));
+    /* Make sure the MCLK divider is set to "1": */
+    BITMASK_CLEAR(BCSCTL2, DIVM1 | DIVM0);
+    /* Make sure the ACLK divider is set to "1": */
+    BITMASK_CLEAR(BCSCTL1, DIVA1 | DIVA0);
+    /* Select the crystal for MCLK: */
+    BITMASK_SET(BCSCTL2, SELM1 | SELM0);
+    BITMASK_CLEAR(P3OUT, P3_LED0);
 
 #ifdef MEASURE_CPU_SPEED
     /* Make P5.0 through P5.5 outputs */
