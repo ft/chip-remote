@@ -14,29 +14,103 @@
 
 #include "cr-msp430.h"
 
-#define SETUP_PIN_READ(mask) (BITMASK_CLEAR(P5DIR, mask))
-#define SETUP_PIN_WRITE(mask) (BITMASK_SET(P5DIR, mask))
-#define PIN_WRITE(mask, value) (value ? BITMASK_SET(P5OUT, mask) \
-                                      : BITMASK_CLEAR(P5OUT, mask))
-#define PIN_READ(mask) ((P5IN & mask) ? 1 : 0)
+#define SETUP_PIN_READ(reg, mask) (BITMASK_CLEAR(reg, mask))
+#define SETUP_PIN_WRITE(reg, mask) (BITMASK_SET(reg, mask))
+#define PIN_READ(reg, mask) ((reg & mask) ? 1 : 0)
+#define PIN_WRITE(reg, mask, value) \
+    (value ? BITMASK_SET(reg, mask) \
+           : BITMASK_CLEAR(reg, mask))
+
+static int
+access_port(struct cr_line *line, enum cr_access_mode mode, int value,
+            unsigned int in, unsigned int out)
+{
+    if (mode == CR_ACCESS_READ)
+        return PIN_READ(in, line->bitmask);
+    else
+        PIN_WRITE(out, line->bitmask, value);
+    return 0;
+}
+
+static void
+dir_port(struct cr_line *line, enum cr_access_mode mode, unsigned int dir)
+{
+    if (mode == CR_ACCESS_READ)
+        SETUP_PIN_READ(dir, line->bitmask);
+    else
+        SETUP_PIN_WRITE(dir, line->bitmask);
+}
+
+int
+access_port1(struct cr_line *line, enum cr_access_mode mode, int value)
+{
+    return access_port(line, mode, value, P1IN, P1OUT);
+}
+
+void
+dir_port1(struct cr_line *line, enum cr_access_mode mode)
+{
+    return dir_port(line, mode, P1DIR);
+}
+
+int
+access_port2(struct cr_line *line, enum cr_access_mode mode, int value)
+{
+    return access_port(line, mode, value, P2IN, P2OUT);
+}
+
+void
+dir_port2(struct cr_line *line, enum cr_access_mode mode)
+{
+    return dir_port(line, mode, P2DIR);
+}
+
+int
+access_port3(struct cr_line *line, enum cr_access_mode mode, int value)
+{
+    return access_port(line, mode, value, P3IN, P3OUT);
+}
+
+void
+dir_port3(struct cr_line *line, enum cr_access_mode mode)
+{
+    return dir_port(line, mode, P3DIR);
+}
+
+int
+access_port4(struct cr_line *line, enum cr_access_mode mode, int value)
+{
+    return access_port(line, mode, value, P4IN, P4OUT);
+}
+
+void
+dir_port4(struct cr_line *line, enum cr_access_mode mode)
+{
+    return dir_port(line, mode, P4DIR);
+}
 
 int
 access_port5(struct cr_line *line, enum cr_access_mode mode, int value)
 {
-    if (mode == CR_ACCESS_READ)
-        return PIN_READ(line->bitmask);
-    else
-        PIN_WRITE(line->bitmask, value);
-        return 0;
+    return access_port(line, mode, value, P5IN, P5OUT);
 }
 
 void
 dir_port5(struct cr_line *line, enum cr_access_mode mode)
 {
-    if (mode == CR_ACCESS_READ)
-        SETUP_PIN_READ(line->bitmask);
-    else
-        SETUP_PIN_WRITE(line->bitmask);
+    return dir_port(line, mode, P5DIR);
+}
+
+int
+access_port6(struct cr_line *line, enum cr_access_mode mode, int value)
+{
+    return access_port(line, mode, value, P6IN, P6OUT);
+}
+
+void
+dir_port6(struct cr_line *line, enum cr_access_mode mode)
+{
+    return dir_port(line, mode, P6DIR);
 }
 
 void
