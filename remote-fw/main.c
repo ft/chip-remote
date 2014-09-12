@@ -213,9 +213,9 @@ main(void)
 #define UART_DIR (P3DIR)
 #define UART_TX  (0x10)
 #define UART_RX  (0x20)
-/* This firmware doesn't use CTS or RTS in MSP430F1481 mode at this point. */
-#define UART_CTS (0x40)
-#define UART_RTS (0x80)
+
+#define P3_LED0 (0x40)
+#define P3_LED1 (0x80)
 
     /* Disable watchdog */
     WDTCTL = WDTPW + WDTHOLD;
@@ -301,12 +301,6 @@ main(void)
     /* Set module functionality for UART0 */
     BITMASK_SET(ME1, UTXE0|URXE0);
     BITMASK_SET(UART_SEL, UART_TX | UART_RX);
-
-    /* Set RTS as output, CTS as input */
-    BITMASK_SET(UART_DIR, UART_RTS);
-    BITMASK_CLEAR(UART_DIR, UART_CTS);
-    BITMASK_CLEAR(UART_SEL, UART_RTS);
-    BITMASK_CLEAR(UART_SEL, UART_CTS);
 
     /* Initialise uart state machine */
     BITMASK_CLEAR(UCTL0, SWRST);
