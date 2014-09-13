@@ -3,7 +3,7 @@
 # Terms for redistribution and use can be found in LICENCE.
 
 CC = @@CC@@
-CFLAGS = @@CFLAGS@@ @@CMCU@@ @@CTARGETFLAGS@@ @@COPTIM@@ @@CDEBUG@@
+CFLAGS = @@CFLAGS_EXTRA@@ @@CFLAGS@@ @@CMCU@@ @@CTARGETFLAGS@@ @@COPTIM@@ @@CDEBUG@@
 DEPCFLAGS = @@CFLAGS@@ @@COPTIM@@ @@CDEBUG@@
 
 STRIP = @@STRIP@@

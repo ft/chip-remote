@@ -26,24 +26,30 @@ msp430)
     OBJDUMP=msp430-objdump
     OBJEXT=a43
     OBJFMT=ihex
-    CFLAGS="-Wall -Wnested-externs -Wmissing-prototypes -Wstrict-prototypes"
+    CFLAGS="-Wnested-externs -Wmissing-prototypes -Wstrict-prototypes"
     CFLAGS="$CFLAGS -std=gnu99"
     CFLAGS="$CFLAGS -DMSPGCC_BUILD"
+    CFLAGS_EXTRA="-Wall"
     COPTIM=-Os
     CDEBUG=
     CONFIG_H=config.msp430.h
     MSPGCC_LOCATION=/usr
     ;;
 sim)
-    CC=clang
+    CC=${CC:-clang}
     STRIP=strip
     SIZE=:
     OBJCOPY=:
     OBJDUMP=:
     OBJEXT=a43
     OBJFMT=ihex
-    CFLAGS="-Wall -Wnested-externs -Wmissing-prototypes -Wstrict-prototypes"
+    CFLAGS="-Wnested-externs -Wmissing-prototypes -Wstrict-prototypes"
     CFLAGS="$CFLAGS -std=gnu99"
+    if [ "$CC" = clang ]; then
+        CFLAGS_EXTRA="-Weverything -pedantic"
+    else
+        CFLAGS_EXTRA="-Wall -pedantic"
+    fi
     COPTIM=-Os
     CDEBUG=
     CONFIG_H=config.sim.h
@@ -131,6 +137,7 @@ filter() {
         -e "s,@@OBJEXT@@,${OBJEXT},g" \
         -e "s,@@OBJFMT@@,${OBJFMT},g" \
         -e "s,@@CFLAGS@@,${CFLAGS},g" \
+        -e "s,@@CFLAGS_EXTRA@@,${CFLAGS_EXTRA},g" \
         -e "s,@@COPTIM@@,${COPTIM},g" \
         -e "s,@@CDEBUG@@,${CDEBUG},g" \
         -e "s,@@CONFIG_H@@,${CONFIG_H},g" \
