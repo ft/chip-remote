@@ -80,35 +80,25 @@
  *
  * 4*4 + 5 + 1 + 3 + 8 pins = 33 pins.
  *
- * So lets define three 4-pin ports; one 9 pin port (since we got 3 pins left,
- * let's make this one 12 pins wide anyway) and one 12 pin port.
+ * In order to limit the amount of memory required for the port mapping (the
+ * MSP430f1481 only sports 2KiB of RAM), let's group the SPI devices onto one
+ * SPI port with four chip-select lines. The parex port gets its own cr-port.
  */
 
 static struct cr_line port1_lines[] = {
+    /* CLK, MOSI, MISO plus for times CS: */
     NEW_LINE(access_port1, dir_port1, 1<<4),
     NEW_LINE(access_port1, dir_port1, 1<<5),
     NEW_LINE(access_port1, dir_port1, 1<<6),
     NEW_LINE(access_port1, dir_port1, 1<<7),
+    NEW_LINE(access_port2, dir_port2, 1<<0),
+    NEW_LINE(access_port2, dir_port2, 1<<1),
+    NEW_LINE(access_port2, dir_port2, 1<<2),
     LINE_LIST_END
 };
 
 static struct cr_line port2_lines[] = {
-    NEW_LINE(access_port2, dir_port2, 1<<0),
-    NEW_LINE(access_port2, dir_port2, 1<<1),
-    NEW_LINE(access_port2, dir_port2, 1<<2),
-    NEW_LINE(access_port2, dir_port2, 1<<3),
-    LINE_LIST_END
-};
-
-static struct cr_line port3_lines[] = {
-    NEW_LINE(access_port2, dir_port2, 1<<4),
-    NEW_LINE(access_port2, dir_port2, 1<<5),
-    NEW_LINE(access_port2, dir_port2, 1<<6),
-    NEW_LINE(access_port2, dir_port2, 1<<7),
-    LINE_LIST_END
-};
-
-static struct cr_line port4_lines[] = {
+    /* CLK, 3*ADDRESS, 8*DATA: */
     NEW_LINE(access_port4, dir_port4, 1<<0),
     NEW_LINE(access_port4, dir_port4, 1<<1),
     NEW_LINE(access_port4, dir_port4, 1<<2),
@@ -124,28 +114,9 @@ static struct cr_line port4_lines[] = {
     LINE_LIST_END
 };
 
-static struct cr_line port5_lines[] = {
-    NEW_LINE(access_port5, dir_port5, 1<<4),
-    NEW_LINE(access_port5, dir_port5, 1<<5),
-    NEW_LINE(access_port5, dir_port5, 1<<6),
-    NEW_LINE(access_port5, dir_port5, 1<<7),
-    NEW_LINE(access_port6, dir_port6, 1<<0),
-    NEW_LINE(access_port6, dir_port6, 1<<1),
-    NEW_LINE(access_port6, dir_port6, 1<<2),
-    NEW_LINE(access_port6, dir_port6, 1<<3),
-    NEW_LINE(access_port6, dir_port6, 1<<4),
-    NEW_LINE(access_port6, dir_port6, 1<<5),
-    NEW_LINE(access_port6, dir_port6, 1<<6),
-    NEW_LINE(access_port6, dir_port6, 1<<7),
-    LINE_LIST_END
-};
-
 struct cr_port cr_ports[] = {
-    NEW_PORT(4, port1_lines),
-    NEW_PORT(4, port2_lines),
-    NEW_PORT(4, port3_lines),
-    NEW_PORT(12, port4_lines),
-    NEW_PORT(12, port5_lines),
+    NEW_PORT(7, port1_lines),
+    NEW_PORT(12, port2_lines),
     PORT_LIST_END
 };
 
