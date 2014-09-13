@@ -7,18 +7,18 @@
 use strict;
 use Test::ChipRemote;
 
-my %clk  = ( port => 'A', index => 15, role => "CLK" );
-my %addr2  = ( port => 'A', index => 14, role => "ADDR:2" );
-my %addr1  = ( port => 'A', index => 13, role => "ADDR:1" );
-my %addr0  = ( port => 'A', index => 12, role => "ADDR:0" );
-my %data7  = ( port => 'A', index => 11, role => "DATA:7" );
-my %data6  = ( port => 'A', index => 10, role => "DATA:6" );
-my %data5  = ( port => 'A', index => 9, role => "DATA:5" );
-my %data4  = ( port => 'A', index => 8, role => "DATA:4" );
-my %data3  = ( port => 'A', index => 7, role => "DATA:3" );
-my %data2  = ( port => 'A', index => 6, role => "DATA:2" );
-my %data1  = ( port => 'A', index => 5, role => "DATA:1" );
-my %data0  = ( port => 'A', index => 4, role => "DATA:0" );
+my %clk  = ( port => 'B', index => 11, role => "CLK" );
+my %addr2  = ( port => 'B', index => 10, role => "ADDR:2" );
+my %addr1  = ( port => 'B', index => 9, role => "ADDR:1" );
+my %addr0  = ( port => 'B', index => 8, role => "ADDR:0" );
+my %data7  = ( port => 'B', index => 7, role => "DATA:7" );
+my %data6  = ( port => 'B', index => 6, role => "DATA:6" );
+my %data5  = ( port => 'B', index => 5, role => "DATA:5" );
+my %data4  = ( port => 'B', index => 4, role => "DATA:4" );
+my %data3  = ( port => 'B', index => 3, role => "DATA:3" );
+my %data2  = ( port => 'B', index => 2, role => "DATA:2" );
+my %data1  = ( port => 'B', index => 1, role => "DATA:1" );
+my %data0  = ( port => 'B', index => 0, role => "DATA:0" );
 
 sub clk_is_output { cr_line_trace_reply_direction_write(\%clk) }
 

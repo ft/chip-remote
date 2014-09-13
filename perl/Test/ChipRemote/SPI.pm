@@ -12,6 +12,7 @@ use Exporter;
 use base qw{ Exporter };
 use vars qw{ @EXPORT };
 @EXPORT = qw{ spi_default_setup
+              spi_extended_setup
               clk_halfcycle
               cs_setup
               clk_high
@@ -20,6 +21,9 @@ use vars qw{ @EXPORT };
               cs_high
               cs_low
               cs_is_output
+              csN_high
+              csN_low
+              csN_is_output
               miso_high
               miso_low
               miso_is_input
@@ -43,14 +47,17 @@ sub clk_halfcycle {
 
 my %clk  = ( port => 'A', index => 0, role => "CLK" );
 my %cs   = ( port => 'A', index => 1, role => "CS:0" );
+my %cs1   = ( port => 'A', index => 4, role => "CS:1" );
+my %cs2   = ( port => 'A', index => 5, role => "CS:2" );
+my %cs3   = ( port => 'A', index => 6, role => "CS:3" );
 my %mosi = ( port => 'A', index => 2, role => "MOSI" );
 my %miso = ( port => 'A', index => 3, role => "MISO" );
+my @css = ( \%cs, \%cs1, \%cs2, \%cs3 );
 
 sub spi_default_setup {
     return ( cr_request("SET 0 MODE SPI", "OK"),
              cr_request("SET 0 FRAME-LENGTH 8", "OK"),
-             # CS-LINES is currently non-writable in remote-fw!
-             #cr_request("SET 0 CS-LINES 1", "OK"),
+             cr_request("SET 0 CS-LINES 1", "OK"),
              cr_request("SET 0 BIT-ORDER MSB-FIRST", "OK"),
              cr_request("SET 0 CLK-PHASE-DELAY TRUE", "OK"),
              cr_request("SET 0 CLK-POLARITY RISING-EDGE", "OK"),
@@ -59,6 +66,13 @@ sub spi_default_setup {
              cr_request("LINE 0 $cs{index} $cs{role}", "OK"),
              cr_request("LINE 0 $mosi{index} $mosi{role}", "OK"),
              cr_request("LINE 0 $miso{index} $miso{role}", "OK") );
+}
+
+sub spi_extended_setup {
+    return ( cr_request("LINE 0 $cs1{index} $cs1{role}", "OK"),
+             cr_request("LINE 0 $cs2{index} $cs2{role}", "OK"),
+             cr_request("LINE 0 $cs3{index} $cs3{role}", "OK"),
+             cr_request("SET 0 CS-LINES 4", "OK") );
 }
 
 sub clk_high {
@@ -83,6 +97,21 @@ sub cs_low {
 
 sub cs_is_output {
     return cr_line_trace_reply_direction_write(\%cs),
+}
+
+sub csN_high {
+    my ($n) = @_;
+    return cr_line_trace_reply_out($css[$n], 1);
+}
+
+sub csN_low {
+    my ($n) = @_;
+    return cr_line_trace_reply_out($css[$n], 0);
+}
+
+sub csN_is_output {
+    my ($n) = @_;
+    return cr_line_trace_reply_direction_write($css[$n]);
 }
 
 sub mosi_high {
