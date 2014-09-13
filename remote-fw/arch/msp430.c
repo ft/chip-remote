@@ -50,7 +50,7 @@ access_port1(struct cr_line *line, enum cr_access_mode mode, int value)
 void
 dir_port1(struct cr_line *line, enum cr_access_mode mode)
 {
-    return dir_port(line, mode, P1DIR);
+    dir_port(line, mode, P1DIR);
 }
 
 int
@@ -62,7 +62,7 @@ access_port2(struct cr_line *line, enum cr_access_mode mode, int value)
 void
 dir_port2(struct cr_line *line, enum cr_access_mode mode)
 {
-    return dir_port(line, mode, P2DIR);
+    dir_port(line, mode, P2DIR);
 }
 
 int
@@ -74,7 +74,7 @@ access_port3(struct cr_line *line, enum cr_access_mode mode, int value)
 void
 dir_port3(struct cr_line *line, enum cr_access_mode mode)
 {
-    return dir_port(line, mode, P3DIR);
+    dir_port(line, mode, P3DIR);
 }
 
 int
@@ -86,7 +86,7 @@ access_port4(struct cr_line *line, enum cr_access_mode mode, int value)
 void
 dir_port4(struct cr_line *line, enum cr_access_mode mode)
 {
-    return dir_port(line, mode, P4DIR);
+    dir_port(line, mode, P4DIR);
 }
 
 int
@@ -98,7 +98,7 @@ access_port5(struct cr_line *line, enum cr_access_mode mode, int value)
 void
 dir_port5(struct cr_line *line, enum cr_access_mode mode)
 {
-    return dir_port(line, mode, P5DIR);
+    dir_port(line, mode, P5DIR);
 }
 
 int
@@ -110,7 +110,7 @@ access_port6(struct cr_line *line, enum cr_access_mode mode, int value)
 void
 dir_port6(struct cr_line *line, enum cr_access_mode mode)
 {
-    return dir_port(line, mode, P6DIR);
+    dir_port(line, mode, P6DIR);
 }
 
 void
