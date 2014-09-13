@@ -160,6 +160,7 @@ struct cr_words {
 
 enum cr_request_ids {
     REQUEST_HI = 0,
+    REQUEST_ADDRESS,
     REQUEST_BYE,
     REQUEST_FEATURES,
     REQUEST_FOCUS,

@@ -109,6 +109,7 @@ static void cr_process(void);
     [id] = { string, id, state, cb, { minargs, maxargs }, 0 }
 
 struct cr_request requests[MAX_REQUEST + 1] = {
+    NMR("ADDRESS", REQUEST_ADDRESS, CR_SINGLE_LINE, cr_handle_address, 1, 1),
     NMR("BYE", REQUEST_BYE, CR_SINGLE_LINE, cr_handle_bye, 0, 0),
     NMR("FEATURES", REQUEST_FEATURES, CR_MULTI_LINE, cr_handle_features, 0, 0),
     NOR("FOCUS", REQUEST_FOCUS, CR_SINGLE_LINE, cr_handle_focus, 1, 1),

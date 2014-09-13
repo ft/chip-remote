@@ -116,6 +116,26 @@ cr_unset_line_with_polarity(struct cr_line *line, int polarity)
     cr_line_write(line, polarity);
 }
 
+static void
+cr_spi_set_addr(struct cr_line **cs, int n, uint32_t addr, int polarity)
+{
+    int i;
+
+    for (i = 0; i < n; ++i)
+        if ((1<<i) & addr)
+            cr_set_line_with_polarity(cs[i], polarity);
+}
+
+static void
+cr_spi_unset_addr(struct cr_line **cs, int n, uint32_t addr, int polarity)
+{
+    int i;
+
+    for (i = 0; i < n; ++i)
+        if ((1<<i) & addr)
+            cr_unset_line_with_polarity(cs[i], polarity);
+}
+
 uint32_t
 cr_spi_transmit(struct cr_port *port, uint32_t data)
 {
@@ -125,7 +145,7 @@ cr_spi_transmit(struct cr_port *port, uint32_t data)
 
     rv = 0;
     map = port->mode.map.spi;
-    cr_set_line_with_polarity(map->cs[map->cs_focused], map->cs_polarity);
+    cr_spi_set_addr(map->cs, map->cs_lines_num, map->address, map->cs_polarity);
     spi_wait(CR_T_SPI_CS_SETUP);
     for (i = 0; i < map->frame_length; ++i) {
         /* Determine the current scan-mask depending on bit-order */
@@ -157,7 +177,7 @@ cr_spi_transmit(struct cr_port *port, uint32_t data)
         }
     }
     spi_wait(CR_T_SPI_CS_SETUP);
-    cr_unset_line_with_polarity(map->cs[map->cs_focused], map->cs_polarity);
+    cr_spi_unset_addr(map->cs,map->cs_lines_num,map->address,map->cs_polarity);
     return rv;
 }
 
@@ -194,7 +214,6 @@ cr_spi_init(struct cr_port *port)
 
     map = port->mode.map.spi;
     params = port->params;
-    map->cs_focused = 0;
 
     CR_SYMB_PARAM_GET(params, "CLK-POLARITY",
                       clk_polarity_tab, map->clk_polarity);
@@ -220,8 +239,11 @@ cr_spi_init(struct cr_port *port)
             return 0;
     }
     /* Bring CS and CLK to their idle states */
-    map->cs[map->cs_focused]->dir(map->cs[map->cs_focused], CR_ACCESS_WRITE);
-    cr_unset_line_with_polarity(map->cs[map->cs_focused], map->cs_polarity);
+    for (i = 0; i < map->cs_lines_num; ++i) {
+        map->cs[i]->dir(map->cs[i], CR_ACCESS_WRITE);
+        cr_unset_line_with_polarity(map->cs[i], map->cs_polarity);
+    }
+    map->address = 1;
     map->clk->dir(map->clk, CR_ACCESS_WRITE);
     cr_unset_line_with_polarity(map->clk, map->clk_polarity);
     /* Directions of MISO and MOSI */
@@ -277,7 +299,7 @@ cr_spi_params(struct cr_port *port)
     n = port->lines - 3;
     uint2str((uint32_t)n, buf);
     cr_param_init(new, 3, "CS-LINES", buf);
-    CR_MARK_PROP(&(new[3].value), CR_IMMUTABLE);
+    /* CR_MARK_PROP(&(new[3].value), CR_IMMUTABLE); */
     cr_param_init(new, 4, "CS-POLARITY", "ACTIVE-LOW");
     cr_param_init(new, 5, "FRAME-LENGTH", "8");
     cr_end_param_init(new, 6);
@@ -327,4 +349,18 @@ cr_spi_map(struct cr_port *port)
         return -1;
     }
     return 0;
+}
+
+int
+cr_spi_address(struct cr_port *port, uint32_t addr)
+{
+    struct cr_spi_map *map;
+    uint32_t max;
+
+    map = port->mode.map.spi;
+    max = (1 << map->cs_lines_num) - 1;
+    if (addr > max)
+        return 0;
+    map->address = addr;
+    return 1;
 }

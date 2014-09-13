@@ -20,23 +20,27 @@ static struct {
     int (*destroy_map)(struct cr_port *);
     int (*init_port)(struct cr_port *);
     uint32_t (*transmit)(struct cr_port *, uint32_t);
+    int (*set_addr)(struct cr_port *, uint32_t);
 } mode_helpers[] = {
     { CR_MODE_NONE, NULL, NULL, NULL, NULL },
     { CR_MODE_PAREX, cr_parex_params,
                      cr_parex_map,
                      cr_parex_destroy_map,
                      cr_parex_init,
-                     cr_parex_transmit },
+                     cr_parex_transmit,
+                     NULL },
     { CR_MODE_SPI, cr_spi_params,
                    cr_spi_map,
                    cr_spi_destroy_map,
                    cr_spi_init,
-                   cr_spi_transmit },
+                   cr_spi_transmit,
+                   cr_spi_address },
     { CR_MODE_INVALID, NULL, NULL, NULL, NULL }
 };
 
 typedef int (*port_setter)(struct cr_port *);
 typedef uint32_t (*port_transmitter)(struct cr_port *, uint32_t);
+typedef int (*port_addr_setter)(struct cr_port *, uint32_t);
 
 static port_transmitter
 cr_port_transmitter(enum cr_port_modes mode)
@@ -90,6 +94,17 @@ cr_port_initfnc(enum cr_port_modes mode)
     for (i = 0; mode_helpers[i].mode != CR_MODE_INVALID; ++i)
         if (mode_helpers[i].mode == mode)
             return mode_helpers[i].init_port;
+    return NULL;
+}
+
+static port_addr_setter
+cr_port_addrfnc(enum cr_port_modes mode)
+{
+    int i;
+
+    for (i = 0; mode_helpers[i].mode != CR_MODE_INVALID; ++i)
+        if (mode_helpers[i].mode == mode)
+            return mode_helpers[i].set_addr;
     return NULL;
 }
 
@@ -215,6 +230,20 @@ error:
     return rc;
 }
 
+static int
+validate_mode(enum cr_port_modes mode)
+{
+    if (mode == CR_MODE_NONE) {
+        cr_fail("Focused port is unconfigured.");
+        return 0;
+    }
+    if (mode == CR_MODE_INVALID) {
+        cr_fail("Focused port is invalid. [BUG?]");
+        return 0;
+    }
+    return 1;
+}
+
 void
 cr_init_port(struct cr_port *port)
 {
@@ -222,14 +251,9 @@ cr_init_port(struct cr_port *port)
     port_setter initfnc;
 
     mode = port->mode.mode;
-    if (mode == CR_MODE_NONE) {
-        cr_fail("Focused port is unconfigured.");
+    if (!validate_mode(mode))
         return;
-    }
-    if (mode == CR_MODE_INVALID) {
-        cr_fail("Focused port is invalid. [BUG?]");
-        return;
-    }
+
     initfnc = cr_port_initfnc(port->mode.mode);
     if (initfnc == NULL) {
         cr_fail("Port has no init function. [BUG?]");
@@ -240,5 +264,29 @@ cr_init_port(struct cr_port *port)
         return;
     }
     PORT_MARK_INITIALISED(port);
+    xcr_send_host(OK_REPLY);
+}
+
+void
+cr_port_address(struct cr_port *port, uint32_t addr)
+{
+    enum cr_port_modes mode;
+    port_addr_setter addrfnc;
+
+    mode = port->mode.mode;
+    if (!validate_mode(mode))
+        return;
+
+    addrfnc = cr_port_addrfnc(port->mode.mode);
+
+    if (addrfnc == NULL)
+        goto out;
+
+    if (!addrfnc(port, addr)) {
+        cr_uint_oor(addr);
+        return;
+    }
+
+out:
     xcr_send_host(OK_REPLY);
 }

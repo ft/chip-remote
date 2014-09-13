@@ -130,6 +130,21 @@ verify_fits_numofports(struct cr_words *words, size_t num)
 }
 
 int
+cr_handle_address(int cnt, struct cr_words *words)
+{
+    struct cr_port *port;
+    uint32_t addr;
+    int err;
+
+    addr = verify_word_is_int(words, 1, &err);
+    if (err)
+        return 0;
+    port = cr_ports + cr_get_focused_port();
+    cr_port_address(port, addr);
+    return 1;
+}
+
+int
 cr_handle_features(int cnt, struct cr_words *words)
 {
     int i, n;

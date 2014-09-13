@@ -8,7 +8,6 @@
 #define INC_LINE_MAPS_H
 
 struct cr_spi_map {
-    int cs_focused;
     struct cr_line *clk;
     struct cr_line *mosi;
     struct cr_line *miso;
@@ -26,6 +25,8 @@ struct cr_spi_map {
     int frame_length;
     /** [SPI_MSB_FIRST|SPI_LSB_FIRST] */
     int bit_order;
+    /** Chip-Select Addressing bitmask */
+    uint32_t address;
 };
 
 struct cr_parex_map {
