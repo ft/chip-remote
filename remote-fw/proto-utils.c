@@ -30,7 +30,7 @@ tx_add_n(char *buf, size_t len)
     if (len == 0)
         len = strlen(buf);
     left = CR_MAX_LINE - txbuflen;
-    if (left <= 0 || len > left)
+    if (left <= 0 || (int)len > left)
         return;
     txbuflen += len;
     strncat(txbuf, buf, len);

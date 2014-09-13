@@ -150,7 +150,7 @@ cr_check_args(enum cr_request_ids req, struct cr_words *words)
     }
     if (requests[req].args.max < 0)
         return 1;
-    if (argc > requests[req].args.max) {
+    if (argc > (unsigned int)(requests[req].args.max)) {
         cr_fail("Too many arguments");
         return 0;
     }

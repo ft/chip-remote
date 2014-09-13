@@ -57,7 +57,7 @@ cr_split_request(char *buf, struct cr_words *words)
         if (*end == '\0' && *start == '\0')
             break;
         words->word[n].start = start;
-        words->word[n].length = end - start;
+        words->word[n].length = (size_t)(end - start);
         words->count = ++n;
         if (*end == '\0')
             break;

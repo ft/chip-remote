@@ -29,7 +29,7 @@ msp430)
     CFLAGS="-Wnested-externs -Wmissing-prototypes -Wstrict-prototypes"
     CFLAGS="$CFLAGS -std=gnu99"
     CFLAGS="$CFLAGS -DMSPGCC_BUILD"
-    CFLAGS_EXTRA="-Wall"
+    CFLAGS_EXTRA="-Wall -Wextra -Wpadded -pedantic"
     COPTIM=-Os
     CDEBUG=
     CONFIG_H=config.msp430.h

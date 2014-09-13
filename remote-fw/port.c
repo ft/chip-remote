@@ -22,7 +22,7 @@ static struct {
     uint32_t (*transmit)(struct cr_port *, uint32_t);
     int (*set_addr)(struct cr_port *, uint32_t);
 } mode_helpers[] = {
-    { CR_MODE_NONE, NULL, NULL, NULL, NULL },
+    { CR_MODE_NONE, NULL, NULL, NULL, NULL, NULL, NULL },
     { CR_MODE_PAREX, cr_parex_params,
                      cr_parex_map,
                      cr_parex_destroy_map,
@@ -35,7 +35,7 @@ static struct {
                    cr_spi_init,
                    cr_spi_transmit,
                    cr_spi_address },
-    { CR_MODE_INVALID, NULL, NULL, NULL, NULL }
+    { CR_MODE_INVALID, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
 typedef int (*port_setter)(struct cr_port *);

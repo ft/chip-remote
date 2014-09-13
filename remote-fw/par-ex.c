@@ -54,13 +54,13 @@ cr_line_read(struct cr_line *line)
 static void
 cr_line_input(struct cr_line *line)
 {
-    return line->dir(line, CR_ACCESS_READ);
+    line->dir(line, CR_ACCESS_READ);
 }
 
 static void
 cr_line_output(struct cr_line *line)
 {
-    return line->dir(line, CR_ACCESS_WRITE);
+    line->dir(line, CR_ACCESS_WRITE);
 }
 
 int

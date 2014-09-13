@@ -41,7 +41,7 @@ cr_echo_int_property(char *reply, struct cr_int_prop *p)
     tx_init();
     tx_add(reply);
     tx_add_space();;
-    tx_add_integer(p->value);
+    tx_add_integer((uint32_t)p->value);
     if (!p->mutable_p)
         tx_add(" FIXED");
     tx_trigger();
@@ -120,14 +120,14 @@ cr_echo_line(size_t port, size_t line, enum cr_pin_role role, int idx,
     tx_init();
     tx_add(LINE_REPLY);
     tx_add_space();
-    tx_add_integer(port);
+    tx_add_integer((uint32_t)port);
     tx_add_space();;
-    tx_add_integer(line);
+    tx_add_integer((uint32_t)line);
     tx_add_space();;
     tx_add(cr_id2role(role));
     if (idx >= 0) {
         tx_add(":");
-        tx_add_integer(idx);
+        tx_add_integer((uint32_t)idx);
     }
     if (!mutable)
         tx_add(" FIXED");
@@ -137,7 +137,7 @@ cr_echo_line(size_t port, size_t line, enum cr_pin_role role, int idx,
 void
 cr_echo_lines(struct cr_port *ports, size_t num)
 {
-    cr_echo_int(LINES_REPLY, ports[num].lines);
+    cr_echo_int(LINES_REPLY, (uint32_t)ports[num].lines);
 }
 
 void
@@ -161,7 +161,11 @@ cr_echo_mode(struct cr_port *ports, size_t num)
     case CR_MODE_SPI:
         tx_add("SPI");
         break;
-    default:
+    case CR_MODE_PAREX:
+        tx_add("PAREX");
+        break;
+    case CR_MODE_NONE:
+    case CR_MODE_INVALID:
         tx_add("NONE");
     }
     if (!ports[num].mode.mutable_p)
@@ -172,7 +176,7 @@ cr_echo_mode(struct cr_port *ports, size_t num)
 void
 cr_echo_ports(size_t num)
 {
-    cr_echo_int(PORTS_REPLY, num);
+    cr_echo_int(PORTS_REPLY, (uint32_t)num);
 }
 
 void
@@ -185,5 +189,5 @@ cr_echo_focus(int num)
         tx_trigger();
         return;
     }
-    cr_echo_int(FOCUS_REPLY, num);
+    cr_echo_int(FOCUS_REPLY, (uint32_t)num);
 }
