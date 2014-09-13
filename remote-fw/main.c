@@ -160,27 +160,30 @@ static struct cr_line port1_lines[] = {
     NEW_LINE(access_portA, dir_portA, 1<<1),
     NEW_LINE(access_portA, dir_portA, 1<<2),
     NEW_LINE(access_portA, dir_portA, 1<<3),
+    NEW_LINE(access_portA, dir_portA, 1<<4),
+    NEW_LINE(access_portA, dir_portA, 1<<5),
+    NEW_LINE(access_portA, dir_portA, 1<<6),
     LINE_LIST_END
 };
 
 static struct cr_line port2_lines[] = {
-    NEW_LINE(access_portA, dir_portA, 1<<4),
-    NEW_LINE(access_portA, dir_portA, 1<<5),
-    NEW_LINE(access_portA, dir_portA, 1<<6),
-    NEW_LINE(access_portA, dir_portA, 1<<7),
-    NEW_LINE(access_portA, dir_portA, 1<<8),
-    NEW_LINE(access_portA, dir_portA, 1<<9),
-    NEW_LINE(access_portA, dir_portA, 1<<10),
-    NEW_LINE(access_portA, dir_portA, 1<<11),
-    NEW_LINE(access_portA, dir_portA, 1<<12),
-    NEW_LINE(access_portA, dir_portA, 1<<13),
-    NEW_LINE(access_portA, dir_portA, 1<<14),
-    NEW_LINE(access_portA, dir_portA, 1<<15),
+    NEW_LINE(access_portB, dir_portB, 1<<0),
+    NEW_LINE(access_portB, dir_portB, 1<<1),
+    NEW_LINE(access_portB, dir_portB, 1<<2),
+    NEW_LINE(access_portB, dir_portB, 1<<3),
+    NEW_LINE(access_portB, dir_portB, 1<<4),
+    NEW_LINE(access_portB, dir_portB, 1<<5),
+    NEW_LINE(access_portB, dir_portB, 1<<6),
+    NEW_LINE(access_portB, dir_portB, 1<<7),
+    NEW_LINE(access_portB, dir_portB, 1<<8),
+    NEW_LINE(access_portB, dir_portB, 1<<9),
+    NEW_LINE(access_portB, dir_portB, 1<<10),
+    NEW_LINE(access_portB, dir_portB, 1<<11),
     LINE_LIST_END
 };
 
 struct cr_port cr_ports[] = {
-    NEW_PORT(4, port1_lines),
+    NEW_PORT(7, port1_lines),
     NEW_PORT(12, port2_lines),
     PORT_LIST_END
 };

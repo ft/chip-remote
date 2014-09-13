@@ -13,13 +13,13 @@
 
 #include "stdout.h"
 
-int
-access_portA(struct cr_line *line, enum cr_access_mode mode, int value)
+static int
+access_port(char c, struct cr_line *line, enum cr_access_mode mode, int value)
 {
     static int val = 0;
 
     printf("-!- %c%c[%04x]{%s}",
-           'A',
+           c,
            mode == CR_ACCESS_READ ? '>' : '<',
            line->bitmask,
            line->rolestr);
@@ -34,13 +34,37 @@ access_portA(struct cr_line *line, enum cr_access_mode mode, int value)
     return -1;
 }
 
+static void
+dir_port(char c, struct cr_line *line, enum cr_access_mode mode)
+{
+    if (mode == CR_ACCESS_READ)
+        printf("-!- %cR[%04x]{%s}\n", c, line->bitmask, line->rolestr);
+    else
+        printf("-!- %cW[%04x]{%s}\n", c, line->bitmask, line->rolestr);
+}
+
+int
+access_portA(struct cr_line *line, enum cr_access_mode mode, int value)
+{
+    return access_port('A', line, mode, value);
+}
+
+int
+access_portB(struct cr_line *line, enum cr_access_mode mode, int value)
+{
+    return access_port('B', line, mode, value);
+}
+
 void
 dir_portA(struct cr_line *line, enum cr_access_mode mode)
 {
-    if (mode == CR_ACCESS_READ)
-        printf("-!- AR[%04x]{%s}\n", line->bitmask, line->rolestr);
-    else
-        printf("-!- AW[%04x]{%s}\n", line->bitmask, line->rolestr);
+    dir_port('A', line, mode);
+}
+
+void
+dir_portB(struct cr_line *line, enum cr_access_mode mode)
+{
+    dir_port('B', line, mode);
 }
 
 void
