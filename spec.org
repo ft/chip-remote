@@ -282,6 +282,8 @@ projects.
 
 *** HI Request
 
+    Synopsis:\hspace{0.5cm} ~HI~
+
     This request takes no argument.
 
     The ~HI~ request puts the remote controller into /Active State/. The reply
@@ -296,16 +298,20 @@ projects.
 
 *** ADDRESS Request
 
-    The ~ADDRESS~ request takes one non-optional argument. The request is used
-    to handle slave addressing with protocols, that employ explicit addressing
-    schemes. The actual effect of the request is dependent of the mode the
-    given port is set to. Modes that use in-band addressing may choose to
-    ignore ~ADDRESS~ requests altogether. See section [[sec:port-modes]] for
-    details.
+    Synopsis:\hspace{0.5cm} ~ADDRESS~
+
+    \vspace{0.3cm}\noindent The ~ADDRESS~ request takes one non-optional
+    argument. The request is used to handle slave addressing with protocols,
+    that employ explicit addressing schemes. The actual effect of the request
+    is dependent of the mode the given port is set to. Modes that use in-band
+    addressing may choose to ignore ~ADDRESS~ requests altogether. See section
+    [[sec:port-modes]] for details.
 
 *** BYE Request
 
-    This request takes no argument.
+    Synopsis:\hspace{0.5cm} ~BYE~
+
+    \vspace{0.3cm}\noindent This request takes no argument.
 
     This reply puts the remote controller back into /Idle State/. The remote
     controller's reply to this request shall be:
@@ -314,22 +320,28 @@ projects.
 
 *** FEATURES Request
 
-    This request takes no argument.
+    Synopsis:\hspace{0.5cm} ~FEATURES~
+
+    \vspace{0.3cm}\noindent This request takes no argument.
 
     The ~FEATURES~ request returns a multiline reply. Each line names one
     optional protocol feature the remote controller implements.
 
 *** FOCUS Request
 
-    The ~FOCUS~ request takes one non-optional argument: The index of the port
-    to focus. Focussing a port means that subsequent data transmissions are
-    carried out by using the specified port.
+    Synopsis:\hspace{0.5cm} ~FOCUS <port-index:integer>~
+
+    \vspace{0.3cm}\noindent The ~FOCUS~ request takes one non-optional
+    argument: The index of the port to focus. Focussing a port means that
+    subsequent data transmissions are carried out by using the specified port.
 
     Default focus is implementation defined.
 
 *** HASHED Request
 
-    This request takes one optional boolean argument.
+    Synopsis:\hspace{0.5cm} ~HASHED <next-state:boolean>~
+
+    \vspace{0.3cm}\noindent This request takes one optional boolean argument.
 
     The ~HASHED~ request enables or disables the Hashed-Messages extension (see
     section [[sec:hashed-messages]] for details). The boolean argument to the
@@ -349,15 +361,20 @@ projects.
 
 *** INIT Request
 
-    The ~INIT~ request takes one non-optional argument: The index of the port
-    to initialise. If a port has even a single configurable property, this
-    request is required initially before any other operation with that port and
-    then again after any set of changes with the port's properties.
+    Synopsis:\hspace{0.5cm} ~INIT <port-index:integer>~
+
+    \vspace{0.3cm}\noindent The ~INIT~ request takes one non-optional argument:
+    The index of the port to initialise. If a port has even a single
+    configurable property, this request is required initially before any other
+    operation with that port and then again after any set of changes with the
+    port's properties.
 
 *** LINES Request
 
-    The ~LINES~ request takes one non-optional argument: In index if the port
-    to query information about.
+    Synopsis:\hspace{0.5cm} ~LINES <port-index:integer>~
+
+    \vspace{0.3cm}\noindent The ~LINES~ request takes one non-optional
+    argument: In index if the port to query information about.
 
     This request returns a multiline reply. Each line shows to which role the
     line of a given index assigned to:
@@ -370,9 +387,10 @@ projects.
 
 *** LINE Request
 
-    The ~LINE~ request takes three non-optional arguments:
+    Synopsis:\hspace{0.5cm} ~LINE <port:integer> <line:integer> <role:string>~
 
-      - "~LINE <port:integer> <line:integer> <role:string>~"
+    \vspace{0.3cm}\noindent The ~LINE~ request takes three non-optional
+    arguments.
 
     ~port~ specifies the index of the port to configure. ~line~ specifies the
     index of the line within the port to configure. ~<role>~ describes the role
@@ -382,13 +400,17 @@ projects.
 
 *** MODES Request
 
-    This request takes no argument. The ~MODES~ request returns a multiline
-    reply. Each line names one mode the remote controller implements. Possible
-    modes are documented in section [[sec:port-modes]].
+    Synopsis:\hspace{0.5cm} ~MODES~
+
+    \vspace{0.3cm}\noindent This request takes no argument. The ~MODES~ request
+    returns a multiline reply. Each line names one mode the remote controller
+    implements. Possible modes are documented in section [[sec:port-modes]].
 
 *** PORTS Request
 
-    This request takes no argument.
+    Synopsis:\hspace{0.5cm} ~PORTS~
+
+    \vspace{0.3cm}\noindent This request takes no argument.
 
     The ~PORTS~ request returns a multiline reply. The lines shall contain the
     following:
@@ -402,8 +424,10 @@ projects.
 
 *** PORT Request
 
-    The ~PORT~ request takes one non-optional argument: The index of the port to
-    query information about.
+    Synopsis:\hspace{0.5cm} ~PORT <port-index:integer>~
+
+    \vspace{0.3cm}\noindent The ~PORT~ request takes one non-optional argument:
+    The index of the port to query information about.
 
     This request returns a multiline reply. The lines contain key-value pairs
     of properties for the port in question. These are the generic properties
@@ -428,9 +452,10 @@ projects.
 
 *** SET Request
 
-    The ~SET~ request takes three non-optional arguments:
+    Synopsis:\hspace{0.5cm} ~SET <port:integer> <key:string> <value>~
 
-      - "~SET <port:integer> <key:string> <value>~"
+    \vspace{0.3cm}\noindent The ~SET~ request takes three non-optional
+    arguments.
 
     ~port~ is the index of the port to configure. ~key~ is the property's name
     to set. ~value~ is the new value for the property.
@@ -444,11 +469,14 @@ projects.
 
 *** TRANSMIT Request
 
-    The ~TRANSMIT~ request takes one non-optional argument: The value to
-    transmit to the currently focused port. The value has to be an integer. In
-    case the given integer is larger than the frame-length configured for the
-    port's current mode, it is truncated to that size. In case it is smaller,
-    the value is padded with zeros towards the most-significant bit.
+    Synopsis:\hspace{0.5cm} ~TRANSMIT <data:integer>~
+
+    \vspace{0.3cm}\noindent The ~TRANSMIT~ request takes one non-optional
+    argument: The value to transmit to the currently focused port. The value
+    has to be an integer. In case the given integer is larger than the
+    frame-length configured for the port's current mode, it is truncated to
+    that size. In case it is smaller, the value is padded with zeros towards
+    the most-significant bit.
 
     The request returns an integer, which contains a possible reply from the
     attached slave device. If no meaningful reply is received, the return value
@@ -456,7 +484,9 @@ projects.
 
 *** VERSION Request
 
-    This request takes no argument.
+    Synopsis:\hspace{0.5cm} ~VERSION~
+
+    \vspace{0.3cm}\noindent This request takes no argument.
 
     This request returns the protocol version the remote controller implements.
     The reply shall be formatted like this:
@@ -477,6 +507,8 @@ projects.
 
 *** MORE Request
 
+    Synopsis:\hspace{0.5cm} ~MORE~
+
     This request takes no argument.
 
     This request causes the next line of a multiline reply to be returned. When
@@ -493,11 +525,11 @@ projects.
     What follows is a list of properties the ~PORT~ request may return with
     ports configured for ~SPI~ mode.
 
-      - ~FRAME-LENGTH <int>~: Indicates the number of bits that are used per
-        transmission.
+      - ~FRAME-LENGTH <integer>~: Indicates the number of bits that are used
+        per transmission.
 
-      - ~CS-LINES <int>~: Indicates the number of chip-select lines the port
-        offers.
+      - ~CS-LINES <integer>~: Indicates the number of chip-select lines the
+        port offers.
 
       - ~CS-POLARITY <ACTIVE-HIGH|ACTIVE-LOW>~: Use of either of the listed
         symbols indicates whether the chip-select lines operate as ~ACTIVE-HIGH~

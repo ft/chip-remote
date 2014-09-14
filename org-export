@@ -5,6 +5,11 @@ input="$2"
 intermediate="${input%.*}"
 output="$3"
 
+stripper () {
+    sed -e 's@Synopsis:\\hspace{[0-9.]*cm}@Synopsis:@' \
+        -e 's@\\vspace{[0-9.]*cm}\\noindent *@@'
+}
+
 case "$mode" in
 pdf)
     emacs -Q --batch --visit="$input" --funcall org-latex-export-to-pdf || exit 1
@@ -12,10 +17,19 @@ pdf)
     rm -f "${intermediate}.tex~"
     ;;
 html)
-    emacs -Q --batch --visit="$input" --funcall org-html-export-to-html || exit 1
+    stripped="${intermediate}.stripped"
+    stripper < "$input" > "$stripped"
+    emacs -Q --batch --visit="$stripped" \
+          --eval "(require 'org)" \
+          --eval "(require 'ox)" \
+          --eval "(require 'ox-html)" \
+          --funcall org-html-export-to-html || exit 1
+    rm -f "$stripped"
     ;;
 txt)
-    emacs -Q --batch --visit="$input" \
+    stripped="${intermediate}.stripped"
+    stripper < "$input" > "$stripped"
+    emacs -Q --batch --visit="$stripped" \
           --eval "(require 'org)" \
           --eval "(require 'ox)" \
           --eval "(require 'ox-ascii)" \
@@ -24,6 +38,7 @@ txt)
           --eval '(defun org-ascii-italic (it c in) (format "%s" c))' \
           --eval '(defun org-ascii-bold (b c in) (format "%s" c))' \
           --funcall org-ascii-export-to-ascii || exit 1
+    rm -f "$stripped"
     ;;
 *)
     printf 'org-export: Unknown mode: `%s'\''. Giving up.\n' "$mode"
