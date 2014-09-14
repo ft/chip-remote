@@ -5,6 +5,6 @@ exec valgrind --verbose                 \
               --leak-check=full         \
               --leak-resolution=high    \
               --show-possibly-lost=yes  \
-              --show-reachable=no       \
+              --show-reachable=yes      \
               --undef-value-errors=yes  \
               "$@"
