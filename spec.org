@@ -604,9 +604,12 @@ projects.
   would therefore cause a "~VERSION 2 0 0~" reply with remote controllers, that
   implement this version of the protocol. In detail that means:
 
-    - Major Version: *2*
-    - Minor Version: *0*
-    - Micro Version: *0*
+  |---------------+-----|
+  | <l>           | <c> |
+  | Major Version | *2* |
+  | Minor Version | *0* |
+  | Micro Version | *0* |
+  |---------------+-----|
 
 ** Major Version Number
 
