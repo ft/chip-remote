@@ -50,6 +50,8 @@ sub cb_more;
                 code => sub { return "OK" } },
     'SET' => { state => q{main},
                code => sub { return "OK" } },
+    'ADDRESS' => { state => q{main},
+                   code => sub { return "OK" } },
     'TRANSMIT' => { state => q{main},
                     code => sub { return "0" } },
     'MORE' => { state => [ qw{ features modes ports } ],
