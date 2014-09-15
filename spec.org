@@ -300,7 +300,7 @@ projects.
 
 *** ADDRESS Request
 
-    Synopsis:\hspace{0.5cm} ~ADDRESS~
+    Synopsis:\hspace{0.5cm} ~ADDRESS <address:integer>~
 
     \vspace{0.3cm}\noindent The ~ADDRESS~ request takes one non-optional
     argument. The request is used to handle slave addressing with protocols,
