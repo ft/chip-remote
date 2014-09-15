@@ -7,6 +7,8 @@
 # #+LATEX_HEADER: \textwidth 13cm
 # #+LATEX_HEADER: \hoffset 0cm
 
+#+LATEX: \setlength\parskip{0.2cm}
+
 #+LATEX: \vspace{6cm}
 
 #+LATEX: \thispagestyle{empty}
@@ -284,7 +286,7 @@ projects.
 
     Synopsis:\hspace{0.5cm} ~HI~
 
-    This request takes no argument.
+    \vspace{0.3cm}\noindent This request takes no argument.
 
     The ~HI~ request puts the remote controller into /Active State/. The reply
     to this request shall be:
