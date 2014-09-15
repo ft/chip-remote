@@ -5,7 +5,8 @@
 (define-module (chip-remote protocol)
   #:use-module (chip-remote io)
   #:use-module (srfi srfi-1)
-  #:export (bye
+  #:export (address
+            bye
             client-version
             features
             focus
@@ -303,6 +304,12 @@ represented integer INDEX separated by an ASCII space."
   "Place a request to a remote controller connected to via CONN, that consists
 of REQUEST and INDEX. The controller is expected to reply \"OK\"."
   (request-expects-ok conn (request-with-index request index)))
+
+(define request-with-integer request-with-index)
+(define request-with-integer-to-ok request-with-index-to-ok)
+
+(define (address conn addr)
+  (request-with-integer-to-ok conn "ADDRESS" addr))
 
 (define (focus conn index)
   "Instruct (via CONN) a remote controller to focus the port indexed by INDEX."
