@@ -10,7 +10,7 @@ for dir in scheme/*/*/*/*/*/ scheme/*/*/*/*/ \
     (cd "$dir" && for input in *.scm; do
                       [ ! -f "$input" ] && continue
                       output="${input%.*}.go"
-                      [ "$input" -nt "$output" ] || continue
+                      [ -e "$output" ] && [ "$output" -nt "$input" ] && continue
                       guild compile -o "$output" "$input" || exit 1
                   done; ) || exit 1
 done
