@@ -6,7 +6,8 @@
   #:export (bit-extract-width
             clear-bits
             one-bits
-            set-bits))
+            set-bits
+            logclear))
 
 (define (one-bits width)
   "Returns an integer, that has its lower WIDTH bits set:
