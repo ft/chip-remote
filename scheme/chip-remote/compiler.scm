@@ -89,10 +89,16 @@ syntax-objects in the context of KEYWORD."
             (cons (datum->syntax keyword expr)
                   (loop (read fileport)))))))
 
+  (define (change-section state section is-equal? key value)
+    (let ((sec (assq-ref state section)))
+      (alist-change-or-add eq? state section
+                           (alist-change-or-add is-equal? sec key value))))
+
   (define (change-meta state key value)
-    (let ((meta (assq-ref state 'meta)))
-      (alist-change-or-add eq? state 'meta
-                           (alist-change-or-add eq? meta key value))))
+    (change-section state 'meta eq? key value))
+
+  (define (add-register state idx data)
+    (change-section state 'registers = idx data))
 
   (define (initial-dsl-state)
     (list (list 'meta
@@ -110,11 +116,6 @@ syntax-objects in the context of KEYWORD."
           (list 'decoders)
           (list 'dependencies)
           (list 'combinations)))
-
-  (define (add-register state idx data)
-    (alist-change-or-add
-     eq? state 'registers (alist-change-or-add
-                           = (assq-ref state 'registers) idx data)))
 
   (define (dsl/with-modules-from kw state prefix exprs)
     state)
