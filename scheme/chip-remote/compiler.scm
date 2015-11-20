@@ -89,6 +89,11 @@ syntax-objects in the context of KEYWORD."
             (cons (datum->syntax keyword expr)
                   (loop (read fileport)))))))
 
+  (define (change-meta state key value)
+    (let ((meta (assq-ref state 'meta)))
+      (alist-change-or-add eq? state 'meta
+                           (alist-change-or-add eq? meta key value))))
+
   (define (initial-dsl-state)
     (list (list 'meta
                 (cons 'name #f)
@@ -186,7 +191,7 @@ Contents keywords:
                (loop rest default pp (append new-contents contents))))))))
 
   (define (dsl/default-value kw state value)
-    state)
+    (change-meta state 'default-value value))
 
   (define (dsl/register-width kw state value)
     state)
