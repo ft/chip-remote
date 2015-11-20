@@ -210,14 +210,14 @@ Contents keywords:
     state)
 
   (define (analyse-form keyword state expression)
-    (syntax-case expression (with-modules-from
-                             register
-                             default-value
-                             register-width
+    (syntax-case expression (combine-into
                              decode-using
-                             encoder-for
+                             default-value
                              dependencies-for
-                             combine-into)
+                             encoder-for
+                             register
+                             register-width
+                             with-modules-from)
       ((with-modules-from (prefix ...) e0 e* ...)
        (dsl/with-modules-from keyword
                               state
