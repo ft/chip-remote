@@ -194,7 +194,7 @@ Contents keywords:
     (change-meta state 'default-value value))
 
   (define (dsl/register-width kw state value)
-    state)
+    (change-meta state 'register-width value))
 
   (define (dsl/decode-using kw state type name exprs)
     state)
