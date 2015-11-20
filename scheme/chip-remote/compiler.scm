@@ -39,6 +39,8 @@
 
 (eval-when (expand load eval)
 
+  ;; Utilities
+
   (define (syntax-keyword? sym)
     (keyword? (syntax->datum sym)))
 
@@ -97,6 +99,43 @@ syntax-objects in the context of KEYWORD."
   (define (change-meta state key value)
     (change-section state 'meta eq? key value))
 
+  (define (clean-up state)
+    (let ((regs (assq-ref state 'registers)))
+      (alist-change-or-add
+       eq? state 'registers (sort regs (lambda (a b)
+                                         (< (car a) (car b)))))))
+
+  (define (file-in-load-path lp lst ext)
+    (let ((fname (string-concatenate
+                  (list (string-join (map symbol->string lst)
+                                     file-name-separator-string
+                                     'infix)
+                        ext))))
+      (let loop ((rest lp))
+        (if (null? rest)
+            (throw 'no-such-file-in-load-path
+                   (cons 'load-path lp)
+                   (cons 'file-list lst)
+                   (cons 'file-name fname))
+            (let ((full-name (string-concatenate
+                              (list (car rest)
+                                    file-name-separator-string
+                                    fname))))
+              (if (file-exists? full-name)
+                  full-name
+                  (loop (cdr rest))))))))
+
+  (define (determine-file-name file)
+    (cond ((string? file)
+           (unless (file-exists? file)
+             (throw 'no-such-file file))
+           file)
+          ((list? file)
+           (file-in-load-path %load-path file ".map"))
+          (else (throw 'unknown-type-for-file file))))
+
+  ;; Keyword-specific utilities
+
   (define (add-register state idx data)
     (change-section state 'registers = idx data))
 
@@ -116,9 +155,6 @@ syntax-objects in the context of KEYWORD."
           (list 'decoders)
           (list 'dependencies)
           (list 'combinations)))
-
-  (define (dsl/with-modules-from kw state prefix exprs)
-    state)
 
   (define (register/contents list)
     (let loop ((rest list) (acc '()))
@@ -147,6 +183,38 @@ syntax-objects in the context of KEYWORD."
                                                           'name
                                                           #'name)))))
                      acc))))))
+
+  ;; DSL callbacks
+
+  (define (dsl/combine-into kw state name exprs)
+    state)
+
+  (define (dsl/datasheet-code kw state value)
+    (change-meta state 'datasheet-code value))
+
+  (define (dsl/datasheet-uri kw state value)
+    (change-meta state 'datasheet-uri value))
+
+  (define (dsl/decode-using kw state type name exprs)
+    state)
+
+  (define (dsl/default-post-processor kw state value)
+    (change-meta state 'default-post-processor value))
+
+  (define (dsl/default-value kw state value)
+    (change-meta state 'default-value value))
+
+  (define (dsl/dependencies-for kw state type name exprs)
+    state)
+
+  (define (dsl/encoder-for kw state type name exprs)
+    state)
+
+  (define (dsl/manufacturer kw state value)
+    (change-meta state 'manufacturer value))
+
+  (define (dsl/name kw state value)
+    (change-meta state 'name value))
 
   (define (dsl/register kw state idx exprs)
     "Define a register and its contents.
@@ -191,49 +259,21 @@ Contents keywords:
                            (register/contents #'(e* ...))))
                (loop rest default pp (append new-contents contents))))))))
 
-  (define (dsl/datasheet-code kw state value)
-    (change-meta state 'datasheet-code value))
-
-  (define (dsl/datasheet-uri kw state value)
-    (change-meta state 'datasheet-uri value))
-
-  (define (dsl/default-post-processor kw state value)
-    (change-meta state 'default-post-processor value))
-
-  (define (dsl/default-value kw state value)
-    (change-meta state 'default-value value))
-
-  (define (dsl/default-post-processor kw state value)
-    (change-meta state 'default-post-processor value))
-
-  (define (dsl/manufacturer kw state value)
-    (change-meta state 'manufacturer value))
-
-  (define (dsl/name kw state value)
-    (change-meta state 'name value))
-
   (define (dsl/register-width kw state value)
     (change-meta state 'register-width value))
 
-  (define (dsl/decode-using kw state type name exprs)
+  (define (dsl/with-modules-from kw state prefix exprs)
     state)
 
-  (define (dsl/encoder-for kw state type name exprs)
-    state)
-
-  (define (dsl/dependencies-for kw state type name exprs)
-    state)
-
-  (define (dsl/combine-into kw state name exprs)
-    state)
+  ;; Main entry points
 
   (define (analyse-form keyword state expression)
     (syntax-case expression (combine-into
                              datasheet-code
                              datasheet-uri
                              decode-using
-                             default-value
                              default-post-processor
+                             default-value
                              dependencies-for
                              encoder-for
                              manufacturer
@@ -289,12 +329,6 @@ Contents keywords:
                          #'name
                          #'(e0 e* ...)))))
 
-  (define (clean-up state)
-    (let ((regs (assq-ref state 'registers)))
-      (alist-change-or-add
-       eq? state 'registers (sort regs (lambda (a b)
-                                         (< (car a) (car b)))))))
-
   (define (analyse-register-map keyword syntax-expressions)
     "This function processes all syntax expressions from a register map,
 store and return all information from those expressions in a concise way, so
@@ -304,33 +338,4 @@ jobs."
                (state (initial-dsl-state)))
       (if (null? rest)
           (clean-up state)
-          (loop (cdr rest) (analyse-form keyword state (car rest))))))
-
-  (define (file-in-load-path lp lst ext)
-    (let ((fname (string-concatenate
-                  (list (string-join (map symbol->string lst)
-                                     file-name-separator-string
-                                     'infix)
-                        ext))))
-      (let loop ((rest lp))
-        (if (null? rest)
-            (throw 'no-such-file-in-load-path
-                   (cons 'load-path lp)
-                   (cons 'file-list lst)
-                   (cons 'file-name fname))
-            (let ((full-name (string-concatenate
-                              (list (car rest)
-                                    file-name-separator-string
-                                    fname))))
-              (if (file-exists? full-name)
-                  full-name
-                  (loop (cdr rest))))))))
-
-  (define (determine-file-name file)
-    (cond ((string? file)
-           (unless (file-exists? file)
-             (throw 'no-such-file file))
-           file)
-          ((list? file)
-           (file-in-load-path %load-path file ".map"))
-          (else (throw 'unknown-type-for-file file)))))
+          (loop (cdr rest) (analyse-form keyword state (car rest)))))))
