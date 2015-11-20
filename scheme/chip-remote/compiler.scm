@@ -191,8 +191,26 @@ Contents keywords:
                            (register/contents #'(e* ...))))
                (loop rest default pp (append new-contents contents))))))))
 
+  (define (dsl/datasheet-code kw state value)
+    (change-meta state 'datasheet-code value))
+
+  (define (dsl/datasheet-uri kw state value)
+    (change-meta state 'datasheet-uri value))
+
+  (define (dsl/default-post-processor kw state value)
+    (change-meta state 'default-post-processor value))
+
   (define (dsl/default-value kw state value)
     (change-meta state 'default-value value))
+
+  (define (dsl/default-post-processor kw state value)
+    (change-meta state 'default-post-processor value))
+
+  (define (dsl/manufacturer kw state value)
+    (change-meta state 'manufacturer value))
+
+  (define (dsl/name kw state value)
+    (change-meta state 'name value))
 
   (define (dsl/register-width kw state value)
     (change-meta state 'register-width value))
@@ -211,10 +229,15 @@ Contents keywords:
 
   (define (analyse-form keyword state expression)
     (syntax-case expression (combine-into
+                             datasheet-code
+                             datasheet-uri
                              decode-using
                              default-value
+                             default-post-processor
                              dependencies-for
                              encoder-for
+                             manufacturer
+                             name
                              register
                              register-width
                              with-modules-from)
@@ -228,8 +251,18 @@ Contents keywords:
                      state
                      #'idx
                      #'(e0 e* ...)))
+      ((datasheet-code value)
+       (dsl/datasheet-code keyword state #'value))
+      ((datasheet-uri value)
+       (dsl/datasheet-uri keyword state #'value))
       ((default-value value)
        (dsl/default-value keyword state #'value))
+      ((default-post-processor value)
+       (dsl/default-post-processor keyword state #'value))
+      ((manufacturer value)
+       (dsl/manufacturer keyword state #'value))
+      ((name value)
+       (dsl/name keyword state #'value))
       ((register-width value)
        (dsl/register-width keyword state #'value))
       ((decode-using (type name) e0 e* ...)
