@@ -99,11 +99,21 @@ syntax-objects in the context of KEYWORD."
   (define (change-meta state key value)
     (change-section state 'meta eq? key value))
 
+  (define (clean-up-section state section cleaner)
+    (let ((sec (assq-ref state section)))
+      (alist-change-or-add eq? state section (cleaner sec))))
+
   (define (clean-up state)
-    (let ((regs (assq-ref state 'registers)))
-      (alist-change-or-add
-       eq? state 'registers (sort regs (lambda (a b)
-                                         (< (car a) (car b)))))))
+    (let ((cleaners `((registers . ,(lambda (x)
+                                      (sort x (lambda (a b)
+                                                (< (car a)
+                                                   (car b)))))))))
+      (let loop ((rest cleaners) (clean-state state))
+        (if (null? rest)
+            clean-state
+            (loop (cdr rest) (clean-up-section clean-state
+                                               (caar rest)
+                                               (cdar rest)))))))
 
   (define (file-in-load-path lp lst ext)
     (let ((fname (string-concatenate
