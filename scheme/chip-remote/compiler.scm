@@ -170,8 +170,8 @@ syntax-objects in the context of KEYWORD."
           (list 'dependencies)
           (list 'combinations)))
 
-  (define (register/contents list)
-    (let loop ((rest list) (acc '()))
+  (define (register/contents lst)
+    (let loop ((rest lst) (acc '()))
       (syntax-case rest ()
         (() (values rest (reverse acc)))
         ((sym e* ...) (syntax-keyword? #'sym)
