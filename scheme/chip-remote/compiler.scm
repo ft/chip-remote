@@ -212,6 +212,9 @@ syntax-objects in the context of KEYWORD."
   (define (dsl/decode-using kw state type name exprs)
     state)
 
+  (define (dsl/decoder kw state name exprs)
+    state)
+
   (define (dsl/default-post-processor kw state value)
     (change-meta state 'default-post-processor value))
 
@@ -219,6 +222,9 @@ syntax-objects in the context of KEYWORD."
     (change-meta state 'default-value value))
 
   (define (dsl/dependencies-for kw state type name exprs)
+    state)
+
+  (define (dsl/encoder kw state name exprs)
     state)
 
   (define (dsl/encoder-for kw state type name exprs)
@@ -286,9 +292,11 @@ Contents keywords:
                              datasheet-code
                              datasheet-uri
                              decode-using
+                             decoder
                              default-post-processor
                              default-value
                              dependencies-for
+                             encoder
                              encoder-for
                              manufacturer
                              name
@@ -325,6 +333,10 @@ Contents keywords:
                          #'type
                          #'name
                          #'(e0 e* ...)))
+      ((decoder (dname) e0 e* ...)
+       (dsl/decoder keyword state #'dname #'(e0 e* ...)))
+      ((encoder (ename) e0 e* ...)
+       (dsl/encoder keyword state #'ename #'(e0 e* ...)))
       ((encoder-for (type name) e0 e* ...)
        (dsl/encoder-for keyword
                         state
