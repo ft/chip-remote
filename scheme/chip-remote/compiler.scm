@@ -198,6 +198,16 @@ syntax-objects in the context of KEYWORD."
                                                           #'name)))))
                      acc))))))
 
+  (define (encoder-constraints lst)
+    (syntax-case lst (=>)
+      ((name => value)
+       #'(cons name (lambda (x) (memq x value))))
+      ((name . value)
+       #'(cons name value))))
+
+  (define (add-coder section state name value)
+    (change-section state section eq? name value))
+
   ;; DSL callbacks
 
   (define (dsl/combine-into kw state name exprs)
@@ -213,7 +223,17 @@ syntax-objects in the context of KEYWORD."
     state)
 
   (define (dsl/decoder kw state name exprs)
-    state)
+    (let loop ((rest exprs) (acc '()))
+      (syntax-case rest ()
+        (() (add-coder 'decoders state (syntax->datum name) (reverse acc)))
+        ((#:type value e* ...)
+         (loop #'(e* ...) (alist-change-or-add eq? acc
+                                               'type
+                                               #'value)))
+        ((#:callback value e* ...)
+         (loop #'(e* ...) (alist-change-or-add eq? acc
+                                               'callback
+                                               #'value))))))
 
   (define (dsl/default-post-processor kw state value)
     (change-meta state 'default-post-processor value))
@@ -225,7 +245,25 @@ syntax-objects in the context of KEYWORD."
     state)
 
   (define (dsl/encoder kw state name exprs)
-    state)
+    (let loop ((rest exprs) (acc '()))
+      (syntax-case rest ()
+        (() (add-coder 'encoders state (syntax->datum name) (reverse acc)))
+        ((#:type value e* ...)
+         (loop #'(e* ...) (alist-change-or-add eq? acc
+                                               'type
+                                               #'value)))
+        ((#:callback value e* ...)
+         (loop #'(e* ...) (alist-change-or-add eq? acc
+                                               'callback
+                                               #'value)))
+        ((#:signature (v0 v* ...) e* ...)
+         (loop #'(e* ...) (alist-change-or-add eq? acc
+                                               'signature
+                                               #'(v0 v* ...))))
+        ((#:constraints value e* ...)
+         (loop #'(e* ...) (alist-change-or-add
+                           eq? acc 'constraints
+                           (encoder-constraints #'value)))))))
 
   (define (dsl/encode-using kw state type name exprs)
     state)
