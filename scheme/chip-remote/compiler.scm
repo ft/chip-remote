@@ -227,7 +227,7 @@ syntax-objects in the context of KEYWORD."
   (define (dsl/encoder kw state name exprs)
     state)
 
-  (define (dsl/encoder-for kw state type name exprs)
+  (define (dsl/encode-using kw state type name exprs)
     state)
 
   (define (dsl/manufacturer kw state value)
@@ -297,7 +297,7 @@ Contents keywords:
                              default-value
                              dependencies-for
                              encoder
-                             encoder-for
+                             encode-using
                              manufacturer
                              name
                              register
@@ -337,8 +337,8 @@ Contents keywords:
        (dsl/decoder keyword state #'dname #'(e0 e* ...)))
       ((encoder (ename) e0 e* ...)
        (dsl/encoder keyword state #'ename #'(e0 e* ...)))
-      ((encoder-for (type name) e0 e* ...)
-       (dsl/encoder-for keyword
+      ((encode-using (type name) e0 e* ...)
+       (dsl/encode-using keyword
                         state
                         #'type
                         #'name
