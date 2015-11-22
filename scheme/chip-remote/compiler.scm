@@ -377,10 +377,10 @@ Contents keywords:
        (dsl/encoder keyword state #'ename #'(e0 e* ...)))
       ((encode-using (type name) e0 e* ...)
        (dsl/encode-using keyword
-                        state
-                        #'type
-                        #'name
-                        #'(e0 e* ...)))
+                         state
+                         #'type
+                         #'name
+                         #'(e0 e* ...)))
       ((dependencies-for (type name) e0 e* ...)
        (dsl/dependencies-for keyword
                              state
