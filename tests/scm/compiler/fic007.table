@@ -1,0 +1,22 @@
+;; -*- scheme -*-
+
+(register #x0
+  #:default #x54
+  #:contents (m-divider #:offset 0 #:width 4)
+             (n-divider #:offset 4 #:width 4))
+
+(register #x1
+  #:default #xd0
+  #:contents (power-save #:offset 0 #:width 1)
+             (reference-divider #:offset 4 #:width 4))
+
+(register #x2
+  #:default #xf0
+  #:contents (gain #:offset 0 #:width 6)
+             (rate #:offset 6 #:width 2))
+
+(register #xf
+  #:default #xc8
+  #:contents (self-destruct #:offset 0 #:width 1)
+             (deploy-coffee #:offset 2 #:width 3)
+             (read-paper #:offset 7 #:width 1))
