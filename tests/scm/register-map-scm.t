@@ -1,51 +1,39 @@
-;; Copyright (c) 2011-2014 chip-remote workers, All rights reserved.
+;; Copyright (c) 2011-2016 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
+             (chip-remote compiler level-one)
              (chip-remote register-map))
 
 (primitive-load "tests/test-tap-cfg.scm")
 
-;; Define a register map for our fictional ‘foo-bar’ device. It has four
-;; eight-bit registers. Not all bits are used for configuration.
-(define-register-map foo-bar
-  (#x0 (default-value #x54)
-       (contents (m-divider 0 4)
-                 (n-divider 4 4)))
-  (#x1 (default-value #xd0)
-       (contents (power-save 0 1)
-                 (reference-divider 4 4)))
-  (#x2 (default-value #xf0)
-       (contents (gain 0 6)
-                 (rate 6 2)))
-  (#xf (default-value #xc8)
-       (contents (self-destruct 0 1)
-                 (deploy-coffee 2 3)
-                 (read-paper 7 1))))
+;; Using the compiler for the DSL to generate the register map for our
+;; fictional device:
+(generate-level-one "tests/scm/compiler/fic007.table")
 
 ;; ‘register-default’ is an old API, that is used in parts of this script. We
 ;; could rewrite the whole script to use ‘regmap->item’ instead. Ooor, we
 ;; introduce a wrapper like this:
 (define (register-default rm addr)
-  (regmap->item rm addr 'default-value))
+  (regmap->item rm addr 'default))
 
 (with-fs-test-bundle
  (plan 19)
 
  (define-test "register-default finds first address"
-   (pass-if-no-exception (register-default foo-bar-register-map #x0)))
+   (pass-if-no-exception (register-default register-map #x0)))
  (define-test "register-default first default-value is correct"
-   (pass-if-= (register-default foo-bar-register-map #x0)
+   (pass-if-= (register-default register-map #x0)
               #x54))
 
  (define-test "register-default finds third address"
-   (pass-if-no-exception (register-default foo-bar-register-map #x2)))
+   (pass-if-no-exception (register-default register-map #x2)))
  (define-test "register-default third default-value is correct"
-   (pass-if-= (register-default foo-bar-register-map #x2)
+   (pass-if-= (register-default register-map #x2)
               #xf0))
 
- (let ((reg-0 (register-default foo-bar-register-map #x0)))
+ (let ((reg-0 (register-default register-map #x0)))
    (define-test "#x0: m-divider: #x4"
      (pass-if-= (get-m-divider-bits reg-0)
                 #x4))
@@ -53,7 +41,7 @@
      (pass-if-= (get-n-divider-bits reg-0)
                 #x5)))
 
- (let ((reg-1 (register-default foo-bar-register-map #x1)))
+ (let ((reg-1 (register-default register-map #x1)))
    (define-test "#x1: power-safe: #x0"
      (pass-if-= (get-power-save-bits reg-1)
                 #x0))
@@ -61,7 +49,7 @@
      (pass-if-= (get-reference-divider-bits reg-1)
                 #xd)))
 
- (let ((reg-2 (register-default foo-bar-register-map #x2)))
+ (let ((reg-2 (register-default register-map #x2)))
    (define-test "#x2: gain: #x30"
      (pass-if-= (get-gain-bits reg-2)
                 #x30))
@@ -69,7 +57,7 @@
      (pass-if-= (get-rate-bits reg-2)
                 #x3)))
 
- (let ((reg-f (register-default foo-bar-register-map #xf)))
+ (let ((reg-f (register-default register-map #xf)))
    (define-test "#xf: self-destruct: #x0"
      (pass-if-= (get-self-destruct-bits reg-f)
                 #x0))
