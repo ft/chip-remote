@@ -4,10 +4,18 @@
 
 (define-module (chip-remote compiler level-one)
   #:use-module (chip-remote compiler)
+  #:use-module (chip-remote compiler utilities)
   #:use-module (srfi srfi-1)
   #:export (generate-level-one))
 
-(define (generate-entry-functions kw data cb)
+(define (generate-entry-functions kw state cb)
+  (foreach-entry kw state (lambda (kw entry)
+                            (let ((name (assq-ref entry 'name))
+                                  (offset (assq-ref entry 'offset))
+                                  (width (assq-ref entry 'width)))
+                              (list (cb kw name offset width))))))
+
+(define (generate-entry-functions* kw data cb)
   (let loop ((rest (concatenate
                     (map (lambda (x) (assq-ref (cdr x) 'contents))
                          (assq-ref data 'registers))))
