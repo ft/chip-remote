@@ -1,5 +1,13 @@
 ;; -*- scheme -*-
 
+(name 'fic007)
+(manufacturer "Fictional Instruments")
+(datasheet-code 'FIC007)
+(datasheet-uri "http://www.fic-inc.tld/ds/fic007.pdf")
+
+(register-width 8)
+(default-value #x42)
+
 (register #x0
   #:default #x54
   #:contents (m-divider #:offset 0 #:width 4)
