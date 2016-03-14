@@ -142,6 +142,43 @@ convenient and enables a number of useful techniques when compiling to Scheme.
    ~post-processor~ field definition of the ~register~ form.
 
 
+* Register Information
+
+** The register form
+
+   - *TBD*
+
+
+* Interconnections
+
+** dependencies-for
+
+   - *TBD*
+
+** combine-into
+
+   - *TBD*
+
+
+* Encoding and Decoding
+
+** encoder
+
+   - *TBD*
+
+** decoder
+
+   - *TBD*
+
+** encode-using
+
+   - *TBD*
+
+** decode-using
+
+   - *TBD*
+
+
 * Version <<sec:version-number>>
 
     - Current status of the specification: *Draft*
