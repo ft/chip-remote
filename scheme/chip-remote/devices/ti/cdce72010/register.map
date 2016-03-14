@@ -21,8 +21,7 @@
              (cp-preset-output-voltage #:offset 17 #:width 1)
              (cp-current #:offset 18 #:width 4)
              (reserved #:offset 22 #:width 2)
-             ;; "i-"?
-             (i-ref-pull-down #:offset 24 #:width 1)
+             (i-ref-cp-pull-down-enable #:offset 24 #:width 1)
              (output-mode #:offset 25 #:width 7))
 
 
