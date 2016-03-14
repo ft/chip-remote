@@ -75,6 +75,48 @@ convenient and enables a number of useful techniques when compiling to Scheme.
    the high level compiler.
 
 
+* Meta Information
+
+  The forms described within this section capture information about a device
+  that bears little to no technical relevance. They provide additional
+  annotation about facts like the origin and documentation of the device that
+  is being described.
+
+** name
+
+   Synopsis:\hspace{0.5cm} ~(name NAME)~
+
+   The ~name~ form reflects the name of a device. The parameter ~NAME~ has to
+   be a symbol or a string. Example: ~(name 'cdce72010)~
+
+** manufacturer
+
+   Synopsis:\hspace{0.5cm} ~(manufacturer NAME)~
+
+   This form allows users to express the name of the manufacturer of a device.
+   The ~NAME~ parameter has to be a string.
+
+   \noindent{}Example:\hspace{0.25cm} ~(manufacturer "Texas Instruments")~
+
+** datasheet-code
+
+   Synopsis:\hspace{0.5cm} ~(datasheet-code CODE)~
+
+   Some manufacturers assign document codes to their datasheets. This form
+   enables users to express such codes. The ~CODE~ parameter has toe be a
+   symbol or a string. Example: ~(datasheet-code 'scas858)~
+
+** datasheet-uri
+
+   Synopsis:\hspace{0.5cm} ~(datasheet-uri URI)~
+
+   Most manufacturers offer users to access datasheets directly from their
+   websites. This form allows users to provide a direct URI for datasheet
+   retrieval. The ~URI~ parameter has to be a string.
+
+   \noindent{}Example:\hspace{0.25cm} ~(datasheet-uri "http://www.ti.com/lit/pdf/scas858")~
+
+
 * Version <<sec:version-number>>
 
     - Current status of the specification: *Draft*
@@ -112,6 +154,7 @@ convenient and enables a number of useful techniques when compiling to Scheme.
 
 
 #+LATEX: \newpage
+
 
 * Full Copyright Statement
 
