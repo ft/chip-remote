@@ -21,6 +21,10 @@ rccep-spec.pdf
 rccep-spec.tex
 rccep-spec.txt
 rccep-spec.html
+crdsl-spec.pdf
+crdsl-spec.tex
+crdsl-spec.txt
+crdsl-spec.html
 auto/*
 remote-fw/Makefile
 remote-fw/config.*.h
