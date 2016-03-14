@@ -1,5 +1,4 @@
 #+TITLE: Device Description Language Specification
-#+SUBTITLE: The ~chip-remote~ Project
 #+AUTHOR: Frank Terbeck
 #+EMAIL: ft@bewatermyfriend.org
 #+OPTIONS: num:t toc:nil
