@@ -15,7 +15,16 @@
 
 #+BEGIN_ABSTRACT
 
-…
+Given a useful, annotated representation of a configurable device's internals
+allows to infer a lot of additional information that enables software to
+automatically generate most, if not all of the code that is required to deal
+with these devices. It also opens the door for compiler backends that compile
+to C library code, targeting micro-controller platforms. This document
+describes the domain specific language (DSL) used by the chip-remote project to
+represent and annotate configurable devices. The language is made up of
+S-expressions and uses the Scheme reader to perform all parsing tasks, which is
+convenient and enables a number of useful techniques when compiling to Scheme.
+
 
 #+END_ABSTRACT
 
