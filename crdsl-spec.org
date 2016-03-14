@@ -32,6 +32,41 @@
 
 #+LATEX: \newpage
 
+* Notes
+
+** How to deal with banks
+
+   Some manufacturers like the idea of grouping registers into banks. The
+   current concept did not consider banks at all. I don't feel that this is
+   necessary. Making banks explicit would introduce quite a bit of redundancy
+   into device definition files with very little benefit.
+
+   If there are, say six banks in a device, we will just determine how many
+   bits that is going to cost us and add those in front of the usual register
+   address. Add to that a few functions that can extract and encode the real
+   register addresses as well as bank addresses from and into the new composite
+   address word and we'll be set.
+
+   In the definition files themselves, the existence of banks should be
+   possible with a single declaration ~(banks 6)~. And to place a register in a
+   certain bank should be done with its definition:
+
+#+BEGIN_SRC scheme
+  (register #x23
+    #:bank 3
+    #:default 42
+    #:contents ...)
+#+END_SRC
+
+   Six banks require three bits to encode, so the above address would change:
+
+   - From: ~00100011~ (~0x23~)
+   - To: ~00100011110~ (~0x11e~)
+
+   The lower level compilers will not care about this. The impact will be on
+   the high level compiler.
+
+
 * Version <<sec:version-number>>
 
     - Current status of the specification: *Draft*
