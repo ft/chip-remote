@@ -24,7 +24,6 @@
              (i-ref-cp-pull-down-enable #:offset 24 #:width 1)
              (output-mode #:offset 25 #:width 7))
 
-
 (register #x1
   #:default #x83840051
   #:contents (address #:offset 0 #:width 4)
