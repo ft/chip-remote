@@ -167,6 +167,8 @@ syntax-objects in the context of KEYWORD."
           (list 'banks)
           (list 'encoders)
           (list 'decoders)
+          (list 'encoder-map)
+          (list 'decoder-map)
           (list 'dependencies)
           (list 'combinations)))
 
@@ -219,7 +221,7 @@ syntax-objects in the context of KEYWORD."
   (define (dsl/datasheet-uri kw state value)
     (change-meta state 'datasheet-uri value))
 
-  (define (dsl/decode-using kw state type name exprs)
+  (define (dsl/decode-using kw state name exprs)
     state)
 
   (define (dsl/decoder kw state name exprs)
@@ -265,7 +267,7 @@ syntax-objects in the context of KEYWORD."
                            eq? acc 'constraints
                            (encoder-constraints #'value)))))))
 
-  (define (dsl/encode-using kw state type name exprs)
+  (define (dsl/encode-using kw state name exprs)
     state)
 
   (define (dsl/manufacturer kw state value)
@@ -365,22 +367,14 @@ Contents keywords:
        (dsl/name keyword state #'value))
       ((register-width value)
        (dsl/register-width keyword state #'value))
-      ((decode-using (type name) e0 e* ...)
-       (dsl/decode-using keyword
-                         state
-                         #'type
-                         #'name
-                         #'(e0 e* ...)))
+      ((decode-using (ename) e0 e* ...)
+       (dsl/decode-using keyword state #'ename #'(e0 e* ...)))
       ((decoder (dname) e0 e* ...)
        (dsl/decoder keyword state #'dname #'(e0 e* ...)))
       ((encoder (ename) e0 e* ...)
        (dsl/encoder keyword state #'ename #'(e0 e* ...)))
-      ((encode-using (type name) e0 e* ...)
-       (dsl/encode-using keyword
-                         state
-                         #'type
-                         #'name
-                         #'(e0 e* ...)))
+      ((encode-using (dname) e0 e* ...)
+       (dsl/encode-using keyword state #'dname #'(e0 e* ...)))
       ((dependencies-for (type name) e0 e* ...)
        (dsl/dependencies-for keyword
                              state
