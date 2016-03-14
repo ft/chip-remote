@@ -37,3 +37,19 @@
   #:contents (self-destruct #:offset 0 #:width 1)
              (deploy-coffee #:offset 2 #:width 3)
              (read-paper #:offset 7 #:width 1))
+
+(register #x10
+  #:default #xc8
+  #:contents (lvds-strength #:offset 0 #:width 2))
+
+;; Decoders:
+
+(decoder (lvds-strength-map) #:type alist)
+
+(decode-using (lvds-strength-map) lvds-strength)
+
+;; Encoders:
+
+(encoder (lvds-strength-map) #:type reverse-alist)
+
+(encode-using (lvds-strength-map) lvds-strength)
