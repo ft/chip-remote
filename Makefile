@@ -39,13 +39,13 @@ spec: rccep-spec.pdf rccep-spec.html rccep-spec.txt
 spec-clean:
 	rm -f rccep-spec.tex rccep-spec.pdf rccep-spec.html rccep-spec.txt
 
-rccep-spec.pdf: spec.org
+rccep-spec.pdf: rccep-spec.org
 	$(ORG_EXPORT) pdf $< $@
 
-rccep-spec.html: spec.org
+rccep-spec.html: rccep-spec.org
 	$(ORG_EXPORT) html $< $@
 
-rccep-spec.txt: spec.org
+rccep-spec.txt: rccep-spec.org
 	$(ORG_EXPORT) txt $< $@
 
 test:

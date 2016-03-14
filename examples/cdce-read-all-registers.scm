@@ -4,7 +4,8 @@
 
 ;; This is a fairly elaborate example script to outline the basic use of the
 ;; ‘chip-remote’ client library. This script assumes that the remote firmware
-;; implements pretty much all of the protocol specification from ‘spec.org’.
+;; implements pretty much all of the protocol specification from
+;; ‘rccep-spec.org’.
 ;;
 ;; It also assumes that the port that is being used has enough lines to
 ;; implement SPI (so at least four lines in the chosen port).
