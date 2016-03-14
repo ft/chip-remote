@@ -1,0 +1,95 @@
+#+TITLE: Device Description Language Specification
+#+SUBTITLE: The ~chip-remote~ Project
+#+AUTHOR: Frank Terbeck
+#+EMAIL: ft@bewatermyfriend.org
+#+OPTIONS: num:t toc:nil
+#+ATTR_ASCII: :width 79
+#+LATEX_CLASS_OPTIONS: [a4paper]
+# #+LATEX_HEADER: \textwidth 13cm
+# #+LATEX_HEADER: \hoffset 0cm
+
+#+LATEX: \setlength\parskip{0.2cm}
+
+#+LATEX: \vspace{6cm}
+
+#+LATEX: \thispagestyle{empty}
+
+#+BEGIN_ABSTRACT
+
+…
+
+#+END_ABSTRACT
+
+#+ASCII:
+
+#+ASCII:
+
+#+ASCII:
+
+#+LATEX: \newpage
+
+#+TOC: headlines 3
+
+#+LATEX: \newpage
+
+* Version <<sec:version-number>>
+
+    - Current status of the specification: *Draft*
+
+  This document specifies version 0.0.0 of the domain-specific language used in
+  chip-remote's device descriptions. In detail:
+
+  |---------------+-----|
+  | <l>           | <c> |
+  | Major Version | *0* |
+  | Minor Version | *0* |
+  | Micro Version | *0* |
+  |---------------+-----|
+
+** Major Version Number
+
+   The major version number will be changed *only* to indicate differences that
+   break backward compatibility with earlier versions of the specification.
+   Major version “0” indicates early mock-up.
+
+** Minor Version Number
+
+   Changes in the minor version number indicate changes in previously existing
+   features, that do not break backward compatibility, as well as major feature
+   additions.
+
+** Micro Version Number
+
+   Changes in the micro version number indicate the addition of small features
+   as well as bug-fixes.
+
+** Version History
+
+   There is no version history at this point.
+
+
+#+LATEX: \newpage
+
+* Full Copyright Statement
+
+   Copyright © 2016 ~Frank Terbeck <ft@bewatermyfriend.org>~.
+   All Rights Reserved.
+
+   This document and translations of it may be copied and furnished to
+   others, and derivative works that comment on or otherwise explain it
+   or assist in its implementation may be prepared, copied, published
+   and distributed, in whole or in part, without restriction of any
+   kind, provided that the above copyright notice and this paragraph are
+   included on all such copies and derivative works.  However, this
+   document itself may not be modified in any way, such as by removing
+   the copyright notice.
+
+   The limited permissions granted above are perpetual and will not be
+   revoked by the authors or their successors or assigns.
+
+   This document and the information contained herein is provided on
+   an “AS IS” basis and THE AUTHORS DISCLAIM ALL WARRANTIES, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE
+   OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY
+   IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR
+   PURPOSE.
