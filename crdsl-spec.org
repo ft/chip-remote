@@ -117,6 +117,31 @@ convenient and enables a number of useful techniques when compiling to Scheme.
    \noindent{}Example:\hspace{0.25cm} ~(datasheet-uri "http://www.ti.com/lit/pdf/scas858")~
 
 
+* Default Values
+
+  In order to specify defaults for certain fields of register definitions, the
+  language defines a few simple forms to express them.
+
+** default-value
+
+   Synopsis:\hspace{0.5cm} ~(default-value VALUE)~
+
+   The ~VALUE~ provided to this form defines the default value for all
+   registers of a device, that do not define a default value of their own. The
+   parameter ~VALUE~ has to be a positive integer.
+
+   \noindent{}Example:\hspace{0.25cm} ~(default-value #x3242)~
+
+
+** default-post-processor
+
+   Synopsis:\hspace{0.5cm} ~(default-post-processor VALUE)~
+
+   Each register may specify a post-processor. It they do not, this form can be
+   used to specify a default post-processor. For details about ~VALUE~ see the
+   ~post-processor~ field definition of the ~register~ form.
+
+
 * Version <<sec:version-number>>
 
     - Current status of the specification: *Draft*
