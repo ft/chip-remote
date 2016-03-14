@@ -1,5 +1,12 @@
 ;; -*- scheme -*-
 
+;; This is a definition for a fictional chip called "fix007". It uses
+;; chip-remote's domain specific description languange to define meta
+;; information about the chip, its registers, custom decoders and encoder and
+;; maps those encoder/decoders to entries.
+
+;; Meta information:
+
 (name 'fic007)
 (manufacturer "Fictional Instruments")
 (datasheet-code 'FIC007)
@@ -7,6 +14,8 @@
 
 (register-width 8)
 (default-value #x42)
+
+;; Register definitions
 
 (register #x0
   #:default #x54
