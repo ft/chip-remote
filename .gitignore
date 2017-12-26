@@ -25,6 +25,10 @@ crdsl-spec.pdf
 crdsl-spec.tex
 crdsl-spec.txt
 crdsl-spec.html
+client-library.pdf
+client-library.tex
+client-library.txt
+client-library.html
 auto/*
 remote-fw/Makefile
 remote-fw/config.*.h
