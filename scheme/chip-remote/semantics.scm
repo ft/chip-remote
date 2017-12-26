@@ -20,7 +20,11 @@
   (decode semantics-decode)
   (encode semantics-encode))
 
-(define* (make-semantics type #:key (decode identity) (encode identity))
+(define* (make-semantics type
+                         #:key
+                         (decode identity)
+                         (encode identity)
+                         (table '()))
   (case type
     ((boolean) (make-semantics* type decode-boolean encode-boolean))
     ((boolean/active-low) (make-semantics* type
@@ -43,7 +47,9 @@
     ((sign-magnitude) (make-semantics* type
                                        decode-sign-magnitude
                                        encode-sign-magnitude))
-    ((table-lookup) (make-semantics* type decode-with-table encode-with-table))
+    ((table-lookup) (make-semantics* type
+                                     (make-table-decoder table)
+                                     (make-table-encoder table)))
     ((interpreter) (make-semantics* type
                                     (make-evaluation decode)
                                     (make-evaluation encode)))

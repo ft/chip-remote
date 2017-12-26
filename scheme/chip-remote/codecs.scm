@@ -19,7 +19,11 @@
             decode-offset-binary
             encode-offset-binary
             decode-sign-magnitude
-            encode-sign-magnitude))
+            encode-sign-magnitude
+            decode-with-table
+            make-table-decoder
+            encode-with-table
+            make-table-encoder))
 
 ;; Boolean codecs
 
@@ -135,3 +139,27 @@
 (define (decode-offset-binary width value)
   (let ((half (ash 1 (- width 1))))
     (- value half)))
+
+;; Table lookup based codecs
+
+(define (make-table-decoder table)
+  (lambda (x) (decode-with-table table x)))
+
+(define (decode-with-table table value)
+  (let loop ((rest table))
+    (if (null? rest)
+        'undefined
+        (let ((k (caar rest))
+              (v (cdar rest)))
+          (if (= value v)
+              k
+              (loop (cdr rest)))))))
+
+(define (make-table-encoder table)
+  (lambda (x) (encode-with-table table x)))
+
+(define (encode-with-table table key)
+  (let ((value (assoc key table)))
+    (if value
+        (cdr value)
+        'undefined)))

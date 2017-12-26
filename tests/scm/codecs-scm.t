@@ -10,7 +10,7 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (plan 26)
+ (plan 30)
 
  (define-test "decode-state 1 works"
    (pass-if-eq? (decode-state 1)
@@ -93,4 +93,22 @@
               7))
  (define-test "decode-offset-binary 4 0: works"
    (pass-if-= (decode-offset-binary 4 0)
-              -8)))
+              -8))
+
+ (let* ((table '((something . 3)
+                 (more . 5)
+                 (stuff . 23)))
+        (decoder (make-table-decoder table))
+        (encoder (make-table-encoder table)))
+   (define-test "table decoding works"
+     (pass-if-eq? (decoder 3)
+                  'something))
+   (define-test "table decoding works (undefined)"
+     (pass-if-eq? (decoder 42)
+                  'undefined))
+   (define-test "table encoding works"
+     (pass-if-= (encoder 'more)
+                5))
+   (define-test "table encoding works (undefined)"
+     (pass-if-eq? (encoder 'does-not-exist)
+                  'undefined))))
