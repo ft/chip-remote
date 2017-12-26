@@ -57,6 +57,15 @@ crdsl-spec.html: crdsl-spec.org
 crdsl-spec.txt: crdsl-spec.org
 	$(ORG_EXPORT) txt $< $@
 
+client-library.pdf: client-library.org
+	$(ORG_EXPORT) pdf $< $@
+
+client-library.html: client-library.org
+	$(ORG_EXPORT) html $< $@
+
+client-library.txt: client-library.org
+	$(ORG_EXPORT) txt $< $@
+
 test:
 	$(RUNTESTS)
 

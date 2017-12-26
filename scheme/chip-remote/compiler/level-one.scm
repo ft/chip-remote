@@ -4,6 +4,7 @@
 
 (define-module (chip-remote compiler level-one)
   #:use-module (chip-remote compiler)
+  #:use-module (chip-remote compiler transform)
   #:use-module (chip-remote compiler utilities)
   #:use-module (srfi srfi-1)
   #:export (generate-level-one))
@@ -109,6 +110,7 @@
       ((kw file)
        (let* ((fname (determine-file-name (syntax->datum #'file)))
               (data (analyse-register-map #'kw (read-file #'kw fname))))
+         (format #t "wat: ~a~%" (handle-non-unique-entries #'kw data))
          (with-syntax (((setters ...) (generate-setters #'kw data))
                        ((getters ...) (generate-getters #'kw data))
                        ((regaddr ...) (generate-regaddr #'kw data))

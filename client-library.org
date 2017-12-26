@@ -248,10 +248,38 @@
 
 ** The Register-Map Abstraction
 
+*** Overview
+
+Most configurable ICs use a region of memory, that stores their adjustable
+parameters. That region is usually addressable. These addresses within that
+memory can be viewed as a table. This table's rows are called registers.
+
+Oftentimes, registers have a fixed width. But that is not a general rule. And
+(most often with variable-width registers) some chips allow addressing
+sub-registers.
+
+Moreover, sometimes chips use more than one region addressable memory to store
+their parameters. In those cases, these regions are addressable as multiple
+memory pages (sometimes called “banks”).
+
+The register-map abstraction has to account for all of these variations and be
+generic enough to allow for possible extensions upon that scheme.
+
+In Scheme, the natural way to represent a table is a list of lists. In this
+particular implementation, we will be using association lists, where all the
+addressing information will be contained within the ‘key’ portion of the data-
+structure (memory bank as well as register address, width and name — none of
+which are mandatory).
+
+Upon this data-structure multiple selectors will be implemented: For example:
+Select by register address, select be register and bank address, etc. Higher
+level code can then alias its register access in terms of these generic
+accessors.
+
 *** The Datasheet
 
-    Let's look at a finctional device called “bfg2000”. Its datasheet describes
-    a register map that looks like this:
+Let's look at a finctional device called “bfg2000”. Its datasheet describes a
+register map that looks like this:
 
         |                      3 |             2 |            1 |          0 |
         |------------------------+---------------+--------------+------------|
@@ -264,10 +292,14 @@
     0xb |   remote-controlled    | self-destruct |        blast - type       |
         |------------------------+---------------+--------------+------------|
 
+That's a pretty simple table, fixed width registers with no sub-addressing, but
+varying widths in its sub-fields and a hole consisting of the addresses between
+0x2 and 0x9.
+
 *** The First Transcription
 
-    So a first attempt at expressing that table using the register-map
-    abstraction looks like this:
+So a first attempt at expressing that table using the register-map abstraction
+looks like this:
 
       (define-register-map bfg2000
         (#x0 (contents (power-down 0 1)
@@ -279,44 +311,44 @@
                        (self-destruct 2 1)
                        (remote-controlled 3 1))))
 
-    If you look at:
+If you look at:
 
         (#x0 (contents (power-down 0 1)
                        (blast-radius 1 2)
                        (high-performance 3 1)))
 
-    That means, it describes the register at address 0x0, which contains the
-    following fields:
+That means, it describes the register at address 0x0, which contains the
+following fields:
 
       - power-down at offset 0 with width 1
       - blast-radius at offset 1 with width 2
       - high-performance at offset 3 with width 1
 
-    In short, it's a direct transcription of the register-map from the
-    data-sheet into a scheme data-structure. The ‘define-register-map’ macro
-    now goes ahead and defines the following set of first-level access (for
-    the example of the ‘blast-radius’ bits:
+In short, it's a direct transcription of the register-map from the data-sheet
+into a scheme data-structure. The ‘define-register-map’ macro now goes ahead
+and defines the following set of first-level access (for the example of the
+‘blast-radius’ bits:
 
       (set-blast-radius-bits regval bits)
       (get-blast-radius-bits regval)
       (define regaddr:blast-radius #x0)
 
-    And it does this for all bit fields. You get the first-level access
-    functions for free.
+And it does this for all bit fields. You get the first-level access functions
+for free.
 
 *** More Information about the Bit-Fields
 
-   The datasheet will undoubtedly contain more information about the content
-   and the encoding of the bit-fields. For example:
+The datasheet will undoubtedly contain more information about the content and
+the encoding of the bit-fields. For example:
 
-   Power-Down, High-Performance, Remote-Controlled and Self-Destruct are
-   single-bit configuration values, that work as Active-High logic (i.e. 1
-   means enabled, 0 means disabled).
+Power-Down, High-Performance, Remote-Controlled and Self-Destruct are
+single-bit configuration values, that work as Active-High logic (i.e. 1 means
+enabled, 0 means disabled).
 
-   The Self-Destruct-Password is a four bit signed integer, that uses
-   twos-complement to encode its value. Fire-rate is an unsigned integer.
+The Self-Destruct-Password is a four bit signed integer, that uses twos-
+complement to encode its value. Fire-rate is an unsigned integer.
 
-   Blast-Radius and Blast-Type are 2-bit values that are mapped like this:
+Blast-Radius and Blast-Type are 2-bit values that are mapped like this:
 
      (define blast-type-map '((projectile . #b00)
                               (plasma     . #b01)
@@ -328,32 +360,31 @@
                                 (planetary . #b10)
                                 (galaxy    . #b11)))
 
-    This information is crucial for writing second-level access code and for
-    decoding register values back into human-readable form. Which means that
-    you'd like to inform the system about that, so it can do more work for you.
+This information is crucial for writing second-level access code and for
+decoding register values back into human-readable form. Which means that you'd
+like to inform the system about that, so it can do more work for you.
 
-    Previously we had the following expression, describing the ‘power-down’
-    bit:
+Previously we had the following expression, describing the ‘power-down’ bit:
 
         (power-down 0 1)
 
-    To tell the system, that that's a bit that works as “active-high” logic,
-    that definition could be annotated like this:
+To tell the system, that that's a bit that works as “active-high” logic, that
+definition could be annotated like this:
 
         (power-down 0 1 #,(=> logic-active-high))
 
-    Here ‘logic-active-high’ is a function, a bit into a boolean value.
+Here ‘logic-active-high’ is a function, a bit into a boolean value.
 
-    Another example would be the “blast-radius” bits that are defined by the
-    mapping defined earlier. To tell the system that connection, we add an
-    annotation like this:
+Another example would be the “blast-radius” bits that are defined by the
+mapping defined earlier. To tell the system that connection, we add an
+annotation like this:
 
         (blast-radius 1 2 #,(=> blast-radius-map))
 
-    If no annotation is defined, the default is the ‘literal-binary’ function,
-    that takes the bit-field literally without any other interpretation.
+If no annotation is defined, the default is the ‘literal-binary’ function, that
+takes the bit-field literally without any other interpretation.
 
-    A complete and annotated register map definition could look like this:
+A complete and annotated register map definition could look like this:
 
       (define-register-map bfg2000
         (#x0 (contents (power-down 0 1 #,(=> logic-active-high))
@@ -365,19 +396,19 @@
                        (self-destruct 2 1 #,(=> logic-active-high))
                        (remote-controlled 3 1 #,(=> logic-active-high)))))
 
-    With careful definition and annotation such as this, the decoder part of
-    the framework will just work.
+With careful definition and annotation such as this, the decoder part of the
+framework will just work.
 
 ** Generation of Second- and Third-Level Access Code
 
-   There is no way to completely generate second-level (and therefore
-   third-level) access code, since you may always encounter situations, that
-   are dealt with in a very device-specific manner. Maybe it's just one
-   bit-field. But it's there and rains on our parade.
+There is no way to completely generate second-level (and therefore third-level)
+access code, since you may always encounter situations, that are dealt with in
+a very device-specific manner. Maybe it's just one bit-field. But it's there
+and rains on our parade.
 
-   That however doesn't mean that we can't generate anything. Take the
-   power-down bit from our previous example. Two second level access functions
-   might look like this:
+That however doesn't mean that we can't generate anything. Take the power-down
+bit from our previous example. Two second level access functions might look
+like this:
 
      (define (enable-power-down regval)
        (set-logic-active-high set-power-down-bits regval))
@@ -385,37 +416,37 @@
      (define (disable-power-down regval)
        (unset-logic-active-high set-power-down-bits regval))
 
-   But we know from the register-map annotations that it indeed is an
-   active-high bit. We also know the name of the first-level access function.
-   So there is nothing that should keep us from generating the second level
-   functions for this particular bit.
+But we know from the register-map annotations that it indeed is an active-high
+bit. We also know the name of the first-level access function. So there is
+nothing that should keep us from generating the second level functions for this
+particular bit.
 
-   With the blast-radius bit field, the second level function could look like
-   this:
+With the blast-radius bit field, the second level function could look like
+this:
 
      (define (set-blast-radius regval value)
        (set-blast-radius-bits (value->bits blast-radius-map value)))
 
-   And again, the know the connection from the ‘blast-radius-map’ variable to
-   this particular bit-field. Again, technically there's nothing that should
-   keep us from generating this code.
+And again, the know the connection from the ‘blast-radius-map’ variable to this
+particular bit-field. Again, technically there's nothing that should keep us
+from generating this code.
 
-   So the plan is to provide a way to perform this sort of generation to remove
-   a large chunk of manual typing work, while still providing the author the
-   ability to incorporate unusual workarounds required for the device.
+So the plan is to provide a way to perform this sort of generation to remove a
+large chunk of manual typing work, while still providing the author the ability
+to incorporate unusual workarounds required for the device.
 
-   Once you got second-level access code, you may think of generating third
-   level code. Because usually, the dance goes like this: Get the current
-   register value for the bit-field you want to modify from the device, modify
-   the correct portion of the register-value and transmit the changed value
-   back to the device.
+Once you got second-level access code, you may think of generating third level
+code. Because usually, the dance goes like this: Get the current register value
+for the bit-field you want to modify from the device, modify the correct
+portion of the register-value and transmit the changed value back to the
+device.
 
-   But again, we can't automate that generation process fully, because in the
-   general case, things might not be as simple. Take the ADS4149 ADU from Texas
-   Instruments for example: That device has a High-Performance mode. The state
-   of that mode (active or not) is controlled by three bits that are spread
-   across two registers in the device. So for that particular chip, you'd have
-   to do this:
+But again, we can't automate that generation process fully, because in the
+general case, things might not be as simple. Take the ADS4149 ADU from Texas
+Instruments for example: That device has a High-Performance mode. The state of
+that mode (active or not) is controlled by three bits that are spread across
+two registers in the device. So for that particular chip, you'd have to do
+this:
 
      - Get the first register's value
      - Get the second register's value
@@ -424,17 +455,17 @@
      - Transmit the first register back to the device
      - Transmit the second register back to the device
 
-   While cases like that might indeed be special, they have to be considered.
-   But still, the plan is to provide a way to generate third-level access code
-   at some point, as a starting point for authors to manually deal with special
-   cases afterwards.
+While cases like that might indeed be special, they have to be considered. But
+still, the plan is to provide a way to generate third-level access code at some
+point, as a starting point for authors to manually deal with special cases
+afterwards.
 
 ** Legacy Code
 
-   The (chip-remote legacy ti cdce72010) module and its children are based on
-   code for a predecessor of chip-remote. It does not use the usual
-   abstractions and conventions. While it works, it should not be used as an
-   example of how to write modules for new devices.
+The (chip-remote legacy ti cdce72010) module and its children are based on code
+for a predecessor of chip-remote. It does not use the usual abstractions and
+conventions. While it works, it should not be used as an example of how to
+write modules for new devices.
 
-   At some point, it would probably be good to port this legacy code over to
-   the new abstractions and conventions. If only for consistency's sake.
+At some point, it would probably be good to port this legacy code over to the
+new abstractions and conventions. If only for consistency's sake.

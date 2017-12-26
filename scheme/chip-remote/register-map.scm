@@ -222,7 +222,7 @@
        (with-syntax ((name (datum->syntax
                             #'kw (symbol-append 'set-
                                                 (syntax->datum #'n)
-                                                '-bits))))
+                                                'bits))))
          #'(define-public (name register value)
              ((@ (chip-remote bitops) set-bits) register
                                     (logand value (- (ash 1 w) 1)) w o)))))))
