@@ -2,7 +2,7 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
-(define-module (chip-remote decode)
+(define-module (chip-remote old-decode)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 session)
