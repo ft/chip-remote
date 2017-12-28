@@ -11,6 +11,7 @@
             page-map-table
             page-map-defaults
             page-map-item-names
+            page-map-merge
             define-page-map))
 
 ;; How to share some registers between the register maps of all or even only
@@ -55,3 +56,6 @@
   (format port ">"))
 
 (set-record-type-printer! <page-map> record-page-map-printer)
+
+(define (page-map-merge lst)
+  (make-page-map (apply append (map page-map-table (flatten lst)))))

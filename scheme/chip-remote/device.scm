@@ -47,7 +47,7 @@
        (with-syntax ((((mp ...) (meta ...)) (process-plist #'(pl ...)
                                                            group:page
                                                            (group 'meta))))
-         #'(make-device (list meta ...) (list mp ...)))))))
+         #'(make-device (list meta ...) (page-map-merge (list mp ...))))))))
 
 (define-syntax-rule (define-device binding e0 e* ...)
   (define binding (generate-device e0 e* ...)))
