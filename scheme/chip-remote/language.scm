@@ -26,10 +26,10 @@
 
 (define* (group name
                 #:key
-                (type 'single)
+                (type 'single) ;; 'list
                 (predicate (lambda (x) #t))
                 (transformer default-transformer)
-                (context 'list))
+                (context 'list)) ;; 'scalar
   (list name type predicate transformer context))
 
 (define (alist-change is-equal? alist key value)
@@ -110,10 +110,24 @@ of ALIST, *this* function *adds* the key/value pair indicated by KEY and VALUE."
                                     (list new))))
                              '()))))
 
+(define (just-value e)
+  (when debug? (format #t "just-value, e: ~a~%" e))
+  (syntax-case e ()
+    ((key value) #'value)
+    ((key . value) #'value)))
+
+(define (default-transformer e)
+  (when debug? (format #t "default-transformer, e: ~a~%" e))
+  (syntax-case e ()
+    ((kw exp) #'(kw exp))
+    ((kw exp0 expn ...) #'(kw exp0 expn ...))))
+
+(define catch-all-fallback (group 'unmatched-fallback))
+
 (define (find-active groups exp)
   (let loop ((rest groups))
     (if (null? rest)
-        #t
+        catch-all-fallback
         (let ((group (car rest)))
           (if ((group-predicate group) exp)
               group
@@ -195,17 +209,19 @@ of ALIST, *this* function *adds* the key/value pair indicated by KEY and VALUE."
   (when debug? (format #t "process-plist,exps: ~a~%" exps))
   (if (or (null? exps)
           (null? groups))
-      #'(())
+      (datum->syntax #'process-plist (make-list (length groups) '()))
       (let loop ((exps exps) (state '((mode . init))))
         (syntax-case exps ()
-          (() (groups->syntax groups
-                              (set-group
-                               (set-delim
-                                (set-mode
-                                 (set-chunk
-                                  (save-chunk state)
-                                  '())
-                                 'done)
-                                #f)
-                               #f)))
+          (() (let ((rv (groups->syntax groups
+                                        (set-group
+                                         (set-delim
+                                          (set-mode
+                                           (set-chunk
+                                            (save-chunk state)
+                                            '())
+                                           'done)
+                                          #f)
+                                         #f))))
+                ((@@ (ice-9 pretty-print) pretty-print) rv)
+                rv))
           ((exp . rest) (loop #'rest (process-with groups state #'exp)))))))
