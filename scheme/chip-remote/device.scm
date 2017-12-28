@@ -9,14 +9,14 @@
             make-device
             device?
             device-meta
-            device-page-maps
+            device-page-map
             define-device))
 
 (define-record-type <device>
-  (make-device meta page-maps)
+  (make-device meta page-map)
   device?
   (meta device-meta)
-  (page-maps device-page-maps))
+  (page-map device-page-map))
 
 (define group:page
   (group 'pages
@@ -55,7 +55,7 @@
 (define (record-device-printer device port)
   (format port "<device:~%    #:meta~%")
   (pretty-print (device-meta device) port #:per-line-prefix "    ")
-  (format port "    #:page-maps~%")
+  (format port "    #:page-map~%")
   (pretty-print (device-page-maps device) port #:per-line-prefix "    ")
   (format port ">"))
 
