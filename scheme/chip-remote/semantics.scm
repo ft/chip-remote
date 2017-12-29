@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote semantics)
+  #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
   #:use-module (srfi srfi-9)
   #:use-module (chip-remote codecs)
@@ -11,7 +12,8 @@
             semantics?
             semantics-type
             semantics-decode
-            semantics-encode))
+            semantics-encode
+            deduce-semantics))
 
 (define-record-type <semantics>
   (make-semantics* type decode encode)
@@ -47,11 +49,27 @@
     ((sign-magnitude) (make-semantics* type
                                        decode-sign-magnitude
                                        encode-sign-magnitude))
-    ((table-lookup) (make-semantics* type
-                                     (make-table-decoder table)
-                                     (make-table-encoder table)))
+    ((table-lookup lookup) (make-semantics* 'table-lookup
+                                            (make-table-decoder table)
+                                            (make-table-encoder table)))
     ((interpreter) (make-semantics* type
                                     (make-evaluation decode)
                                     (make-evaluation encode)))
     ((scheme) (make-semantics* type decode encode))
     (else (throw 'unknown-semantics type decode encode))))
+
+(define (deduce-semantics width meta semantics)
+  (match semantics
+    (() (if (= width 1)
+            (make-semantics 'boolean)
+            (make-semantics 'unsigned-integer)))
+    ((? semantics? semantics) semantics)
+    (((? semantics? semantics)) semantics)
+    (((? symbol? type)) (make-semantics type))
+    (('lookup arg) (make-semantics 'lookup #:table arg))
+    (('table-lookup arg) (make-semantics 'table-lookup #:table arg))
+    (('interpreter (? keyword? kw1) a1 (? keyword? kw2) a2)
+     (make-semantics 'interpreter kw1 a1 kw2 a2))
+    (('scheme (? keyword? kw1) a1 (? keyword? kw2) a2)
+     (make-semantics 'scheme kw1 a1 kw2 a2))
+    (_ (throw 'cannot-deduce-semantics width meta semantics))))
