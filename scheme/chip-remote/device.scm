@@ -57,7 +57,7 @@
   (format port "<device:~%    #:meta~%")
   (pretty-print (device-meta device) port #:per-line-prefix "    ")
   (format port "    #:page-map~%")
-  (pretty-print (device-page-maps device) port #:per-line-prefix "    ")
+  (pretty-print (device-page-map device) port #:per-line-prefix "    ")
   (format port ">"))
 
 (set-record-type-printer! <device> record-device-printer)
