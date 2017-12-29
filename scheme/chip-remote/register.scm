@@ -46,11 +46,12 @@
     (syntax-case x ()
       ((kw exp0 expn ...)
        (is-kw? #'exp0)
-       (with-syntax (((((contents ...) ...) (meta ...))
+       (with-syntax (((((contents ...) ...) ((key value) ...))
                       (process-plist #'(exp0 expn ...)
                                      group:contents
                                      (group 'meta))))
-         #'(make-register (list meta ...) (list contents ... ...)))))))
+         #'(make-register (list (cons key value) ...)
+                          (list contents ... ...)))))))
 
 (define-syntax-rule (define-register binding e0 e* ...)
   (define binding (generate-register e0 e* ...)))

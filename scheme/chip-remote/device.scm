@@ -44,10 +44,11 @@
   (lambda (x)
     (syntax-case x ()
       ((_ pl ...)
-       (with-syntax ((((mp ...) (meta ...)) (process-plist #'(pl ...)
-                                                           group:page
-                                                           (group 'meta))))
-         #'(make-device (list meta ...) (page-map-merge (list mp ...))))))))
+       (with-syntax ((((mp ...) ((key value) ...)) (process-plist #'(pl ...)
+                                                                  group:page
+                                                                  (group 'meta))))
+         #'(make-device (list (cons key value) ...)
+                        (page-map-merge (list mp ...))))))))
 
 (define-syntax-rule (define-device binding e0 e* ...)
   (define binding (generate-device e0 e* ...)))
