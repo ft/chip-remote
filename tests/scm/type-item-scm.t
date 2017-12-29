@@ -5,7 +5,8 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
-             (chip-remote item))
+             (chip-remote item)
+             (chip-remote semantics))
 
 (primitive-load "tests/test-tap-cfg.scm")
 
@@ -21,13 +22,13 @@
    (pass-if-true (item? (generate-item #:name 'foo #:offset 2 #:width 4))))
  (define-test "generate-item, default call structure (with meta)"
    (pass-if-true (item? (generate-item foo 2 4
-                                       #:semantics 'quuz))))
+                                       #:semantics 'unsigned-integer))))
  (define-test "generate-item, annotated call structure (with meta)"
    (pass-if-true (item? (generate-item foo #:offset 2 #:width 4
-                                       #:semantics 'quuz))))
+                                       #:semantics 'offset-binary))))
  (define-test "generate-item, fully annotated call structure (with meta)"
    (pass-if-true (item? (generate-item #:name 'foo #:offset 2 #:width 4
-                                       #:semantics 'quuz))))
+                                       #:semantics 'twos-complement))))
 
  ;; Generate items and test their properties
  (let* ((item (generate-item thing 4 12)))
@@ -35,9 +36,10 @@
      (pass-if-equal? (item-meta item)
                      '())))
 
- (let* ((item (generate-item thing 4 12 #:semantics 'integer))
+ (let* ((item (generate-item thing 4 12 #:semantics 'unsigned-integer))
         (getter (item-get item))
-        (setter (item-set item)))
+        (setter (item-set item))
+        (sem (item-semantics item)))
    (define-test "item-name => 'thing"
      (pass-if-eq? (item-name item) 'thing))
    (define-test "item-offset => 4"
@@ -45,8 +47,7 @@
    (define-test "item-width => 12"
      (pass-if-= (item-width item) 12))
    (define-test "item-meta => #:sem..."
-     (pass-if-equal? (item-meta item)
-                     '((#:semantics . integer))))
+     (pass-if-equal? (semantics-type sem) 'unsigned-integer))
    (define-test "item-getter works"
      (pass-if-= (getter #b1011110111111010)
                 #b101111011111))
