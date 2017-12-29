@@ -7,6 +7,9 @@
   #:use-module (ice-9 match)
   #:export (cr-eval
             make-evaluation
+            evaluation?
+            evaluation-expression
+            evaluation-value
             define-evaluation))
 
 ;; Sometimes, an item in a register has a simple arithmetic relation to its

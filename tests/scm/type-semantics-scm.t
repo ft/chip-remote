@@ -5,12 +5,13 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
+             (chip-remote interpreter)
              (chip-remote semantics))
 
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (plan 5)
+ (plan 8)
 
  (define-test "default semantics for width 1 work (boolean)"
    (pass-if-eq? (semantics-type (deduce-semantics 1 '() '()))
@@ -26,4 +27,15 @@
    (define-test "table lookup decoder works"
      (pass-if-eq? 'b ((semantics-decode sem) 2)))
    (define-test "table lookup encoder works"
-     (pass-if-= 1 ((semantics-encode sem) 'a)))))
+     (pass-if-= 1 ((semantics-encode sem) 'a))))
+
+ (let ((sem (deduce-semantics 8 '() '(interpreter
+                                      #:decode (lambda (x) (increment x 2))
+                                      #:encode (lambda (x) (decrement x 2))))))
+   (define-test "interpreter codecs work"
+     (pass-if-eq? (semantics-type sem)
+                  'interpreter))
+   (define-test "interpreter decoder works"
+     (pass-if-= 8 ((evaluation-value (semantics-decode sem)) 6)))
+   (define-test "interpreter encoder works"
+     (pass-if-= 6 ((evaluation-value (semantics-encode sem)) 8)))))

@@ -68,6 +68,10 @@
     (((? symbol? type)) (make-semantics type))
     (('lookup arg) (make-semantics 'lookup #:table arg))
     (('table-lookup arg) (make-semantics 'table-lookup #:table arg))
+    ;; The make-semantics calls for interpreter and scheme yield compiler
+    ;; warnings, because the compiler doesn't see actual keywords in the
+    ;; callsite. Our match here makes sure, though, that kw1 and k2 *are* in
+    ;; fact keywords. So this is fine.
     (('interpreter (? keyword? kw1) a1 (? keyword? kw2) a2)
      (make-semantics 'interpreter kw1 a1 kw2 a2))
     (('scheme (? keyword? kw1) a1 (? keyword? kw2) a2)
