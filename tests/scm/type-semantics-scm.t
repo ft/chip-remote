@@ -13,10 +13,10 @@
  (plan 5)
 
  (define-test "default semantics for width 1 work (boolean)"
-   (pass-if-eq? (semantics-type (deduce-semantics 1 '() #f))
+   (pass-if-eq? (semantics-type (deduce-semantics 1 '() '()))
                 'boolean))
  (define-test "default semantics for width 2.. work (unsigned-integer)"
-   (pass-if-eq? (semantics-type (deduce-semantics 2 '() #f))
+   (pass-if-eq? (semantics-type (deduce-semantics 2 '() '()))
                 'unsigned-integer))
  (let* ((table '((a . 1) (b . 2)))
         (sem (deduce-semantics 2 '() (list 'lookup table))))
