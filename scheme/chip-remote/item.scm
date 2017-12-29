@@ -71,17 +71,24 @@
             item-meta
             item-get
             item-set
-            item-default))
+            item-default
+            item-semantics))
 
 (define-record-type <item>
-  (make-item name offset width meta get set)
+  (make-item* name offset width semantics meta get set)
   item?
   (name item-name)
   (offset item-offset)
   (width item-width)
+  (semantics item-semantics)
   (meta item-meta)
   (get item-get)
   (set item-set))
+
+(define* (make-item name offset width meta get set #:key (semantics '()))
+  (make-item* name offset width
+              (deduce-semantics width meta semantics)
+              meta get set))
 
 (define (record-item-printer item port)
   (format port "<item: name: ~s offset: ~a width: ~a>"
@@ -104,14 +111,16 @@
 (define-syntax generate-item*
   (lambda (x)
     (syntax-case x ()
-      ((kw name offset width (meta ...))
+      ((kw name offset width (semantics ...) ((key value) ...))
        #'(let ((v:name name)
                (v:width width)
                (v:offset offset)
-               (v:meta (list meta ...)))
+               (v:semantics (list semantics ...))
+               (v:meta (list (cons key value) ...)))
            (make-item name v:offset v:width v:meta
                       (lambda (r) (bit-extract-width r v:offset v:width))
-                      (lambda (r v) (set-bits r v v:width v:offset))))))))
+                      (lambda (r v) (set-bits r v v:width v:offset))
+                      #:semantics v:semantics))))))
 
 (define-syntax generate-item
   (lambda (x)
@@ -120,26 +129,31 @@
        (and (not-kw? #'name)
             (not-kw? #'offset)
             (not-kw? #'width))
-       (with-syntax ((((meta ...)) (process-plist #'(m ...) (group 'meta))))
-         #'(generate-item* 'name offset width (meta ...))))
+       (with-syntax ((((semantics ...) (meta ...))
+                      (process-plist #'(m ...) semantics-group (group 'meta))))
+         #'(generate-item* 'name offset width (semantics ...) (meta ...))))
       ((kw name exp0 expn ...)
        (and (not-kw? #'name)
             (is-kw? #'exp0))
-       (with-syntax (((width offset (meta ...))
+       (with-syntax (((width offset (semantics ...) (meta ...))
                       (process-plist #'(exp0 expn ...)
                                      (scalar-group 'width)
                                      (scalar-group 'offset)
+                                     semantics-group
                                      (group 'meta))))
-         #'(generate-item* 'name offset width (meta ...))))
+         #'(generate-item* 'name offset width
+                           (semantics ...) (meta ...))))
       ((kw exp0 expn ...)
        (is-kw? #'exp0)
-       (with-syntax (((width offset name (meta ...))
+       (with-syntax (((width offset name (semantics ...) (meta ...))
                       (process-plist #'(exp0 expn ...)
                                      (scalar-group 'width)
                                      (scalar-group 'offset)
                                      (scalar-group 'name)
+                                     semantics-group
                                      (group 'meta))))
-         #'(generate-item* name offset width (meta ...)))))))
+         #'(generate-item* name offset width
+                           (semantics ...) (meta ...)))))))
 
 (define (item-semantics item)
   (let ((sem (assq #:semantics (item-meta item))))
