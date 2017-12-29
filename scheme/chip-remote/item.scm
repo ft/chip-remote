@@ -72,7 +72,9 @@
             item-get
             item-set
             item-default
-            item-semantics))
+            item-semantics
+            item-decode
+            item-encode))
 
 (define-record-type <item>
   (make-item* name offset width semantics meta get set)
