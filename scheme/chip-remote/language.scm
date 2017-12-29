@@ -177,13 +177,19 @@ of ALIST, *this* function *adds* the key/value pair indicated by KEY and VALUE."
                             (syntax->datum (tf #'e))))
                   (recurse-assembly tf #'rest #`(#,@acc #,(tf #'e)))))))
 
+(define (scalar-transformer tf chunk)
+  (if (and (list? chunk)
+           (not (null? chunk)))
+      (tf (car (last-pair chunk)))
+      #'()))
+
 (define (assemble-group-syntax group chunk)
   (when debug? (format #t "assemble-group-syntax, chunk: ~a~%" chunk))
   (let ((tf (group-transformer group))
         (context (group-context group)))
     (when debug? (format #t "chunk is ~a => group: ~a~%" chunk group))
     (if (eq? context 'scalar)
-        (tf (car (last-pair chunk)))
+        (scalar-transformer tf chunk)
         (recurse-assembly tf chunk #'()))))
 
 (define (groups->syntax groups state)
