@@ -11,6 +11,7 @@
             device-meta
             device-page-map
             device-register
+            device-ref
             define-device))
 
 (define-record-type <device>
@@ -71,3 +72,6 @@
              (eq? (caar pm) #f))
         (register-map-register (cdar pm))
         (throw 'more-than-single-register-map dev))))
+
+(define (device-ref device name)
+  (page-map-ref (device-page-map device) name))
