@@ -12,7 +12,7 @@
 (force-import (chip-remote item) semantics-group)
 
 (with-fs-test-bundle
- (plan 4)
+ (plan 5)
 
  (define-test "No groups means no output"
    (pass-if-equal? (~ (process-plist #'(#:foo bar #:baz boz beast #:thing fish)))
