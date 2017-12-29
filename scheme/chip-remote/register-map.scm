@@ -1,8 +1,11 @@
 (define-module (chip-remote register-map)
+  #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module (srfi srfi-9 gnu)
+  #:use-module (ice-9 control)
   #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote process-plist)
+  #:use-module (chip-remote item)
   #:use-module (chip-remote register)
   #:use-module (chip-remote utilities)
   #:export (generate-register-map
@@ -13,6 +16,8 @@
             register-map-defaults
             register-map-item-names
             register-map-register
+            register-map-fold
+            register-map-ref
             define-register-map))
 
 (define-record-type <register-map>
@@ -69,3 +74,18 @@
              (eq? (caar rm*) #f))
         (cdar rm*)
         (throw 'more-than-single-register rm))))
+
+(define (register-map-fold fnc init rm)
+  (fold (lambda (reg acc)
+          (fnc (car reg) (cdr reg) acc))
+        init
+        (register-map-table rm)))
+
+(define (register-map-ref rm name)
+  (call/ec (lambda (return)
+             (register-map-fold (lambda (ra reg acc)
+                                  (let ((item (register-ref reg name)))
+                                    (if (item? item)
+                                        (return item)
+                                        #f)))
+                                #f rm))))
