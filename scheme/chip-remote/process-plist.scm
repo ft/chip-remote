@@ -1,4 +1,4 @@
-(define-module (chip-remote language)
+(define-module (chip-remote process-plist)
   #:export (group
             group-context
             group-name

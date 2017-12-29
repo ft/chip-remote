@@ -9,7 +9,7 @@
   #:use-module (srfi srfi-9)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote item)
-  #:use-module (chip-remote language)
+  #:use-module (chip-remote process-plist)
   #:export (generate-register
             make-register
             register?

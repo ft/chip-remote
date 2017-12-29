@@ -5,7 +5,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
-             (chip-remote language))
+             (chip-remote process-plist))
 
 (primitive-load "tests/test-tap-cfg.scm")
 (define ~ syntax->datum)

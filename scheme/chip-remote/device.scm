@@ -2,7 +2,7 @@
   #:use-module (srfi srfi-9)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 pretty-print)
-  #:use-module (chip-remote language)
+  #:use-module (chip-remote process-plist)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote page-map)
   #:export (generate-device
