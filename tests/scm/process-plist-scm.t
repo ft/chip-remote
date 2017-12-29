@@ -53,5 +53,5 @@
    (pass-if-equal? (~ (process-plist #'(#:semantics 'lookup foo-table)
                                      semantics-group
                                      (group 'meta)))
-                   '((('lookup foo-table))
+                   '(('lookup foo-table)
                      ()))))
