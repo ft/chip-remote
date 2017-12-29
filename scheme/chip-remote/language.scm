@@ -5,6 +5,7 @@
             group-mode
             group-predicate
             group-transformer
+            scalar-group
             process-plist
             just-value
             is-kw?
@@ -31,6 +32,12 @@
                 (transformer default-transformer)
                 (context 'list)) ;; 'scalar
   (list name type predicate transformer context))
+
+(define (scalar-group name)
+  (group name
+         #:context 'scalar
+         #:predicate (lambda (x) (eq? x (symbol->keyword name)))
+         #:transformer just-value))
 
 (define (alist-change is-equal? alist key value)
   "Change an existing value in an association list.

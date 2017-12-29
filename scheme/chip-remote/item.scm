@@ -91,11 +91,15 @@
 
 (set-record-type-printer! <item> record-item-printer)
 
-(define (scalar-group name)
-  (group name
+(define semantics-group
+  (group 'semantics
+         #:type 'list
          #:context 'scalar
-         #:predicate (lambda (x) (eq? x (symbol->keyword name)))
-         #:transformer just-value))
+         #:predicate (lambda (x) (eq? x #:semantics))
+         #:transformer (lambda (expr)
+                         (syntax-case expr ()
+                           ((#:semantics e* ...) #'(e* ...))
+                           ((e* ...) #'(e* ...))))))
 
 (define-syntax generate-item*
   (lambda (x)
