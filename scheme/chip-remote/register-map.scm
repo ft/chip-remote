@@ -12,6 +12,7 @@
             register-map-table
             register-map-defaults
             register-map-item-names
+            register-map-register
             define-register-map))
 
 (define-record-type <register-map>
@@ -61,3 +62,10 @@
   (format port ">"))
 
 (set-record-type-printer! <register-map> record-register-map-printer)
+
+(define (register-map-register rm)
+  (let ((rm* (register-map-table rm)))
+    (if (and (= (length rm*) 1)
+             (eq? (caar rm*) #f))
+        (cdar rm*)
+        (throw 'more-than-single-register rm))))

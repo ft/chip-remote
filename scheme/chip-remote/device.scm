@@ -10,6 +10,7 @@
             device?
             device-meta
             device-page-map
+            device-register
             define-device))
 
 (define-record-type <device>
@@ -61,3 +62,12 @@
   (format port ">"))
 
 (set-record-type-printer! <device> record-device-printer)
+
+(define (device-register dev)
+  (let ((pm (page-map-table (device-page-map dev))))
+    ;; Only one page-map entry and no address on the page means there is no
+    ;; real page-map in the chip, so it just has a single register-map.
+    (if (and (= (length pm) 1)
+             (eq? (caar pm) #f))
+        (register-map-register (cdar pm))
+        (throw 'more-than-single-register-map dev))))
