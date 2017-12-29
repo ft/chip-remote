@@ -21,6 +21,7 @@
             register-contains?
             register-ref
             register-set
+            register-fold
             define-register))
 
 (define-record-type <register>
@@ -88,19 +89,23 @@
 (define (register-contains? reg item)
   (not (not (memq item (register-item-names reg)))))
 
-(define (register-ref reg item)
+(define (register-ref reg name)
   (call/ec (lambda (return)
-             (let loop ((rest (register-items reg)))
-               (cond ((null? rest) #f)
-                     ((eq? item (item-name (car rest)))
-                      (return (car rest)))
-                     (else (loop (cdr rest))))))))
+             (register-fold (lambda (item iacc)
+                              (if (eq? (item-name item)
+                                       name)
+                                  (return item)
+                                  #f))
+                            #f reg))))
 
 (define (register-set reg regval item itemval)
   (let ((item (register-ref reg item)))
     (unless item
       (throw 'unknown-register-item item reg))
     ((item-set item) regval itemval)))
+
+(define (register-fold fnc init reg)
+  (fold fnc init (register-items reg)))
 
 ;; TODO: register-verify?:
 ;;
