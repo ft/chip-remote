@@ -1,8 +1,11 @@
 (define-module (chip-remote page-map)
+  #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module (srfi srfi-9 gnu)
+  #:use-module (ice-9 control)
   #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote process-plist)
+  #:use-module (chip-remote item)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote utilities)
   #:export (generate-page-map
@@ -12,6 +15,8 @@
             page-map-defaults
             page-map-item-names
             page-map-merge
+            page-map-fold
+            page-map-ref
             define-page-map))
 
 ;; How to share some registers between the register maps of all or even only
@@ -59,3 +64,18 @@
 
 (define (page-map-merge lst)
   (make-page-map (apply append (map page-map-table (flatten lst)))))
+
+(define (page-map-fold fnc init pm)
+  (fold (lambda (page acc)
+          (fnc (car page) (cdr page) acc))
+        init
+        (page-map-table pm)))
+
+(define (page-map-ref pm name)
+  (call/ec (lambda (return)
+             (page-map-fold (lambda (pa rm pacc)
+                              (let ((item (register-map-ref rm name)))
+                                (if (item? item)
+                                    (return item)
+                                    #f)))
+                            #f pm))))
