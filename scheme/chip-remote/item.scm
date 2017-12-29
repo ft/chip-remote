@@ -155,12 +155,6 @@
          #'(generate-item* name offset width
                            (semantics ...) (meta ...)))))))
 
-(define (item-semantics item)
-  (let ((sem (assq #:semantics (item-meta item))))
-    (if sem
-        (cdr sem)
-        (make-semantics 'unsigned-integer))))
-
 (define (item-default item)
   (let ((default (assq #:default (item-meta item))))
     (if default (cdr default) 0)))

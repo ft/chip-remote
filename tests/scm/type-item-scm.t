@@ -11,7 +11,7 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (plan 13)
+ (plan 15)
 
  ;; Test the different call structures of the generate-item macro
  (define-test "generate-item, default call structure"
@@ -29,6 +29,14 @@
  (define-test "generate-item, fully annotated call structure (with meta)"
    (pass-if-true (item? (generate-item #:name 'foo #:offset 2 #:width 4
                                        #:semantics 'twos-complement))))
+
+ (define-test "generate-item, width 1 defaults to boolean"
+   (pass-if-eq? (semantics-type (item-semantics (generate-item foo 2 1)))
+                'boolean))
+
+ (define-test "generate-item, longer widths default to unsigned-integer"
+   (pass-if-eq? (semantics-type (item-semantics (generate-item foo 2 2)))
+                'unsigned-integer))
 
  ;; Generate items and test their properties
  (let* ((item (generate-item thing 4 12)))
