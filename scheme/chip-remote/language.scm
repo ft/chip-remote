@@ -141,6 +141,7 @@ of ALIST, *this* function *adds* the key/value pair indicated by KEY and VALUE."
               (loop (cdr rest)))))))
 
 (define (lowlvl-process groups state exp mode group)
+  (when debug? (format #t "lowlvl: group: ~a~%" group))
   (case mode
     ((init) (set-group (set-chunk (set-delim (set-mode (save-chunk state)
                                                        (group-mode group))
@@ -163,17 +164,6 @@ of ALIST, *this* function *adds* the key/value pair indicated by KEY and VALUE."
           (lowlvl-process groups state exp 'init group))
         (lowlvl-process groups state exp mode '()))))
 
-(define (just-value e)
-  (when debug? (format #t "just-value, e: ~a~%" e))
-  (syntax-case e ()
-    ((key value) #'value)))
-
-(define (default-transformer e)
-  (when debug? (format #t "default-transformer, e: ~a~%" e))
-  (syntax-case e ()
-    ((kw exp) #'(cons kw exp))
-    ((kw exp0 expn ...) #'(list kw exp0 expn ...))))
-
 (define (recurse-assembly tf exp acc)
   (when debug? (format #t "recurse-assembly, exp: ~a~%" exp))
   (syntax-case exp ()
@@ -191,7 +181,7 @@ of ALIST, *this* function *adds* the key/value pair indicated by KEY and VALUE."
   (when debug? (format #t "assemble-group-syntax, chunk: ~a~%" chunk))
   (let ((tf (group-transformer group))
         (context (group-context group)))
-    (when debug? (format #t "chunk is #f => group: ~a~%" group))
+    (when debug? (format #t "chunk is ~a => group: ~a~%" chunk group))
     (if (eq? context 'scalar)
         (tf (car (last-pair chunk)))
         (recurse-assembly tf chunk #'()))))
@@ -205,6 +195,11 @@ of ALIST, *this* function *adds* the key/value pair indicated by KEY and VALUE."
     (format #t "groups->syntax, groups: ~a~%" groups))
   (let* ((chunks (assq-ref state 'saved-chunks))
          (data (map (lambda (g)
+                      (when debug?
+                        (format #t "---> group: ~a~%" g)
+                        (format #t "---> chunks: ~a~%" chunks)
+                        (format #t "---> chunk: ~a~%"
+                                (assq-ref chunks (group-name g))))
                       (assemble-group-syntax g (assq-ref chunks
                                                          (group-name g))))
                     groups)))
@@ -229,6 +224,6 @@ of ALIST, *this* function *adds* the key/value pair indicated by KEY and VALUE."
                                            'done)
                                           #f)
                                          #f))))
-                ((@@ (ice-9 pretty-print) pretty-print) rv)
+                (when debug? ((@@ (ice-9 pretty-print) pretty-print) rv))
                 rv))
           ((exp . rest) (loop #'rest (process-with groups state #'exp)))))))
