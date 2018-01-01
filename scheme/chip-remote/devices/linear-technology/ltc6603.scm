@@ -10,7 +10,6 @@
 (define-module (chip-remote devices linear-technology ltc6603)
   #:use-module (chip-remote device)
   #:use-module (chip-remote manufacturer linear-technology)
-  #:use-module (chip-remote register)
   #:export (ltc6603))
 
 ;; These two-bit config fields are placed into the final configuration word
