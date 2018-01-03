@@ -12,7 +12,7 @@
             make-page-map
             page-map?
             page-map-table
-            page-map-defaults
+            page-map-default
             page-map-item-names
             page-map-merge
             page-map-fold
@@ -47,8 +47,9 @@
       ((kw (addr exp) ...)
        #'(make-page-map (list (cons addr exp) ...))))))
 
-(define (page-map-defaults rm)
-  (map register-map-defaults (page-map-table rm)))
+(define (page-map-default rm)
+  (map (lambda (x) (register-map-default (cdr x)))
+       (page-map-table rm)))
 
 (define (page-map-item-names rm)
   (flatten (map register-map-item-names (page-map-table rm))))
