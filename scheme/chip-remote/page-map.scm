@@ -17,6 +17,7 @@
             page-map-merge
             page-map-fold
             page-map-ref
+            page-map-address
             define-page-map))
 
 ;; How to share some registers between the register maps of all or even only
@@ -79,3 +80,21 @@
                                     (return item)
                                     #f)))
                             #f pm))))
+
+(define page-map-address
+  (case-lambda
+    ((pm page-addr)
+     (call/ec (lambda (return)
+                (page-map-fold (lambda (pa rm pacc)
+                                 (if (eqv? pa page-addr)
+                                     (return rm)
+                                     #f))
+                               #f pm))))
+    ((pm page-addr reg-addr)
+     (register-map-address (page-map-address pm page-addr) reg-addr))
+    ((pm page-addr reg-addr item-addr)
+     (register-map-address (page-map-address pm page-addr)
+                           reg-addr item-addr))
+    ((pm page-addr reg-addr name cnt)
+     (register-map-address (page-map-address pm page-addr)
+                           reg-addr name cnt))))
