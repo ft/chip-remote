@@ -18,6 +18,7 @@
             register-map-register
             register-map-fold
             register-map-ref
+            register-map-address
             define-register-map))
 
 (define-record-type <register-map>
@@ -89,3 +90,16 @@
                                         (return item)
                                         #f)))
                                 #f rm))))
+
+(define register-map-address
+  (case-lambda
+    ((rm reg-addr) (call/ec (lambda (return)
+                              (register-map-fold (lambda (ra reg acc)
+                                                   (if (eqv? ra reg-addr)
+                                                       (return reg)
+                                                       #f))
+                                                 #f rm))))
+    ((rm reg-addr item-addr)
+     (register-ref/address (register-map-address rm reg-addr) item-addr))
+    ((rm reg-addr name cnt)
+     (register-address (register-map-address rm reg-addr) name cnt))))
