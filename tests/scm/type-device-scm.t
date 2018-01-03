@@ -14,7 +14,7 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (plan 8)
+ (plan 9)
 
  (define-test "generate-page-map, call structure works"
    (pass-if-true
@@ -35,12 +35,13 @@
  (let ((dev (generate-device
              #:page-map
              (0 #:table
-                (0 (#:contents (thing 0 4) (fish 4 4)))
+                (0 (#:default 128
+                    #:contents (thing 0 4) (fish 4 4)))
                 (1 (#:contents (more 0 4) (stuff 4 4))))
              (1 #:table
                 (0 (#:contents (thing* 0 4) (fish* 4 4)))
                 (1 (#:contents (more* 0 4) (stuff* 4 4)))
-                (2 (#:contents (stuff 0 8)))))))
+                (2 (#:contents (stuff 0 8 #:default 666)))))))
    (define-test "device-address by page-address works #1"
      (pass-if-= (length (register-map-table (device-address dev 0)))
                 2))
@@ -58,4 +59,7 @@
                   'stuff*))
    (define-test "device-address by page-, reg-addr, name and count works"
      (pass-if-eq? (item-name (device-address dev 1 1 'more* 0))
-                  'more*))))
+                  'more*))
+   (define-test "device-default works"
+     (pass-if-equal? (device-default dev)
+                     '((128 0) (0 0 666))))))

@@ -14,6 +14,7 @@
             device-ref
             device-address
             device-item-names
+            device-default
             define-device))
 
 (define-record-type <device>
@@ -65,6 +66,9 @@
   (format port ">"))
 
 (set-record-type-printer! <device> record-device-printer)
+
+(define (device-default dev)
+  (page-map-default (device-page-map dev)))
 
 (define (device-item-names dev)
   (page-map-item-names (device-page-map dev)))
