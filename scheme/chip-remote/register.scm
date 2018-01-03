@@ -15,7 +15,7 @@
             register?
             register-meta
             register-items
-            register-defaults
+            register-default
             register-width
             register-item-names
             register-contains?
@@ -69,11 +69,14 @@
 
 (set-record-type-printer! <register> record-register-printer)
 
-(define (register-defaults reg)
-  (fold (lambda (x acc)
-          ((item-set x) acc (item-default x)))
-        0
-        (register-items reg)))
+(define (register-default reg)
+  (let ((default (assq #:default (register-meta reg))))
+    (if default
+        (cdr default)
+        (fold (lambda (x acc)
+                ((item-set x) acc (item-default x)))
+              0
+              (register-items reg)))))
 
 (define (register-width reg)
   (let loop ((rest (register-items reg)) (biggest-offset 0) (width-of-that 0))

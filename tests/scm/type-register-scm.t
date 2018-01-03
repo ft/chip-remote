@@ -14,7 +14,7 @@
   (generate-item #:name name #:offset 3 #:width 2))
 
 (with-fs-test-bundle
- (plan 22)
+ (plan 23)
 
  (define-test "generate-register, call structure works"
    (pass-if-true (register? (generate-register #:default #x12
@@ -87,4 +87,6 @@
                   'bar))
    (define-test "reg: register-ref/address works #2"
      (pass-if-eq? (item-name (register-ref/address reg 'foo))
-                  'foo))))
+                  'foo))
+   (define-test "register-default works"
+     (pass-if-= (register-default reg) #x12))))
