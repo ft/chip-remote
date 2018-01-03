@@ -25,6 +25,7 @@ NAME = remote-fw
 all: @@ALLTARGETS@@
 
 clean:
+	rm -f Makefile config.*.h platform.h
 	rm -f *.p *.o *.s *.elf *.$(OBJEXT) *.lst arch/*.o
 	rm -f *~ arch/*~
 

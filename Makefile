@@ -47,6 +47,7 @@ fw-simulator:
 	(cd remote-fw && $(MAKE);)
 
 clean:
+	test -f remote-fw/Makefile && $(MAKE) -C remote-fw clean || true
 	find . -name "*.go" -exec rm -f '{}' +
 	find . -name "*~" -exec rm -f '{}' +
 	find . -name "*.failure" -exec rm -f '{}' +
