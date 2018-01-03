@@ -15,13 +15,13 @@
                                           (foo 0 4)
                                           (bar 4 4)))
 (define *register-two* (generate-register #:contents
-                                          (baz 0 4)
+                                          (baz 0 4 #:default #b0110)
                                           (boz 4 4)))
 
 (define pp (@@ (ice-9 pretty-print) pretty-print))
 
 (with-fs-test-bundle
- (plan 6)
+ (plan 7)
 
  (define-test "generate-register, call structure works"
    (pass-if-true (register-map? (generate-register-map
@@ -51,4 +51,7 @@
                   'foo))
    (define-test "register-map-ref works"
      (pass-if-eq? (item-name (register-map-ref rm 'boz))
-                  'boz))))
+                  'boz))
+   (define-test "register-map-default works"
+     (pass-if-equal? (register-map-default rm)
+                     '(0 0 6)))))

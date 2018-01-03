@@ -13,7 +13,7 @@
             register-map?
             register-map-meta
             register-map-table
-            register-map-defaults
+            register-map-default
             register-map-item-names
             register-map-register
             register-map-fold
@@ -51,8 +51,9 @@
          #'(make-register-map (list meta ...)
                               (list table ... ...)))))))
 
-(define (register-map-defaults rm)
-  (map register-defaults (register-map-table rm)))
+(define (register-map-default rm)
+  (map (lambda (x) (register-default (cdr x)))
+       (register-map-table rm)))
 
 (define (register-map-item-names rm)
   (flatten (map register-item-names (register-map-table rm))))
