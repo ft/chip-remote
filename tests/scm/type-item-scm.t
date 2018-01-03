@@ -11,7 +11,7 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (plan 15)
+ (plan 17)
 
  ;; Test the different call structures of the generate-item macro
  (define-test "generate-item, default call structure"
@@ -62,4 +62,13 @@
    (define-test "item-setter works"
      (pass-if-= (setter #b1011110111111010
                         #b100000001111)
-                #b1000000011111010))))
+                #b1000000011111010)))
+
+ (let ((item-a (generate-item thing 4 12 #:default 1000))
+       (item-b (generate-item thing 4 12)))
+   (define-test "item-default works #1"
+     (pass-if-= (item-default item-a)
+                1000))
+   (define-test "item-default works #2"
+     (pass-if-= (item-default item-b)
+                0))))
