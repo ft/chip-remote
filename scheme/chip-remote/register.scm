@@ -19,9 +19,12 @@
             register-width
             register-item-names
             register-contains?
+            register-address
             register-ref
+            register-ref/address
             register-set
             register-fold
+            sorted-items
             define-register))
 
 (define-record-type <register>
@@ -106,6 +109,30 @@
 
 (define (register-fold fnc init reg)
   (fold fnc init (register-items reg)))
+
+(define (sorted-items reg)
+  (sort (register-items reg)
+        (lambda (a b)
+          (< (item-offset a)
+             (item-offset b)))))
+
+(define register-address
+  (case-lambda
+    ((reg n) (list-ref (sorted-items reg) n))
+    ((reg name n)
+     (call/ec (lambda (return)
+                (let loop ((rest (sorted-items reg)) (cnt 0))
+                  (cond ((null? rest) #f)
+                        ((eq? name (item-name (car rest)))
+                         (if (= cnt n)
+                             (return (car rest))
+                             (loop (cdr rest) (+ cnt 1))))
+                        (else (loop (cdr rest) cnt)))))))))
+
+(define (register-ref/address reg thing)
+  (cond ((symbol? thing) (register-ref reg thing))
+        ((integer? thing) (register-address reg thing))
+        (else (throw 'invalid-item-address thing))))
 
 ;; TODO: register-verify?:
 ;;
