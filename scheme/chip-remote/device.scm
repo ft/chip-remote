@@ -13,6 +13,7 @@
             device-register
             device-ref
             device-address
+            device-item-names
             define-device))
 
 (define-record-type <device>
@@ -64,6 +65,9 @@
   (format port ">"))
 
 (set-record-type-printer! <device> record-device-printer)
+
+(define (device-item-names dev)
+  (page-map-item-names (device-page-map dev)))
 
 (define (device-register dev)
   (let ((pm (page-map-table (device-page-map dev))))
