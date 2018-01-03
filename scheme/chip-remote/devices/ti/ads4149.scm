@@ -5,7 +5,7 @@
 (define-module (chip-remote devices ti ads4149)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 optargs)
-  #:use-module (chip-remote bitops)
+  #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote level-3)
   #:use-module (chip-remote protocol)

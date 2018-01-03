@@ -3,7 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote codecs)
-  #:use-module (chip-remote bitops)
+  #:use-module (chip-remote bit-operations)
   #:export (decode-boolean
             decode-boolean/active-low
             encode-boolean

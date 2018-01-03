@@ -167,7 +167,7 @@
 
 ** Non-Device-Specific Modules
 
-*** (chip-remote bitops)
+*** (chip-remote bit-operations)
 
     This module implements a number of utilities that deal with manipulating
     blocks of bits in integers, that are not implemented by the libraries

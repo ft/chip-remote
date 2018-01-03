@@ -59,7 +59,7 @@
 (define-module (chip-remote item)
   #:use-module (srfi srfi-9)
   #:use-module (srfi srfi-9 gnu)
-  #:use-module (chip-remote bitops)
+  #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote semantics)
   #:export (generate-item
