@@ -9,6 +9,7 @@ CR = $(LOAD_PATH)/chip-remote
 MODULES_CORE = $(CR)/bit-operations.scm
 MODULES_CORE += $(CR)/codecs.scm
 MODULES_CORE += $(CR)/decode.scm
+MODULES_CORE += $(CR)/decode/types.scm
 MODULES_CORE += $(CR)/device.scm
 MODULES_CORE += $(CR)/interpreter.scm
 MODULES_CORE += $(CR)/manufacturer.scm
