@@ -119,7 +119,7 @@
                (v:offset offset)
                (v:semantics (list semantics ...))
                (v:meta (list (cons key value) ...)))
-           (make-item name v:offset v:width v:meta
+           (make-item v:name v:offset v:width v:meta
                       (lambda (r) (bit-extract-width r v:offset v:width))
                       (lambda (r v) (set-bits r v v:width v:offset))
                       #:semantics v:semantics))))))
