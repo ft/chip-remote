@@ -12,6 +12,7 @@
             device-page-map
             device-register
             device-ref
+            device-address
             define-device))
 
 (define-record-type <device>
@@ -75,3 +76,20 @@
 
 (define (device-ref device name)
   (page-map-ref (device-page-map device) name))
+
+(define device-address
+  (case-lambda
+    ((device page-addr)
+     (page-map-address (device-page-map device) page-addr))
+    ((device page-addr reg-addr)
+     (register-map-address (page-map-address (device-page-map device)
+                                             page-addr)
+                           reg-addr))
+    ((device page-addr reg-addr item-addr)
+     (register-map-address (page-map-address (device-page-map device)
+                                             page-addr)
+                           reg-addr item-addr))
+    ((device page-addr reg-addr name cnt)
+     (register-map-address (page-map-address (device-page-map device)
+                                             page-addr)
+                           reg-addr name cnt))))
