@@ -69,4 +69,4 @@
   decoder-device?
   (raw decoder-device-raw)
   (page-map decoder-device-page-map)
-  (description device-description))
+  (description decoder-device-description))
