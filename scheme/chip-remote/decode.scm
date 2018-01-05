@@ -15,19 +15,17 @@
   #:use-module (chip-remote semantics)
   #:export (decode decode* ?))
 
-(define (decode-register-item item value)
-  (let ((getter (item-get item))
-        (decoder (semantics-decode (item-semantics item))))
-    (decoder (getter value))))
-
 (define (decode* desc value)
-  (cond ((item? desc) (make-item/decoder (decode-register-item desc value)
-                                         value
-                                         desc))
+  (cond ((item? desc)
+         (let* ((decoder (semantics-decode (item-semantics desc)))
+                (item-decoded (decoder value)))
+           (make-item/decoder item-decoded value desc)))
         ((register? desc)
          (make-register/decoder
           value
-          (map (lambda (x) (decode* x value))
+          (map (lambda (x)
+                 (let ((getter (item-get x)))
+                   (decode* x (getter value))))
                (register-items desc))
           desc))
         ((register-map? desc)

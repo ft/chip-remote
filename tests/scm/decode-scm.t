@@ -29,14 +29,14 @@
                           (item-name boolitem))
        (pass-if-eq? (semantics-type (item-semantics boolitem)) 'boolean))
      (define-test "Decoding a boolean item works (true)"
-       (pass-if-eq? (decode boolitem 1) 'true))
+       (pass-if-equal? (decode boolitem 1) '(output . true)))
      (define-test "Decoding a boolean item works (false)"
-       (pass-if-eq? (decode boolitem 0) 'false)))
+       (pass-if-equal? (decode boolitem 0) '(output . false))))
    (let ((tableitem (fourth items)))
      (define-test (format #f "Device'e first item is a table-lookup (~a)"
                           (item-name tableitem))
        (pass-if-eq? (semantics-type (item-semantics tableitem)) 'table-lookup))
      (define-test "Decoding a boolean item works (div-by-32)"
-       (pass-if-eq? (decode tableitem 1) 'div-by-32))
+       (pass-if-equal? (decode tableitem 1) '(low-pass-cfg . div-by-32)))
      (define-test "Decoding a boolean item works (div-by-512)"
-       (pass-if-eq? (decode tableitem 0) 'div-by-512)))))
+       (pass-if-equal? (decode tableitem 0) '(low-pass-cfg . div-by-512))))))
