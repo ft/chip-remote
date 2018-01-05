@@ -56,7 +56,7 @@
                         (page-map-merge (list mp ...))))))))
 
 (define-syntax-rule (define-device binding e0 e* ...)
-  (define binding (generate-device e0 e* ...)))
+  (define binding (generate-device #:name 'binding e0 e* ...)))
 
 (define (record-device-printer device port)
   (format port "<device:~%    #:meta~%")
