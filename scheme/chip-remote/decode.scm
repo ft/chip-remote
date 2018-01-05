@@ -21,14 +21,13 @@
     (decoder (getter value))))
 
 (define (decode* desc value)
-  (cond ((item? desc) (make-item/decoder (item-decode desc value)
+  (cond ((item? desc) (make-item/decoder (decode-register-item desc value)
                                          value
                                          desc))
         ((register? desc)
          (make-register/decoder
           value
-          (map (lambda (x)
-                 (decode-register-item x value))
+          (map (lambda (x) (decode* x value))
                (register-items desc))
           desc))
         ((register-map? desc)
@@ -52,11 +51,15 @@
         ((device? desc)
          (make-device/decoder
           value
-          (map (lambda (rm v)
-                 (cons (car rm)
-                       (decode* (cdr rm) v)))
-               (page-map-table (device-page-map desc))
-               value)
+          (let ((pm (device-page-map desc)))
+            (make-page-map/decoder
+             value
+             (map (lambda (rm v)
+                    (cons (car rm)
+                          (decode* (cdr rm) v)))
+                  (page-map-table pm)
+                  value)
+             pm))
           desc))
         (else (throw 'invalid-data-type desc))))
 
@@ -65,10 +68,7 @@
          (cons (item-name (decoder-item-description thing))
                (decoder-item-decoded thing)))
         ((decoder-register? thing)
-         (map (lambda (n v)
-                (cons (item-name n) v))
-              (register-items (decoder-register-description thing))
-              (decoder-register-items thing)))
+         (map ? (decoder-register-items thing)))
         ((decoder-register-map? thing)
          (map (lambda (x) (cons (car x) (? (cdr x))))
               (decoder-register-map-registers thing)))
