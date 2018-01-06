@@ -26,7 +26,7 @@
             register->text
             registers->text
             text-decode-header
-            wat))
+            decode-to-text))
 
 (define debug? #f)
 
@@ -347,7 +347,7 @@
         (else (trace-?? 'else indent thing)
               #:ignore)))
 
-(define (wat description value)
+(define (decode-to-text description value)
   (let ((lst (flatten (?? (decode* description value)))))
     (for-each (lambda (s)
                 (unless (eq? s #:ignore) (display s)
