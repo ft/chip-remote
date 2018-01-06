@@ -14,6 +14,7 @@ MODULES_CORE += $(CR)/decode/types.scm
 MODULES_CORE += $(CR)/device.scm
 MODULES_CORE += $(CR)/interpreter.scm
 MODULES_CORE += $(CR)/manufacturer.scm
+MODULES_CORE += $(CR)/named-value.scm
 MODULES_CORE += $(CR)/page-map.scm
 MODULES_CORE += $(CR)/process-plist.scm
 MODULES_CORE += $(CR)/register-map.scm
