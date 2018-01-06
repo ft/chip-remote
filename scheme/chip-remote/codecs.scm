@@ -4,6 +4,7 @@
 
 (define-module (chip-remote codecs)
   #:use-module (chip-remote bit-operations)
+  #:use-module (chip-remote named-value)
   #:export (decode-boolean
             decode-boolean/active-low
             encode-boolean
@@ -146,7 +147,7 @@
   (lambda (x) (decode-with-table table x)))
 
 (define (decode-with-table table value)
-  (let loop ((rest table))
+  (let loop ((rest (if (named-value? table) (value-data table) table)))
     (if (null? rest)
         'undefined
         (let ((k (caar rest))
