@@ -8,9 +8,10 @@
              (chip-remote validate))
 
 (primitive-load "tests/test-tap-cfg.scm")
+(define-validator foobar ∈ foo bar)
 
 (with-fs-test-bundle
- (plan 13)
+ (plan 14)
  (let ((trivial (predicates))
        (below (predicates (< 100)))
        (above (predicates (> 100)))
@@ -47,4 +48,7 @@
                         (p 'quux))))
    (define-test "not-element-of expression is correct"
      (pass-if-equal? (validator-expression v)
-                     '(foo bar)))))
+                     '(foo bar))))
+
+ (define-test "Validators can be identified"
+   (pass-if-eq? (validator-name foobar) 'foobar)))

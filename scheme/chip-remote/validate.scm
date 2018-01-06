@@ -3,12 +3,14 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote validate)
-  #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:export (predicates
             make-validator
             generate-validator
             define-validator
+            identify-validator
             validator?
+            validator-name
             validator-type
             validator-expression
             validator-predicate))
@@ -16,9 +18,10 @@
 (define-syntax-rule (predicates (op bound) ...)
   (lambda (x) (and (op x bound) ...)))
 
-(define-record-type <validator>
-  (make-validator type expression predicate)
+(define-immutable-record-type <validator>
+  (make-validator name type expression predicate)
   validator?
+  (name validator-name identify-validator)
   (type validator-type)
   (expression validator-expression)
   (predicate validator-predicate))
@@ -35,23 +38,25 @@
             (equal? sym '∉))))
     (syntax-case x (range interpreter scheme)
       ((_ range expr ...)
-       #'(make-validator 'range '(expr ...)
+       #'(make-validator #f 'range '(expr ...)
                          (predicates expr ...)))
       ((_ elem-of expr ...)
        (elem-of-mode? #'elem-of)
-       #'(make-validator 'element-of '(expr ...)
+       #'(make-validator #f 'element-of '(expr ...)
                          (lambda (x)
                            (not (not (member x '(expr ...)))))))
       ((_ not-elem-of expr ...)
        (not-elem-of-mode? #'not-elem-of)
-       #'(make-validator 'not-element-of '(expr ...)
+       #'(make-validator #f 'not-element-of '(expr ...)
                          (lambda (x)
                            (not (member x '(expr ...))))))
       ((_ interpreter expr)
-       #'(make-validator 'interpreter #f
+       #'(make-validator #f 'interpreter #f
                          (make-evaluation expr)))
       ((_ scheme expr)
-       #'(make-validator 'scheme #f expr)))))
+       #'(make-validator #f 'scheme #f expr)))))
 
-(define-syntax-rule (define-validator binding expr ...)
-  (define binding (generate-validator expr ...)))
+(define-syntax-rule (define-validator binding expr expr* ...)
+  (define binding
+    (identify-validator (generate-validator expr expr* ...)
+                        'binding)))
