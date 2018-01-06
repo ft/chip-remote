@@ -4,6 +4,9 @@
 
 (define-module (chip-remote validate)
   #:use-module (srfi srfi-9 gnu)
+  #:use-module (chip-remote item)
+  #:use-module (chip-remote semantics)
+  #:use-module (chip-remote utilities)
   #:export (predicates
             make-validator
             generate-validator
@@ -13,7 +16,8 @@
             validator-name
             validator-type
             validator-expression
-            validator-predicate))
+            validator-predicate
+            validate-item-value))
 
 (define-syntax-rule (predicates (op bound) ...)
   (lambda (x) (and (op x bound) ...)))
@@ -60,3 +64,56 @@
   (define binding
     (identify-validator (generate-validator expr expr* ...)
                         'binding)))
+
+(define (unsigned-integer-max width) (- (2e width) 1))
+(define (unsigned-integer-min width) 0)
+(define (offset-binary-min width) (* -1 (2e width)))
+(define offset-binary-max unsigned-integer-max)
+(define (ones-complement-min width) (* -1 (unsigned-integer-max width)))
+(define ones-complement-max unsigned-integer-max)
+(define twos-complement-min offset-binary-min)
+(define twos-complement-max unsigned-integer-max)
+(define sign-magnitude-min ones-complement-min)
+(define sign-magnitude-max unsigned-integer-max)
+
+(define (int-validate width min* max*)
+  (lambda (x)
+    (and (integer? x)
+         (>= x (min* width))
+         (<= x (max* width)))))
+
+(define (semantics->validator width semantics)
+  (let ((type (semantics-type semantics)))
+    (case type
+      ((boolean boolean/active-low state state/active-low)
+       (lambda (x)
+         (member x '(#t #f 1 0 true false enabled disabled))))
+      ((table-lookup)
+       (lambda (x)
+         (member x (map car (semantics-data semantics)))))
+      ((unsigned-integer)
+       (int-validate width unsigned-integer-min unsigned-integer-max))
+      ((ones-complement)
+       (int-validate width ones-complement-min ones-complement-max))
+      ((twos-complement)
+       (int-validate width twos-complement-min twos-complement-max))
+      ((offset-binary)
+       (int-validate width offset-binary-min offset-binary-max))
+      (else (lambda (x) #t)))))
+
+(define (validator-or-true validator)
+  (if (validator? validator)
+      (validator-predicate validator)
+      (lambda (x) #t)))
+
+(define (validate-item-value item value)
+  (let* ((meta (item-meta item))
+         (width (item-width item))
+         (semantics (item-semantics item))
+         (validate-combine (assq-ref meta #:validate-combine))
+         (semantic-validator (semantics->validator width semantics))
+         (validator (validator-or-true (item-validator item))))
+    (case validate-combine
+        ((only) (validator value))
+        ((or) (or (semantic-validator value) (validator value)))
+        (else (and (semantic-validator value) (validator value))))))
