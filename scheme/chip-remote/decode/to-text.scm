@@ -21,12 +21,7 @@
   #:use-module (chip-remote page-map)
   #:use-module (chip-remote device)
   #:use-module (chip-remote utilities)
-  #:export (decode->text
-            display-list
-            register->text
-            registers->text
-            text-decode-header
-            decode-to-text))
+  #:export (decode-to-text))
 
 (define debug? #f)
 
