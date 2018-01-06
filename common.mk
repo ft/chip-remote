@@ -20,6 +20,7 @@ MODULES_CORE += $(CR)/register-map.scm
 MODULES_CORE += $(CR)/register.scm
 MODULES_CORE += $(CR)/semantics.scm
 MODULES_CORE += $(CR)/utilities.scm
+MODULES_CORE += $(CR)/validate.scm
 
 MODULES_MANUFACTURERS = $(CR)/manufacturer/bosch.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/linear-technology.scm
