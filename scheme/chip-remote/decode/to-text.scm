@@ -25,11 +25,6 @@
 
 (define debug? #f)
 
-(define-syntax cat
-  (lambda (x)
-    (syntax-case x ()
-      ((_ exp ...) #'(string-concatenate (list exp ...))))))
-
 (define colour-map '((black . "30")
                      (blue . "34")
                      (cyan . "36")

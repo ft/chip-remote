@@ -1,6 +1,10 @@
 (define-module (chip-remote utilities)
-  #:export (flatten
+  #:export (cat
+            flatten
             log2))
+
+(define-syntax-rule (cat str ...)
+  (string-concatenate (list str ...)))
 
 (define (flatten lst)
   "Flatten deep tree to a shallow list"
