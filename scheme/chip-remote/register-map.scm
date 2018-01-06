@@ -1,7 +1,6 @@
 (define-module (chip-remote register-map)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
-  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 control)
   #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote process-plist)
@@ -60,15 +59,6 @@
 
 (define-syntax-rule (define-register-map binding e0 e* ...)
   (define binding (generate-register-map e0 e* ...)))
-
-(define (record-register-map-printer register-map port)
-  (format port "<register-map:~%    #:meta~%")
-  (pretty-print (register-map-meta register-map) port #:per-line-prefix "    ")
-  (format port "    #:table~%")
-  (pretty-print (register-map-table register-map) port #:per-line-prefix "    ")
-  (format port ">"))
-
-(set-record-type-printer! <register-map> record-register-map-printer)
 
 (define (register-map-register rm)
   (let ((rm* (register-map-table rm)))

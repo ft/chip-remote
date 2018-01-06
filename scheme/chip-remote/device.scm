@@ -1,6 +1,5 @@
 (define-module (chip-remote device)
   #:use-module (srfi srfi-9)
-  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote register-map)
@@ -57,15 +56,6 @@
 
 (define-syntax-rule (define-device binding e0 e* ...)
   (define binding (generate-device #:name 'binding e0 e* ...)))
-
-(define (record-device-printer device port)
-  (format port "<device:~%    #:meta~%")
-  (pretty-print (device-meta device) port #:per-line-prefix "    ")
-  (format port "    #:page-map~%")
-  (pretty-print (device-page-map device) port #:per-line-prefix "    ")
-  (format port ">"))
-
-(set-record-type-printer! <device> record-device-printer)
 
 (define (device-default dev)
   (page-map-default (device-page-map dev)))

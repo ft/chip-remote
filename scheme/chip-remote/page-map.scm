@@ -1,7 +1,6 @@
 (define-module (chip-remote page-map)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
-  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 control)
   #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote process-plist)
@@ -56,13 +55,6 @@
 
 (define-syntax-rule (define-page-map binding e0 e* ...)
   (define binding (generate-page-map e0 e* ...)))
-
-(define (record-page-map-printer page-map port)
-  (format port "<page-map:~%    #:table~%")
-  (pretty-print (page-map-table page-map) port #:per-line-prefix "    ")
-  (format port ">"))
-
-(set-record-type-printer! <page-map> record-page-map-printer)
 
 (define (page-map-merge lst)
   (make-page-map (apply append (map page-map-table (flatten lst)))))

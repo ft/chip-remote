@@ -7,7 +7,6 @@
   #:use-module (ice-9 pretty-print)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
-  #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote item)
   #:use-module (chip-remote process-plist)
   #:export (generate-register
@@ -59,15 +58,6 @@
 
 (define-syntax-rule (define-register binding e0 e* ...)
   (define binding (generate-register e0 e* ...)))
-
-(define (record-register-printer register port)
-  (format port "<register:~%    #:meta~%")
-  (pretty-print (register-meta register) port #:per-line-prefix "    ")
-  (format port "    #:items~%")
-  (pretty-print (register-items register) port #:per-line-prefix "    ")
-  (format port ">"))
-
-(set-record-type-printer! <register> record-register-printer)
 
 (define (register-default reg)
   (let ((default (assq #:default (register-meta reg))))

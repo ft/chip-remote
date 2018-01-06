@@ -58,7 +58,6 @@
 
 (define-module (chip-remote item)
   #:use-module (srfi srfi-9)
-  #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote semantics)
@@ -91,14 +90,6 @@
   (make-item* name offset width
               (deduce-semantics width meta semantics)
               meta get set))
-
-(define (record-item-printer item port)
-  (format port "<item: name: ~s offset: ~a width: ~a>"
-          (item-name item)
-          (item-offset item)
-          (item-width item)))
-
-(set-record-type-printer! <item> record-item-printer)
 
 (define semantics-group
   (group 'semantics
