@@ -2,18 +2,6 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
-;; scratchpad SEMANTICS: (Datatype)
-;;
-;; Standard semantics:
-;;
-;;  - boolean
-;;  - table-lookup
-;;  - unsigned-integer
-;;  - offset-integer
-;;  - two-complement-integer
-;;  - interpreter
-;;  - scheme
-
 ;; scratchpad VALIDATORS: (Datatype)
 ;;
 ;; Check if a value is valid for an item.
@@ -24,10 +12,6 @@
 ;;  - list
 ;;  - interpreter
 ;;  - scheme
-
-;; scratchpad SCRIPT: (Datatype)
-;;
-;; Datatype for describing scripts for our interpreter.
 
 ;; This module implements an abstraction for pieces of data that, when combined
 ;; make up a register (see (chip-remote register) about that combination). The
