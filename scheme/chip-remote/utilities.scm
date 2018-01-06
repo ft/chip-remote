@@ -1,5 +1,6 @@
 (define-module (chip-remote utilities)
-  #:export (cat
+  #:export (2e
+            cat
             flatten
             log2))
 
@@ -12,6 +13,9 @@
         ((not (pair? lst)) (list lst))
         (else (append (flatten (car lst))
                       (flatten (cdr lst))))))
+
+(define (2e n)
+  (ash 1 n))
 
 (define log2-scale (log10 2))
 
