@@ -9,6 +9,7 @@
 
 (define-module (chip-remote devices linear-technology ltc6603)
   #:use-module (chip-remote device)
+  #:use-module (chip-remote named-value)
   #:use-module (chip-remote manufacturer linear-technology)
   #:export (ltc6603))
 
@@ -16,15 +17,15 @@
 ;; most-significant bit toward the lower bit offsets. That's why the #b10 and
 ;; #b01 mappings look different from a first look into the datasheet.
 
-(define low-pass-cfg '((div-by-512 . #b00)
-                       (div-by-128 . #b10)
-                       (div-by-32  . #b01)
-                       (div-by-32  . #b11)))
+(define-value low-pass-cfg '((div-by-512 . #b00)
+                             (div-by-128 . #b10)
+                             (div-by-32  . #b01)
+                             (div-by-32  . #b11)))
 
-(define gain-cfg '(( 0dB . #b00)
-                   ( 6dB . #b10)
-                   (12dB . #b01)
-                   (24dB . #b11)))
+(define-value gain-cfg '(( 0dB . #b00)
+                         ( 6dB . #b10)
+                         (12dB . #b01)
+                         (24dB . #b11)))
 
 (define-device ltc6603
   #:manufacturer linear-technology
