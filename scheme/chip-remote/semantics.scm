@@ -11,14 +11,16 @@
   #:export (make-semantics
             semantics?
             semantics-type
+            semantics-data
             semantics-decode
             semantics-encode
             deduce-semantics))
 
 (define-record-type <semantics>
-  (make-semantics* type decode encode)
+  (make-semantics* type data decode encode)
   semantics?
   (type semantics-type)
+  (data semantics-data)
   (decode semantics-decode)
   (encode semantics-encode))
 
@@ -28,34 +30,35 @@
                          (encode identity)
                          (table '()))
   (case type
-    ((boolean) (make-semantics* type decode-boolean encode-boolean))
-    ((boolean/active-low) (make-semantics* type
+    ((boolean) (make-semantics* type #f decode-boolean encode-boolean))
+    ((boolean/active-low) (make-semantics* type #f
                                            decode-boolean/active-low
                                            encode-boolean/active-low))
-    ((state) (make-semantics* type decode-state encode-state))
-    ((state/active-low) (make-semantics* type
+    ((state) (make-semantics* type #f decode-state encode-state))
+    ((state/active-low) (make-semantics* type #f
                                          decode-state/active-low
                                          encode-state/active-low))
-    ((unsigned-integer) (make-semantics* type identity identity))
-    ((offset-binary) (make-semantics* type
+    ((unsigned-integer) (make-semantics* type #f identity identity))
+    ((offset-binary) (make-semantics* type #f
                                       decode-offset-binary
                                       encode-offset-binary))
-    ((ones-complement) (make-semantics* type
+    ((ones-complement) (make-semantics* type #f
                                         decode-ones-complement
                                         encode-ones-complement))
-    ((twos-complement) (make-semantics* type
+    ((twos-complement) (make-semantics* type #f
                                         decode-twos-complement
                                         encode-twos-complement))
-    ((sign-magnitude) (make-semantics* type
+    ((sign-magnitude) (make-semantics* type #f
                                        decode-sign-magnitude
                                        encode-sign-magnitude))
     ((table-lookup lookup) (make-semantics* 'table-lookup
+                                            table
                                             (make-table-decoder table)
                                             (make-table-encoder table)))
-    ((interpreter) (make-semantics* type
+    ((interpreter) (make-semantics* type #f
                                     (make-evaluation decode)
                                     (make-evaluation encode)))
-    ((scheme) (make-semantics* type decode encode))
+    ((scheme) (make-semantics* type #f decode encode))
     (else (throw 'unknown-semantics type decode encode))))
 
 (define (deduce-semantics width meta semantics)
