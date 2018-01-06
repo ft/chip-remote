@@ -3,11 +3,12 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote interpreter)
-  #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 match)
   #:export (cr-eval
             make-evaluation
             evaluation?
+            evaluation-name
             evaluation-expression
             evaluation-value
             define-evaluation))
@@ -70,14 +71,15 @@
                             (just-eval rand2)))
       (_ (error (format #f "Invalid expression: ~s~%" expression))))))
 
-(define-record-type <evaluation>
-  (make-evaluation* expression value)
+(define-immutable-record-type <evaluation>
+  (make-evaluation* name expression value)
   evaluation?
+  (name evaluation-name identify-evaluation)
   (expression evaluation-expression)
   (value evaluation-value))
 
 (define (make-evaluation e)
-  (make-evaluation* e (cr-eval e)))
+  (make-evaluation* #f e (cr-eval e)))
 
 (define-syntax-rule (define-evaluation binding e)
-  (define binding (make-evaluation e)))
+  (define binding (identify-evaluation (make-evaluation e) 'binding)))
