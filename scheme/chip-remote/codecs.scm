@@ -73,7 +73,7 @@
 (define (encode-boolean* x tf)
   (boolean-encoder x 'true 'false tf 'invalid-boolean))
 
-(define (encode-boolean x tf)
+(define (encode-boolean x)
   (encode-boolean* x identity))
 
 (define (encode-boolean/active-low x tf)
