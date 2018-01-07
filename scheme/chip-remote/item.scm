@@ -95,10 +95,17 @@
   (group 'validator
          #:type 'list
          #:predicate
-         (lambda (x) (memq x '(#:validate #:validate*)))
+         (lambda (x)
+           (memq x '(#:validate #:validate* #:and-validate #:or-validate)))
          #:transformer
          (lambda (e)
            (syntax-case e ()
+             ((#:and-validate exps ...)
+              #'(combine-validator (generate-validator exps ...)
+                                   'and))
+             ((#:or-validate exps ...)
+              #'(combine-validator (generate-validator exps ...)
+                                   'or))
              ((#:validate exps ...) #'(generate-validator exps ...))
              ((#:validate* expr) #'expr)))))
 
