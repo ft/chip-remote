@@ -89,10 +89,10 @@
     (case type
       ((boolean boolean/active-low state state/active-low)
        (lambda (x)
-         (member x '(#t #f 1 0 true false enabled disabled))))
+         (not (not (member x '(#t #f 1 0 true false enable disable))))))
       ((table-lookup)
        (lambda (x)
-         (member x (map car (semantics-data semantics)))))
+         (not (not (member x (map car (semantics-data semantics)))))))
       ((unsigned-integer)
        (int-validate width unsigned-integer-min unsigned-integer-max))
       ((ones-complement)
