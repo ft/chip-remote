@@ -160,7 +160,9 @@
   (lambda (x) (encode-with-table table x)))
 
 (define (encode-with-table table key)
-  (let ((value (assoc key table)))
+  (let ((value (assoc key (if (named-value? table)
+                              (value-data table)
+                              table))))
     (if value
         (cdr value)
         'undefined)))
