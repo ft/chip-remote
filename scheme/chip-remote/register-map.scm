@@ -18,6 +18,7 @@
             register-map-fold
             register-map-ref
             register-map-address
+            register-map-address->index
             define-register-map))
 
 (define-record-type <register-map>
@@ -94,3 +95,12 @@
      (register-ref/address (register-map-address rm reg-addr) item-addr))
     ((rm reg-addr name cnt)
      (register-address (register-map-address rm reg-addr) name cnt))))
+
+(define (register-map-address->index rm addr)
+  (let loop ((rest (register-map-table rm)) (idx 0))
+    (if (null? rest)
+        #f
+        (let ((this (car rest)))
+          (if (eqv? (car this) addr)
+              idx
+              (loop (cdr rest) (+ idx 1)))))))
