@@ -14,13 +14,13 @@
  (plan 8)
 
  (define-test "default semantics for width 1 work (boolean)"
-   (pass-if-eq? (semantics-type (deduce-semantics 1 '() '()))
+   (pass-if-eq? (semantics-type (deduce-semantics 1 '() #f))
                 'boolean))
  (define-test "default semantics for width 2.. work (unsigned-integer)"
-   (pass-if-eq? (semantics-type (deduce-semantics 2 '() '()))
+   (pass-if-eq? (semantics-type (deduce-semantics 2 '() #f))
                 'unsigned-integer))
  (let* ((table '((a . 1) (b . 2)))
-        (sem (deduce-semantics 2 '() (list 'lookup table))))
+        (sem (generate-semantics lookup table)))
    (define-test "table lookup semantics work"
      (pass-if-eq? (semantics-type sem)
                   'table-lookup))
@@ -29,9 +29,9 @@
    (define-test "table lookup encoder works"
      (pass-if-= 1 ((semantics-encode sem) 'a))))
 
- (let ((sem (deduce-semantics 8 '() '(interpreter
-                                      #:decode (lambda (x) (increment x 2))
-                                      #:encode (lambda (x) (decrement x 2))))))
+ (let ((sem (generate-semantics interpreter
+                                #:decode '(lambda (x) (increment x 2))
+                                #:encode '(lambda (x) (decrement x 2)))))
    (define-test "interpreter codecs work"
      (pass-if-eq? (semantics-type sem)
                   'interpreter))

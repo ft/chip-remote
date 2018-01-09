@@ -28,7 +28,7 @@
                               (1 #:table
                                  (0 (#:contents (thing* 0 4) (fish* 4 4)))
                                  (1 (#:contents (more* 0 4) (stuff* 4 4)))
-                                 (2 (#:contents (stuff 0 8 #:default 666)))))))
+                                 (2 (#:contents (stuff 0 8 #:default 111)))))))
    (define-test "page-map-address by page-address works #1"
      (pass-if-= (length (register-map-table (page-map-address pm 0)))
                 2))
@@ -49,4 +49,4 @@
                   'more*))
    (define-test "page-map-default works"
      (pass-if-equal? (page-map-default pm)
-                     '((128 0) (0 0 666))))))
+                     '((128 0) (0 0 111))))))

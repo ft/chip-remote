@@ -13,6 +13,8 @@
             decode-state/active-low
             encode-state
             encode-state/active-low
+            decode-unsigned-integer
+            encode-unsigned-integer
             decode-ones-complement
             encode-ones-complement
             decode-twos-complement
@@ -95,6 +97,11 @@
 ;; https://www.intersil.com/content/dam/Intersil/documents/an96/an9657.pdf
 ;;
 ;; All encodings need to know the width of an item to work.
+
+(define (encode-unsigned-integer width value)
+  (logand (one-bits width) value))
+
+(define decode-unsigned-integer encode-unsigned-integer)
 
 (define (encode-twos-complement width value)
   (if (>= value 0)

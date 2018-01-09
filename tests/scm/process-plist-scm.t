@@ -50,8 +50,8 @@
                    '(real boz ((#:thing fish)))))
 
  (define-test "Semantic group looks good"
-   (pass-if-equal? (~ (process-plist #'(#:semantics 'lookup foo-table)
+   (pass-if-equal? (~ (process-plist #'(#:semantics lookup foo-table)
                                      semantics-group
                                      (group 'meta)))
-                   '(('lookup foo-table)
+                   '(((generate-semantics lookup foo-table))
                      ()))))

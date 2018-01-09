@@ -22,13 +22,13 @@
    (pass-if-true (item? (generate-item #:name 'foo #:offset 2 #:width 4))))
  (define-test "generate-item, default call structure (with meta)"
    (pass-if-true (item? (generate-item foo 2 4
-                                       #:semantics 'unsigned-integer))))
+                                       #:semantics unsigned-integer))))
  (define-test "generate-item, annotated call structure (with meta)"
    (pass-if-true (item? (generate-item foo #:offset 2 #:width 4
-                                       #:semantics 'offset-binary))))
+                                       #:semantics offset-binary))))
  (define-test "generate-item, fully annotated call structure (with meta)"
    (pass-if-true (item? (generate-item #:name 'foo #:offset 2 #:width 4
-                                       #:semantics 'twos-complement))))
+                                       #:semantics twos-complement))))
 
  (define-test "generate-item, width 1 defaults to boolean"
    (pass-if-eq? (semantics-type (item-semantics (generate-item foo 2 1)))
@@ -44,7 +44,7 @@
      (pass-if-equal? (item-meta item)
                      '())))
 
- (let* ((item (generate-item thing 4 12 #:semantics 'unsigned-integer))
+ (let* ((item (generate-item thing 4 12 #:semantics unsigned-integer))
         (getter (item-get item))
         (setter (item-set item))
         (sem (item-semantics item)))

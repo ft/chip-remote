@@ -5,10 +5,12 @@
 (define-module (chip-remote semantics)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
-  #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote codecs)
   #:use-module (chip-remote interpreter)
   #:export (make-semantics
+            generate-semantics
+            define-semantics
             semantics?
             semantics-type
             semantics-data
@@ -16,67 +18,100 @@
             semantics-encode
             deduce-semantics))
 
-(define-record-type <semantics>
-  (make-semantics* type data decode encode)
+(define-immutable-record-type <semantics>
+  (make-semantics name type data decode encode)
   semantics?
+  (name semantics-name identify-semantics)
   (type semantics-type)
   (data semantics-data)
-  (decode semantics-decode)
-  (encode semantics-encode))
-
-(define* (make-semantics type
-                         #:key
-                         (decode identity)
-                         (encode identity)
-                         (table '()))
-  (case type
-    ((boolean) (make-semantics* type #f decode-boolean encode-boolean))
-    ((boolean/active-low) (make-semantics* type #f
-                                           decode-boolean/active-low
-                                           encode-boolean/active-low))
-    ((state) (make-semantics* type #f decode-state encode-state))
-    ((state/active-low) (make-semantics* type #f
-                                         decode-state/active-low
-                                         encode-state/active-low))
-    ((unsigned-integer) (make-semantics* type #f identity identity))
-    ((offset-binary) (make-semantics* type #f
-                                      decode-offset-binary
-                                      encode-offset-binary))
-    ((ones-complement) (make-semantics* type #f
-                                        decode-ones-complement
-                                        encode-ones-complement))
-    ((twos-complement) (make-semantics* type #f
-                                        decode-twos-complement
-                                        encode-twos-complement))
-    ((sign-magnitude) (make-semantics* type #f
-                                       decode-sign-magnitude
-                                       encode-sign-magnitude))
-    ((table-lookup lookup) (make-semantics* 'table-lookup
-                                            table
-                                            (make-table-decoder table)
-                                            (make-table-encoder table)))
-    ((interpreter) (make-semantics* type #f
-                                    (make-evaluation decode)
-                                    (make-evaluation encode)))
-    ((scheme) (make-semantics* type #f decode encode))
-    (else (throw 'unknown-semantics type decode encode))))
+  (decode semantics-decode amend-decoder)
+  (encode semantics-encode amend-encoder))
 
 (define (deduce-semantics width meta semantics)
   (match semantics
-    (() (if (= width 1)
-            (make-semantics 'boolean)
-            (make-semantics 'unsigned-integer)))
+    (#f (if (= width 1)
+            (deduce-semantics width meta *boolean-fallback*)
+            (deduce-semantics width meta *unsigned-integer-fallback*)))
+    ((? procedure? semantics) (semantics width))
     ((? semantics? semantics) semantics)
-    (((? semantics? semantics)) semantics)
-    (((? symbol? type)) (make-semantics type))
-    (('lookup arg) (make-semantics 'lookup #:table arg))
-    (('table-lookup arg) (make-semantics 'table-lookup #:table arg))
-    ;; The make-semantics calls for interpreter and scheme yield compiler
-    ;; warnings, because the compiler doesn't see actual keywords in the
-    ;; callsite. Our match here makes sure, though, that kw1 and k2 *are* in
-    ;; fact keywords. So this is fine.
-    (('interpreter (? keyword? kw1) a1 (? keyword? kw2) a2)
-     (make-semantics 'interpreter kw1 a1 kw2 a2))
-    (('scheme (? keyword? kw1) a1 (? keyword? kw2) a2)
-     (make-semantics 'scheme kw1 a1 kw2 a2))
     (_ (throw 'cannot-deduce-semantics width meta semantics))))
+
+(define-syntax generate-semantics
+  (lambda (x)
+
+    (define (sym->codec kw table accessor sym)
+      (datum->syntax
+       kw `(@@ (chip-remote codecs)
+               ,(accessor (assq-ref table (syntax->datum sym))))))
+
+    (define simple-table
+      '((boolean decode-boolean encode-boolean)
+        (boolean/active-low decode-boolean/active-low encode-boolean/active-low)
+        (state/active-low decode-state/active-low encode-state/active-low)
+        (state decode-state encode-state)))
+
+    (define (simple-type? syn)
+      (memq (syntax->datum syn) (map car simple-table)))
+
+    (define (simple-decoder kw type)
+      (sym->codec kw simple-table car type))
+
+    (define (simple-encoder kw type)
+      (sym->codec kw simple-table cadr type))
+
+    (define width-table
+      '((unsigned-integer decode-unsigned-integer encode-unsigned-integer)
+        (ones-complement decode-ones-complement encode-ones-complement)
+        (twos-complement decode-twos-complement encode-twos-complement)
+        (offset-binary decode-offset-binary encode-offset-binary)
+        (sign-magnitude decode-sign-magnitude encode-sign-magnitude)))
+
+    (define (width-type? syn)
+      (memq (syntax->datum syn) (map car width-table)))
+
+    (define (width-decoder kw type)
+      (sym->codec kw width-table car type))
+
+    (define (width-encoder kw type)
+      (sym->codec kw width-table cadr type))
+
+    (syntax-case x (lookup interpreter scheme)
+      ((kw type)
+       (simple-type? #'type)
+       #`(make-semantics #f 'type #f
+                         #,(simple-decoder #'kw #'type)
+                         #,(simple-encoder #'kw #'type)))
+      ((kw type)
+       (width-type? #'type)
+       #`(lambda (w)
+           (let* ((sem (make-semantics #f 'type #f
+                                       #,(width-decoder #'kw #'type)
+                                       #,(width-encoder #'kw #'type)))
+                  (dec (semantics-decode sem))
+                  (enc (semantics-encode sem)))
+             (amend-decoder (amend-encoder sem
+                                           (lambda (v) (enc w v)))
+                            (lambda (v) (dec w v))))))
+      ((kw lookup table)
+       #'(make-semantics #f 'table-lookup table
+                         (make-table-decoder table)
+                         (make-table-encoder table)))
+      ((kw interpreter #:encode e #:decode d)
+       #'(make-semantics #f 'interpreter #f
+                         (make-evaluation d)
+                         (make-evaluation e)))
+      ((kw interpreter #:decode d #:encode e)
+       #'(generate-semantics interpreter #:encode e #:decode d))
+      ((kw scheme #:encode e #:decode d)
+       #'(make-semantics #f 'scheme #f
+                         (make-evaluation d)
+                         (make-evaluation e)))
+      ((kw scheme #:decode d #:encode e)
+       #'(generate-semantics scheme #:encode e #:decode d)))))
+
+(define-syntax-rule (define-semantics binding e* ...)
+  (define binding (identify-semantics (generate-semantics e* ...)
+                                      'binding)))
+
+(define *boolean-fallback* (generate-semantics boolean))
+(define *unsigned-integer-fallback* (generate-semantics unsigned-integer))

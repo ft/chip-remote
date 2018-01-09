@@ -62,7 +62,7 @@
             item-encode))
 
 (define-record-type <item>
-  (make-item* name offset width semantics validator meta get set)
+  (make-item name offset width semantics validator meta get set)
   item?
   (name item-name)
   (offset item-offset)
@@ -73,23 +73,14 @@
   (get item-get)
   (set item-set))
 
-(define* (make-item name offset width meta get set
-                    #:key
-                    (validator #f)
-                    (semantics '()))
-  (make-item* name offset width
-              (deduce-semantics width meta semantics)
-              validator meta get set))
-
 (define semantics-group
   (group 'semantics
          #:type 'list
-         #:context 'scalar
-         #:predicate (lambda (x) (eq? x #:semantics))
-         #:transformer (lambda (expr)
-                         (syntax-case expr ()
-                           ((#:semantics e* ...) #'(e* ...))
-                           ((e* ...) #'(e* ...))))))
+         #:predicate (lambda (x) (memq x '(#:semantics #:semantics*)))
+         #:transformer (lambda (e)
+                         (syntax-case e ()
+                           ((#:semantics e* ...) #'(generate-semantics e* ...))
+                           ((#:semantics* expr) #'expr)))))
 
 (define validator-group
   (group 'validator
@@ -112,20 +103,25 @@
 (define-syntax generate-item*
   (lambda (x)
     (syntax-case x ()
-      ((kw name offset width (semantics ...) () ((key value) ...))
-       #'(kw name offset width (semantics ...) (#f) ((key value) ...)))
-      ((kw name offset width (semantics ...) (validator _ ...) ((key value) ...))
+      ((kw name offset width (semantics s* ...) () ((key value) ...))
+       #'(kw name offset width (semantics s* ...) (#f) ((key value) ...)))
+      ((kw name offset width () (validator v* ...) ((key value) ...))
+       #'(kw name offset width (#f) (validator v* ...) ((key value) ...)))
+      ((kw name offset width () () ((key value) ...))
+       #'(kw name offset width (#f) (#f) ((key value) ...)))
+      ((kw name offset width (semantics s* ...) (validator v* ...) ((key value) ...))
        #'(let ((v:name name)
                (v:width width)
                (v:offset offset)
-               (v:semantics (list semantics ...))
-               (v:validator validator)
-               (v:meta (list (cons key value) ...)))
-           (make-item v:name v:offset v:width v:meta
+               (v:meta (list (cons key value) ...))
+               (v:semantics semantics)
+               (v:validator validator))
+           (make-item v:name v:offset v:width
+                      (deduce-semantics v:width v:meta v:semantics)
+                      v:validator
+                      v:meta
                       (lambda (r) (bit-extract-width r v:offset v:width))
-                      (lambda (r v) (set-bits r v v:width v:offset))
-                      #:validator v:validator
-                      #:semantics v:semantics))))))
+                      (lambda (r v) (set-bits r v v:width v:offset))))))))
 
 (define-syntax generate-item
   (lambda (x)
