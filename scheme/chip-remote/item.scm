@@ -44,6 +44,7 @@
   #:use-module (srfi srfi-9)
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote process-plist)
+  #:use-module (chip-remote interpreter)
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote validate)
   #:export (generate-item
@@ -170,12 +171,15 @@
 (define (item-codec what item value)
   (let* ((semantics (item-semantics item))
          (worker (what semantics))
-         (arity (car (procedure-minimum-arity worker))))
-    (cond ((= arity 1) (worker value))
-          ((= arity 2) (worker (item-width item) value))
+         (proc (if (evaluation? worker)
+                   (evaluation-value worker)
+                   worker))
+         (arity (car (procedure-minimum-arity proc))))
+    (cond ((= arity 1) (proc value))
+          ((= arity 2) (proc (item-width item) value))
           (else (throw 'invalid-arity
                        what item value
-                       semantics worker arity)))))
+                       semantics proc arity)))))
 
 (define (item-decode item value)
   (item-codec semantics-decode item value))
