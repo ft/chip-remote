@@ -1,4 +1,5 @@
-#+TITLE: Remote Control for Configurable Electronic Parts (RCCEP)
+#+TITLE: Remote Control of Configurable Electronic Parts
+#+SUBTITLE: RCCEP
 #+AUTHOR: Frank Terbeck
 #+EMAIL: ft@bewatermyfriend.org
 #+OPTIONS: num:t toc:nil
