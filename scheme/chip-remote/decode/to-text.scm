@@ -113,7 +113,9 @@
 (define square-backets (make-wrapper "[" "]"))
 
 (define (maybe-string x)
-  (format #f "~a" x))
+  (format #f "~a" (if (symbol? x)
+                      (symbol->string x)
+                      x)))
 
 (define (make-indent n)
   (make-string n #\space))
