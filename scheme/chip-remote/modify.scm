@@ -30,7 +30,9 @@
                 (_ (throw 'unknown-addressing-scheme addr)))))
     (unless (item? item)
       (throw 'addressing-returned-non-item item addr))
-    ((item-set item) init (item-encode item value))))
+    (if (validate-item-value item value)
+        ((item-set item) init (item-encode item value))
+        (throw 'invalid-value-for-item value item))))
 
 (define (register-matches? reg addr)
   (match addr
