@@ -69,7 +69,7 @@
 
  ;; Modify with default
  (define-test "Modify item in device with default value"
-   (pass-if-equal? '((2)) (modify* ltc6603 'shutdown #t)))
+   (pass-if-equal? '((18)) (modify* ltc6603 'shutdown #t)))
 
  ;; Chain modify
  (define-test "Chain-modify on register works"
