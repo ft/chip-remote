@@ -103,6 +103,8 @@
        (int-validate width twos-complement-min twos-complement-max))
       ((offset-binary)
        (int-validate width offset-binary-min offset-binary-max))
+      ((sign-magnitude)
+       (int-validate width sign-magnitude-min sign-magnitude-max))
       (else (lambda (x) #t)))))
 
 (define (validator-or-true validator)
