@@ -20,6 +20,7 @@
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote page-map)
   #:use-module (chip-remote device)
+  #:use-module (chip-remote semantics)
   #:use-module (chip-remote utilities)
   #:export (decode-to-text))
 
@@ -122,6 +123,7 @@
 
 (define d:item:highlight:name (make-highlighter 'yellow))
 (define d:item:highlight:decoded (make-highlighter 'red #:bold? #t))
+(define d:item:highlight:semantics (make-highlighter 'magenta #:bold? #t))
 (define d:regmap:highlight:name (make-highlighter 'red))
 (define d:pagemap:highlight:name (make-highlighter 'white #:bold? #t))
 (define d:device:highlight:title (make-highlighter 'white #:bold? #t))
@@ -192,14 +194,19 @@
          (d:item:highlight:decoded (maybe-string v)))))
 
 (define (d:item-value item indent)
-  (list (cat (make-indent indent)
-             "Item "
-             (double-quote
-              (d:item:highlight:name
-               (maybe-string (item-name (decoder-item-description item)))))
-             ":")
-        (d:item-raw-value item (+ 2 indent))
-        (d:item-decoded-value item (+ 2 indent))))
+  (let ((sem (item-semantics (decoder-item-description item))))
+    (list (cat (make-indent indent)
+               "Item "
+               (double-quote
+                (d:item:highlight:name
+                 (maybe-string (item-name (decoder-item-description item)))))
+               " (semantics: "
+               (d:item:highlight:semantics (if (semantics? sem)
+                                               (maybe-string (semantics-type sem))
+                                               "*unknown-semantics*"))
+               "):")
+          (d:item-raw-value item (+ 2 indent))
+          (d:item-decoded-value item (+ 2 indent)))))
 
 (define (d:regmap:num b v)
   (number->terminal v #:base b #:prefix? #f #:decorate? #t #:zeropad? #f
