@@ -10,38 +10,17 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (plan 30)
+ (plan 23)
 
- (define-test "decode-state 1 works"
-   (pass-if-eq? (decode-state 1)
-                'enabled))
- (define-test "decode-state 0 works"
-   (pass-if-eq? (decode-state 0)
-                'disabled))
  (define-test "decode-boolean 1 works"
    (pass-if-eq? (decode-boolean 1)
-                'true))
+                'enabled))
  (define-test "decode-boolean 0 works"
    (pass-if-eq? (decode-boolean 0)
-                'false))
- (define-test "active-low: decode-state 1 works"
-   (pass-if-eq? (decode-state/active-low 1)
                 'disabled))
  (define-test "active-low: decode-boolean 1 works"
    (pass-if-eq? (decode-boolean/active-low 1)
-                'false))
- (define-test "encode-state true works"
-   (pass-if-= (encode-state 'enabled)
-              1))
- (define-test "boolean->data true works"
-   (pass-if-= (encode-state #t)
-              1))
- (define-test "active-low: boolean->data true works"
-   (pass-if-= (encode-state/active-low 0)
-              1))
- (define-test "active-low: encode-state true works"
-   (pass-if-= (encode-state/active-low 'disabled)
-              1))
+                'disabled))
 
  (define-test "decode-twos-complement 4 0: works"
    (pass-if-= (decode-twos-complement 4 0)

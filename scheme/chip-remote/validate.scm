@@ -4,6 +4,7 @@
 
 (define-module (chip-remote validate)
   #:use-module (srfi srfi-9 gnu)
+  #:use-module (chip-remote codecs)
   #:use-module (chip-remote item)
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote utilities)
@@ -89,10 +90,8 @@
     (case type
       ((boolean boolean/active-low)
        (lambda (x)
-         (not (not (member x '(#t #f 1 0 true false))))))
-      ((state state/active-low)
-       (lambda (x)
-         (not (not (member x '(#t #f 1 0 enabled disabled))))))
+         (or (boolean-true? x)
+             (boolean-false? x))))
       ((table-lookup)
        (lambda (x)
          (not (not (member x (map car (semantics-data semantics)))))))

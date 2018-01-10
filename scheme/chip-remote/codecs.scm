@@ -5,14 +5,12 @@
 (define-module (chip-remote codecs)
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote named-value)
-  #:export (decode-boolean
+  #:export (boolean-true?
+            boolean-false?
+            decode-boolean
             decode-boolean/active-low
             encode-boolean
             encode-boolean/active-low
-            decode-state
-            decode-state/active-low
-            encode-state
-            encode-state/active-low
             decode-unsigned-integer
             encode-unsigned-integer
             decode-ones-complement
@@ -30,65 +28,34 @@
 
 ;; Boolean codecs
 
-(define (true-ish x)
-  (or (eq? x #t)
-      (and (number? x)
-           (= x 1))))
-
-(define (false-ish x)
-  (or (eq? x #f)
-      (and (number? x)
-           (= x 0))))
-
 (define (invert-bit x)
   (logxor x 1))
 
-(define (boolean-encoder datum t f tf exception)
-  (cond ((or (eq? datum t) (true-ish datum)) (tf 1))
-        ((or (eq? datum f) (false-ish datum)) (tf 0))
-        (else (throw exception datum t f tf))))
+(define (boolean-true? x)
+  (case x
+    ((#t 1 on true enable enabled yes) #t)
+    (else #f)))
 
-(define (boolean-decoder datum t f tf exception)
-  (let ((x (tf datum)))
-    (cond ((= x 1) t)
-          ((= x 0) f)
-          (else (throw exception datum t f tf)))))
-
-(define (encode-state* x tf)
-  (boolean-encoder x 'enabled 'disabled tf 'invalid-state))
-
-(define (encode-state x)
-  (encode-state* x identity))
-
-(define (encode-state/active-low x)
-  (encode-state* x invert-bit))
-
-(define (decode-state* x tf)
-  (boolean-decoder x 'enabled 'disabled tf 'invalid-state))
-
-(define (decode-state x)
-  (decode-state* x identity))
-
-(define (decode-state/active-low x)
-  (decode-state* x invert-bit))
-
-(define (encode-boolean* x tf)
-  (boolean-encoder x 'true 'false tf 'invalid-boolean))
-
-(define (encode-boolean x)
-  (encode-boolean* x identity))
-
-(define (encode-boolean/active-low x tf)
-  (encode-boolean* x invert-bit))
-
-(define (decode-boolean* x tf)
-  (boolean-decoder x 'true 'false tf 'invalid-boolean))
+(define (boolean-false? x)
+  (case x
+    ((#f 0 off false disable disabled no) #t)
+    (else #f)))
 
 (define (decode-boolean x)
-  (decode-boolean* x identity))
+  (cond ((zero? x) 'disabled)
+        ((= 1 x) 'enabled)
+        (else (throw 'invalid-boolean x))))
 
 (define (decode-boolean/active-low x)
-  (decode-boolean* x invert-bit))
+  (decode-boolean (invert-bit x)))
+
+(define (encode-boolean x)
+  (cond ((boolean-true? x) 1)
+        ((boolean-false? x) 0)
+        (else (throw 'invalid-boolean x))))
+
+(define (encode-boolean/active-low x)
+  (invert-bit (encode-boolean x)))
 
 ;; Integer codecs. For a nice summary of common signed integer encodings (un-
 ;; signed ones are easy, because that's just the identity function) take a look

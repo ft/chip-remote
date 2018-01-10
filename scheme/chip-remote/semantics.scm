@@ -46,9 +46,7 @@
 
     (define simple-table
       '((boolean decode-boolean encode-boolean)
-        (boolean/active-low decode-boolean/active-low encode-boolean/active-low)
-        (state/active-low decode-state/active-low encode-state/active-low)
-        (state decode-state encode-state)))
+        (boolean/active-low decode-boolean/active-low encode-boolean/active-low)))
 
     (define (simple-type? syn)
       (memq (syntax->datum syn) (map car simple-table)))
