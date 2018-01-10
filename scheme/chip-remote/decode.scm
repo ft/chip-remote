@@ -17,8 +17,7 @@
 
 (define (decode* desc value)
   (cond ((item? desc)
-         (let* ((decoder (semantics-decode (item-semantics desc)))
-                (item-decoded (decoder value)))
+         (let ((item-decoded (item-decode desc value)))
            (make-item/decoder item-decoded value desc)))
         ((register? desc)
          (make-register/decoder
