@@ -19,8 +19,8 @@
             encode-twos-complement
             decode-offset-binary
             encode-offset-binary
-            decode-sign-magnitude
-            encode-sign-magnitude
+            decode-signed-magnitude
+            encode-signed-magnitude
             decode-with-table
             make-table-decoder
             encode-with-table
@@ -94,13 +94,13 @@
         value
         (* -1 (logxor rest (logand rest value))))))
 
-(define (encode-sign-magnitude width value)
+(define (encode-signed-magnitude width value)
   (if (negative? value)
       value
       (let ((top-bit (ash 1 (- width 1))))
         (logior top-bit value))))
 
-(define (decode-sign-magnitude width value)
+(define (decode-signed-magnitude width value)
   (let* ((w (- width 1))
          (v (bit-extract-width value 0 w)))
     (if (zero? (bit-extract-width value w 1))

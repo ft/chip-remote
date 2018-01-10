@@ -48,20 +48,20 @@
    (pass-if-= (decode-ones-complement 4 15)
               0))
 
- (define-test "decode-sign-magnitude 4 0: works (negative zero)"
-   (pass-if-= (decode-sign-magnitude 4 0)
+ (define-test "decode-signed-magnitude 4 0: works (negative zero)"
+   (pass-if-= (decode-signed-magnitude 4 0)
               0))
- (define-test "decode-sign-magnitude 4 0: works (positive zero)"
-   (pass-if-= (decode-sign-magnitude 4 8)
+ (define-test "decode-signed-magnitude 4 0: works (positive zero)"
+   (pass-if-= (decode-signed-magnitude 4 8)
               0))
- (define-test "decode-sign-magnitude 4 7: works"
-   (pass-if-= (decode-sign-magnitude 4 7)
+ (define-test "decode-signed-magnitude 4 7: works"
+   (pass-if-= (decode-signed-magnitude 4 7)
               -7))
- (define-test "decode-sign-magnitude 4 9: works"
-   (pass-if-= (decode-sign-magnitude 4 9)
+ (define-test "decode-signed-magnitude 4 9: works"
+   (pass-if-= (decode-signed-magnitude 4 9)
               1))
- (define-test "decode-sign-magnitude 4 15: works"
-   (pass-if-= (decode-sign-magnitude 4 15)
+ (define-test "decode-signed-magnitude 4 15: works"
+   (pass-if-= (decode-signed-magnitude 4 15)
               7))
 
  (define-test "decode-offset-binary 4 8: works"

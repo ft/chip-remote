@@ -76,8 +76,8 @@
 (define ones-complement-max unsigned-integer-max)
 (define twos-complement-min offset-binary-min)
 (define twos-complement-max unsigned-integer-max)
-(define sign-magnitude-min ones-complement-min)
-(define sign-magnitude-max unsigned-integer-max)
+(define signed-magnitude-min ones-complement-min)
+(define signed-magnitude-max unsigned-integer-max)
 
 (define (int-validate width min* max*)
   (lambda (x)
@@ -103,8 +103,8 @@
        (int-validate width twos-complement-min twos-complement-max))
       ((offset-binary)
        (int-validate width offset-binary-min offset-binary-max))
-      ((sign-magnitude)
-       (int-validate width sign-magnitude-min sign-magnitude-max))
+      ((signed-magnitude)
+       (int-validate width signed-magnitude-min signed-magnitude-max))
       (else (lambda (x) #t)))))
 
 (define (validator-or-true validator)
