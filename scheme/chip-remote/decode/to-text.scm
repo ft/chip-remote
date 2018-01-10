@@ -166,7 +166,7 @@
 
 (define (d:item-raw-value item indent)
   (let* ((i (decoder-item-description item))
-         (v ((item-get i) (decoder-item-raw item)))
+         (v (decoder-item-raw item))
          (w (item-width i))
          (o (item-offset i)))
     (cat (make-indent indent)
