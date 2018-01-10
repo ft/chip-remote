@@ -25,11 +25,15 @@ MODULES_CORE += $(CR)/semantics.scm
 MODULES_CORE += $(CR)/utilities.scm
 MODULES_CORE += $(CR)/validate.scm
 
-MODULES_MANUFACTURERS = $(CR)/manufacturer/bosch.scm
+MODULES_MANUFACTURERS = $(CR)/manufacturer/analog-devices.scm
+MODULES_MANUFACTURERS += $(CR)/manufacturer/bosch.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/linear-technology.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/texas-instruments.scm
 
-MODULES_DEVICES = $(CR)/devices/bosch/bno055.scm
+MODULES_DEVICES = $(CR)/devices/analog-devices/adf4169.scm
+MODULES_DEVICES += $(CR)/devices/analog-devices/adf4169/registers.scm
+MODULES_DEVICES += $(CR)/devices/analog-devices/adf4169/tables.scm
+MODULES_DEVICES += $(CR)/devices/bosch/bno055.scm
 MODULES_DEVICES += $(CR)/devices/linear-technology/ltc6603.scm
 MODULES_DEVICES += $(CR)/devices/texas-instruments/cdce72010.scm
 
