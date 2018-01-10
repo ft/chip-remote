@@ -14,7 +14,7 @@
 
 #+LATEX: \thispagestyle{empty}
 
-#+BEGIN_ABSTRACT
+#+BEGIN_abstract
 
 This document specifies a text protocol for communication between a client
 (commonly a personal computer) and a remote controller, for the purpose of
@@ -26,7 +26,7 @@ which systems can be built that enable tasks like experimentation, rapid
 prototyping, automated testing, revisioning and trouble-shooting with hardware
 projects.
 
-#+END_ABSTRACT
+#+END_abstract
 
 #+ASCII:
 
