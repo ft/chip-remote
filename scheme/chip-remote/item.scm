@@ -165,8 +165,11 @@
                            (semantics ...) (validator ...) (meta ...)))))))
 
 (define (item-default item)
-  (let ((default (assq #:default (item-meta item))))
-    (if default (cdr default) 0)))
+  (let ((default (assq #:default (item-meta item)))
+        (default-raw (assq #:default-raw (item-meta item))))
+    (cond (default (item-encode item (cdr default)))
+          (default-raw (cdr default-raw))
+          (else 0))))
 
 (define (item-codec what item value)
   (let* ((semantics (item-semantics item))
