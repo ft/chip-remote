@@ -2,17 +2,6 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
-;; scratchpad VALIDATORS: (Datatype)
-;;
-;; Check if a value is valid for an item.
-;;
-;;  - unbounded, with respect to semantics (ie. has to be a value from a table,
-;;    in table lookup semantics)
-;;  - range
-;;  - list
-;;  - interpreter
-;;  - scheme
-
 ;; This module implements an abstraction for pieces of data that, when combined
 ;; make up a register (see (chip-remote register) about that combination). The
 ;; abstraction is bundled into the <item> data-type, which make-item creates.
