@@ -1,4 +1,6 @@
-;; Copyright (c) 2011-2014 chip-remote workers, All rights reserved.
+;; -*- scheme -*-
+
+;; Copyright (c) 2011-2018 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 

@@ -659,7 +659,7 @@ projects.
 
 * Full Copyright Statement
 
-   Copyright © 2013-2014 ~Frank Terbeck <ft@bewatermyfriend.org>~.
+   Copyright © 2013-2018 ~Frank Terbeck <ft@bewatermyfriend.org>~.
    All Rights Reserved.
 
    This document and translations of it may be copied and furnished to

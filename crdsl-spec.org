@@ -220,7 +220,7 @@ convenient and enables a number of useful techniques when compiling to Scheme.
 
 * Full Copyright Statement
 
-   Copyright © 2016 ~Frank Terbeck <ft@bewatermyfriend.org>~.
+   Copyright © 2016-2018 ~Frank Terbeck <ft@bewatermyfriend.org>~.
    All Rights Reserved.
 
    This document and translations of it may be copied and furnished to
