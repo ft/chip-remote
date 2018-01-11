@@ -51,7 +51,8 @@
        (page-map-table rm)))
 
 (define (page-map-item-names rm)
-  (flatten (map register-map-item-names (page-map-table rm))))
+  (flatten (map (lambda (x) (register-map-item-names (cdr x)))
+                (page-map-table rm))))
 
 (define-syntax-rule (define-page-map binding e0 e* ...)
   (define binding (generate-page-map e0 e* ...)))

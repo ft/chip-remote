@@ -56,7 +56,8 @@
        (register-map-table rm)))
 
 (define (register-map-item-names rm)
-  (flatten (map register-item-names (register-map-table rm))))
+  (flatten (map (lambda (x) (register-item-names (cdr x)))
+                (register-map-table rm))))
 
 (define-syntax-rule (define-register-map binding e0 e* ...)
   (define binding (generate-register-map e0 e* ...)))
