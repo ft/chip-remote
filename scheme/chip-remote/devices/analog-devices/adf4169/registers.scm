@@ -24,6 +24,7 @@
   (div-integer 15 12 #:default 1024)
   (muxout-ctrl 27 4
                #:semantics lookup muxout-cfg
+               #:and-validate ∉ reserved
                #:default 'three-state)
   (ramp-mode 31 1 #:default #f))
 
@@ -104,6 +105,7 @@
   (clock2-divider 7 12 #:default 1024)
   (clock-divider-mode 19 2
                       #:semantics lookup clk-divider-mode-map
+                      #:and-validate ∉ reserved
                       #:default 'clock-divider-off)
   (ramp-status 21 5
                #:semantics lookup ramp-status-map
