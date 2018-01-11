@@ -1,5 +1,6 @@
 (define-module (chip-remote utilities)
-  #:export (2e
+  #:export (!!
+            2e
             cat
             flatten
             log2))
@@ -21,3 +22,6 @@
 
 (define (log2 n)
   (/ (log10 n) log2-scale))
+
+(define (!! x)
+  (not (not x)))

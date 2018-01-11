@@ -9,6 +9,7 @@
   #:use-module (srfi srfi-9)
   #:use-module (chip-remote item)
   #:use-module (chip-remote process-plist)
+  #:use-module (chip-remote utilities)
   #:export (generate-register
             make-register
             register?
@@ -83,7 +84,7 @@
   (map item-name (register-items reg)))
 
 (define (register-contains? reg item)
-  (not (not (memq item (register-item-names reg)))))
+  (!! (memq item (register-item-names reg))))
 
 (define (register-ref reg name)
   (call/ec (lambda (return)
