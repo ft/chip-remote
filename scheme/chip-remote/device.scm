@@ -13,6 +13,7 @@
             device-ref
             device-address
             device-item-names
+            device-name
             device-default
             define-device))
 
@@ -56,6 +57,11 @@
 
 (define-syntax-rule (define-device binding e0 e* ...)
   (define binding (generate-device #:name 'binding e0 e* ...)))
+
+(define (device-name dev)
+  (let* ((meta (device-meta dev))
+         (name (assq-ref meta #:name)))
+    (if name name '*unnamed-device*)))
 
 (define (device-default dev)
   (page-map-default (device-page-map dev)))
