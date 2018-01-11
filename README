@@ -1,5 +1,10 @@
   chip-remote: A protocol for remote controlling runtime-configurable chips
 
+
+Note: The framework was recently re-written. The documentation is NOT AT ALL
+      up-to-date with this new implementation.
+
+
 Many powerful and flexible electronic parts, are configurable at runtime via
 simple interfaces like SPI or I2C. In prototyping, revising and testing, it is
 useful to be able to control these chips from a computer, preferably via a high
