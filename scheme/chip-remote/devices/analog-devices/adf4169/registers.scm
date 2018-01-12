@@ -46,7 +46,7 @@
 (define-register reg:r-divider
   #:contents
   (address 0 3 #:default 2)
-  (clk1-divider 3 12 #:default 4096)
+  (clk1-divider 3 12 #:default 4095)
   (r-divider 15 5
              #:semantics* unsigned-zero-is-32
              #:validate range (>= 1) (<= 32)
