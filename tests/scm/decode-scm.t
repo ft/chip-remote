@@ -29,9 +29,9 @@
                           (item-name boolean-item))
        (pass-if-eq? (semantics-type (item-semantics boolean-item)) 'boolean))
      (define-test "Decoding a boolean item works (enabled)"
-       (pass-if-equal? (decode boolean-item 1) '(output . enabled)))
+       (pass-if-equal? (decode boolean-item 1) '(enable-output? . enabled)))
      (define-test "Decoding a boolean item works (disabled)"
-       (pass-if-equal? (decode boolean-item 0) '(output . disabled))))
+       (pass-if-equal? (decode boolean-item 0) '(enable-output? . disabled))))
    (let ((tableitem (fourth items)))
      (define-test (format #f "Device'e first item is a table-lookup (~a)"
                           (item-name tableitem))
