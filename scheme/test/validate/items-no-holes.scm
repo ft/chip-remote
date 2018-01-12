@@ -11,7 +11,7 @@
             items-no-holes/check))
 
 (define items-no-holes/count items-alignment-count)
-(define-alignment-test test-holes pass-if->=)
+(define-alignment-test test-holes pass-if->= " don't form holes")
 (define check-reg (make-alignment-test test-holes))
 (define (items-no-holes/check dev cfg)
   (for-each check-reg (device-registers dev)))

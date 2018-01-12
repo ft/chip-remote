@@ -11,7 +11,7 @@
             items-dont-overlap/check))
 
 (define items-dont-overlap/count items-alignment-count)
-(define-alignment-test test-overlap pass-if-<=)
+(define-alignment-test test-overlap pass-if-<= " don't overlap")
 (define check-reg (make-alignment-test test-overlap))
 (define (items-dont-overlap/check dev cfg)
   (for-each check-reg (device-registers dev)))

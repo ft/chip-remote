@@ -15,7 +15,7 @@
             define-alignment-test
             items-alignment-count))
 
-(define-syntax-rule (define-alignment-test name test)
+(define-syntax-rule (define-alignment-test name test str)
   (define (name a b)
     (let ((a-name (item-name a))
           (a-offset (item-offset a))
@@ -23,8 +23,8 @@
           (b-name (item-name b))
           (b-offset (item-offset b))
           (b-width (item-width b)))
-      (define-test (fmt "Items a(~a, o:~a, w:~a) b(~a, o:~a, w:~a) don't form a hole"
-                        a-name a-offset a-width b-name b-offset b-width)
+      (define-test (fmt "Items a(~a, o:~a, w:~a) b(~a, o:~a, w:~a) don't~a"
+                        a-name a-offset a-width b-name b-offset b-width str)
         (test (+ a-offset a-width)
                     b-offset)))))
 
