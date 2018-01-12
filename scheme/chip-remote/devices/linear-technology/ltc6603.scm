@@ -33,8 +33,8 @@
   #:datasheet "http://cds.linear.com/docs/en/datasheet/6603fa.pdf"
   #:keywords '(switched capacitor lowpass filter programmable gain)
   #:register-width 8
-  #:register (#:contents (output 0 1 #:default 'off)
-                         (shutdown 1 1 #:default 'no)
+  #:register (#:contents (enable-output? 0 1 #:default 'no)
+                         (shutdown? 1 1 #:default 'no)
                          (reserved 2 2)
                          (low-pass-cfg 4 2
                                        #:semantics lookup low-pass-cfg
