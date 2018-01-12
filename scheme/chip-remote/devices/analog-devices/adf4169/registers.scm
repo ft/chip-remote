@@ -18,10 +18,10 @@
 (define-register reg:frac/int
   #:contents
   (address 0 3 #:default 0)
-  (div-fractional-msb 3 12
-                      #:default 0
-                      #:validate range (>= 23) (<= 4095))
-  (div-integer 15 12 #:default 1024)
+  (div-fractional-msb 3 12 #:default 0)
+  (div-integer 15 12
+               #:default 1024
+               #:validate range (>= 23) (<= 4095))
   (muxout-ctrl 27 4
                #:semantics lookup muxout-cfg
                #:and-validate ∉ reserved
