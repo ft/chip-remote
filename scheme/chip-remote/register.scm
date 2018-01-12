@@ -127,9 +127,3 @@
   (cond ((symbol? thing) (register-ref reg thing))
         ((integer? thing) (register-address reg thing))
         (else (throw 'invalid-item-address thing))))
-
-;; TODO: register-verify?:
-;;
-;;   - No overlaps in between items.
-;;   - No names used multiple times.
-;;   - No missing regions in register.
