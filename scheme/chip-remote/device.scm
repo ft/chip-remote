@@ -12,6 +12,7 @@
             device-register
             device-ref
             device-address
+            device-registers
             device-item-names
             device-name
             device-default
@@ -68,6 +69,12 @@
 
 (define (device-item-names dev)
   (page-map-item-names (device-page-map dev)))
+
+(define (device-registers dev)
+  (map cdr
+       (apply append (map register-map-table
+                          (map cdr
+                               (page-map-table (device-page-map dev)))))))
 
 (define (device-register dev)
   (let ((pm (page-map-table (device-page-map dev))))

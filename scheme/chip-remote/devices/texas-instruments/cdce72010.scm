@@ -189,7 +189,7 @@
              (route-hold-to-pll-lock #:offset 19 #:width 1)
              (reserved #:offset 20 #:width 1)
              (ti-test-status #:offset 24 #:width 4)
-             (ti-test-config #:offset 28 #:width 4)
+             (ti-test-config #:offset 28 #:width 1)
              (primary-ref-clk-present #:offset 29 #:width 1)
              (secondary-ref-clk-present #:offset 30 #:width 1)
              (reserved #:offset 31 #:width 1))
