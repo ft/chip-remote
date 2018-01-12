@@ -4,7 +4,8 @@
             cat
             flatten
             kwa-ref
-            log2))
+            log2
+            fmt))
 
 (define-syntax-rule (cat str ...)
   (string-concatenate (list str ...)))
@@ -32,3 +33,6 @@
 
 (define (!! x)
   (not (not x)))
+
+(define (fmt . rest)
+  (apply format (cons #f rest)))
