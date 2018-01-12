@@ -7,12 +7,14 @@
   #:use-module (test validate has-register)
   #:use-module (test validate unique-items)
   #:use-module (test validate items-dont-overlap)
+  #:use-module (test validate items-no-holes)
   #:export (validate-device))
 
 (define *tests*
   `((,has-register/check ,has-register/count)
     (,unique-items/check ,unique-items/count)
-    (,items-dont-overlap/check ,items-dont-overlap/count)))
+    (,items-dont-overlap/check ,items-dont-overlap/count)
+    (,items-no-holes/check ,items-no-holes/count)))
 
 (define (planned-tests dev cfg)
   (apply + (map (lambda (x) (x dev cfg))
