@@ -3,6 +3,7 @@
             2e
             cat
             flatten
+            kwa-ref
             log2))
 
 (define-syntax-rule (cat str ...)
@@ -22,6 +23,12 @@
 
 (define (log2 n)
   (/ (log10 n) log2-scale))
+
+(define (kwa-ref kw-lst kw default)
+  (let ((m (memq kw kw-lst)))
+    (if (not m)
+        default
+        (cadr m))))
 
 (define (!! x)
   (not (not x)))
