@@ -182,10 +182,10 @@
          (d:item:octal v w)
          " "
          (d:item:binary v w)
-         " - width: "
-         (d:item:offset+width (number->string w))
-         ", offset: "
-         (d:item:offset+width (number->string o)))))
+         " - offset: "
+         (d:item:offset+width (number->string o))
+         ", width: "
+         (d:item:offset+width (number->string w)))))
 
 (define (d:item-decoded-value item indent)
   (let ((v (decoder-item-decoded item)))
