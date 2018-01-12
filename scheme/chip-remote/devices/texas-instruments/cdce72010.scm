@@ -17,7 +17,7 @@
              (vcxo-select #:offset 8 #:width 1)
              (reference-select-ctrl #:offset 9 #:width 1)
              (delay-pfd #:offset 10 #:width 2)
-             (cp-mode #:offset 12 #:width 1)
+             (reserved #:offset 12 #:width 1 #:default 0)
              (cp-direction #:offset 13 #:width 1)
              (cp-source #:offset 14 #:width 1)
              (cp-sink #:offset 15 #:width 1)
@@ -26,7 +26,7 @@
              (cp-current #:offset 18 #:width 4)
              (reserved #:offset 22 #:width 2)
              (i-ref-cp-pull-down-enable #:offset 24 #:width 1)
-             (output-mode #:offset 25 #:width 7))
+             (output-mode-0 #:offset 25 #:width 7))
 
 (define-register reg-x1
   #:default #x83840051
@@ -37,20 +37,20 @@
              (primary-input-bias #:offset 7 #:width 1)
              (secondary-input-bias #:offset 8 #:width 1)
              (fail-safe #:offset 9 #:width 1)
-             (coarse-phase-adjust #:offset 10 #:width 7)
-             (output-divider #:offset 17 #:width 7)
-             (divider-enable #:offset 24 #:width 1)
-             (output-mode #:offset 25 #:width 7))
+             (coarse-phase-adjust-0/1 #:offset 10 #:width 7)
+             (output-divider-0/1 #:offset 17 #:width 7)
+             (divider-enable-0/1 #:offset 24 #:width 1)
+             (output-mode-1 #:offset 25 #:width 7))
 
 (define-register reg-x2
   #:default #x83840052
   #:contents (address #:offset 0 #:width 4)
              (delay-m #:offset 4 #:width 3)
              (delay-n #:offset 7 #:width 3)
-             (coarse-phase-adjust #:offset 10 #:width 7)
-             (output-divider #:offset 17 #:width 7)
-             (divider-enable #:offset 24 #:width 1)
-             (output-mode #:offset 25 #:width 7))
+             (coarse-phase-adjust-2 #:offset 10 #:width 7)
+             (output-divider-2 #:offset 17 #:width 7)
+             (divider-enable-2 #:offset 24 #:width 1)
+             (output-mode-2 #:offset 25 #:width 7))
 
 (define-register reg-x3
   #:default #x83400003
@@ -59,10 +59,10 @@
              (disable-fb-frequency-detect #:offset 5 #:width 1)
              (bias-divider-01 #:offset 6 #:width 2)
              (bias-divider-23 #:offset 8 #:width 2)
-             (coarse-phase-adjust #:offset 10 #:width 7)
-             (output-divider #:offset 17 #:width 7)
-             (divider-enable #:offset 24 #:width 1)
-             (output-mode #:offset 25 #:width 7))
+             (coarse-phase-adjust-3 #:offset 10 #:width 7)
+             (output-divider-3 #:offset 17 #:width 7)
+             (divider-enable-3 #:offset 24 #:width 1)
+             (output-mode-3 #:offset 25 #:width 7))
 
 (define-register reg-x4
   #:default #x81800004
@@ -70,10 +70,10 @@
              (reserved #:offset 4 #:width 4)
              (hold-cp-on-loss-of-refclk #:offset 8 #:width 1)
              (reserved #:offset 9 #:width 1)
-             (coarse-phase-adjust #:offset 10 #:width 7)
-             (output-divider #:offset 17 #:width 7)
-             (divider-enable #:offset 24 #:width 1)
-             (output-mode #:offset 25 #:width 7))
+             (coarse-phase-adjust-4 #:offset 10 #:width 7)
+             (output-divider-4 #:offset 17 #:width 7)
+             (divider-enable-4 #:offset 24 #:width 1)
+             (output-mode-4 #:offset 25 #:width 7))
 
 (define-register reg-x5
   #:default #x81800005
@@ -81,10 +81,10 @@
              (bias-divider-45 #:offset 4 #:width 2)
              (bias-divider-67 #:offset 6 #:width 2)
              (reserved #:offset 8 #:width 2)
-             (coarse-phase-adjust #:offset 10 #:width 7)
-             (output-divider #:offset 17 #:width 7)
-             (divider-enable #:offset 24 #:width 1)
-             (output-mode #:offset 25 #:width 7))
+             (coarse-phase-adjust-5 #:offset 10 #:width 7)
+             (output-divider-5 #:offset 17 #:width 7)
+             (divider-enable-5 #:offset 24 #:width 1)
+             (output-mode-5 #:offset 25 #:width 7))
 
 (define-register reg-x6
   #:default #xeb040006
@@ -95,10 +95,10 @@
              (fb-determ-divider-2-disable #:offset 7 #:width 1)
              (fb-start-bypass #:offset 8 #:width 1)
              (det-start-bypass #:offset 9 #:width 1)
-             (coarse-phase-adjust #:offset 10 #:width 7)
-             (output-divider #:offset 17 #:width 7)
-             (divider-enable #:offset 24 #:width 1)
-             (output-mode #:offset 25 #:width 7))
+             (coarse-phase-adjust-6 #:offset 10 #:width 7)
+             (output-divider-6 #:offset 17 #:width 7)
+             (divider-enable-6 #:offset 24 #:width 1)
+             (output-mode-6 #:offset 25 #:width 7))
 
 (define-register reg-x7
   #:default #xeb040717
@@ -107,10 +107,10 @@
              (reserved #:offset 6 #:width 1)
              (coherent-lock #:offset 7 #:width 2)
              (analog-digital-lock-detect #:offset 9 #:width 1)
-             (coarse-phase-adjust #:offset 10 #:width 7)
-             (output-divider #:offset 17 #:width 7)
-             (divider-enable #:offset 24 #:width 1)
-             (output-mode #:offset 25 #:width 7))
+             (coarse-phase-adjust-7 #:offset 10 #:width 7)
+             (output-divider-7 #:offset 17 #:width 7)
+             (divider-enable-7 #:offset 24 #:width 1)
+             (output-mode-7 #:offset 25 #:width 7))
 
 (define-register reg-x8
   #:default #x010c0158
@@ -120,10 +120,10 @@
              (vcxo-hysteresis-enable #:offset 7 #:width 1)
              (vcxo-input-termination #:offset 8 #:width 1)
              (vcxo-input-bias #:offset 9 #:width 1)
-             (coarse-phase-adjust #:offset 10 #:width 7)
-             (output-divider #:offset 17 #:width 7)
-             (divider-enable #:offset 24 #:width 1)
-             (output-mode #:offset 25 #:width 7))
+             (coarse-phase-adjust-8/9 #:offset 10 #:width 7)
+             (output-divider-8/9 #:offset 17 #:width 7)
+             (divider-enable-8/9 #:offset 24 #:width 1)
+             (output-mode-8 #:offset 25 #:width 7))
 
 (define-register reg-x9
   #:default #x01000049
@@ -142,10 +142,10 @@
              (low-fd-fb-en #:offset 17 #:width 1)
              (npreset-m-divider #:offset 18 #:width 1)
              (bias-fb-div #:offset 19 #:width 2)
-             (bias-div89 #:offset 21 #:width 2)
+             (bias-div-8/9 #:offset 21 #:width 2)
              (aux-input-bias #:offset 23 #:width 1)
              (disable-aux-input #:offset 24 #:width 1)
-             (output-mode #:offset 25 #:width 7))
+             (output-mode-9 #:offset 25 #:width 7))
 
 (define-register reg-xa
   #:default #x0bfc07ca

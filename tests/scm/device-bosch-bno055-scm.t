@@ -11,4 +11,5 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (validate-device bno055))
+ (validate-device bno055
+                  #:multi-items '(page-id reserved)))

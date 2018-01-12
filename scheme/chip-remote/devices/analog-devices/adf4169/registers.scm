@@ -26,7 +26,7 @@
                #:semantics lookup muxout-cfg
                #:and-validate ∉ reserved
                #:default 'three-state)
-  (ramp-mode 31 1 #:default #f))
+  (ramp-enabled? 31 1 #:default #f))
 
 (define-register reg:lsb-frac
   #:contents

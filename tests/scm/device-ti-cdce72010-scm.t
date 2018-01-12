@@ -11,4 +11,5 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (validate-device cdce72010))
+ (validate-device cdce72010
+                  #:multi-items '(address reserved)))

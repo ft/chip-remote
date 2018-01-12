@@ -5,10 +5,12 @@
 (define-module (test validate-device)
   #:use-module (test tap)
   #:use-module (test validate has-register)
+  #:use-module (test validate unique-items)
   #:export (validate-device))
 
 (define *tests*
-  `((,has-register/check ,has-register/count)))
+  `((,has-register/check ,has-register/count)
+    (,unique-items/check ,unique-items/count)))
 
 (define (planned-tests dev cfg)
   (apply + (map (lambda (x) (x dev cfg))
