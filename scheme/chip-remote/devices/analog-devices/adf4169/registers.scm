@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices analog-devices adf4169 registers)
+  #:use-module (chip-remote item builder)
   #:use-module (chip-remote register)
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote devices analog-devices adf4169 tables)
@@ -15,9 +16,11 @@
             reg:step
             reg:delay))
 
+(define address (make-address #:width 3))
+
 (define-register reg:frac/int
   #:contents
-  (address 0 3 #:default 0)
+  (=> (address 0))
   (div-fractional-msb 3 12 #:default 0)
   (div-integer 15 12
                #:default 1024
@@ -30,7 +33,7 @@
 
 (define-register reg:lsb-frac
   #:contents
-  (address 0 3 #:default 1)
+  (=> (address 1))
   (phase 3 12
          #:semantics twos-complement
          #:default 0)
@@ -45,7 +48,7 @@
 
 (define-register reg:r-divider
   #:contents
-  (address 0 3 #:default 2)
+  (=> (address 2))
   (clk1-divider 3 12 #:default 4095)
   (r-divider 15 5
              #:semantics* unsigned-zero-is-32
@@ -65,7 +68,7 @@
 
 (define-register reg:function
   #:contents
-  (address 0 3 #:default 3)
+  (=> (address 3))
   (rf-counter-reset? 3 1 #:default #f)
   (charge-pump-3state 4 1 #:default #f)
   (power-down? 5 1 #:default #f)
@@ -97,7 +100,7 @@
 
 (define-register reg:clock
   #:contents
-  (address 0 3 #:default 4)
+  (=> (address 4))
   (reserved 3 3)
   (clock-divider-select 6 1
                         #:semantics lookup word-select
@@ -119,7 +122,7 @@
 
 (define-register reg:deviation
   #:contents
-  (address 0 3 #:default 5)
+  (=> (address 5))
   (deviation 3 16
              #:semantics twos-complement
              #:default 0)
@@ -144,7 +147,7 @@
 
 (define-register reg:step
   #:contents
-  (address 0 3 #:default 6)
+  (=> (address 6))
   (step 3 20 #:default 0)
   (step-select 23 1
                #:semantics lookup word-select
@@ -153,7 +156,7 @@
 
 (define-register reg:delay
   #:contents
-  (address 0 3 #:default 7)
+  (=> (address 7))
   (delay-start 3 12 #:default 0)
   (delay-start-enable? 15 1 #:default #f)
   (delay-clock-select 16 1
