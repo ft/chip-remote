@@ -10,6 +10,10 @@
 
 (primitive-load "tests/test-tap-cfg.scm")
 
+(define (address default)
+  (generate-item #:name 'address #:offset 14 #:width 2
+                 #:access 'read-only #:default default))
+
 (define (fnct-that-returns-an-item name)
   (generate-item #:name name #:offset 3 #:width 2))
 
@@ -28,7 +32,8 @@
                                 #:contents*
                                 (fnct-that-returns-an-item 'thing)
                                 #:contents
-                                (foo 8 8)))
+                                (foo 8 6)
+                                (=> (address 0))))
         (meta (register-meta reg))
         (items (register-items reg))
         (foo (car items))
@@ -45,7 +50,7 @@
      (pass-if-eq? (item-name bar) 'bar))
    (define-test "reg: item names are as expected"
      (pass-if-equal? (register-item-names reg)
-                     '(foo bar thing foo)))
+                     '(foo bar thing foo address)))
    (define-test "reg: the register's width is correct"
      (pass-if-= (register-width reg) 16))
    (define-test "reg: the regsiter has an item foo"

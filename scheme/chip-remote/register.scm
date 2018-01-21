@@ -33,6 +33,12 @@
   (meta register-meta)
   (items register-items))
 
+(define-syntax expand-content
+  (lambda (x)
+    (syntax-case x (=>)
+      ((_ => expr) #'expr)
+      ((_ exps ...) #'(generate-item exps ...)))))
+
 (define group:contents
   (group 'contents
          #:type 'list
@@ -41,7 +47,7 @@
          #:transformer (lambda (e)
                          (syntax-case e ()
                            ((#:contents (exps ...) ...)
-                            #'((generate-item exps ...) ...))
+                            #'((expand-content exps ...) ...))
                            ((#:contents* e0 e* ...)
                             #'(e0 e* ...))))))
 
