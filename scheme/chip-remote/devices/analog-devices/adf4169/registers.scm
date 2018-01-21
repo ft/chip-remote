@@ -39,7 +39,7 @@
          #:default 0)
   (div-fractional-lsb 15 13 #:default 0)
   (phase-adjust 28 1 #:default #f)
-  (reserved 29 3))
+  (=> (reserved 29 3)))
 
 (define-semantics unsigned-zero-is-32
   interpreter
@@ -59,12 +59,12 @@
   (prescaler 22 1
              #:semantics lookup prescaler-cfg
              #:default 4/5)
-  (reserved 23 1)
+  (=> (reserved 23 1))
   (charge-pump-current 24 4
                        #:semantics lookup charge-pump-cfg
                        #:default 5)
   (cycle-spin-reduction? 28 1 #:default #f)
-  (reserved 29 3))
+  (=> (reserved 29 3)))
 
 (define-register reg:function
   #:contents
@@ -83,7 +83,7 @@
   (ramp-mode 10 2
              #:semantics lookup ramp-mode-cfg
              #:default 'sawtooth)
-  (reserved 12 2)
+  (=> (reserved 12 2))
   (sigma-delta-reset? 14 1
                       #:semantics boolean/active-low
                       #:default #t)
@@ -91,17 +91,17 @@
   (loss-of-lock-enable? 16 1
                         #:semantics boolean/active-low
                         #:default #f)
-  (reserved 17 4 #:default #b0001)
+  (=> (reserved 17 4 #:default #b0001))
   (negative-bleed-enable? 21 1 #:default #f)
   (negative-bleed-current 22 3
                           #:semantics lookup negative-bleed-map
                           #:default 3730/1000)
-  (reserved 25 7))
+  (=> (reserved 25 7)))
 
 (define-register reg:clock
   #:contents
   (=> (address 4))
-  (reserved 3 3)
+  (=> (reserved 3 3))
   (clock-divider-select 6 1
                         #:semantics lookup word-select
                         #:default 'word-1)
@@ -138,12 +138,12 @@
   (interrupt-ctrl 26 2
                   #:semantics lookup interrupt-ctrl-map
                   #:default 'interrupt-off)
-  (reserved 28 1)
+  (=> (reserved 28 1))
   (tx-data-ramp-clock-select 29 1
                              #:semantics lookup tx-data-ramp-clock-map
                              #:default 'clock-divider)
   (tx-data-invert? 30 1 #:default #f)
-  (reserved 31 1))
+  (=> (reserved 31 1)))
 
 (define-register reg:step
   #:contents
@@ -152,7 +152,7 @@
   (step-select 23 1
                #:semantics lookup word-select
                #:default 'word-1)
-  (reserved 24 8))
+  (=> (reserved 24 8)))
 
 (define-register reg:delay
   #:contents
@@ -163,10 +163,10 @@
                       #:semantics lookup delay-clock-map
                       #:default 'pfd-clock)
   (ramp-delay-enable? 17 1 #:default #f)
-  (reserved 18 1)
+  (=> (reserved 18 1))
   (fast-ramp-enable? 19 1 #:default #f)
   (tx-data-trigger-enable? 20 1 #:default #f)
   (single-full-triangle? 21 1 #:default #f)
   (triangle-delay-enable? 22 1 #:default #f)
   (tx-data-trigger-delay? 23 1 #:default #f)
-  (reserved 24 8))
+  (=> (reserved 24 8)))
