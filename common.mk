@@ -36,6 +36,7 @@ MODULES_DEVICES += $(CR)/devices/analog-devices/adf4169/registers.scm
 MODULES_DEVICES += $(CR)/devices/analog-devices/adf4169/tables.scm
 MODULES_DEVICES += $(CR)/devices/bosch/bno055.scm
 MODULES_DEVICES += $(CR)/devices/linear-technology/ltc6603.scm
+MODULES_DEVICES += $(CR)/devices/texas-instruments/ads4149.scm
 MODULES_DEVICES += $(CR)/devices/texas-instruments/cdce72010.scm
 
 MODULES= $(MODULES_CORE) $(MODULES_MANUFACTURERS) $(MODULES_DEVICES)
