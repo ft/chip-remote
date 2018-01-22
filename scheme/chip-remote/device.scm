@@ -32,6 +32,7 @@
            (memq x '(#:page-map
                      #:page-map*
                      #:register-map
+                     #:register-map*
                      #:register)))
          #:transformer
          (lambda (e)
@@ -40,6 +41,8 @@
               #'exp)
              ((#:page-map (e0 e* ...) ...)
               #'(list (generate-page-map (e0 e* ...)) ...))
+             ((#:register-map* expr)
+              #'(list (generate-page-map (#f expr))))
              ((#:register-map (e0 e* ...))
               #'(list (generate-page-map (#f (generate-register-map e0 e* ...)))))
              ((#:register (e0 e* ...))
