@@ -40,21 +40,21 @@
 
 (define clkout-pos-rise-lvds ;; ps
   '((default . #b00)
-    (500   . #b01)
+    (500     . #b01)
     (aligned . #b10)
-    (200   . #b11)))
+    (200     . #b11)))
 
 (define clkout-pos-rise-cmos ;; ps
   '((default . #b00)
-    (100   . #b01)
-    (200   . #b10)
-    (1500  . #b11)))
+    (100     . #b01)
+    (200     . #b10)
+    (1500    . #b11)))
 
 (define clkout-pos-fall-lvds ;; ps
   '((default . #b00)
-    (400   . #b01)
+    (400     . #b01)
     (aligned . #b10)
-    (200   . #b11)))
+    (200     . #b11)))
 
 (define clkout-pos-fall-cmos clkout-pos-rise-cmos)
 
