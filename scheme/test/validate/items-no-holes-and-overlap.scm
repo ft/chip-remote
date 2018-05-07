@@ -38,4 +38,7 @@
           (loop (cdr rest)))))))
 
 (define (items-alignment-count dev cfg)
-  (apply + (map 1- (map length (map register-items (device-registers dev))))))
+  (apply + (map 1-
+                (filter (lambda (x) (> x 0))
+                        (map length (map register-items
+                                         (device-registers dev)))))))
