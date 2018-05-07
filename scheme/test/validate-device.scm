@@ -8,10 +8,12 @@
   #:use-module (test validate unique-items)
   #:use-module (test validate items-dont-overlap)
   #:use-module (test validate items-no-holes)
+  #:use-module (test validate registers-have-content)
   #:export (validate-device))
 
 (define *tests*
   `((,has-register/check ,has-register/count)
+    (,non-empty-registers/check ,non-empty-registers/count)
     (,unique-items/check ,unique-items/count)
     (,items-dont-overlap/check ,items-dont-overlap/count)
     (,items-no-holes/check ,items-no-holes/count)))
