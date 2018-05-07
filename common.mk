@@ -28,6 +28,7 @@ MODULES_CORE += $(CR)/validate.scm
 
 MODULES_MANUFACTURERS = $(CR)/manufacturer/analog-devices.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/bosch.scm
+MODULES_MANUFACTURERS += $(CR)/manufacturer/decawave.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/linear-technology.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/texas-instruments.scm
 
