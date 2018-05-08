@@ -18,6 +18,7 @@
   #:use-module (chip-remote item)
   #:use-module (chip-remote register)
   #:use-module (chip-remote register-map)
+  #:use-module (chip-remote register-window)
   #:use-module (chip-remote page-map)
   #:use-module (chip-remote device)
   #:use-module (chip-remote semantics)
@@ -141,21 +142,53 @@
 (define (d:reg:binary v w) (d:reg:num 2 v w))
 (define (d:reg:decimal v w) (d:reg:num 10 v w))
 
+(define (d:register-like indent title tl v w more)
+  (list (cat (make-indent indent)
+             title
+             (d:reg:decimal v w))
+        (cat more
+             (d:reg:hex v w))
+        (cat more
+             (d:reg:octal v w))
+        (cat more
+             (d:reg:binary v w))))
+
 (define (d:register-value r indent)
   (let* ((v (decoder-register-raw r))
          (w (register-width (decoder-register-description r)))
          (title "Raw Register Value: ")
          (tl (string-length title))
          (more (make-indent (+ tl indent))))
+    (d:register-like indent title tl v w more)))
+
+(define (d:broken-window indent w type)
+  (let* ((item (if (eq? type 'LSI)
+                   (first (window-items w))
+                   (last (window-items w))))
+         (start (item-offset item))
+         (end (+ start (- (item-width item) 1)))
+         (limit (if (eq? type 'LSI)
+                    (window-offset w)
+                    (+ (window-offset w) (- (window-width w) 1)))))
     (list (cat (make-indent indent)
-               title
-               (d:reg:decimal v w))
-          (cat more
-               (d:reg:hex v w))
-          (cat more
-               (d:reg:octal v w))
-          (cat more
-               (d:reg:binary v w)))))
+               (format #f "Incomplete ~a ~a: start: ~a, end ~a, limit: ~a"
+                       type (item-name item) start end limit)))))
+
+(define (d:register-window-value rw indent)
+  (let* ((window (decoder-register-window-description rw))
+         (w (window-width window))
+         (o (window-offset window))
+         (v (ash (decoder-register-window-raw rw)
+                 (* -1 (window-offset window))))
+         (title "Raw Register-Window Value: ")
+         (tl (string-length title))
+         (more (make-indent (+ tl indent))))
+    (append (d:register-like indent title tl v w more)
+            (list (format #f "Window Offset: ~a, Width: ~a" o w))
+            (if (lsi-complete? window) '()
+                (list (d:broken-window indent window 'LSI)))
+            (if (msi-complete? window) '()
+                (list (d:broken-window indent window 'MSI))))))
 
 (define (d:item:num b v w)
   (number->terminal v #:base b #:width w #:prefix? #f #:decorate? #t
@@ -314,6 +347,11 @@
          (trace-?? 'register indent thing)
          (list (d:register-value thing indent)
                (??+ (decoder-register-items thing) indent)))
+
+        ((decoder-register-window? thing)
+         (trace-?? 'register-window indent thing)
+         (list (d:register-window-value thing indent)
+               (??+ (decoder-register-window-items thing) indent)))
 
         ((decoder-register-map? thing)
          (trace-?? 'register-map indent thing)

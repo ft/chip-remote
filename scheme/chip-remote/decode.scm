@@ -9,6 +9,7 @@
   #:use-module (chip-remote interpreter)
   #:use-module (chip-remote device)
   #:use-module (chip-remote page-map)
+  #:use-module (chip-remote register-window)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote register)
   #:use-module (chip-remote item)
@@ -27,6 +28,15 @@
                    (decode* x (getter value))))
                (register-items desc))
           desc))
+        ((register-window? desc)
+         (let ((new-value (ash value (window-offset desc))))
+           (make-register-window/decoder
+            new-value
+            (map (lambda (x)
+                   (let ((getter (item-get x)))
+                     (decode* x (getter new-value))))
+                 (window-items desc))
+            desc)))
         ((register-map? desc)
          (make-register-map/decoder
           value
@@ -66,6 +76,14 @@
                (decoder-item-decoded thing)))
         ((decoder-register? thing)
          (map ? (decoder-register-items thing)))
+        ((decoder-register-window? thing)
+         (let* ((win (decoder-register-window-description thing))
+                (items (window-items win))
+                (lsi (and (not (null? items)) (item-name (first items))))
+                (msi (and (not (null? items)) (item-name (last items)))))
+           (cons (list `(lsi-complete? ,(lsi-complete? win) ,lsi)
+                       `(msi-complete? ,(msi-complete? win) ,msi))
+                 (map ? (decoder-register-window-items thing)))))
         ((decoder-register-map? thing)
          (map (lambda (x) (cons (car x) (? (cdr x))))
               (decoder-register-map-registers thing)))

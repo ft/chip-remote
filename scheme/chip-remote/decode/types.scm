@@ -10,6 +10,11 @@
             decoder-register-raw
             decoder-register-items
             decoder-register-description
+            make-register-window/decoder
+            decoder-register-window?
+            decoder-register-window-raw
+            decoder-register-window-items
+            decoder-register-window-description
             make-register-map/decoder
             decoder-register-map?
             decoder-register-map-raw
@@ -49,6 +54,13 @@
   (raw decoder-register-raw)
   (items decoder-register-items)
   (description decoder-register-description))
+
+(define-record-type <decoder-register-window>
+  (make-register-window/decoder raw items description)
+  decoder-register-window?
+  (raw decoder-register-window-raw)
+  (items decoder-register-window-items)
+  (description decoder-register-window-description))
 
 (define-record-type <decoder-register-map>
   (make-register-map/decoder raw registers description)
