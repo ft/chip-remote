@@ -809,4 +809,10 @@
   (reserved (offset #x10 0) (octets 22))
   ;; offset 0x26
   (tx-fine-grain-power-sequencing (offset #x26 0) (octets 2)
-                                  #:default #b0000101100111100))
+                                  #:default #b0000101100111100)
+  ;; offset 0x28
+  (led-blink-time (offset #x28 0) (octets 1))
+  (led-blink-enable (offset #x28 8) 1)
+  (reserved (offset #x28 9) 7)
+  (led-blink-now-mask (offset #x28 16) 4)
+  (reserved (offset #x28 20) 12))
