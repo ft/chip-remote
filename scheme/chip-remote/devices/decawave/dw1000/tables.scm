@@ -20,9 +20,10 @@
             irq-polarity-map
             phy-header-mode-map
             spi-data-edge-map
-            tx-bit-rate-map
+            bit-rate-map
             prf-map
-            tx-psr-map))
+            preamble-symbol-rep-map
+            system-clock-map))
 
 (define-value irq-polarity-map '((active-low  . 0)
                                  (active-high . 1)))
@@ -35,25 +36,25 @@
                                     (reserved        . #b10)
                                     (long-frames     . #b11)))
 
-(define-value tx-bit-rate-map '((110kBit/s  . #b00)
-                                (850kBit/s  . #b01)
-                                (6.81MBit/s . #b10)
-                                (reserved   . #b11)))
+(define-value bit-rate-map '((110kBit/s  . #b00)
+                             (850kBit/s  . #b01)
+                             (6.81MBit/s . #b10)
+                             (reserved   . #b11)))
 
 (define-value prf-map '((4MHz     . #b00)
                         (16MHz    . #b01)
                         (64MHz    . #b10)
                         (reserved . #b11)))
 
-(define-value tx-psr-map '((16   . #b0000)
-                           (64   . #b0001)
-                           (128  . #b0101)
-                           (256  . #b1001)
-                           (512  . #b1101)
-                           (1024 . #b0010)
-                           (1536 . #b0110)
-                           (2048 . #b1010)
-                           (4096 . #b0011)))
+(define-value preamble-symbol-rep-map '((16   . #b0000)
+                                        (64   . #b0001)
+                                        (128  . #b0101)
+                                        (256  . #b1001)
+                                        (512  . #b1101)
+                                        (1024 . #b0010)
+                                        (1536 . #b0110)
+                                        (2048 . #b1010)
+                                        (4096 . #b0011)))
 
 (define-value gpio-0-modes '((gpio         . #b00)
                              (rx-ok-led    . #b01)
@@ -111,3 +112,8 @@
 
 (define-value gpio-irq-both-map '((normal     . 0)
                                   (both-edges . 1)))
+
+(define-value system-clock-map '((auto            . #b00)
+                                 (force-xti-clock . #b01)
+                                 (force-pll-clock . #b10)
+                                 (reserved        . #b11)))

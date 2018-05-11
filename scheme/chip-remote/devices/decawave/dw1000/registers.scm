@@ -144,14 +144,14 @@
   (tx-frame-length 0 10 #:default 10)
   (reserved 10 3)
   (tx-bit-rate 13 2
-               #:semantics lookup tx-bit-rate-map
+               #:semantics lookup bit-rate-map
                #:default '6.81MBit/s)
   (tx-ranging-enable-bit 15 1)
   (tx-pulse-repetition-frequency 16 2
                                  #:semantics lookup prf-map
                                  #:default '16MHz)
   (tx-preamble-symbol-repetition 18 4
-                                 #:semantics lookup tx-psr-map
+                                 #:semantics lookup preamble-symbol-rep-map
                                  #:default 64)
   (tx-buffer-offset-index 22 10 #:validate range (>= 0) (<= 1023))
   (inter-frame-spacing 32 8))
@@ -198,15 +198,96 @@
 
 (define-register reg:system-event-mask
   #:address #x0e
-  #:description "System Event Mask Register")
+  #:description "System Event Mask Register"
+  #:register-width (octets 4)
+  #:contents
+  (reserved 0 1)
+  (mask-pll-lock-event 1 1)
+  (mask-external-sync-clock-reset-event 2 1)
+  (mask-automatic-ack-trigger-event 3 1)
+  (mask-tx-frame-begin-event 4 1)
+  (mask-tx-preamble-sent-event 5 1)
+  (mask-tx-phy-header-sent-event 6 1)
+  (mask-tx-frame-sent-event 7 1)
+  (mask-rx-preamble-detect-event 8 1)
+  (mask-rx-sfd-detect-event 9 1)
+  (mask-lde-processing-done-event 10 1)
+  (mask-rx-phy-header-detect-event 11 1)
+  (mask-rx-phy-header-error-event 12 1)
+  (mask-rx-data-frame-ready-event 13 1)
+  (mask-rx-frame-check-good-event 14 1)
+  (mask-rx-frame-check-fail-event 15 1)
+  (mask-rx-reed-solomon-frame-sync-loss-event 16 1)
+  (mask-rx-frame-wait-timeout-event 17 1)
+  (mask-rx-lde-detection-error-event 18 1)
+  (reserved 19 1)
+  (mask-rx-overrun-event 20 1)
+  (mask-rx-preamble-detection-timeout-event 21 1)
+  (mask-gpio-event 22 1)
+  (mask-sleep-to-init-event 23 1)
+  (mask-rf-pll-lost-lock-event 24 1)
+  (mask-clock-pll-lost-lock-event 25 1)
+  (mask-rx-sfd-timeout-event 26 1)
+  (mask-half-period-delay-warning-event 27 1)
+  (mask-transmit-buffer-error-event 28 1)
+  (mask-automatic-frame-filtering-event 29 1)
+  (reserved 30 2))
 
 (define-register reg:system-status
   #:address #x0f
-  #:description "System event Status Register")
+  #:description "System event Status Register"
+  #:register-width (octets 4)
+  #:contents
+  (irq-request! 0 1)
+  (pll-lock-event 1 1)
+  (external-sync-clock-reset-event 2 1)
+  (automatic-ack-trigger-event 3 1)
+  (tx-frame-begin-event 4 1)
+  (tx-preamble-sent-event 5 1)
+  (tx-phy-header-sent-event 6 1)
+  (tx-frame-sent-event 7 1)
+  (rx-preamble-detect-event 8 1)
+  (rx-sfd-detect-event 9 1)
+  (lde-processing-done-event 10 1)
+  (rx-phy-header-detect-event 11 1)
+  (rx-phy-header-error-event 12 1)
+  (rx-data-frame-ready-event 13 1)
+  (rx-frame-check-good-event 14 1)
+  (rx-frame-check-fail-event 15 1)
+  (rx-reed-solomon-frame-sync-loss-event 16 1)
+  (rx-frame-wait-timeout-event 17 1)
+  (rx-lde-detection-error-event 18 1)
+  (reserved 19 1)
+  (rx-overrun-event 20 1)
+  (rx-preamble-detection-timeout-event 21 1)
+  (gpio-event 22 1)
+  (sleep-to-init-event 23 1)
+  (rf-pll-lost-lock-event 24 1)
+  (clock-pll-lost-lock-event 25 1)
+  (rx-sfd-timeout-event 26 1)
+  (half-period-delay-warning-event 27 1)
+  (transmit-buffer-error-event 28 1)
+  (automatic-frame-filtering-event 29 1)
+  (host-side-receive-buffer-pointer 30 1)
+  (ic-side-receive-buffer-pointer 31 1)
+  (rx-reed-solomon-correction-status 32 1)
+  (rx-preamble-rejection 33 1)
+  (tx-power-up-time-error 34 1)
+  (reserved 35 5))
 
 (define-register reg:rx-frame-info
   #:address #x10
-  #:description "RX Frame Information (in double buffer set)")
+  #:description "RX Frame Information (in double buffer set)"
+  #:register-width 4
+  #:contents
+  (rx-frame-length 0 10)
+  (reserved 10 1)
+  (rx-preamble-length-low 11 2)
+  (rx-bit-rate 13 2 #:semantics lookup bit-rate-map)
+  (rx-ranging-bit? 15 1)
+  (rx-prf-report 16 2 #:semantics lookup prf-map)
+  (rx-preamble-symbol-repetition 18 2)
+  (rx-preamble-accumulation-count 20 12))
 
 (define-register reg:rx-buffer
   #:address #x11
@@ -682,5 +763,50 @@
   #:address #x36
   #:description "Power Management System Control Block"
   #:register-width (octets 44)
-  ;; TODO: This would be interesting, but I can't be arsed right now.
-  #:contents (power-management-ctrl 0 (octets 44)))
+  #:contents
+  (system-clock-select 0 2
+                       #:semantics lookup system-clock-map
+                       #:default 'auto)
+  (rx-clock-select 2 2
+                   #:semantics lookup system-clock-map
+                   #:default 'auto)
+  (tx-clock-select 4 2
+                   #:semantics lookup system-clock-map
+                   #:default 'auto)
+  (force-accumulator-clock-enable 6 1 #:default #f)
+  (reserved 7 3 #:default #b100)
+  (adc-convert-clock-enable 10 1 #:default #f)
+  (reserved 11 4)
+  (accumulator-memory-clock-enable 15 1 #:default #f)
+  (gpio-clock-enable 16 1 #:default #f)
+  (gpio-reset 17 1 #:semantics boolean/active-low #:default #t)
+  (gpio-debounce-clock-enable 18 1 #:default #f)
+  (gpio-debounce-reset 19 1 #:semantics boolean/active-low #:default #t)
+  (reserved 20 3 #:default #b011)
+  (kilohertz-clock-enable 23 1 #:default #f)
+  (reserved 24 4)
+  (soft-reset 28 4 #:default #b1111)
+  ;; offset 0x04
+  (reserved (offset #x04 0) 1)
+  (auto-rx-to-init (offset #x04 1) 1 #:default #f)
+  (reserved (offset #x04 2) 1)
+  (packet-sequence (offset #x04 3) 8 #:default #xe7)
+  (auto-tx-to-sleep (offset #x04 11) 1 #:default #f)
+  (auto-rx-to-sleep (offset #x04 12) 1 #:default #f)
+  (snooze-enable (offset #x04 13) 1 #:default #f)
+  (snooze-repeat-enable (offset #x04 14) 1 #:default #f)
+  (pll-sync-clock-enable (offset #x04 15) 1 #:default #f)
+  (reserved (offset #x04 16) 1)
+  (lde-run-enable (offset #x04 17) 1 #:default #f)
+  (reserved (offset #x04 18) 8 #:default #b01000000)
+  (kilohertz-clock-divider (offset #x04 26) 6 #:default #x100000)
+  ;; offset 0x08
+  (reserved (offset #x08 0) (octets 4))
+  ;; offset 0x0c
+  (snooze-time (offset #x0c 0) (octets 1) #:default #b01000000)
+  (reserved (offset #x0c (octets 1)) (octets 3))
+  ;; offset 0x10
+  (reserved (offset #x10 0) (octets 22))
+  ;; offset 0x26
+  (tx-fine-grain-power-sequencing (offset #x26 0) (octets 2)
+                                  #:default #b0000101100111100))
