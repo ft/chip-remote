@@ -11,6 +11,7 @@
             make-page-map
             page-map?
             page-map-table
+            page-map-register-maps
             page-map-default
             page-map-item-names
             page-map-merge
@@ -29,6 +30,9 @@
   (make-page-map table)
   page-map?
   (table page-map-table))
+
+(define (page-map-register-maps pm)
+  (map cdr (page-map-table pm)))
 
 (define-syntax generate-page-map
   (lambda (x)
