@@ -4,6 +4,7 @@
 
 (define-module (test validate-device)
   #:use-module (test tap)
+  #:use-module (test validate complete-registers)
   #:use-module (test validate has-register)
   #:use-module (test validate unique-items)
   #:use-module (test validate items-dont-overlap)
@@ -16,7 +17,8 @@
     (,non-empty-registers/check ,non-empty-registers/count)
     (,unique-items/check ,unique-items/count)
     (,items-dont-overlap/check ,items-dont-overlap/count)
-    (,items-no-holes/check ,items-no-holes/count)))
+    (,items-no-holes/check ,items-no-holes/count)
+    (,complete-registers/check ,complete-registers/count)))
 
 (define (planned-tests dev cfg)
   (apply + (map (lambda (x) (x dev cfg))
