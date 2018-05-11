@@ -55,7 +55,8 @@
 
 (define-register reg:device-id
   #:address #x00
-  #:description "Device ID register, includes revision info (0xDECA0130)"
+  #:description "Device ID register"
+  #:double-buffer? #f
   #:register-width (octets 4)
   #:contents
   (revision 0 4)
@@ -65,7 +66,8 @@
 
 (define-register reg:ieee-eui
   #:address #x01
-  #:description "IEEE Extended Unique Identifier (63:0)"
+  #:description "IEEE Extended Unique Identifier"
+  #:double-buffer? #f
   #:register-width (octets 8)
   #:contents
   (ieee-eui-device 0 40)
@@ -73,7 +75,8 @@
 
 (define-register reg:pan-id/short-address
   #:address #x03
-  #:description "PAN ID (31:16) and Short Address (15:0)"
+  #:description "PAN ID and Short Address"
+  #:double-buffer? #f
   #:register-width (octets 4)
   #:contents
   (short-address 0 16)
@@ -81,7 +84,8 @@
 
 (define-register reg:system-cfg
   #:address #x04
-  #:description "System Configuration (31:0)"
+  #:description "System Configuration"
+  #:double-buffer? #f
   #:register-width (octets 4)
   #:contents
   (frame-filter-enable 0 1)
@@ -132,13 +136,15 @@
 
 (define-register reg:system-time
   #:address #x06
-  #:description "System Time Counter (40-bit)"
+  #:description "System Time Counter"
+  #:double-buffer? #f
   #:register-width (octets 5)
   #:contents (high-speed-time-stamp 0 40))
 
 (define-register reg:tx-frame-ctrl
   #:address #x08
   #:description "Transmit Frame Control"
+  #:double-buffer? #f
   #:register-width (octets 5)
   #:contents
   (tx-frame-length 0 10 #:default 10)
@@ -159,18 +165,21 @@
 (define-register reg:tx-buffer
   #:address #x09
   #:description "Transmit Data Buffer"
+  #:double-buffer? #f
   #:register-width (octets 1024)
   #:contents (tx-buffer 0 (octets 1024)))
 
 (define-register reg:delayed-tx/rx-time
   #:address #x0a
-  #:description "Delayed Send or Receive Time (40-bit)"
+  #:description "Delayed Send or Receive Time"
+  #:double-buffer? #f
   #:register-width (octets 5)
   #:contents (delay-time 0 (octets 5)))
 
 (define-register reg:rx-frame-wait-timeout
   #:address #x0c
   #:description "Receive Frame Wait Timeout Period"
+  #:double-buffer? #f
   #:register-width (octets 4)
   #:contents
   (wait-timeout 0 (octets 2))
@@ -179,6 +188,7 @@
 (define-register reg:system-ctrl
   #:address #x0d
   #:description "System Control Register"
+  #:double-buffer? #f
   #:register-width (octets 4)
   #:contents
   (tx-auto-frame-check 0 1 #:semantics boolean/active-low #:default #t)
@@ -199,6 +209,7 @@
 (define-register reg:system-event-mask
   #:address #x0e
   #:description "System Event Mask Register"
+  #:double-buffer? #f
   #:register-width (octets 4)
   #:contents
   (reserved 0 1)
@@ -236,6 +247,7 @@
 (define-register reg:system-status
   #:address #x0f
   #:description "System event Status Register"
+  #:double-buffer? #f
   #:register-width (octets 5)
   #:contents
   (irq-request! 0 1)
@@ -277,7 +289,8 @@
 
 (define-register reg:rx-frame-info
   #:address #x10
-  #:description "RX Frame Information (in double buffer set)"
+  #:description "RX Frame Information"
+  #:double-buffer? #t
   #:register-width (octets 4)
   #:contents
   (rx-frame-length 0 10)
@@ -291,13 +304,15 @@
 
 (define-register reg:rx-buffer
   #:address #x11
-  #:description "Receive Data Buffer (in double buffer set)"
+  #:description "Receive Data Buffer"
+  #:double-buffer? #t
   #:register-width (octets 1024)
   #:contents (rx-buffer 0 (octets 1024)))
 
 (define-register reg:rx-frame-quality-info
   #:address #x12
-  #:description "Rx Frame Quality information (in double buffer set)"
+  #:description "Rx Frame Quality information"
+  #:double-buffer? #t
   #:register-width (octets 8)
   #:contents
   (noise-standard-deviation 0 (octets 2))
@@ -307,13 +322,15 @@
 
 (define-register reg:rx-time-track-interval
   #:address #x13
-  #:description "Receiver Time Tracking Interval (in double buffer set)"
+  #:description "Receiver Time Tracking Interval"
+  #:double-buffer? #t
   #:register-width (octets 4)
   #:contents (rx-time-tracking-interval 0 (octets 4)))
 
 (define-register reg:rx-time-track-offset
   #:address #x14
-  #:description "Receiver Time Tracking Offset (in double buffer set)"
+  #:description "Receiver Time Tracking Offset"
+  #:double-buffer? #t
   #:register-width (octets 5)
   #:contents
   (rx-time-tracking-offset 0 19 #:semantics twos-complement)
@@ -324,7 +341,8 @@
 
 (define-register reg:rx-time-of-arrival
   #:address #x15
-  #:description "Receive Message Time of Arrival (in double buffer set)"
+  #:description "Receive Message Time of Arrival"
+  #:double-buffer? #t
   #:register-width (octets 14)
   #:contents
   (rx-time-stamp 0 (octets 5))
@@ -335,6 +353,7 @@
 (define-register reg:tx-time-of-sending
   #:address #x17
   #:description "Transmit Message Time of Sending"
+  #:double-buffer? #f
   #:register-width (octets 10)
   #:contents
   (tx-time-stamp 0 (octets 5))
@@ -343,18 +362,21 @@
 (define-register reg:tx-antenna-delay
   #:address #x18
   #:description "16-bit Delay from Transmit to Antenna"
+  #:double-buffer? #f
   #:register-width (octets 2)
   #:contents (tx-antenna-delay 0 (octets 2)))
 
 (define-register reg:system-state
   #:address #x19
-  #:description "System State information READ ONLY"
+  #:description "System State information"
+  #:double-buffer? #f
   #:register-width (octets 5)
   #:contents (reserved 0 (octets 5)))
 
 (define-register reg:ack-time/response-time
   #:address #x1a
   #:description "Acknowledgement Time and Response Time"
+  #:double-buffer? #f
   #:register-width (octets 4)
   #:contents
   (wait-for-response-time 0 20)
@@ -364,6 +386,7 @@
 (define-register reg:rx-sniff-mode-cfg
   #:address #x1d
   #:description "Sniff Mode Configuration"
+  #:double-buffer? #f
   #:register-width (octets 4)
   #:contents
   (sniff-mode-on-time 0 4)
@@ -374,6 +397,7 @@
 (define-register reg:tx-power-ctrl
   #:address #x1e
   #:description "TX Power Control"
+  #:double-buffer? #f
   ;; TODO: So, this one needs to be dependently decoded. I have a vague idea on
   ;; how to do it, but I need to think about it some more before implementing
   ;; it all. Until then, lets just put the default here. This is the case when
@@ -390,6 +414,7 @@
 (define-register reg:channel-ctrl
   #:address #x1f
   #:description "Channel Control"
+  #:double-buffer? #f
   #:register-width (octets 4)
   #:contents
   (tx-channel 0 4)
@@ -407,6 +432,7 @@
 (define-register reg:user-sfd-sequences
   #:address #x21
   #:description "User-specified short/long TX/RX SFD sequences"
+  #:double-buffer? #f
   #:register-width (octets 41)
   ;; TODO: Not messing with this for now.
   #:contents
@@ -415,6 +441,7 @@
 (define-register reg:agc-ctrl
   #:address #x23
   #:description "Automatic Gain Control configuration"
+  #:double-buffer? #f
   #:register-width (octets 32)
   ;; TODO: Also not touching these...
   #:contents
@@ -423,6 +450,7 @@
 (define-register reg:external-sync-ctrl
   #:address #x24
   #:description "External synchronisation control"
+  #:double-buffer? #f
   #:register-width (octets 12)
   #:contents
   ;; Another one, I don't care about for now.
@@ -431,6 +459,7 @@
 (define-register reg:accumulator-memory
   #:address #x25
   #:description "Read access to accumulator data"
+  #:double-buffer? #f
   ;; This one is also interesting: You need to be particular about how you read
   ;; this part of memory. But other than that it's really just a large ass
   ;; register.
@@ -439,7 +468,8 @@
 
 (define-register reg:gpio-ctrl
   #:address #x26
-  #:description "Peripheral register bus 1 access - GPIO control"
+  #:description "GPIO control"
+  #:double-buffer? #f
   #:register-width (octets 44)
   #:contents
   (reserved (offset 0 0) 6)
@@ -676,6 +706,7 @@
 (define-register reg:digital-rx-cfg
   #:address #x27
   #:description "Digital Receiver configuration"
+  #:double-buffer? #f
   #:register-width (octets 46)
   ;; TODO: Again, not concerned with these right now.
   #:contents (digital-rx-cfg 0 (octets 46)))
@@ -683,6 +714,7 @@
 (define-register reg:analog-rx-cfg
   #:address #x28
   #:description "Analog RF Configuration"
+  #:double-buffer? #f
   #:register-width (octets 53)
   ;; TODO: And again...
   #:contents (analog-rx-cfg 0 (octets 53)))
@@ -690,6 +722,7 @@
 (define-register reg:tx-calibration-cfg
   #:address #x2a
   #:description "Transmitter calibration block"
+  #:double-buffer? #f
   #:register-width (octets 13)
   ;; TODO: And again...
   #:contents (tx-calibration-cfg 0 (octets 13)))
@@ -697,6 +730,7 @@
 (define-register reg:frequency-synthesizer-ctrl
   #:address #x2b
   #:description "Frequency synthesiser control block"
+  #:double-buffer? #f
   #:register-width (octets 21)
   ;; TODO: And again...
   #:contents (frequency-synthesizer-ctrl 0 (octets 21)))
@@ -704,6 +738,7 @@
 (define-register reg:always-on-ctrl
   #:address #x2c
   #:description "Always-On register set"
+  #:double-buffer? #f
   #:register-width (octets 12)
   ;; TODO: And again...
   #:contents (always-on-ctrl 0 (octets 12)))
@@ -711,6 +746,7 @@
 (define-register reg:otp-interface
   #:address #x2d
   #:description "One Time Programmable Memory Interface"
+  #:double-buffer? #f
   #:register-width (octets 13)
   ;; TODO: And again...
   #:contents (otp-interface 0 (octets 13)))
@@ -718,6 +754,7 @@
 (define-register reg:leading-edge-detect-ctrl
   #:address #x2e
   #:description "Leading edge detection control block"
+  #:double-buffer? #f
   ;; TODO: And again...
   #:register-width (octets 10246)
   #:contents (leading-edge-detect-ctrl 0 (octets 10246)))
@@ -725,6 +762,7 @@
 (define-register reg:digital-diagnostics
   #:address #x2f
   #:description "Digital Diagnostics Interface"
+  #:double-buffer? #f
   #:register-width (octets 38)
   #:contents
   (event-counter-enable (offset #x00 0) 1)
@@ -762,6 +800,7 @@
 (define-register reg:power-management-ctrl
   #:address #x36
   #:description "Power Management System Control Block"
+  #:double-buffer? #f
   #:register-width (octets 44)
   #:contents
   (system-clock-select 0 2
