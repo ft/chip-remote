@@ -161,7 +161,8 @@
                    (acc-sleep-duration 1 4)
                    (reserved 5 3)))
   (#xd (#:contents (gyr-sleep-duration 0 3)
-                   (gyr-auto-sleep-duration 3 3)))
+                   (gyr-auto-sleep-duration 3 3)
+                   (reserved 6 2)))
   ;; #xe is completely reserved.
   (#xf (#:contents (reserved 0 2)
                    (irq-mask-gyr-any-motion 2 1)
