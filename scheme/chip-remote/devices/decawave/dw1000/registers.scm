@@ -278,7 +278,7 @@
 (define-register reg:rx-frame-info
   #:address #x10
   #:description "RX Frame Information (in double buffer set)"
-  #:register-width 4
+  #:register-width (octets 4)
   #:contents
   (rx-frame-length 0 10)
   (reserved 10 1)
