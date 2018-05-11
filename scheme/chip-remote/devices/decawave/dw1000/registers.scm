@@ -236,7 +236,7 @@
 (define-register reg:system-status
   #:address #x0f
   #:description "System event Status Register"
-  #:register-width (octets 4)
+  #:register-width (octets 5)
   #:contents
   (irq-request! 0 1)
   (pll-lock-event 1 1)
