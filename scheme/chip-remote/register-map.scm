@@ -12,6 +12,7 @@
             register-map?
             register-map-meta
             register-map-table
+            register-map-registers
             register-map-default
             register-map-item-names
             register-map-register
@@ -61,6 +62,9 @@
 
 (define-syntax-rule (define-register-map binding e0 e* ...)
   (define binding (generate-register-map e0 e* ...)))
+
+(define (register-map-registers rm)
+  (map cdr (register-map-table rm)))
 
 (define (register-map-register rm)
   (let ((rm* (register-map-table rm)))
