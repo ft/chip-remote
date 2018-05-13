@@ -7,6 +7,7 @@
   #:use-module (test validate complete-registers)
   #:use-module (test validate has-register)
   #:use-module (test validate unique-items)
+  #:use-module (test validate item-defaults-work)
   #:use-module (test validate items-dont-overlap)
   #:use-module (test validate items-no-holes)
   #:use-module (test validate registers-have-content)
@@ -18,7 +19,8 @@
     (,unique-items/check ,unique-items/count)
     (,items-dont-overlap/check ,items-dont-overlap/count)
     (,items-no-holes/check ,items-no-holes/count)
-    (,complete-registers/check ,complete-registers/count)))
+    (,complete-registers/check ,complete-registers/count)
+    (,item-defaults-work/check ,item-defaults-work/count)))
 
 (define (planned-tests dev cfg)
   (apply + (map (lambda (x) (x dev cfg))
