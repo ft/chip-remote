@@ -31,10 +31,10 @@
 (define-value spi-data-edge-map '((miso-at-sampling-edge . 0)
                                   (miso-at-inverted-edge . 1)))
 
-(define-value phy-header-mode-map '((standard-frames . #b00)
-                                    (reserved        . #b01)
-                                    (reserved        . #b10)
-                                    (long-frames     . #b11)))
+(define-value phy-header-mode-map '((standard-frame . #b00)
+                                    (reserved       . #b01)
+                                    (reserved       . #b10)
+                                    (long-frame     . #b11)))
 
 (define-value bit-rate-map '((110kBit/s  . #b00)
                              (850kBit/s  . #b01)
