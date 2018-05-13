@@ -299,7 +299,7 @@
   (rx-bit-rate 13 2 #:semantics lookup bit-rate-map)
   (rx-ranging-bit? 15 1)
   (rx-prf-report 16 2 #:semantics lookup prf-map)
-  (rx-preamble-symbol-repetition 18 2)
+  (rx-preamble-length-high 18 2)
   (rx-preamble-accumulation-count 20 12))
 
 (define-register reg:rx-buffer
