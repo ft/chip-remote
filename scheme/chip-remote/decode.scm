@@ -92,6 +92,25 @@
                           (decoder-register-items reg)))
         reg)))
 
+(define (into-register-window proc state regwin)
+  (let ((cb (p:register proc)))
+    (cb proc
+        (new-content state
+                     (let* ((win (decoder-register-window-description regwin))
+                            (items (window-items win))
+                            (lsi (and (not (null? items))
+                                      (item-name (first items))))
+                            (msi (and (not (null? items))
+                                      (item-name (last items)))))
+                       (cons (list `(lsi-complete? ,(lsi-complete? win) ,lsi)
+                                   `(msi-complete? ,(msi-complete? win) ,msi))
+                             (map (lambda (item)
+                                    (process proc
+                                             (ps-level-up state 'register-window)
+                                             item))
+                                  (decoder-register-window-items regwin)))))
+        regwin)))
+
 (define (into-register-map proc state regmap)
   (let ((cb (p:register-map proc)))
     (cb proc
