@@ -78,66 +78,103 @@
                    item register window register-map page-map device
                    lst pair other))
 
+(define (into-item proc state item)
+  ((p:item proc) proc state item))
+
+(define (into-register proc state reg)
+  (let ((cb (p:register proc)))
+    (cb proc
+        (new-content state
+                     (map (lambda (item)
+                            (process proc
+                                     (ps-level-up state 'register)
+                                     item))
+                          (decoder-register-items reg)))
+        reg)))
+
+(define (into-register-map proc state regmap)
+  (let ((cb (p:register-map proc)))
+    (cb proc
+        (new-content state
+                     (map (lambda (reg)
+                            (process proc
+                                     (set-fields state
+                                                 ((ps-level) (cons 'register-map
+                                                                   (ps-level state)))
+                                                 ((ps-address) (car reg)))
+                                     (cdr reg)))
+                          (decoder-register-map-registers regmap)))
+        regmap)))
+
+(define (into-page-map proc state pagemap)
+  (let ((cb (p:page-map proc)))
+    ((p:page-map proc) proc
+     (new-content state
+                  (map (lambda (regmap)
+                         (process proc
+                                  (set-fields state
+                                              ((ps-level) (cons 'page-map
+                                                                (ps-level state)))
+                                              ((ps-address) (car regmap)))
+                                  (cdr regmap)))
+                       (decoder-page-map-register-maps pagemap)))
+     pagemap)))
+
+(define (into-device proc state device)
+  (let ((cb (p:device proc)))
+    (cb proc (new-content state (process proc
+                                         (ps-level-up state 'device)
+                                         (decoder-device-page-map device)))
+        device)))
+
+(define (into-list proc state lst)
+  (let ((cb (p:list proc)))
+    (cb proc (new-content state
+                          (map (lambda (x)
+                                 (process proc state x))
+                               lst))
+        lst)))
+
+(define (into-pair proc state pair)
+  (let ((cb (p:pair proc)))
+    (cb proc
+        (new-content state (cons (process proc state (car pair))
+                                 (process proc state (cdr pair))))
+        pair)))
+
+(define (into-other proc state thing)
+  ((p:other proc) proc state thing))
+
 (define (process proc state thing)
   (define* (trace-process name thing #:key (force? #f))
     (when (or (ps-debug? state) force?)
       (format #t "debug(~a, ~a):~%~a~%" name (ps-level state) 'thing)))
   (cond ((decoder-item? thing)
          (trace-process 'item thing)
-         ((p:item proc) proc state thing))
+         (into-item proc state thing))
         ((decoder-register? thing)
          (trace-process 'register thing)
-         ((p:register proc) proc
-          (new-content state (map (lambda (x)
-                                    (process proc (ps-level-up state 'register) x))
-                                  (decoder-register-items thing)))
-          thing))
+         (into-register proc state thing))
         ((decoder-register-window? thing)
          (trace-process 'register-window thing)
          ((p:window proc) proc state thing))
         ((decoder-register-map? thing)
          (trace-process 'register-map thing)
-         ((p:register-map proc) proc
-          (new-content state
-                       (map (lambda (x)
-                              (process proc
-                                       (set-fields state
-                                                   ((ps-level) (cons 'register-map (ps-level state)))
-                                                   ((ps-address) (car x)))
-                                       (cdr x)))
-                            (decoder-register-map-registers thing)))
-          thing))
+         (into-register-map proc state thing))
         ((decoder-page-map? thing)
          (trace-process 'page-map thing)
-         ((p:page-map proc) proc
-          (new-content state
-                       (map (lambda (x)
-                              (process proc
-                                       (set-fields state
-                                                   ((ps-level) (cons 'page-map (ps-level state)))
-                                                   ((ps-address) (car x)))
-                                       (cdr x)))
-                            (decoder-page-map-register-maps thing)))
-          thing))
+         (into-page-map proc state thing))
         ((decoder-device? thing)
          (trace-process 'device thing)
-         ((p:device proc) proc
-          (new-content state(process proc (ps-level-up state 'device) (decoder-device-page-map thing)))
-          thing))
+         (into-device proc state thing))
         ((list? thing)
          (trace-process 'list thing)
-         ((p:list proc) proc (new-content state (map (lambda (x)
-                                                       (process proc state x))
-                                                     thing))
-          thing))
+         (into-list proc state thing))
         ((pair? thing)
          (trace-process 'pair thing)
-         ((p:pair proc) proc
-          (new-content state (cons (process proc state (car thing))
-                                   (process proc state (cdr thing))))
-          thing))
+         (into-pair proc state thing))
         (else (trace-process 'other thing)
-              ((p:other proc) proc state thing))))
+              (into-other proc state thing))))
 
 (define (decode* desc value)
   (cond ((item? desc)
