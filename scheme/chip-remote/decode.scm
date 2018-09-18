@@ -29,9 +29,6 @@
 (define* (make-processor-state #:key (level '()) (address #f) (debug? #f))
   (make-processor-state* level address debug?))
 
-;; Maybe level needs to be a list: (item register register-map page-map device)
-;; That way indendation functions could do more than just multiply levels with
-;; a base indentation:
 (define (ps-level-up state lvl)
   (new-level state (cons lvl (ps-level state))))
 
@@ -82,76 +79,59 @@
   ((p:item proc) proc state item))
 
 (define (into-register proc state reg)
+  (define (into item)
+    (process proc (ps-level-up state 'register) item))
   (let ((cb (p:register proc)))
-    (cb proc
-        (new-content state
-                     (map (lambda (item)
-                            (process proc
-                                     (ps-level-up state 'register)
-                                     item))
-                          (decoder-register-items reg)))
-        reg)))
+    (cb proc (new-content state (map into (decoder-register-items reg))) reg)))
 
 (define (into-register-window proc state regwin)
-  (let ((cb (p:register proc)))
-    (cb proc
-        (new-content state
-                     (let* ((win (decoder-register-window-description regwin))
-                            (items (window-items win))
-                            (lsi (and (not (null? items))
-                                      (item-name (first items))))
-                            (msi (and (not (null? items))
-                                      (item-name (last items)))))
-                       (cons (list `(lsi-complete? ,(lsi-complete? win) ,lsi)
-                                   `(msi-complete? ,(msi-complete? win) ,msi))
-                             (map (lambda (item)
-                                    (process proc
-                                             (ps-level-up state 'register-window)
-                                             item))
-                                  (decoder-register-window-items regwin)))))
-        regwin)))
+  (let* ((win (decoder-register-window-description regwin))
+         (items (window-items win))
+         (lsi (and (not (null? items)) (item-name (first items))))
+         (msi (and (not (null? items)) (item-name (last items))))
+         (c (cons (list `(lsi-complete? ,(lsi-complete? win) ,lsi)
+                        `(msi-complete? ,(msi-complete? win) ,msi))
+                  (map (lambda (i)
+                         (process proc (ps-level-up state 'register-window) i))
+                       (decoder-register-window-items regwin)))))
+    ((p:register proc) proc (new-content state c) regwin)))
 
 (define (into-register-map proc state regmap)
+  (define (into reg)
+    (process proc
+             (set-fields state
+                         ((ps-level) (cons 'register-map (ps-level state)))
+                         ((ps-address) (car reg)))
+             (cdr reg)))
   (let ((cb (p:register-map proc)))
     (cb proc
-        (new-content state
-                     (map (lambda (reg)
-                            (process proc
-                                     (set-fields state
-                                                 ((ps-level) (cons 'register-map
-                                                                   (ps-level state)))
-                                                 ((ps-address) (car reg)))
-                                     (cdr reg)))
-                          (decoder-register-map-registers regmap)))
+        (new-content state (map into (decoder-register-map-registers regmap)))
         regmap)))
 
 (define (into-page-map proc state pagemap)
+  (define (into regmap)
+    (process proc
+             (set-fields state
+                         ((ps-level) (cons 'page-map (ps-level state)))
+                         ((ps-address) (car regmap)))
+             (cdr regmap)))
   (let ((cb (p:page-map proc)))
     (cb proc
-        (new-content state
-                     (map (lambda (regmap)
-                            (process proc
-                                     (set-fields state
-                                                 ((ps-level) (cons 'page-map
-                                                                   (ps-level state)))
-                                                 ((ps-address) (car regmap)))
-                                     (cdr regmap)))
-                          (decoder-page-map-register-maps pagemap)))
+        (new-content state (map into (decoder-page-map-register-maps pagemap)))
         pagemap)))
 
 (define (into-device proc state device)
   (let ((cb (p:device proc)))
-    (cb proc (new-content state (process proc
-                                         (ps-level-up state 'device)
-                                         (decoder-device-page-map device)))
+    (cb proc
+        (new-content state (process proc
+                                    (ps-level-up state 'device)
+                                    (decoder-device-page-map device)))
         device)))
 
 (define (into-list proc state lst)
   (let ((cb (p:list proc)))
-    (cb proc (new-content state
-                          (map (lambda (x)
-                                 (process proc state x))
-                               lst))
+    (cb proc
+        (new-content state (map (lambda (x) (process proc state x)) lst))
         lst)))
 
 (define (into-pair proc state pair)
@@ -252,7 +232,7 @@
         (else (throw 'invalid-data-type desc))))
 
 (define processor (make-processor))
-(define procstate (make-processor-state))
+(define procstate (make-processor-state #:debug? #f))
 
 (define (decode description value)
   (process processor procstate (decode* description value)))
