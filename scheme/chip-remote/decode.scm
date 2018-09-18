@@ -118,11 +118,8 @@
                        (map (lambda (x)
                               (process proc
                                        (set-fields state
-                                                   ((ps-address) (car x))
-                                                   ((ps-content) (map (lambda (y)
-                                                                        (process proc
-                                                                                 (ps-level-up state 'register-map) y))
-                                                                      (decoder-register-items (cdr x)))))
+                                                   ((ps-level) (cons 'register-map (ps-level state)))
+                                                   ((ps-address) (car x)))
                                        (cdr x)))
                             (decoder-register-map-registers thing)))
           thing))
@@ -133,14 +130,8 @@
                        (map (lambda (x)
                               (process proc
                                        (set-fields state
-                                                   ((ps-address) (car x))
-                                                   ((ps-content) (map (lambda (y)
-                                                                        (process proc
-                                                                                 (set-fields state
-                                                                                             ((ps-level) (cons 'page-map (ps-level state)))
-                                                                                             ((ps-address) (car y)))
-                                                                                 (cdr y)))
-                                                                      (decoder-register-map-registers (cdr x)))))
+                                                   ((ps-level) (cons 'page-map (ps-level state)))
+                                                   ((ps-address) (car x)))
                                        (cdr x)))
                             (decoder-page-map-register-maps thing)))
           thing))
@@ -219,7 +210,7 @@
         (else (throw 'invalid-data-type desc))))
 
 (define processor (make-processor))
-(define procstate (make-processor-state #:debug? #t))
+(define procstate (make-processor-state))
 
 (define (decode description value)
   (process processor procstate (decode* description value)))
