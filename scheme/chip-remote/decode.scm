@@ -82,22 +82,6 @@
   (define* (trace-process name thing #:key (force? #f))
     (when (or (ps-debug? state) force?)
       (format #t "debug(~a, ~a):~%~a~%" name (ps-level state) 'thing)))
-  (define (? x)
-    (process proc state x))
-  (define (register-process s x)
-    ((p:register proc) proc s x (map ? (decoder-register-items x))))
-  (define (?-reg x)
-    (register-process state x))
-  (define (?-rw x)
-    (let* ((win (decoder-register-window-description x))
-           (items (window-items win))
-           (lsi (and (not (null? items)) (item-name (first items))))
-           (msi (and (not (null? items)) (item-name (last items)))))
-      ((p:window proc) proc state x win lsi msi
-       (map ? (decoder-register-window-items x)))))
-  ;; Each case in this cond may only call its p:* function. Filling CONTENT is
-  ;; only allowed by calling process recursively. This avoids code dupliation
-  ;; and makes the tracing just work.
   (cond ((decoder-item? thing)
          (trace-process 'item thing)
          ((p:item proc) proc state thing))
