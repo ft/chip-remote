@@ -108,17 +108,17 @@
 
 (define (into-page-map proc state pagemap)
   (let ((cb (p:page-map proc)))
-    ((p:page-map proc) proc
-     (new-content state
-                  (map (lambda (regmap)
-                         (process proc
-                                  (set-fields state
-                                              ((ps-level) (cons 'page-map
-                                                                (ps-level state)))
-                                              ((ps-address) (car regmap)))
-                                  (cdr regmap)))
-                       (decoder-page-map-register-maps pagemap)))
-     pagemap)))
+    (cb proc
+        (new-content state
+                     (map (lambda (regmap)
+                            (process proc
+                                     (set-fields state
+                                                 ((ps-level) (cons 'page-map
+                                                                   (ps-level state)))
+                                                 ((ps-address) (car regmap)))
+                                     (cdr regmap)))
+                          (decoder-page-map-register-maps pagemap)))
+        pagemap)))
 
 (define (into-device proc state device)
   (let ((cb (p:device proc)))
