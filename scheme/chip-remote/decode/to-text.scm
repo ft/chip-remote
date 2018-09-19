@@ -160,7 +160,7 @@
          (title "Raw Register Value: ")
          (tl (string-length title))
          (more (make-indent (+ tl lvl))))
-    (cons (d:register-like lvl title tl v w more) (ps-content state))))
+    (d:register-like lvl title tl v w more)))
 
 (define (d:broken-window indent w type)
   (let* ((item (if (eq? type 'LSI)
