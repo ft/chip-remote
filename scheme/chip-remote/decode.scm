@@ -16,7 +16,26 @@
   #:use-module (chip-remote register)
   #:use-module (chip-remote item)
   #:use-module (chip-remote semantics)
-  #:export (decode decode* make-processor process))
+  #:export (decode
+            decode*
+            make-processor
+            make-processor-state
+            ps-address
+            ps-content
+            ps-debug?
+            ps-level
+            processor?
+            p:indent
+            p:item
+            p:register
+            p:window
+            p:register-map
+            p:page-map
+            p:device
+            p:list
+            p:pair
+            p:other
+            process))
 
 (define-immutable-record-type <processor-state>
   (make-processor-state* level address debug?)
