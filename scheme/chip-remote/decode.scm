@@ -25,7 +25,6 @@
             ps-debug?
             ps-level
             processor?
-            p:indent
             p:item
             p:register
             p:window
@@ -52,9 +51,8 @@
   (new-level state (cons lvl (ps-level state))))
 
 (define-immutable-record-type <processor>
-  (make-processor* indent item register window rm pm dev lst pair other)
+  (make-processor* item register window rm pm dev lst pair other)
   processor?
-  (indent p:indent)
   (item p:item)
   (register p:register)
   (window p:window)
@@ -67,7 +65,6 @@
 
 (define* (make-processor
           #:key
-          (indent (lambda (lvl type) 0))
           (item (lambda (proc state d:item)
                   (cons (item-name (decoder-item-description d:item))
                         (decoder-item-decoded d:item))))
@@ -90,8 +87,7 @@
                   (ps-content state)))
           (other (lambda (proc state d:other)
                    d:other)))
-  (make-processor* indent
-                   item register window register-map page-map device
+  (make-processor* item register window register-map page-map device
                    lst pair other))
 
 (define (into-item proc state item)

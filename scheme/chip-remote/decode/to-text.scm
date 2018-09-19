@@ -117,6 +117,9 @@
                       (symbol->string x)
                       x)))
 
+(define (d:indent state thing)
+  (* (length (ps-level state)) 2))
+
 (define (make-indent n)
   (make-string n #\space))
 
@@ -154,7 +157,7 @@
 (define (d:register-value proc state d:reg)
   (let* ((v (decoder-register-raw d:reg))
          (w (register-width (decoder-register-description d:reg)))
-         (lvl ((p:indent proc) state 'register))
+         (lvl (d:indent state 'register))
          (title "Raw Register Value: ")
          (tl (string-length title))
          (more (make-indent (+ tl lvl))))
@@ -180,7 +183,7 @@
                  (* -1 (window-offset win))))
          (title "Raw Register-Window Value: ")
          (tl (string-length title))
-         (lvl ((p:indent proc) state 'register-window))
+         (lvl (d:indent state 'register-window))
          (more (make-indent (+ tl lvl))))
     (append (d:register-like lvl title tl v w more)
             (list (format #f "Window Offset: ~a, Width: ~a" o w))
@@ -228,7 +231,7 @@
 
 (define (d:item-value proc state d:item)
   (let ((sem (item-semantics (decoder-item-description d:item)))
-        (lvl ((p:indent proc) state 'item)))
+        (lvl (d:indent state 'item)))
     (list (cat (make-indent lvl)
                "Item "
                (double-quote
@@ -253,7 +256,7 @@
 
 (define (d:register-map proc state d:rm)
   (list (let ((addr (ps-address state))
-              (lvl ((p:indent proc) state 'register-map)))
+              (lvl (d:indent state 'register-map)))
           (if (integer? addr)
               (cat (make-indent lvl)
                    (d:regmap:highlight:name "Decoding Register-Map at address: ")
@@ -270,7 +273,7 @@
 
 (define (d:register proc state d:reg)
   (list (let ((addr (ps-address state))
-              (lvl ((p:indent proc) state 'register)))
+              (lvl (d:indent state 'register)))
           (if (integer? addr)
               (cat (make-indent lvl)
                    (d:regmap:highlight:name "Decoding Register at address: ")
@@ -296,7 +299,7 @@
 (define (d:pagemap:decimal v) (d:pagemap:num 10 v))
 
 (define (d:page-map proc state d:pm)
-  (list (cat (make-indent ((p:indent proc) state 'page-map))
+  (list (cat (make-indent (d:indent state 'page-map))
              (d:pagemap:highlight:name "Decoding Page Map: "))
         (ps-content state)))
 
@@ -320,7 +323,7 @@
          (man-name (and man (manufacturer-name man)))
          (man-hp (and man (manufacturer-homepage man)))
          (man-wp (and man (manufacturer-wikipedia man)))
-         (level ((p:indent proc) state 'device))
+         (level (d:indent state 'device))
          (hp (assq-ref meta #:homepage))
          (ds (assq-ref meta #:datasheet))
          (kw (assq-ref meta #:keywords)))
@@ -347,12 +350,8 @@
            (maybe-add kw (thunk (d:device:key/value "Keywords" kw level))))
      (ps-content state))))
 
-(define (d:indent state thing)
-  (* (length (ps-level state)) 2))
-
 (define (decode-to-text desc value)
-  (let ((lst (flatten (process (make-processor #:indent d:indent
-                                               #:item d:item-value
+  (let ((lst (flatten (process (make-processor #:item d:item-value
                                                #:register d:register
                                                #:window d:register-window-value
                                                #:register-map d:register-map
