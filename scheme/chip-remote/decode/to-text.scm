@@ -25,8 +25,6 @@
   #:use-module (chip-remote utilities)
   #:export (decode-to-text))
 
-(define debug? #f)
-
 (define colour-map '((black . "30")
                      (blue . "34")
                      (cyan . "36")
