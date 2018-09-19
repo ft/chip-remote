@@ -352,19 +352,16 @@
 (define (d:indent state thing)
   (* (length (ps-level state)) 2))
 
-(define processor
-  (make-processor #:indent d:indent
-                  #:item d:item-value
-                  #:register d:register
-                  #:window d:register-window-value
-                  #:register-map d:register-map
-                  #:page-map d:page-map
-                  #:device d:device))
-
-(define procstate (make-processor-state #:debug? #f))
-
 (define (decode-to-text desc value)
-  (let ((lst (flatten (process processor procstate (decode* desc value)))))
+  (let ((lst (flatten (process (make-processor #:indent d:indent
+                                               #:item d:item-value
+                                               #:register d:register
+                                               #:window d:register-window-value
+                                               #:register-map d:register-map
+                                               #:page-map d:page-map
+                                               #:device d:device)
+                               (make-processor-state #:debug? #f)
+                               (decode* desc value)))))
     (for-each (lambda (s)
                 (unless (eq? s #:ignore)
                   (display s)
