@@ -125,7 +125,7 @@
 (define d:item:highlight:name (make-highlighter 'yellow))
 (define d:item:highlight:decoded (make-highlighter 'red #:bold? #t))
 (define d:item:highlight:semantics (make-highlighter 'magenta #:bold? #t))
-(define d:regmap:highlight:name (make-highlighter 'red))
+(define d:regmap:highlight:name (make-highlighter 'yellow))
 (define d:pagemap:highlight:name (make-highlighter 'white #:bold? #t))
 (define d:device:highlight:title (make-highlighter 'white #:bold? #t))
 (define d:device:highlight:name (make-highlighter 'cyan))
@@ -153,13 +153,14 @@
         (cat more
              (d:reg:binary v w))))
 
-(define (d:register-value r indent)
-  (let* ((v (decoder-register-raw r))
-         (w (register-width (decoder-register-description r)))
+(define (d:register-value proc state d:reg)
+  (let* ((v (decoder-register-raw d:reg))
+         (w (register-width (decoder-register-description d:reg)))
+         (lvl ((p:indent proc) state 'register))
          (title "Raw Register Value: ")
          (tl (string-length title))
-         (more (make-indent (+ tl indent))))
-    (d:register-like indent title tl v w more)))
+         (more (make-indent (+ tl lvl))))
+    (cons (d:register-like lvl title tl v w more) (ps-content state))))
 
 (define (d:broken-window indent w type)
   (let* ((item (if (eq? type 'LSI)
@@ -174,21 +175,22 @@
                (format #f "Incomplete ~a ~a: start: ~a, end ~a, limit: ~a"
                        type (item-name item) start end limit)))))
 
-(define (d:register-window-value rw indent)
-  (let* ((window (decoder-register-window-description rw))
-         (w (window-width window))
-         (o (window-offset window))
-         (v (ash (decoder-register-window-raw rw)
-                 (* -1 (window-offset window))))
+(define (d:register-window-value proc state d:win win items lsi msi)
+  (let* ((w (window-width win))
+         (o (window-offset win))
+         (v (ash (decoder-register-window-raw d:win)
+                 (* -1 (window-offset win))))
          (title "Raw Register-Window Value: ")
          (tl (string-length title))
-         (more (make-indent (+ tl indent))))
-    (append (d:register-like indent title tl v w more)
+         (lvl ((p:indent proc) state 'register-window))
+         (more (make-indent (+ tl lvl))))
+    (append (d:register-like lvl title tl v w more)
             (list (format #f "Window Offset: ~a, Width: ~a" o w))
             (if (lsi-complete? window) '()
-                (list (d:broken-window indent window 'LSI)))
+                (list (d:broken-window lvl window 'LSI)))
             (if (msi-complete? window) '()
-                (list (d:broken-window indent window 'MSI))))))
+                (list (d:broken-window lvl window 'MSI)))
+            (ps-content state))))
 
 (define (d:item:num b v w)
   (number->terminal v #:base b #:width w #:prefix? #f #:decorate? #t
@@ -226,20 +228,21 @@
          "Decoded: "
          (d:item:highlight:decoded (maybe-string v)))))
 
-(define (d:item-value item indent)
-  (let ((sem (item-semantics (decoder-item-description item))))
-    (list (cat (make-indent indent)
+(define (d:item-value proc state d:item)
+  (let ((sem (item-semantics (decoder-item-description d:item)))
+        (lvl ((p:indent proc) state 'item)))
+    (list (cat (make-indent lvl)
                "Item "
                (double-quote
                 (d:item:highlight:name
-                 (maybe-string (item-name (decoder-item-description item)))))
+                 (maybe-string (item-name (decoder-item-description d:item)))))
                " (semantics: "
                (d:item:highlight:semantics (if (semantics? sem)
                                                (maybe-string (semantics-type sem))
                                                "*unknown-semantics*"))
                "):")
-          (d:item-raw-value item (+ 2 indent))
-          (d:item-decoded-value item (+ 2 indent)))))
+          (d:item-raw-value d:item (+ 2 lvl))
+          (d:item-decoded-value d:item (+ 2 lvl)))))
 
 (define (d:regmap:num b v)
   (number->terminal v #:base b #:prefix? #f #:decorate? #t #:zeropad? #f
@@ -250,19 +253,40 @@
 (define (d:regmap:binary v) (d:regmap:num 2 v))
 (define (d:regmap:decimal v) (d:regmap:num 10 v))
 
-(define (d:register-map addr reg indent)
-  (if (integer? addr)
-      (cat (make-indent indent)
-           (d:regmap:highlight:name "Decoding Register at address: ")
-           (d:regmap:decimal addr)
-           ", "
-           (d:regmap:hex addr)
-           ", "
-           (d:regmap:octal addr)
-           ", "
-           (d:regmap:binary addr))
-      (cat (make-indent indent)
-           (d:regmap:highlight:name "Decoding Register: "))))
+(define (d:register-map proc state d:rm)
+  (list (let ((addr (ps-address state))
+              (lvl ((p:indent proc) state 'register-map)))
+          (if (integer? addr)
+              (cat (make-indent lvl)
+                   (d:regmap:highlight:name "Decoding Register-Map at address: ")
+                   (d:regmap:decimal addr)
+                   ", "
+                   (d:regmap:hex addr)
+                   ", "
+                   (d:regmap:octal addr)
+                   ", "
+                   (d:regmap:binary addr))
+              (cat (make-indent lvl)
+                   (d:regmap:highlight:name "Decoding Register-Map: "))))
+        (ps-content state)))
+
+(define (d:register proc state d:reg)
+  (list (let ((addr (ps-address state))
+              (lvl ((p:indent proc) state 'register)))
+          (if (integer? addr)
+              (cat (make-indent lvl)
+                   (d:regmap:highlight:name "Decoding Register at address: ")
+                   (d:regmap:decimal addr)
+                   ", "
+                   (d:regmap:hex addr)
+                   ", "
+                   (d:regmap:octal addr)
+                   ", "
+                   (d:regmap:binary addr))
+              (cat (make-indent lvl)
+                   (d:regmap:highlight:name "Decoding Register: "))))
+        (d:register-value proc state d:reg)
+        (ps-content state)))
 
 (define (d:pagemap:num b v)
   (number->terminal v #:base b #:prefix? #f #:decorate? #t #:zeropad? #f
@@ -273,19 +297,10 @@
 (define (d:pagemap:binary v) (d:pagemap:num 2 v))
 (define (d:pagemap:decimal v) (d:pagemap:num 10 v))
 
-(define (d:page-map addr rm indent)
-  (if (integer? addr)
-      (cat (make-indent indent)
-           (d:pagemap:highlight:name "Decoding Register Map at address: ")
-           (d:pagemap:decimal addr)
-           ", "
-           (d:pagemap:hex addr)
-           ", "
-           (d:pagemap:octal addr)
-           ", "
-           (d:pagemap:binary addr))
-      (cat (make-indent indent)
-           (d:pagemap:highlight:name "Decoding Register Map: "))))
+(define (d:page-map proc state d:pm)
+  (list (cat (make-indent ((p:indent proc) state 'page-map))
+             (d:pagemap:highlight:name "Decoding Page Map: "))
+        (ps-content state)))
 
 (define-syntax-rule (thunk body* ...)
   (lambda () body* ...))
@@ -299,93 +314,57 @@
        ": "
        (d:device:highlight:value (maybe-string v))))
 
-(define (d:device thing indent)
-  (let* ((dev (decoder-device-description thing))
+(define (d:device proc state d:device)
+  (let* ((dev (decoder-device-description d:device))
          (meta (device-meta dev))
          (name (assq-ref meta #:name))
          (man (assq-ref meta #:manufacturer))
          (man-name (and man (manufacturer-name man)))
          (man-hp (and man (manufacturer-homepage man)))
          (man-wp (and man (manufacturer-wikipedia man)))
+         (level ((p:indent proc) state 'device))
          (hp (assq-ref meta #:homepage))
          (ds (assq-ref meta #:datasheet))
          (kw (assq-ref meta #:keywords)))
-    (list (if name
-              (cat (d:device:highlight:title "Decoding Device ")
-                   (d:device:highlight:name (maybe-string name))
-                   ": ")
-              (d:device:highlight:title "Decoding Device:"))
-          (if man
-              (list
-               (maybe-add man-name
-                          (thunk (d:device:key/value "Manufacturer"
-                                                     man-name indent)))
-               (maybe-add man-hp
-                          (thunk (d:device:key/value "Homepage"
-                                                     man-hp (+ 2 indent))))
-               (maybe-add man-wp
-                          (thunk (d:device:key/value "Wikipedia"
-                                                     man-wp (+ 2 indent)))))
-              '())
-          (maybe-add hp (thunk (d:device:key/value "Device Page" hp indent)))
-          (maybe-add ds (thunk (d:device:key/value "Datasheet" ds indent)))
-          (maybe-add kw (thunk (d:device:key/value "Keywords" kw indent))))))
+    (append
+     (list (if name
+               (cat (d:device:highlight:title "Decoding Device ")
+                    (d:device:highlight:name (maybe-string name))
+                    ": ")
+               (d:device:highlight:title "Decoding Device:"))
+           (if man
+               (list
+                (maybe-add man-name
+                           (thunk (d:device:key/value "Manufacturer"
+                                                      man-name level)))
+                (maybe-add man-hp
+                           (thunk (d:device:key/value "Homepage"
+                                                      man-hp (+ 2 level))))
+                (maybe-add man-wp
+                           (thunk (d:device:key/value "Wikipedia"
+                                                      man-wp (+ 2 level)))))
+               '())
+           (maybe-add hp (thunk (d:device:key/value "Device Page" hp level)))
+           (maybe-add ds (thunk (d:device:key/value "Datasheet" ds level)))
+           (maybe-add kw (thunk (d:device:key/value "Keywords" kw level))))
+     (ps-content state))))
 
-(define* (trace-?? name indent thing #:key (force? #f))
-  (when (or debug? force?)
-    (format #t "debug(~a, ~a):~%~a~%" name indent thing)))
+(define (d:indent state thing)
+  (* (length (ps-level state)) 2))
 
-(define (??+ thing indent)
-  (?? thing #:indent (+ 2 indent)))
+(define processor
+  (make-processor #:indent d:indent
+                  #:item d:item-value
+                  #:register d:register
+                  #:window d:register-window-value
+                  #:register-map d:register-map
+                  #:page-map d:page-map
+                  #:device d:device))
 
-(define* (?? thing #:key (indent 0))
-  (cond ((decoder-item? thing)
-         (trace-?? 'item indent thing)
-         (d:item-value thing indent))
+(define procstate (make-processor-state #:debug? #f))
 
-        ((decoder-register? thing)
-         (trace-?? 'register indent thing)
-         (list (d:register-value thing indent)
-               (??+ (decoder-register-items thing) indent)))
-
-        ((decoder-register-window? thing)
-         (trace-?? 'register-window indent thing)
-         (list (d:register-window-value thing indent)
-               (??+ (decoder-register-window-items thing) indent)))
-
-        ((decoder-register-map? thing)
-         (trace-?? 'register-map indent thing)
-         (map (lambda (reg)
-                (list (d:register-map (car reg) (cdr reg) indent)
-                      (??+ (cdr reg) indent)))
-              (decoder-register-map-registers thing)))
-
-        ((decoder-page-map? thing)
-         (trace-?? 'page-map indent thing)
-         (map (lambda (rm)
-                (list (d:page-map (car rm) (cdr rm) indent)
-                      (??+ (cdr rm) indent)))
-              (decoder-page-map-register-maps thing)))
-
-        ((decoder-device? thing)
-         (trace-?? 'device indent thing)
-         (list (d:device thing indent)
-               (??+ (decoder-device-page-map thing) indent)))
-
-        ((list? thing)
-         (trace-?? 'list indent thing)
-         (map (lambda (x) (?? x #:indent indent)) thing))
-
-        ((pair? thing)
-         (trace-?? 'pair indent thing)
-         (cons (?? (car thing) #:indent indent)
-               (?? (cdr thing) #:indent indent)))
-
-        (else (trace-?? 'else indent thing)
-              #:ignore)))
-
-(define (decode-to-text description value)
-  (let ((lst (flatten (?? (decode* description value)))))
+(define (decode-to-text desc value)
+  (let ((lst (flatten (process processor procstate (decode* desc value)))))
     (for-each (lambda (s)
                 (unless (eq? s #:ignore)
                   (display s)
