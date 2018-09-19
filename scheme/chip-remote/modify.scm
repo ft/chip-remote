@@ -14,24 +14,37 @@
   #:use-module (chip-remote interpreter)
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote validate)
-  #:export (modify modify* chain-modify chain-modify*))
+  #:export (modify modify* chain-modify chain-modify* register-matches? regmap-matches?))
 
 (define (not-integer? x)
   "Predicate for values that are anything BUT integers."
   (not (integer? x)))
+
+(define (modify-ref reg addr)
+  "Reference an item in a register
+
+This function supports all addressing schemes that chain-modify advertises at a
+register level:
+
+  INTEGER             Reference the Nth item in the register.
+  (INTEGER)           Same as the previous.
+  SYMBOL              Reference the first item named SYMBOL.
+  (SYMBOL)            Same as the previous.
+  (SYMBOL INTEGER)    Reference the Nth item named SYMBOL."
+  (match addr
+    (((? integer? i)) (register-address reg i))
+    ((? integer? i) (register-address reg i))
+    (((? not-integer? name)) (register-ref reg name))
+    ((n (? integer? i)) (register-address reg n i))
+    ((? not-integer? name) (register-ref reg name))
+    (_ (throw 'unknown-addressing-scheme addr))))
 
 (define (modify-register reg init addr value)
   "Modification backend for registers.
 
 See the modify function about parameters' semantics."
   ;;(format #t "debug: ~a ~a ~a~%" init addr value)
-  (let ((item (match addr
-                (((? integer? i)) (register-address reg i))
-                ((? integer? i) (register-address reg i))
-                (((? not-integer? name)) (register-ref reg name))
-                ((n (? integer? i)) (register-address reg n i))
-                ((? not-integer? name) (register-ref reg name))
-                (_ (throw 'unknown-addressing-scheme addr)))))
+  (let ((item (modify-ref reg addr)))
     (unless (item? item)
       (throw 'addressing-returned-non-item item addr))
     (if (validate-item-value item value)
