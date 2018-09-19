@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices decawave dw1000 registers)
+  #:use-module (chip-remote combination)
   #:use-module (chip-remote item builder)
   #:use-module (chip-remote register)
   #:use-module (chip-remote semantics)
@@ -287,6 +288,10 @@
   (tx-power-up-time-error 34 1)
   (reserved 35 5))
 
+(define rx-preamble-length
+  (make-combination (list (make-part 'rx-preamble-length-high)
+                          (make-part 'rx-preamble-length-low))))
+
 (define-register reg:rx-frame-info
   #:address #x10
   #:description "RX Frame Information"
@@ -300,7 +305,8 @@
   (rx-ranging-bit? 15 1)
   (rx-prf-report 16 2 #:semantics lookup prf-map)
   (rx-preamble-length-high 18 2)
-  (rx-preamble-accumulation-count 20 12))
+  (rx-preamble-accumulation-count 20 12)
+  #:combination* rx-preamble-length)
 
 (define-register reg:rx-buffer
   #:address #x11
