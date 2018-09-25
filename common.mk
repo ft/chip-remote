@@ -11,6 +11,7 @@ MODULES_CORE += $(CR)/codecs.scm
 MODULES_CORE += $(CR)/combination.scm
 MODULES_CORE += $(CR)/decode.scm
 MODULES_CORE += $(CR)/decode/to-text.scm
+MODULES_CORE += $(CR)/decode/to-c-values.scm
 MODULES_CORE += $(CR)/decode/types.scm
 MODULES_CORE += $(CR)/device.scm
 MODULES_CORE += $(CR)/interpreter.scm
