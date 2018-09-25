@@ -5,6 +5,7 @@
 (define-module (chip-remote decode to-c-values)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
+  #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote decode types)
@@ -84,6 +85,12 @@
            "};"))
     (else (list (format #f "/* Huh. What's this? ~a */" lst)))))
 
+(define (dump-comment lst)
+  (append (list "    /*")
+          (map (lambda (x) (cat "     * " (second x)))
+               (filter (lambda (x) (and (list? x) (eq? (car x) 'comment))) lst))
+          (list "     */")))
+
 (define (generate-c-source state lst)
   (match lst
     ((('device n) . rest)
@@ -117,7 +124,8 @@
                        (if (integer? a) a 0)
                        (if (gs-last? state) "" ",")))))
     ((('register-address a) . rest)
-     (list (format #f "    { .address = ~au," a)
+     (list (dump-comment rest)
+           (format #f "    { .address = ~au," a)
            (format #f "      .value = 0x~v,'0xul }~a"
                    (/ (gs-width state) 4)
                    (cadr (assq 'value rest))
