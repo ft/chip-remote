@@ -3,6 +3,7 @@
             2e
             cat
             flatten
+            map/last
             kwa-ref
             log2
             fmt))
@@ -36,3 +37,8 @@
 
 (define (fmt . rest)
   (apply format (cons #f rest)))
+
+(define (map/last fnc lst)
+  (cond ((null? lst) '())
+        ((null? (cdr lst)) (cons (fnc #t (car lst)) '()))
+        (else (cons (fnc #f (car lst)) (map/last fnc (cdr lst))))))
