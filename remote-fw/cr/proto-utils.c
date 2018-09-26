@@ -12,6 +12,8 @@
 #include "chip-remote.h"
 #include "utils.h"
 
+#include "nucleo-144.h"
+
 static char txbuf[CR_MAX_LINE + 1];
 static int txbuflen;
 

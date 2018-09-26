@@ -83,6 +83,7 @@
  * and after any configuration changes.
  */
 
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "chip-remote.h"
@@ -90,6 +91,8 @@
 #include "protocol.h"
 #include "requests.h"
 #include "utils.h"
+
+#include "nucleo-144.h"
 
 char rxbuf[CR_MAX_LINE + 1];
 static struct cr_state cr_data;

@@ -39,7 +39,7 @@
  * then to two and so on.
  */
 
-
+#include <stdint.h>
 #include <string.h>
 
 #include "chip-remote.h"
@@ -51,6 +51,8 @@
 #include "requests.h"
 #include "transmit.h"
 #include "utils.h"
+
+#include "nucleo-144.h"
 
 static char *cr_modes[] = {
     [ CR_MODE_NONE ] = "NONE",
@@ -136,6 +138,7 @@ cr_handle_address(int cnt, struct cr_words *words)
     uint32_t addr;
     int err;
 
+    (void)cnt;
     addr = verify_word_is_int(words, 1, &err);
     if (err)
         return 0;
@@ -149,6 +152,7 @@ cr_handle_features(int cnt, struct cr_words *words)
 {
     int i, n;
 
+    (void)words;
     for (i = 0, n = 0; requests[i].request != NULL; ++i)
         if (requests[i].optional) {
             if (n == cnt) {
@@ -179,9 +183,9 @@ cr_assign_line_role_string(uint32_t port_idx, uint32_t line_idx,
 int
 cr_handle_line(int cnt, struct cr_words *words)
 {
-    uint32_t pi, li, max;
-    int err;
+    int pi, li, max, err;
 
+    (void)cnt;
     pi = verify_word_is_int(words, 1, &err);
     if (err)
         return 0;
@@ -233,6 +237,7 @@ cr_handle_lines(int cnt, struct cr_words *words)
 int
 cr_handle_modes(int cnt, struct cr_words *words)
 {
+    (void)words;
     return cr_return_list(cnt, cr_modes);
 }
 
@@ -272,6 +277,7 @@ cr_handle_port(int cnt, struct cr_words *words)
 int
 cr_handle_ports(int cnt, struct cr_words *words)
 {
+    (void)words;
     if (cnt == 0) {
         cr_echo_ports(cr_numofports(cr_ports));
         return 0;
@@ -288,6 +294,7 @@ cr_handle_focus(int cnt, struct cr_words *words)
     uint32_t idx, max;
     int err;
 
+    (void)cnt;
     idx = verify_word_is_int(words, 1, &err);
     if (err)
         return 0;
@@ -306,6 +313,8 @@ cr_handle_focus(int cnt, struct cr_words *words)
 int
 cr_handle_hi(int cnt, struct cr_words *words)
 {
+    (void)cnt;
+    (void)words;
     xcr_send_host(HI_REPLY);
     return 1;
 }
@@ -316,6 +325,7 @@ cr_handle_init(int cnt, struct cr_words *words)
     uint32_t idx, max;
     int err;
 
+    (void)cnt;
     idx = verify_word_is_int(words, 1, &err);
     if (err)
         return 0;
@@ -331,6 +341,8 @@ cr_handle_init(int cnt, struct cr_words *words)
 int
 cr_handle_bye(int cnt, struct cr_words *words)
 {
+    (void)cnt;
+    (void)words;
     xcr_send_host(BYE_REPLY);
     return 1;
 }
@@ -342,6 +354,7 @@ cr_handle_set(int cnt, struct cr_words *words)
     enum cr_port_modes mode;
     int err, rc;
 
+    (void)cnt;
     idx = verify_word_is_int(words, 1, &err);
     if (err)
         return 0;
@@ -396,6 +409,7 @@ cr_handle_transmit(int cnt, struct cr_words *words)
     uint32_t value, read_value;
     int err;
 
+    (void)cnt;
     value = verify_word_is_int(words, 1, &err);
     if (err)
         return 0;
@@ -411,6 +425,8 @@ cr_handle_transmit(int cnt, struct cr_words *words)
 int
 cr_handle_version(int cnt, struct cr_words *words)
 {
+    (void)cnt;
+    (void)words;
     xcr_send_host(VERSION_REPLY);
     return 1;
 }

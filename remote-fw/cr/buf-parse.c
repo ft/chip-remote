@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 #include <string.h>
+
 #include "chip-remote.h"
 #include "buf-parse.h"
 #include "utils.h"

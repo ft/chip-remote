@@ -4,7 +4,9 @@
  * Terms for redistribution and use can be found in LICENCE.
  */
 
+#include <stdint.h>
 #include <string.h>
+
 #include "chip-remote.h"
 #include "roles.h"
 

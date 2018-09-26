@@ -4,14 +4,17 @@
  * Terms for redistribution and use can be found in LICENCE.
  */
 
+#include <stdint.h>
+
 #include "chip-remote.h"
 #include "port.h"
 #include "parameters.h"
 #include "properties.h"
 #include "protocol.h"
 #include "spi.h"
-#include "par-ex.h"
 #include "utils.h"
+
+#include "nucleo-144.h"
 
 static struct {
     enum cr_port_modes mode;
@@ -23,12 +26,6 @@ static struct {
     int (*set_addr)(struct cr_port *, uint32_t);
 } mode_helpers[] = {
     { CR_MODE_NONE, NULL, NULL, NULL, NULL, NULL, NULL },
-    { CR_MODE_PAREX, cr_parex_params,
-                     cr_parex_map,
-                     cr_parex_destroy_map,
-                     cr_parex_init,
-                     cr_parex_transmit,
-                     NULL },
     { CR_MODE_SPI, cr_spi_params,
                    cr_spi_map,
                    cr_spi_destroy_map,

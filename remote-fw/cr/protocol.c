@@ -4,6 +4,7 @@
  * Terms for redistribution and use can be found in LICENCE.
  */
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 

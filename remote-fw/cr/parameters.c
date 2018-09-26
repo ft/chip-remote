@@ -5,6 +5,7 @@
  */
 
 #include <limits.h>
+#include <stdint.h>
 
 #include "chip-remote.h"
 #include "parameters.h"
@@ -36,6 +37,7 @@ cr_destroy_params(struct cr_port *port)
 void
 cr_port_reset_line_roles(struct cr_port *port)
 {
+    (void)port;
 }
 
 int

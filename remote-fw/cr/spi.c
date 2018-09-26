@@ -86,6 +86,8 @@
 #include "spi.h"
 #include "utils.h"
 
+#include "nucleo-144.h"
+
 static inline void
 spi_wait(uint32_t n)
 {

@@ -30,6 +30,3 @@ client-library.tex
 client-library.txt
 client-library.html
 auto/*
-remote-fw/Makefile
-remote-fw/config.*.h
-remote-fw/platform.h

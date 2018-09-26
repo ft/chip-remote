@@ -13,7 +13,10 @@
 #define INC_CHIP_REMOTE_H
 
 #include <stdlib.h>
-#include "platform.h"
+#include "line-maps.h"
+
+typedef uint16_t cr_port_addr;
+typedef uint8_t cr_pin_mask;
 
 #define CR_MAX_WORDS 8
 #define CR_MAX_LINE 127
@@ -110,8 +113,6 @@ struct cr_line {
     int mutable_p;
 };
 
-#include "line-maps.h"
-
 /**
  * Description of a port configuration
  *
@@ -199,7 +200,6 @@ void cr_set_active(int);
 void cr_set_line_pending(int);
 void cr_set_focused_port(int);
 int cr_get_focused_port(void);
-void cr_set_active(int);
 void cr_init(int);
 void cr_top_level(void);
 enum cr_request_ids cr_string_to_request(struct cr_words *, size_t);
