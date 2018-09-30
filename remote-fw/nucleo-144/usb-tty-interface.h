@@ -8,6 +8,8 @@
 
 extern USBD_CDC_ItfTypeDef tty_if_opts;
 
+typedef void (*SerialRecvCallback)(uint8_t*, uint32_t);
+void set_tty_recv_cb(SerialRecvCallback);
 uint8_t tty_send(uint8_t* Buf, uint16_t Len);
 
 #endif /* INC_USBD_CDC_IF_H */

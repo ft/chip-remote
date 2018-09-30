@@ -308,6 +308,7 @@ cr_init(int activate)
     cr_data.cr_active = activate;
     cr_data.line_pending = 0;
     cr_data.fport = -1;
+    xcr_init();
 }
 
 void

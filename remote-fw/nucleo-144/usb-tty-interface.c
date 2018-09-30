@@ -54,13 +54,23 @@ tty_ctrl(uint8_t cmd, uint8_t *pbuf, uint16_t length)
     return USBD_OK;
 }
 
+SerialRecvCallback tty_recv_cb = NULL;
+
+void
+set_tty_recv_cb(SerialRecvCallback cb)
+{
+    tty_recv_cb = cb;
+}
+
 static int8_t
 tty_recv(uint8_t *buf, uint32_t *n)
 {
     (void)n;
 
-    USBD_CDC_SetRxBuffer(&tty_handle, &buf[0]);
+    USBD_CDC_SetRxBuffer(&tty_handle, buf);
     USBD_CDC_ReceivePacket(&tty_handle);
+    if (tty_recv_cb != NULL)
+        tty_recv_cb(buf, *n);
 
     return USBD_OK;
 }

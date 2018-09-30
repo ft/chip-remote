@@ -11,6 +11,7 @@
 #include <utils.h>
 
 #include "cr-interface.h"
+#include "usb-tty-interface.h"
 
 int
 access_port1(struct cr_line *line, enum cr_access_mode mode, int value)
