@@ -60,8 +60,10 @@ CFLAGS_ASSEMBLER = -Wa,-agslh=$(patsubst %.c,%.lst,$(<))
 
 ifeq ($(RELEASE),1)
 CFLAGS_DEBUG = -Os
+AS_DEBUG =
 else
 CFLAGS_DEBUG = -O0 -ggdb
+AS_DEBUG = -g
 endif
 
 ifeq ($(WITH_SEMIHOSTING),1)
@@ -78,7 +80,7 @@ CFLAGS += $(CFLAGS_STM) $(CFLAGS_ASSEMBLER) $(CFLAGS_DEBUG)
 CFLAGS += $(CFLAGS_STANDALONE) $(CFLAGS_SEMIHOSTING) $(CFLAGS_EXTRA)
 
 COMPILE = $(CC) $(CFLAGS)
-ASSEMBLE = $(AS) $(CFLAGS_TARGET)
+ASSEMBLE = $(AS) $(CFLAGS_TARGET) $(AS_DEBUG)
 
 # Like for the same target we build for
 LDFLAGS_TARGET = $(CFLAGS_TARGET)
