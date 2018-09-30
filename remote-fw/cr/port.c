@@ -6,6 +6,8 @@
 
 #include <stdint.h>
 
+#include <cr-interface.h>
+
 #include "chip-remote.h"
 #include "port.h"
 #include "parameters.h"
@@ -13,8 +15,6 @@
 #include "protocol.h"
 #include "spi.h"
 #include "utils.h"
-
-#include "nucleo-144.h"
 
 static struct {
     enum cr_port_modes mode;

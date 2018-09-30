@@ -4,16 +4,10 @@
  * Terms for redistribution and use can be found in LICENCE.
  */
 
-#ifndef INC_NUCLEO_144_H
-#define INC_NUCLEO_144_H
+#ifndef INC_CR_INTERFACE_H
+#define INC_CR_INTERFACE_H
 
-#include "chip-remote.h"
-
-/*
- * Within the adu1e9 project, ports 1,2,4,5 and 6 are connected to configurable
- * and controllable devices. Port 3 is used for status bits like LEDs and
- * switches.
- */
+#include <chip-remote.h>
 
 int access_port1(struct cr_line *, enum cr_access_mode, int);
 void dir_port1(struct cr_line *, enum cr_access_mode);
@@ -33,4 +27,4 @@ void xcr_post_bye(void);
 void xcr_send_host(char *);
 void xcr_wait(uint32_t);
 
-#endif /* INC_NUCLEO_144_H */
+#endif /* INC_CR_INTERFACE_H */

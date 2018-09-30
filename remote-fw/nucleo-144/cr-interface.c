@@ -6,11 +6,11 @@
 
 #include <stdint.h>
 
-#include "chip-remote.h"
-#include "protocol.h"
-#include "utils.h"
+#include <chip-remote.h>
+#include <protocol.h>
+#include <utils.h>
 
-#include "nucleo-144.h"
+#include "cr-interface.h"
 
 int
 access_port1(struct cr_line *line, enum cr_access_mode mode, int value)

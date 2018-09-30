@@ -79,14 +79,14 @@
 
 #include <stdint.h>
 
+#include <cr-interface.h>
+
 #include "chip-remote.h"
 #include "parameters.h"
 #include "properties.h"
 #include "line.h"
 #include "spi.h"
 #include "utils.h"
-
-#include "nucleo-144.h"
 
 static inline void
 spi_wait(uint32_t n)

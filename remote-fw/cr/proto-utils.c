@@ -8,11 +8,11 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <cr-interface.h>
+
 #include "proto-utils.h"
 #include "chip-remote.h"
 #include "utils.h"
-
-#include "nucleo-144.h"
 
 static char txbuf[CR_MAX_LINE + 1];
 static int txbuflen;

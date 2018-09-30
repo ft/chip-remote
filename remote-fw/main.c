@@ -11,8 +11,8 @@
 #include <stdio.h>
 #endif /* WITH_SEMIHOSTING */
 
-#include "cr/chip-remote.h"
-#include "cr/nucleo-144.h"
+#include <cr-interface.h>
+#include <chip-remote.h>
 
 #include "board.h"
 

@@ -43,7 +43,7 @@ CFLAGS_TARGET += -mfloat-abi=hard -mfpu=fpv5-sp-d16
 
 # Tell the compiler about STM third-party code
 CFLAGS_STM = -Ithird-party/stm32-hal -Ithird-party/stm32-usb
-CFLAGS_STM += -Ithird-party/stm32-f7xx -Inucleo-144 -DSTM32F767xx
+CFLAGS_STM += -Ithird-party/stm32-f7xx -Inucleo-144 -Icr -DSTM32F767xx
 
 # -Wa,OPTIONS passes OPTIONS to the assembler. This is useful to generate
 # assembler listings during the build process. We're assuming the GNU assem-

@@ -42,6 +42,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <cr-interface.h>
+
 #include "chip-remote.h"
 #include "buf-parse.h"
 #include "port.h"
@@ -51,8 +53,6 @@
 #include "requests.h"
 #include "transmit.h"
 #include "utils.h"
-
-#include "nucleo-144.h"
 
 static char *cr_modes[] = {
     [ CR_MODE_NONE ] = "NONE",
