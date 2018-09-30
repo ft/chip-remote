@@ -123,6 +123,7 @@ all: $(OBJECTS) $(ARTIFACTS)
 clean:
 	@printf '  CLEAN\n'
 	@$(RM) *~ */*~ */*/*~ $(PROJECT).map .depend
+	@$(RM) GPATH GRTAGS GTAGS ID
 	@$(RM) $(OBJECTS)
 	@$(RM) $(ASMLSTS)
 	@$(RM) $(ARTIFACTS)
