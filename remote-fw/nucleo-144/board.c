@@ -1,3 +1,11 @@
+/**
+ * @file board.c
+ * @brief Nucleo-144 Board Initialisation
+ *
+ * This file implements the board_init() function, that calls subsystem
+ * initialisers in order to bring the nucleo-144 board up and running.
+ */
+
 #include <stm32f7xx_hal.h>
 
 #include "board.h"
@@ -7,6 +15,15 @@
 #include "usart.h"
 #include "usb-device.h"
 
+/**
+ * Main board initialisation dispatcher
+ *
+ * This procedure initialises STM's hardware abstraction layer and then calls
+ * the subsystem initialisers that are defined in separate files.
+ *
+ * @return void
+ * @sideeffects Initialises the main board and controller
+ */
 void
 board_init(void)
 {
