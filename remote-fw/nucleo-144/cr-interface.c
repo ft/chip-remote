@@ -77,7 +77,7 @@ add_chunk(char *dst, uint32_t dstsize, uint32_t fill,
     static enum { COPY, IGNORE } state = COPY;
 
     if (state == IGNORE) {
-        char *end = strchr(dst, '\n');
+        char *end = strchr((char*)src, '\n');
         if (end != NULL) {
             state = COPY;
             xcr_send_host("WTF Input too long and therefore ignored.");
