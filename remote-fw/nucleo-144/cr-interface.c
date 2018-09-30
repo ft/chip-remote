@@ -97,6 +97,7 @@ add_chunk(char *dst, uint32_t dstsize, uint32_t fill,
         if (end != NULL) {
             *end = '\0';
             cr_set_line_pending(1);
+            return 0ull;
         }
     }
 
