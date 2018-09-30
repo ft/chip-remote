@@ -70,9 +70,9 @@ AS_DEBUG = -g
 endif
 
 ifeq ($(WITH_SEMIHOSTING),1)
-CFLAGS_SEMIHOSTING = -DWITH_SEMIHOSTING
+CFLAGS_SYSTEM = -DWITH_SEMIHOSTING
 else
-CFLAGS_SEMIHOSTING =
+CFLAGS_SYSTEM =
 endif
 
 # Store compiler options in ELF section
@@ -80,7 +80,7 @@ CFLAGS_EXTRA = -frecord-gcc-switches
 
 CFLAGS = $(CFLAGS_STRICTNESS) $(CFLAGS_LANGUAGE) $(CFLAGS_TARGET)
 CFLAGS += $(CFLAGS_STM) $(CFLAGS_CR) $(CFLAGS_ASSEMBLER) $(CFLAGS_DEBUG)
-CFLAGS += $(CFLAGS_STANDALONE) $(CFLAGS_SEMIHOSTING) $(CFLAGS_EXTRA)
+CFLAGS += $(CFLAGS_STANDALONE) $(CFLAGS_SYSTEM) $(CFLAGS_EXTRA)
 
 DFLAGS = $(CFLAGS_STRICTNESS) $(CFLAGS_LANGUAGE) $(CFLAGS_STM) $(CFLAGS_CR)
 
@@ -89,9 +89,6 @@ ASSEMBLE = $(AS) $(CFLAGS_TARGET) $(AS_DEBUG)
 
 # Like for the same target we build for
 LDFLAGS_TARGET = $(CFLAGS_TARGET)
-
-# The firmware is a standalone application
-LDFLAGS_STANDALONE = -Wl,--start-group -lc -lnosys -Wl,--end-group
 
 # And use the linker script for this particular board
 LDFLAGS_SCRIPT = -Tnucleo-144/nucleo-144.ld
@@ -107,13 +104,14 @@ LDFLAGS_MAPFILE = -Wl,-Map=$(patsubst %.elf,%.map,$(@))
 
 # Semihosting support
 ifeq ($(WITH_SEMIHOSTING),1)
-LDFLAGS_SEMIHOSTING = -specs=rdimon.specs
-LDFLAGS_SEMIHOSTING += -Wl,--start-group -lc -lrdimon -lgcc -Wl,--end-group
+LDFLAGS_SYSTEM = -specs=rdimon.specs
+LDFLAGS_SYSTEM += -Wl,--start-group -lc -lrdimon -lgcc -Wl,--end-group
 else
-LDFLAGS_SEMIHOSTING =
+LDFLAGS_SYSTEM = -specs=nano.specs
+LDFLAGS_SYSTEM += -Wl,--start-group -lc -lnosys -Wl,--end-group
 endif
 
-LDFLAGS = $(LDFLAGS_TARGET) $(LDFLAGS_SEMIHOSTING) $(LDFLAGS_STANDALONE) $(LDFLAGS_SCRIPT)
+LDFLAGS = $(LDFLAGS_TARGET) $(LDFLAGS_SYSTEM) $(LDFLAGS_SCRIPT)
 LDFLAGS += $(LDFLAGS_CLEANUP) $(LDFLAGS_MAPFILE)
 
 ARTIFACTS = $(PROJECT).elf $(PROJECT).bin $(PROJECT).hex
