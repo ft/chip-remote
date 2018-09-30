@@ -13,6 +13,8 @@
 #include "cr-interface.h"
 #include "usb-tty-interface.h"
 
+static void consume_chunk(uint8_t*, uint32_t);
+
 int
 access_port1(struct cr_line *line, enum cr_access_mode mode, int value)
 {
@@ -50,71 +52,59 @@ xcr_pre_top_level(void)
 void
 xcr_post_bye(void)
 {
-    /*
-     * The xcr_post_bye function is mostly in place for the simulator version
-     * of the firmware to be able to exit after the conversation is done. The
-     * actual firmware should just wait for the next conversion. So this is a
-     * no-op here.
-     */
+#ifdef WITH_SEMIHOSTING
+    printf("Remote host terminated chip-remote connection.\n");
+#endif /* WITH_SEMIHOSTING */
 }
-
-#define SEND_BYTE(byte)
 
 void
 xcr_send_host(char *buf)
 {
-    char *ptr;
-
-    ptr = buf;
-    while (*ptr != '\0') {
-        SEND_BYTE(*ptr);
-        ptr++;
-    }
-    SEND_BYTE('\n');
+    tty_send((uint8_t*)buf, strlen(buf));
 }
 
 void
 xcr_wait(uint32_t n)
 {
-    uint32_t i;
-
-    for (i = 0; i < n; ++i)
-        __asm(" nop");
+    HAL_Delay(n);
 }
 
-#define CR_RX_STATE_COPY 0
-#define CR_RX_STATE_IGNORE 1
-
-void uart_rx_interrupt(void);
-
-void
-uart_rx_interrupt(void)
+static uint32_t
+add_chunk(char *dst, uint32_t dstsize, uint32_t fill,
+          uint8_t *src, uint32_t srcsize)
 {
-    static int inputlen = 0;
-    static int state = CR_RX_STATE_COPY;
-    uint8_t devnull;
+    static enum { COPY, IGNORE } state = COPY;
 
-    switch (state) {
-    case CR_RX_STATE_COPY:
-        if (inputlen >= CR_MAX_LINE) {
-            /* Input too long! Ignoring everything until next newline! */
-            inputlen = 0;
-            state = CR_RX_STATE_IGNORE;
-        } else if ('f' == '\n') {
-            rxbuf[inputlen] = '\0';
-            inputlen = 0;
-            cr_set_line_pending(1);
-        } else {
-            rxbuf[inputlen] = 'f';
-            inputlen++;
-        }
-        break;
-    default:
-        devnull = 'f';
-        if (devnull == '\n') {
+    if (state == IGNORE) {
+        char *end = strchr(dst, '\n');
+        if (end != NULL) {
+            state = COPY;
             xcr_send_host("WTF Input too long and therefore ignored.");
-            state = CR_RX_STATE_COPY;
+            return fill;
         }
     }
-    return;
+
+    if ((fill + srcsize) > dstsize) {
+        state = IGNORE;
+        return fill;
+    }
+
+    /* We're in copy-mode and the source fits into the destination. Good. */
+    memcpy(dst + fill, src, srcsize);
+    {
+        char *end = strchr(dst, '\n');
+        if (end != NULL) {
+            *end = '\0';
+            cr_set_line_pending(1);
+        }
+    }
+
+    return (fill + srcsize);
+}
+
+static void
+consume_chunk(uint8_t *buf, uint32_t n)
+{
+    static int inputlen = 0;
+    inputlen = add_chunk(rxbuf, CR_MAX_LINE, inputlen, buf, n);
 }

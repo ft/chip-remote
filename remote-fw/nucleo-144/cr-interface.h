@@ -12,6 +12,7 @@
 int access_port1(struct cr_line *, enum cr_access_mode, int);
 void dir_port1(struct cr_line *, enum cr_access_mode);
 
+void xcr_init(void);
 void xcr_pre_top_level(void);
 void xcr_post_bye(void);
 void xcr_send_host(char *);
