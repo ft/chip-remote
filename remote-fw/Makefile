@@ -79,6 +79,8 @@ CFLAGS = $(CFLAGS_STRICTNESS) $(CFLAGS_LANGUAGE) $(CFLAGS_TARGET)
 CFLAGS += $(CFLAGS_STM) $(CFLAGS_ASSEMBLER) $(CFLAGS_DEBUG)
 CFLAGS += $(CFLAGS_STANDALONE) $(CFLAGS_SEMIHOSTING) $(CFLAGS_EXTRA)
 
+DFLAGS = $(CFLAGS_STRICTNESS) $(CFLAGS_LANGUAGE) $(CFLAGS_STM)
+
 COMPILE = $(CC) $(CFLAGS)
 ASSEMBLE = $(AS) $(CFLAGS_TARGET) $(AS_DEBUG)
 
@@ -131,6 +133,11 @@ size:
 	@printf '\nFull:\n'
 	$(QUIET)$(BINSIZE) -A -x $(PROJECT).elf | $(SED) -e '/^$$/d'
 
+depend:
+	mkdep $(DFLAGS) $(SOURCES)
+
+-include .depend
+
 # Suffix based dependencies
 
 .c.o:
@@ -164,4 +171,4 @@ size:
 	@printf '  OBJDUMP  %s\n' "$@"
 	$(QUIET)$(OBJDUMP) -S $< > $@
 
-.PHONY: all clean opencm3 opencm3-clean size
+.PHONY: all clean depend size
