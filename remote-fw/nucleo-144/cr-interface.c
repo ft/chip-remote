@@ -61,6 +61,7 @@ void
 xcr_send_host(char *buf)
 {
     tty_send((uint8_t*)buf, strlen(buf));
+    tty_send((uint8_t*)"\n", 1u);
 }
 
 void
