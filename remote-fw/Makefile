@@ -122,7 +122,7 @@ all: $(OBJECTS) $(ARTIFACTS)
 
 clean:
 	@printf '  CLEAN\n'
-	@$(RM) *~ */*~ */*/*~
+	@$(RM) *~ */*~ */*/*~ $(PROJECT).map .depend
 	@$(RM) $(OBJECTS)
 	@$(RM) $(ASMLSTS)
 	@$(RM) $(ARTIFACTS)
