@@ -121,7 +121,7 @@ ARTIFACTS += $(PROJECT).srec $(PROJECT).lst
 all: $(OBJECTS) $(ARTIFACTS)
 
 clean:
-	@printf 'Cleaning up...\n'
+	@printf '  CLEAN\n'
 	@$(RM) *~ */*~ */*/*~
 	@$(RM) $(OBJECTS)
 	@$(RM) $(ASMLSTS)
@@ -134,7 +134,8 @@ size:
 	$(QUIET)$(BINSIZE) -A -x $(PROJECT).elf | $(SED) -e '/^$$/d'
 
 depend:
-	mkdep $(DFLAGS) $(SOURCES)
+	@printf '  DEPEND $$(SOURCES)\n'
+	$(QUIET)mkdep $(DFLAGS) $(SOURCES)
 
 -include .depend
 
