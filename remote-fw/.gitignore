@@ -9,3 +9,7 @@
 *.hex
 *.srec
 *.lst
+GPATH
+GRTAGS
+GTAGS
+ID

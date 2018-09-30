@@ -11,11 +11,10 @@
 #include <stdio.h>
 #endif /* WITH_SEMIHOSTING */
 
-#include <libopencm3/stm32/rcc.h>
-#include <libopencm3/stm32/gpio.h>
-
 #include "cr/chip-remote.h"
 #include "cr/nucleo-144.h"
+
+#include "board.h"
 
 #ifdef WITH_SEMIHOSTING
 
@@ -92,13 +91,6 @@ struct cr_port cr_ports[] = {
     PORT_LIST_END
 };
 
-static void
-init_gpio(void)
-{
-    rcc_periph_clock_enable(RCC_GPIOB);
-    gpio_mode_setup(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO0);
-}
-
 int
 main(void)
 {
@@ -106,7 +98,7 @@ main(void)
     initialise_monitor_handles();
 #endif /* WITH_SEMIHOSTING */
 
-    init_gpio();
+    board_init();
     cr_init(1);
     for (;;) {
         cr_top_level();

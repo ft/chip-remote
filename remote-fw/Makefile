@@ -1,9 +1,13 @@
-PROJECT = hello-world
+PROJECT = chip-remote
 
-SOURCES = $(wildcard cr/*.c *.c)
-OBJECTS = $(patsubst %.c,%.o,$(SOURCES))
+ASM =  $(wildcard third-party/stm32-f7xx/*.s)
+SOURCES = $(wildcard third-party/stm32-f7xx/*.c)
+SOURCES += $(wildcard third-party/stm32-hal/*.c)
+SOURCES += $(wildcard third-party/stm32-usb/*.c)
+SOURCES += $(wildcard nucleo-144/*.c cr/*.c *.c)
+OBJECTS = $(patsubst %.s,%.o,$(ASM))
+OBJECTS += $(patsubst %.c,%.o,$(SOURCES))
 ASMLSTS = $(patsubst %.c,%.lst,$(SOURCES))
-OPENCM3 = opencm3
 
 ifneq ($(VERBOSE),1)
 QUIET := @
@@ -16,6 +20,7 @@ SED = sed
 
 TOOLCHAIN = arm-none-eabi
 CC = $(TOOLCHAIN)-gcc
+AS = $(TOOLCHAIN)-as
 OBJCOPY = $(TOOLCHAIN)-objcopy
 OBJDUMP = $(TOOLCHAIN)-objdump
 BINSIZE = $(TOOLCHAIN)-size
@@ -36,8 +41,9 @@ CFLAGS_LANGUAGE = -std=c99
 CFLAGS_TARGET = -mcpu=cortex-m7 -mlittle-endian -mthumb
 CFLAGS_TARGET += -mfloat-abi=hard -mfpu=fpv5-sp-d16
 
-# Set the compiler up to build with the opencm3 module
-CFLAGS_OPENCM3 = -I$(OPENCM3)/include -DSTM32F7
+# Tell the compiler about STM third-party code
+CFLAGS_STM = -Ithird-party/stm32-hal -Ithird-party/stm32-usb
+CFLAGS_STM += -Ithird-party/stm32-f7xx -Inucleo-144 -DSTM32F767xx
 
 # -Wa,OPTIONS passes OPTIONS to the assembler. This is useful to generate
 # assembler listings during the build process. We're assuming the GNU assem-
@@ -68,22 +74,20 @@ endif
 CFLAGS_EXTRA = -frecord-gcc-switches
 
 CFLAGS = $(CFLAGS_STRICTNESS) $(CFLAGS_LANGUAGE) $(CFLAGS_TARGET)
-CFLAGS += $(CFLAGS_OPENCM3) $(CFLAGS_ASSEMBLER) $(CFLAGS_DEBUG)
+CFLAGS += $(CFLAGS_STM) $(CFLAGS_ASSEMBLER) $(CFLAGS_DEBUG)
 CFLAGS += $(CFLAGS_STANDALONE) $(CFLAGS_SEMIHOSTING) $(CFLAGS_EXTRA)
 
 COMPILE = $(CC) $(CFLAGS)
+ASSEMBLE = $(AS) $(CFLAGS_TARGET)
 
 # Like for the same target we build for
 LDFLAGS_TARGET = $(CFLAGS_TARGET)
 
 # The firmware is a standalone application
-LDFLAGS_STANDALONE = -static -nostartfiles -nodefaultlibs -nostdlib
-
-# Link against the right opencm3 build
-LDFLAGS_OPENCM3 = -L$(OPENCM3)/lib -lopencm3_stm32f7
+LDFLAGS_STANDALONE = -Wl,--start-group -lc -lnosys -Wl,--end-group
 
 # And use the linker script for this particular board
-LDFLAGS_SCRIPT = -Tnucleo-144.ld
+LDFLAGS_SCRIPT = -Tnucleo-144/nucleo-144.ld
 
 # Garbage collect sections from linker output
 LDFLAGS_CLEANUP = -Wl,--gc-sections
@@ -96,44 +100,28 @@ LDFLAGS_MAPFILE = -Wl,-Map=$(patsubst %.elf,%.map,$(@))
 
 # Semihosting support
 ifeq ($(WITH_SEMIHOSTING),1)
-LDFLAGS_SEMIHOSTING = --specs=rdimon.specs
+LDFLAGS_SEMIHOSTING = -specs=rdimon.specs
 LDFLAGS_SEMIHOSTING += -Wl,--start-group -lc -lrdimon -lgcc -Wl,--end-group
 else
 LDFLAGS_SEMIHOSTING =
 endif
 
-LDFLAGS = $(LDFLAGS_TARGET) $(LDFLAGS_STANDALONE)
-LDFLAGS += $(LDFLAGS_OPENCM3) $(LDFLAGS_SCRIPT)
+LDFLAGS = $(LDFLAGS_TARGET) $(LDFLAGS_SEMIHOSTING) $(LDFLAGS_STANDALONE) $(LDFLAGS_SCRIPT)
 LDFLAGS += $(LDFLAGS_CLEANUP) $(LDFLAGS_MAPFILE)
-LDFLAGS += $(LDFLAGS_SEMIHOSTING)
-
-# Main targets: Use "make opencm3" once. "make all" to build the firmware.
-# Similarly there are "make opencm3-clean" and "make clean" for cleanup.
 
 ARTIFACTS = $(PROJECT).elf $(PROJECT).bin $(PROJECT).hex
 ARTIFACTS += $(PROJECT).srec $(PROJECT).lst
 
-.SUFFIXES = .c .o .elf .bin .hex .srec .lst
+.SUFFIXES = .c .s .o .elf .bin .hex .srec .lst
 
 all: $(OBJECTS) $(ARTIFACTS)
 
 clean:
-	$(RM) *~ */*~ */*/*~
-	$(RM) $(OBJECTS)
-	$(RM) $(ASMLSTS)
-	$(RM) $(PROJECT).map
-	$(RM) $(PROJECT).elf
-	$(RM) $(PROJECT).bin
-	$(RM) $(PROJECT).hex
-	$(RM) $(PROJECT).srec
-
-opencm3:
-	@printf '  LIBRARY opencm3\n'
-	$(QUIET)$(MAKE) -C $(OPENCM3)
-
-opencm3-clean:
-	@printf '  LIBRARY opencm3: clean\n'
-	$(QUIET)$(MAKE) -C $(OPENCM3) clean
+	@printf 'Cleaning up...\n'
+	@$(RM) *~ */*~ */*/*~
+	@$(RM) $(OBJECTS)
+	@$(RM) $(ASMLSTS)
+	@$(RM) $(ARTIFACTS)
 
 size:
 	@printf 'Brief:\n'
@@ -146,6 +134,10 @@ size:
 .c.o:
 	@printf '  CC       %s\n' "$<"
 	$(QUIET)$(COMPILE) -c -o $@ $<
+
+.s.o:
+	@printf '  AS       %s\n' "$<"
+	$(QUIET)$(ASSEMBLE) -o $@ $<
 
 %.elf: $(OBJECTS)
 	@printf '  LD       %s\n' "$@"
