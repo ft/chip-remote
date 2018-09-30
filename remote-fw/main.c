@@ -57,37 +57,12 @@ extern void initialise_monitor_handles(void);
       NULL, NULL, NULL }
 
 static struct cr_line port1_lines[] = {
-    /* CLK, MOSI, MISO plus for times CS: */
     NEW_LINE(access_port1, dir_port1, 1<<4),
-    NEW_LINE(access_port1, dir_port1, 1<<5),
-    NEW_LINE(access_port1, dir_port1, 1<<6),
-    NEW_LINE(access_port1, dir_port1, 1<<7),
-    NEW_LINE(access_port2, dir_port2, 1<<0),
-    NEW_LINE(access_port2, dir_port2, 1<<1),
-    NEW_LINE(access_port2, dir_port2, 1<<2),
-    LINE_LIST_END
-};
-
-static struct cr_line port2_lines[] = {
-    /* CLK, 3*ADDRESS, 8*DATA: */
-    NEW_LINE(access_port4, dir_port4, 1<<0),
-    NEW_LINE(access_port4, dir_port4, 1<<1),
-    NEW_LINE(access_port4, dir_port4, 1<<2),
-    NEW_LINE(access_port4, dir_port4, 1<<3),
-    NEW_LINE(access_port4, dir_port4, 1<<4),
-    NEW_LINE(access_port4, dir_port4, 1<<5),
-    NEW_LINE(access_port4, dir_port4, 1<<6),
-    NEW_LINE(access_port4, dir_port4, 1<<7),
-    NEW_LINE(access_port5, dir_port5, 1<<0),
-    NEW_LINE(access_port5, dir_port5, 1<<1),
-    NEW_LINE(access_port5, dir_port5, 1<<2),
-    NEW_LINE(access_port5, dir_port5, 1<<3),
     LINE_LIST_END
 };
 
 struct cr_port cr_ports[] = {
     NEW_PORT(7, port1_lines),
-    NEW_PORT(12, port2_lines),
     PORT_LIST_END
 };
 

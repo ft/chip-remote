@@ -28,84 +28,10 @@ dir_port1(struct cr_line *line, enum cr_access_mode mode)
     (void)mode;
 }
 
-int
-access_port2(struct cr_line *line, enum cr_access_mode mode, int value)
-{
-    (void)line;
-    (void)mode;
-    (void)value;
-    return 0;
-}
-
 void
-dir_port2(struct cr_line *line, enum cr_access_mode mode)
+xcr_init(void)
 {
-    (void)line;
-    (void)mode;
-}
-
-int
-access_port3(struct cr_line *line, enum cr_access_mode mode, int value)
-{
-    (void)line;
-    (void)mode;
-    (void)value;
-    return 0;
-}
-
-void
-dir_port3(struct cr_line *line, enum cr_access_mode mode)
-{
-    (void)line;
-    (void)mode;
-}
-
-int
-access_port4(struct cr_line *line, enum cr_access_mode mode, int value)
-{
-    (void)line;
-    (void)mode;
-    (void)value;
-    return 0;
-}
-
-void
-dir_port4(struct cr_line *line, enum cr_access_mode mode)
-{
-    (void)line;
-    (void)mode;
-}
-
-int
-access_port5(struct cr_line *line, enum cr_access_mode mode, int value)
-{
-    (void)line;
-    (void)mode;
-    (void)value;
-    return 0;
-}
-
-void
-dir_port5(struct cr_line *line, enum cr_access_mode mode)
-{
-    (void)line;
-    (void)mode;
-}
-
-int
-access_port6(struct cr_line *line, enum cr_access_mode mode, int value)
-{
-    (void)line;
-    (void)mode;
-    (void)value;
-    return 0;
-}
-
-void
-dir_port6(struct cr_line *line, enum cr_access_mode mode)
-{
-    (void)line;
-    (void)mode;
+    set_tty_recv_cb(consume_chunk);
 }
 
 void
