@@ -122,11 +122,15 @@ all: $(OBJECTS) $(ARTIFACTS)
 
 clean:
 	@printf '  CLEAN\n'
-	@$(RM) *~ */*~ */*/*~ $(PROJECT).map .depend
-	@$(RM) GPATH GRTAGS GTAGS ID
+	@$(RM) *~ */*~ */*/*~ $(PROJECT).map
 	@$(RM) $(OBJECTS)
 	@$(RM) $(ASMLSTS)
 	@$(RM) $(ARTIFACTS)
+
+distclean: clean
+	@printf '  DISTCLEAN\n'
+	@$(RM) .depend
+	@$(RM) GPATH GRTAGS GTAGS ID
 
 size:
 	@printf 'Brief:\n'
@@ -173,4 +177,4 @@ depend:
 	@printf '  OBJDUMP  %s\n' "$@"
 	$(QUIET)$(OBJDUMP) -S $< > $@
 
-.PHONY: all clean depend size
+.PHONY: all clean depend distclean size
