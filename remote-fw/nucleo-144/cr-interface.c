@@ -60,8 +60,6 @@ xcr_post_bye(void)
 void
 xcr_send_host(char *buf)
 {
-    tty_send((uint8_t*)buf, strlen(buf));
-    tty_send((uint8_t*)"\n", 1u);
 #ifdef WITH_SEMIHOSTING
     printf("< %s\n", buf);
 #endif /* WITH_SEMIHOSTING */
