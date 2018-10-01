@@ -9,8 +9,8 @@
 
 #include <chip-remote.h>
 
-int access_port1(struct cr_line *, enum cr_access_mode, int);
-void dir_port1(struct cr_line *, enum cr_access_mode);
+int access_port0(struct cr_line *, enum cr_access_mode, int);
+void dir_port0(struct cr_line *, enum cr_access_mode);
 
 void xcr_init(void);
 void xcr_pre_top_level(void);

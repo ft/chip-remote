@@ -16,7 +16,7 @@
 static void consume_chunk(uint8_t*, uint32_t);
 
 int
-access_port1(struct cr_line *line, enum cr_access_mode mode, int value)
+access_port0(struct cr_line *line, enum cr_access_mode mode, int value)
 {
     (void)line;
     (void)mode;
@@ -25,7 +25,7 @@ access_port1(struct cr_line *line, enum cr_access_mode mode, int value)
 }
 
 void
-dir_port1(struct cr_line *line, enum cr_access_mode mode)
+dir_port0(struct cr_line *line, enum cr_access_mode mode)
 {
     (void)line;
     (void)mode;

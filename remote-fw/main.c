@@ -56,13 +56,16 @@ extern void initialise_monitor_handles(void);
     { 0, 0, NO_RATE, { CR_IMMUTABLE, CR_MODE_INVALID, {NULL}},  \
       NULL, NULL, NULL }
 
-static struct cr_line port1_lines[] = {
-    NEW_LINE(access_port1, dir_port1, 1<<4),
+static struct cr_line port0_lines[] = {
+    NEW_LINE(access_port0, dir_port0, 1<<0),
+    NEW_LINE(access_port0, dir_port0, 1<<1),
+    NEW_LINE(access_port0, dir_port0, 1<<2),
+    NEW_LINE(access_port0, dir_port0, 1<<4),
     LINE_LIST_END
 };
 
 struct cr_port cr_ports[] = {
-    NEW_PORT(7, port1_lines),
+    NEW_PORT(4, port0_lines),
     PORT_LIST_END
 };
 
