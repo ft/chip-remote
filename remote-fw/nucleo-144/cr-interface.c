@@ -62,6 +62,9 @@ xcr_send_host(char *buf)
 {
     tty_send((uint8_t*)buf, strlen(buf));
     tty_send((uint8_t*)"\n", 1u);
+#ifdef WITH_SEMIHOSTING
+    printf("< %s\n", buf);
+#endif /* WITH_SEMIHOSTING */
     while (tty_send((uint8_t*)buf, strlen(buf)) == USBD_BUSY)
         __asm__(" nop");
     while (tty_send((uint8_t*)"\n", 1u) == USBD_BUSY)
@@ -100,6 +103,9 @@ add_chunk(char *dst, uint32_t dstsize, uint32_t fill,
         char *end = strchr(dst, '\n');
         if (end != NULL) {
             *end = '\0';
+#ifdef WITH_SEMIHOSTING
+            printf("> %s\n", rxbuf);
+#endif /* WITH_SEMIHOSTING */
             cr_set_line_pending(1);
             return 0ull;
         }
