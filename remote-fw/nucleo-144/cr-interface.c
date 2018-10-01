@@ -62,6 +62,10 @@ xcr_send_host(char *buf)
 {
     tty_send((uint8_t*)buf, strlen(buf));
     tty_send((uint8_t*)"\n", 1u);
+    while (tty_send((uint8_t*)buf, strlen(buf)) == USBD_BUSY)
+        __asm__(" nop");
+    while (tty_send((uint8_t*)"\n", 1u) == USBD_BUSY)
+        __asm__(" nop");
 }
 
 void
