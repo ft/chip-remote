@@ -103,6 +103,9 @@ cr_param_set(struct cr_parameter *params,
 {
     int i;
 
+    if (params == NULL)
+        return -1;
+
     for (i = 0; params[i].name != NULL; ++i)
         if (STREQ_N(params[i].name,
                     words->word[key].start,
