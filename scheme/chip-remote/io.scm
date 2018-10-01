@@ -54,8 +54,8 @@
 (define (cr-path connection)
   (uri-path (cr-connection-uri connection)))
 
-(define io-options '((serial-timeout . 2)
-                     (trace . #f)))
+(define io-options (list (cons 'serial-timeout 2)
+                         (cons 'trace #f)))
 
 (define (io-opt/get key)
   (let ((value (assq key io-options)))
