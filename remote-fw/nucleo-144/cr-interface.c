@@ -60,6 +60,7 @@ xcr_post_bye(void)
 void
 xcr_send_host(char *buf)
 {
+    cr_set_line_pending(0);
 #ifdef WITH_SEMIHOSTING
     printf("< %s\n", buf);
 #endif /* WITH_SEMIHOSTING */

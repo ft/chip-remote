@@ -279,7 +279,6 @@ cr_process(void)
             state = CR_NO_CONVERSATION;
         break;
     }
-    cr_set_line_pending(0);
 }
 
 /**
