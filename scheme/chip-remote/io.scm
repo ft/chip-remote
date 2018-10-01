@@ -71,9 +71,7 @@
 
 (define (io-read connection)
   (let ((result (select (list (cr-connection-port connection))
-                        '()
-                        '()
-                        (io-opt/get 'serial-timeout))))
+                  '() '() (io-opt/get 'serial-timeout))))
     (if (null? (car result))
         (throw 'read-timeout connection)
         (let ((string (read-line (cr-connection-port connection) 'trim)))
