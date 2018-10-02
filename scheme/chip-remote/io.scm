@@ -37,10 +37,8 @@
                                               value)))
 
 (define (uri-defaults-to-file string-uri)
-  (let ((uri (string->uri string-uri)))
-    (if uri
-        uri
-        (string->uri (string-concatenate (list "file://" string-uri))))))
+  (or (string->uri string-uri)
+      (string->uri (string-concatenate (list "file://" string-uri)))))
 
 (define (make-cr-connection string-uri)
   (let* ((uri (uri-defaults-to-file string-uri))
@@ -77,17 +75,15 @@
         (let ((string (read-line (cr-connection-port connection) 'trim)))
           (unless (string? string)
             (throw 'io-read-error))
-          (if (io-opt/get 'trace)
-              (begin
-                (display (string-concatenate (list " <<< " string)))
-                (newline)))
+          (when (io-opt/get 'trace)
+            (display (string-concatenate (list " <<< " string)))
+            (newline))
           string))))
 
 (define (io-write connection string)
-  (if (io-opt/get 'trace)
-      (begin
-        (display (string-concatenate (list " >>> " string)))
-        (newline)))
+  (when (io-opt/get 'trace)
+    (display (string-concatenate (list " >>> " string)))
+    (newline))
   (let ((p (cr-connection-port connection)))
     (display string p)
     (newline p)))
