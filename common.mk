@@ -25,6 +25,7 @@ MODULES_CORE += $(CR)/named-value.scm
 MODULES_CORE += $(CR)/page-map.scm
 MODULES_CORE += $(CR)/process-plist.scm
 MODULES_CORE += $(CR)/register-map.scm
+MODULES_CORE += $(CR)/register-window.scm
 MODULES_CORE += $(CR)/register.scm
 MODULES_CORE += $(CR)/semantics.scm
 MODULES_CORE += $(CR)/units.scm
