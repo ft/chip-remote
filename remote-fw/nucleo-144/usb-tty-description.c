@@ -24,7 +24,7 @@
 
 #define USB_TTY_VENDOR_ID 0x2342u
 #define USB_TTY_LANGUAGE_ID USB_LANG_EN_UK
-#define USB_TTY_MANUFACTURER "ChipRemoteProject"
+#define USB_TTY_MANUFACTURER "ChipRemote Project"
 #define USB_TTY_PRODUCT_ID 0xf64fu
 #define USB_TTY_PRODUCT_STRING "ChipRemote Controller"
 #define USB_TTY_SERIAL_STRING "23deadbeef42"
