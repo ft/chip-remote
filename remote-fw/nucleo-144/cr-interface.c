@@ -73,7 +73,9 @@ xcr_send_host(char *buf)
 void
 xcr_wait(uint32_t n)
 {
-    HAL_Delay(n);
+    uint32_t limit = 100ull * n;
+    for (uint32_t i = 0; i < limit; ++i)
+        __asm__(" nop");
 }
 
 static uint32_t
