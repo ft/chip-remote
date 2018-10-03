@@ -4,6 +4,7 @@
 
 (define-module (chip-remote devices analog-devices adf4169)
   #:use-module (chip-remote device)
+  #:use-module (chip-remote utilities)
   #:use-module (chip-remote manufacturer analog-devices)
   #:use-module (chip-remote devices analog-devices adf4169 registers)
   #:export (adf4169))
@@ -13,6 +14,8 @@
   #:homepage "http://www.analog.com/en/products/rf-microwave/pll-synth/fractional-n-plls/adf4169.html"
   #:datasheet "http://www.analog.com/media/en/technical-documentation/data-sheets/ADF4169.pdf"
   #:keywords '(fractional-n pll direct modulation fsk psk fmcw)
+  #:bus (spi #:frame-width 32)
+  #:transfer (write-only full-table (lambda (value) (reverse (flatten value))))
   #:register-width 32
   #:register-map (#:table* (0 reg:frac/int)
                            (1 reg:lsb-frac)

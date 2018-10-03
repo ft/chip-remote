@@ -1,6 +1,10 @@
 (define-module (chip-remote device)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 pretty-print)
+  #:use-module (ice-9 optargs)
+  #:use-module (chip-remote device access)
+  #:use-module (chip-remote device transfer)
+  #:use-module (chip-remote device spi)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote page-map)
@@ -11,6 +15,7 @@
             device-page-map
             device-register
             device-ref
+            device-access
             device-address
             device-registers
             device-item-names
@@ -19,10 +24,11 @@
             define-device))
 
 (define-record-type <device>
-  (make-device meta page-map)
+  (make-device meta page-map access)
   device?
   (meta device-meta)
-  (page-map device-page-map))
+  (page-map device-page-map)
+  (access device-access))
 
 (define group:page
   (group 'pages
@@ -49,15 +55,58 @@
               #'(list (generate-page-map (#f (generate-register-map
                                               #:table (#f (e0 e* ...)))))))))))
 
+(define (prefix-syn prefix syn)
+  (datum->syntax #'generate-device (symbol-append prefix (syntax->datum syn))))
+
+(define group:access
+  (group 'access
+         #:type 'list
+         #:predicate (lambda (x) (memq x '(#:bus #:read #:write)))
+         #:transformer
+         (lambda (e)
+           (syntax-case e ()
+             ((#:bus (type e* ...))
+              (with-syntax ((make-type (prefix-syn 'make-device-access- #'type)))
+                #'(#:bus (make-type e* ...))))
+             (else e)))))
+
+(define group:transfer
+  (group 'transfer
+         #:type 'list
+         #:predicate (lambda (x) (memq x '(#:transfer)))
+         #:transformer
+         (lambda (e)
+           (syntax-case e ()
+             ((#:transfer (type var transf))
+              #'(make-device-transfer #:type 'type #:variant 'var
+                                      #:transform transf))
+             ((#:transfer (type var))
+              #'(make-device-transfer #:type 'type #:variant 'var))
+             ((#:transfer (type))
+              #'(make-device-transfer #:type 'type))
+             ((#:transfer type)
+              #'(make-device-transfer #:type 'type))))))
+
 (define-syntax generate-device
   (lambda (x)
     (syntax-case x ()
       ((_ pl ...)
-       (with-syntax ((((mp ...) ((key value) ...)) (process-plist #'(pl ...)
-                                                                  group:page
-                                                                  (group 'meta))))
-         #'(make-device (list (cons key value) ...)
-                        (page-map-merge (list mp ...))))))))
+       (with-syntax ((((mp ...)
+                       ((acc-key acc-value) ...)
+                       (transf ...)
+                       ((key value) ...))
+                      (process-plist #'(pl ...)
+                                     group:page
+                                     group:access
+                                     group:transfer
+                                     (group 'meta))))
+         #`(make-device
+            (list (cons key value) ...)
+            (page-map-merge (list mp ...))
+            (make-device-access #,@(zip-syms #'(acc-key ...)
+                                             #'(acc-value ...))
+                                #,@(if (null? #'(transf ...)) #'()
+                                       #'(#:transfer transf ...)))))))))
 
 (define-syntax-rule (define-device binding e0 e* ...)
   (define binding (generate-device #:name 'binding e0 e* ...)))

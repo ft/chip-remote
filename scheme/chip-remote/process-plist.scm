@@ -8,6 +8,7 @@
             scalar-group
             process-plist
             just-value
+            zip-syms
             is-kw?
             not-kw?))
 
@@ -233,3 +234,8 @@ of ALIST, *this* function *adds* the key/value pair indicated by KEY and VALUE."
                 (when debug? ((@@ (ice-9 pretty-print) pretty-print) rv))
                 rv))
           ((exp . rest) (loop #'rest (process-with groups state #'exp)))))))
+
+(define (zip-syms a b)
+  (cond ((null? a) '())
+        ((null? b) '())
+        (else (cons (car a) (cons (car b) (zip-syms (cdr a) (cdr b)))))))
