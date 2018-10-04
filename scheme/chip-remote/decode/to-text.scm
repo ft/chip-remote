@@ -11,7 +11,6 @@
   #:use-module (ice-9 format)
   #:use-module (ice-9 optargs)
   #:use-module (chip-remote bit-operations)
-  #:use-module (chip-remote bit-decoders)
   #:use-module (chip-remote manufacturer)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote decode types)
