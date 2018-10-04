@@ -59,4 +59,10 @@ void board_init(void);
 #define LD2_Pin GPIO_PIN_7
 #define LD2_GPIO_Port GPIOB
 
+#define CR_PORT0 GPIOE
+#define CR_PORT0_PIN0 GPIO_PIN_10
+#define CR_PORT0_PIN1 GPIO_PIN_12
+#define CR_PORT0_PIN2 GPIO_PIN_14
+#define CR_PORT0_PIN3 GPIO_PIN_15
+
 #endif /* INC_BOARD_H */
