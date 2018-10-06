@@ -5,6 +5,9 @@
  */
 
 #include <stdint.h>
+#ifdef WITH_SEMIHOSTING
+#include <stdio.h>
+#endif /* WITH_SEMIHOSTING */
 
 #include <stm32f767xx.h>
 

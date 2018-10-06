@@ -1,7 +1,12 @@
 #ifndef INC_USBD_CONF_H
 #define INC_USBD_CONF_H
 
+#define USBD_DEBUG_LEVEL 0
+
+#if (USBD_DEBUG_LEVEL > 0)
 #include <stdio.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -12,7 +17,6 @@
 #define USBD_MAX_NUM_CONFIGURATION 1
 #define USBD_MAX_STR_DESC_SIZ 512
 #define USBD_SUPPORT_USER_STRING 0
-#define USBD_DEBUG_LEVEL 0
 #define USBD_LPM_ENABLED 1
 #define USBD_SELF_POWERED 1
 
