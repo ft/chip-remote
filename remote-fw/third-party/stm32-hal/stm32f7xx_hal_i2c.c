@@ -245,6 +245,8 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include <stddef.h>
+
 #include "stm32f7xx_hal.h"
 
 /** @addtogroup STM32F7xx_HAL_Driver
