@@ -57,10 +57,10 @@ extern void initialise_monitor_handles(void);
       NULL, NULL, NULL }
 
 static struct cr_line port0_lines[] = {
-    NEW_LINE(access_port0, dir_port0, 1<<0),
-    NEW_LINE(access_port0, dir_port0, 1<<1),
-    NEW_LINE(access_port0, dir_port0, 1<<2),
-    NEW_LINE(access_port0, dir_port0, 1<<4),
+    NEW_LINE(access_port0, dir_port0, 10),
+    NEW_LINE(access_port0, dir_port0, 12),
+    NEW_LINE(access_port0, dir_port0, 14),
+    NEW_LINE(access_port0, dir_port0, 15),
     LINE_LIST_END
 };
 

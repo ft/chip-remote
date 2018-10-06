@@ -16,7 +16,7 @@
 #include "line-maps.h"
 
 typedef uint16_t cr_port_addr;
-typedef uint8_t cr_pin_mask;
+typedef uint32_t cr_pin_id;
 
 #define CR_MAX_WORDS 8
 #define CR_MAX_LINE 127
@@ -106,7 +106,7 @@ enum cr_port_modes {
 struct cr_line {
     int (*access)(struct cr_line *, enum cr_access_mode mode, int value);
     void (*dir)(struct cr_line *, enum cr_access_mode mode);
-    cr_pin_mask bitmask;
+    cr_pin_id id;
     char rolestr[CR_MAX_ROLE_STRING + 1];
     enum cr_pin_role role;
     int index;

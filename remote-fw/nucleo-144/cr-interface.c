@@ -6,10 +6,13 @@
 
 #include <stdint.h>
 
+#include <stm32f767xx.h>
+
 #include <chip-remote.h>
 #include <protocol.h>
 #include <utils.h>
 
+#include "board.h"
 #include "cr-interface.h"
 #include "usb-tty-interface.h"
 
@@ -18,17 +21,28 @@ static void consume_chunk(uint8_t*, uint32_t);
 int
 access_port0(struct cr_line *line, enum cr_access_mode mode, int value)
 {
-    (void)line;
-    (void)mode;
-    (void)value;
-    return 0;
+    int offset = line->id;
+
+    if (mode == CR_ACCESS_READ) {
+        return (CR_PORT0->IDR | offset) ? 1 : 0;
+    } else if (value == 0) {
+        BITMASK_CLEAR(CR_PORT0->ODR, 1 << offset);
+    } else {
+        BITMASK_SET(CR_PORT0->ODR, 1 << offset);
+    }
+
+    return value;
 }
 
 void
 dir_port0(struct cr_line *line, enum cr_access_mode mode)
 {
-    (void)line;
-    (void)mode;
+    static const uint32_t in = 0ul;
+    static const uint32_t out = 1ul;
+    int offset = (line->id * 2);
+
+    BITMASK_CLEAR(CR_PORT0->MODER, 0x3u << offset);
+    BITMASK_SET(CR_PORT0->MODER, (mode == CR_ACCESS_READ ? in : out) << offset);
 }
 
 void
