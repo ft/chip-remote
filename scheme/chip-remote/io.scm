@@ -10,6 +10,7 @@
   #:use-module (web uri)
   #:export (cr-connection?
             cr-connection-uri
+            cr-connection-port
             get-cr-capability
             set-cr-capability!
             cr-path
