@@ -12,6 +12,7 @@
             focus
             has-feature?
             hi
+            hi*
             init
             line
             lines
@@ -192,6 +193,13 @@ is returned."
     (unless (string=? reply "Hi there, stranger.")
       (throw 'protocol-hi-failed reply))
     #t))
+
+(define (hi* conn)
+  (catch 'protocol-wtf
+    (lambda () (hi conn))
+    (lambda (key . args)
+      (bye conn)
+      (hi conn))))
 
 (define (bye conn)
   "End an RCCEP conversation on CONN. In case the reply doesn't match the
