@@ -24,14 +24,14 @@ static void consume_chunk(uint8_t*, uint32_t);
 int
 access_port0(struct cr_line *line, enum cr_access_mode mode, int value)
 {
-    int offset = line->id;
+    uint32_t scan = 1ul << line->id;
 
     if (mode == CR_ACCESS_READ) {
-        return (CR_PORT0->IDR | offset) ? 1 : 0;
+        return (CR_PORT0->IDR & scan) ? 1 : 0;
     } else if (value == 0) {
-        BITMASK_CLEAR(CR_PORT0->ODR, 1 << offset);
+        BITMASK_CLEAR(CR_PORT0->ODR, scan);
     } else {
-        BITMASK_SET(CR_PORT0->ODR, 1 << offset);
+        BITMASK_SET(CR_PORT0->ODR, scan);
     }
 
     return value;
@@ -44,7 +44,7 @@ dir_port0(struct cr_line *line, enum cr_access_mode mode)
     static const uint32_t out = 1ul;
     int offset = (line->id * 2);
 
-    BITMASK_CLEAR(CR_PORT0->MODER, 0x3u << offset);
+    BITMASK_CLEAR(CR_PORT0->MODER, 0x3ul << offset);
     BITMASK_SET(CR_PORT0->MODER, (mode == CR_ACCESS_READ ? in : out) << offset);
 }
 
