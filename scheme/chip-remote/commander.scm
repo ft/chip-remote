@@ -8,6 +8,7 @@
   #:use-module (chip-remote decode)
   #:use-module (chip-remote device)
   #:use-module (chip-remote io)
+  #:use-module (chip-remote modify)
   #:use-module (chip-remote protocol)
   #:export (make-commander))
 
@@ -65,7 +66,9 @@
      (must-be-connected state)
      (format #t "Changing stuff~%"))
     ((set!)
-     (format #t "Setting stuff~%"))
+     (set-data! state (apply chain-modify
+                             (cons (get-device state)
+                                   (cons (get-data state) args)))))
     ((transmit!)
      (must-be-connected state)
      (format #t "Transmitting stuff~%"))
