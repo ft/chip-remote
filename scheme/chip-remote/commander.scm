@@ -40,6 +40,8 @@
      (let ((c (get-connection state)))
        (bye c)
        (io-close c)))
+    ((data)
+     (get-data state))
     ((decode)
      ((show state) (get-device state) (get-data state)))
     ((focus!)
