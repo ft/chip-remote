@@ -81,6 +81,8 @@
     ((change!)
      (must-be-connected state)
      (format #t "Changing stuff~%"))
+    ((load!)
+     (set-data! state (car args)))
     ((set!)
      (set-data! state (apply chain-modify
                              (cons (get-device state)
