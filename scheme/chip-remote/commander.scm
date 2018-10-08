@@ -5,7 +5,7 @@
 (define-module (chip-remote commander)
   #:use-module (ice-9 optargs)
   #:use-module (srfi srfi-9)
-  #:use-module (chip-remote decode)
+  #:use-module ((chip-remote decode) #:prefix cr:)
   #:use-module (chip-remote device)
   #:use-module (chip-remote device access)
   #:use-module (chip-remote device transfer)
@@ -86,14 +86,14 @@
     ;; Unknown commands error out here as well.
     (else (throw 'unknown-complex-command cmd args))))
 
-(define* (make-commander #:key device connection (port 0) data)
+(define* (make-commander #:key device connection (port 0) data decode)
   (unless (device? device)
     (throw 'cr-missing-data 'device device))
   (unless (cr-connection? connection)
     (throw 'cr-missing-data 'connection connection))
   (let ((state (make-cmdr-state device connection port
                                 (or data (device-default device))
-                                decode)))
+                                (or decode cr:decode))))
     (case-lambda
       (()
        ((show state) (get-device state) (get-data state)))
