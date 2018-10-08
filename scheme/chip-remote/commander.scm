@@ -44,6 +44,8 @@
      (get-data state))
     ((decode)
      ((show state) (get-device state) (get-data state)))
+    ((device)
+     (get-device state))
     ((focus!)
      (must-be-connected state)
      (format #t "Focusing port on remote controller~%")
