@@ -15,11 +15,12 @@
   #:export (make-commander))
 
 (define-record-type <cmdr-state>
-  (make-cmdr-state dev con port data decode)
+  (make-cmdr-state dev con port default data decode)
   cmdr-state?
   (dev get-device)
   (con get-connection)
   (port get-port)
+  (default get-default)
   (data get-data set-data!)
   (decode show))
 
@@ -56,7 +57,7 @@
        (io-open c)
        (hi* c)))
     ((reset!)
-     (set-data! state (device-default (get-device state))))
+     (set-data! state (get-default state)))
     ((trace!)
      (assq 'trace (io-opt/set 'trace (not (io-opt/get 'trace)))))
     ((transmit!)
@@ -99,9 +100,10 @@
     (throw 'cr-missing-data 'device device))
   (unless (cr-connection? connection)
     (throw 'cr-missing-data 'connection connection))
-  (let ((state (make-cmdr-state device connection port
-                                (or data (device-default device))
-                                (or decode cr:decode))))
+  (let* ((default (or data (device-default device)))
+         (state (make-cmdr-state device connection port
+                                 default default
+                                 (or decode cr:decode))))
     (case-lambda
       (()
        ((show state) (get-device state) (get-data state)))
