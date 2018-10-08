@@ -55,6 +55,8 @@
      (let ((c (get-connection state)))
        (io-open c)
        (hi* c)))
+    ((reset!)
+     (set-data! state (device-default (get-device state))))
     ((trace!)
      (assq 'trace (io-opt/set 'trace (not (io-opt/get 'trace)))))
     ((transmit!)
