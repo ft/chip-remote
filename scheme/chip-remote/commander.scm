@@ -4,7 +4,6 @@
 
 (define-module (chip-remote commander)
   #:use-module (ice-9 optargs)
-  #:use-module (ice-9 ports)
   #:use-module (srfi srfi-9)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote device)
