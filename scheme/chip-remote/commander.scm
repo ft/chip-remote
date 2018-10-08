@@ -7,6 +7,8 @@
   #:use-module (srfi srfi-9)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote device)
+  #:use-module (chip-remote device access)
+  #:use-module (chip-remote device transfer)
   #:use-module (chip-remote io)
   #:use-module (chip-remote modify)
   #:use-module (chip-remote protocol)
@@ -53,7 +55,15 @@
      (assq 'trace (io-opt/set 'trace (not (io-opt/get 'trace)))))
     ((transmit!)
      (must-be-connected state)
-     (format #t "Transmitting all~%"))
+     (let* ((dev (get-device state))
+            (acc (device-access dev))
+            (transfer (da-transfer acc))
+            (transform (transfer-transform transfer))
+            (write-data (da-write acc)))
+       (for-each (lambda (datum)
+                   (transmit (get-connection state) datum))
+                 (map write-data
+                      (transform (get-data state))))))
 
     ;; Unknown commands error out.
     (else (throw 'unknown-simple-command cmd))))
