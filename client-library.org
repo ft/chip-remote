@@ -1,250 +1,122 @@
 * Overview of the chip-remote client library
 
-  The client library is written in Scheme (in particular, the GNU Guile
-  implementation of the language). The reasons for this choice range from the
-  excellent numeric qualities of the language, as well as its natural handling
-  of lists (and nested lists, aka. tables) and symbolic values, to the
-  possibility of introducing syntactic extensions, so that complex repetitive
-  programming tasks become more straight forward and elegant.
+The client library is written in Scheme (in particular, the GNU Guile
+implementation of the language). The reasons for this choice range from the
+excellent numeric qualities of the language, as well as its natural handling of
+lists (and nested lists, aka. tables) and symbolic values, to the possibility
+of introducing syntactic extensions, so that complex repetitive programming
+tasks become more straight forward and elegant.
 
 ** Structure
 
-   Most of the library lives in the (chip-remote ...) namespace.
+Most of the library lives in the (chip-remote ...) namespace.
 
-   Device-specific modules live in the (chip-remote devices ...) namespace and
-   are grouped by manufacturer. That means that devices built by Texas
-   Instruments have their modules living in (chip-remote devices ti ...). Each
-   device gets its own namespace within there, to store modules that describe a
-   device's register-map, translation tables and the like.
+Device-specific modules live in the (chip-remote devices ...) namespace and are
+grouped by manufacturer. That means that devices built by Texas Instruments
+have their modules living in (chip-remote devices ti ...). Each device gets its
+own namespace within there, to store modules that describe a device's
+register-map, translation tables and the like.
 
-   Example: The chip-remote modules for the ADS4149 analog-to-digital converter
-   from Texas Instruments are the following:
+Example: The chip-remote modules for the ADS4149 analog-to-digital converter
+from Texas Instruments are the following:
 
-     - (chip-remote devices ti ads4149): The high-level module that offers
-       functionality to conveniently deal with such a device connected to a
-       remote controller. This is also called third-level access.
+- (chip-remote devices ti ads4149): The high-level module that offers
+  functionality to conveniently deal with such a device connected to a remote
+  controller. This is also called third-level access.
 
-     - (chip-remote devices ti ads4149 registers): Defines the device's
-       register-map, custom decoding helpers as well as first-level access
-       functions.
+- (chip-remote devices ti ads4149 registers): Defines the device's
+  register-map, custom decoding helpers as well as first-level access
+  functions.
 
-     - (chip-remote devices ti ads4149 tables): Defines the device's
-       translation tables, that map human-readable symbolic values like
-       ‘aligned’ to binary values such as “#b10”.
+- (chip-remote devices ti ads4149 tables): Defines the device's translation
+  tables, that map human-readable symbolic values like ‘aligned’ to binary
+  values such as “#b10”.
 
-     - (chip-remote devices ti ads4149 program): Defines second-level access
-       functions.
+- (chip-remote devices ti ads4149 program): Defines second-level access
+  functions.
 
-   About the different levels of access, see “Levels of Access” below.
-
-** Levels of Access
-
-*** First Level
-
-    The first level of access is basically a direct translation from a register
-    map. For example a device may have a register (say this is at address 4),
-    that contains a field named “gain”, that is 5 bits wide and starts at
-    offset 3. Given a register value (an integer), you need a function to
-    extract the “gain-bits” from the value as well as one for setting them to
-    produce a new register value with the “gain-bits” changed. The functions
-    may look like this:
-
-      (get-gain-bits register-value)
-
-      (set-gain-bits register-value bits)
-
-    It's also useful to know at which register address the “gain-bits” can be
-    found. So you'd also define a variable such as this:
-
-      (define gain-bits-register-address 4)
-
-    This is exactly what the first-level access encompasses. Since defining
-    functions like that is extremely monotone, mechanical, boring and
-    error-prone, the client library offers a way out (see “The Register-Map
-    Abstraction” below).
-
-*** Second Level
-
-    Directly using the first-level access doesn't make much sense, since you
-    usually don't want to call functions like this:
-
-      (set-gain-bits regval #b10101)
-
-    What does “10101” mean? Hard to say. It may be the binary value turned to
-    decimal in dB (that would mean 21dB in this case). But maybe the value is
-    scaled to half a decibel per bit (10.5dB then). Or maybe the chip allows
-    for negative gain as well and encodes the value in twos complement and then
-    scaled to a quarter of a decibel per bit (“10101” interpreted as a five bit
-    signed integer that uses twos-complement yields -11, scaled to a quarter of
-    a decibel per bit means that gain is set to -2.75dB).
-
-    Second level access cures this problem by providing functions that turn
-    human readable values into a set of bits. This may be done in different
-    ways (like employing an algorithm or doing a table-lookup). A call may look
-    like this:
-
-      (set-gain regval -11/4)
-
-    ...or maybe:
-
-      (enable-powerdown regval)
-      (disable-powerdown regval)
-
-    The number of arguments may range from one to arbitrarily many (the only
-    restriction is that the old register-value has to be the first argument to
-    the function).
-
-    The second level access code lives in the “program” sub-modules of a
-    device; for example (chip-remote devices ti ads4149 program).
-
-    The second level access code is written manually. But there are plans to
-    provide a way to generate a first version of the second level code, if a
-    thoroughly annotated register-map is provided.
-
-*** Third Level
-
-    The third level of access combines the bit-twisting of the first and second
-    level access with the connection to a remote controller, so that actual
-    hardware may be controlled. A function call may look like this:
-
-      (set-gain conn -11/4)
-
-    Here “conn” is a connection object, through which a connection channel to a
-    remote controller is referenced. What this will likely do is: a) Read the
-    register that contains the “gain” information; b) change the gain bits,
-    using the second level access function, and c) transmit the new register
-    value back to the device with only the gain bits changed to the new desired
-    value.
-
-    The third level also contains information on how a remote controller has to
-    talk to the slave-device (example: SPI, MSB-first and so on).
-
-    The third level access lives in a device's top-level module. Example:
-    (chip-remote devices ti ads4149)
-
-    Like with second level access, there are plans to provide a way to generate
-    a first version of the third level access code, which should help
-    especially with devices that contain large register-maps.
-
-** Top-Level Module
-
-*** (chip-remote)
-
-    This module implements general concepts that you may want to use in scripts
-    that use the client library. For example, it implements the ‘chain-fncs’
-    macro that eases the application of multiple second-level functions to a
-    register value. Ordinarily, if you'd want to apply these functions to a
-    register value:
-
-      (set-gain rv 3)
-      (enable-high-performance rv)
-      (set-data-format rv 'twos-complement)
-      (enable-offset-correction rv)
-
-    You would have to do it like this:
-
-      (set-gain
-        (enable-performance
-          (set-data-format
-            (enable-offset-correction rv)
-            'twos-complement))
-        3)
-
-    Because the functions do not modify the register value in place. Instead,
-    they produce a new, changed value as their return value. With ‘chain-fncs’
-    that becomes the much more readable:
-
-      (chain-fncs rv
-                  (set-gain 3)
-                  enable-performance
-                  (set-data-format 'twos-complement)
-                  enable-offset-correction)
-
-    This works with every device module, that adheres to the conventions
-    outlined above (in particular: Have second-level functions that do not
-    modify their input arguments, and that take the old register value as their
-    first, and possibly only, argument).
+  About the different levels of access, see “Levels of Access” below.
 
 ** Non-Device-Specific Modules
 
 *** (chip-remote bit-operations)
 
-    This module implements a number of utilities that deal with manipulating
-    blocks of bits in integers, that are not implemented by the libraries
-    shipped with GNU Guile. These function are used in particular by the
-    first-level access functions, that are derived from a device's
-    register-map.
+This module implements a number of utilities that deal with manipulating blocks
+of bits in integers, that are not implemented by the libraries shipped with GNU
+Guile. These function are used in particular by the first-level access
+functions, that are derived from a device's register-map.
 
 *** (chip-remote io)
 
-    This is the low-level input-output library that sends strings to a remote
-    controller and receives strings from it. It currently only supports
-    connections via device files (such as serial links; one example would be
-    /dev/ttyUSB0 on current Linux boxes).
+This is the low-level input-output library that sends strings to a remote
+controller and receives strings from it. It currently only supports connections
+via device files (such as serial links; one example would be /dev/ttyUSB0 on
+current Linux boxes).
 
 *** (chip-remote protocol)
 
-    This module implements the RCCEP protocol as described in the included
-    specification. It uses the connection abstraction from the “io” module to
-    talk to the remote controller.
+This module implements the RCCEP protocol as described in the included
+specification. It uses the connection abstraction from the “io” module to talk
+to the remote controller.
 
 *** (chip-remote assemble)
 
-    This module is a layer of abstraction to concisely express second-level
-    functions. It helps with enforcing constraints on given values, untangle
-    active-high vs. active-low logic, convert human readable data to bits via
-    table look up or application of an algorithm (like
-    ‘value->twos-complement’).
+This module is a layer of abstraction to concisely express second-level
+functions. It helps with enforcing constraints on given values, untangle
+active-high vs. active-low logic, convert human readable data to bits via table
+look up or application of an algorithm (like ‘value->twos-complement’).
 
 *** (chip-remote decode) and (chip-remote decode to-text)
 
-    So far, everything in the system had to do with modifying register values.
-    But chip-remote also wants to help with the interpretation of given
-    register values. This approach works by looking at additional annotations
-    in the register-map, where you can tell the system “By the way, if you want
-    to decode this set of bits, do a reverse-lookup in the ‘foobar-map’ table”.
+So far, everything in the system had to do with modifying register values. But
+chip-remote also wants to help with the interpretation of given register
+values. This approach works by looking at additional annotations in the
+register-map, where you can tell the system “By the way, if you want to decode
+this set of bits, do a reverse-lookup in the ‘foobar-map’ table”.
 
-    The frontend function to this is the ‘decode’ function, that is called like
-    this:
+The frontend function to this is the ‘decode’ function, that is called like
+this:
 
-      (decode register-map address register-value)
+#+BEGIN_SRC scheme
+(decode register-map address register-value)
+#+END_SRC
 
-    It returns a data-structure, that describes the ‘register-value’ as
-    interpreted as the register at ‘address’ in ‘register-map’. This is still
-    scheme data.
+It returns a data-structure, that describes the ‘register-value’ as interpreted
+as the register at ‘address’ in ‘register-map’. This is still scheme data.
 
-    The (chip-remote decode to-text) module in turn provides a renderer, that
-    turns that data structure into pure human readable text. It contains a
-    frontend called ‘register->text’ that produces a list of lines that look
-    like this:
+The (chip-remote decode to-text) module in turn provides a renderer, that turns
+that data structure into pure human readable text. It contains a frontend
+called ‘register->text’ that produces a list of lines that look like this:
 
-        Decoding register at address: 0x25
-          (octal: o45, binary: 100101b, decimal: 37)
-        Value: [hex: 0x00] [bin: 00000000b]
-          Field "test-pattern":
-            Value: [0x0] [000b] - width: 3, offset: 0
-            Decoded: normal
-          Field "disable-gain":
-            Value: [0x0] [0b] - width: 1, offset: 3
-            Decoded: disabled
-          Field "gain":
-            Value: [0x0] [0000b] - width: 4, offset: 4
-            Decoded: 0
+#+BEGIN_EXAMPLE
+    Decoding register at address: 0x25
+      (octal: o45, binary: 100101b, decimal: 37)
+    Value: [hex: 0x00] [bin: 00000000b]
+      Field "test-pattern":
+        Value: [0x0] [000b] - width: 3, offset: 0
+        Decoded: normal
+      Field "disable-gain":
+        Value: [0x0] [0b] - width: 1, offset: 3
+        Decoded: disabled
+      Field "gain":
+        Value: [0x0] [0000b] - width: 4, offset: 4
+        Decoded: 0
+#+END_EXAMPLE
 
 *** (chip-remote bit-decoders)
 
-    This implements a few callback functions, that may be used in register-map
-    decoding annotations.
+This implements a few callback functions, that may be used in register-map
+decoding annotations.
 
 *** (chip-remote register-map)
 
-    See “The Register-Map Abstraction” below.
+See “The Register-Map Abstraction” below.
 
 ** The (chip-remote test) Namespace
 
-   The “test” namespace contains code, that is only used when running the
-   project's test suite. It is therefore not even installed to the system with
-   the rest of the framework.
+The “test” namespace contains code, that is only used when running the
+project's test suite. It is therefore not even installed to the system with the
+rest of the framework.
 
 ** The Register-Map Abstraction
 
@@ -398,74 +270,3 @@ A complete and annotated register map definition could look like this:
 
 With careful definition and annotation such as this, the decoder part of the
 framework will just work.
-
-** Generation of Second- and Third-Level Access Code
-
-There is no way to completely generate second-level (and therefore third-level)
-access code, since you may always encounter situations, that are dealt with in
-a very device-specific manner. Maybe it's just one bit-field. But it's there
-and rains on our parade.
-
-That however doesn't mean that we can't generate anything. Take the power-down
-bit from our previous example. Two second level access functions might look
-like this:
-
-     (define (enable-power-down regval)
-       (set-logic-active-high set-power-down-bits regval))
-
-     (define (disable-power-down regval)
-       (unset-logic-active-high set-power-down-bits regval))
-
-But we know from the register-map annotations that it indeed is an active-high
-bit. We also know the name of the first-level access function. So there is
-nothing that should keep us from generating the second level functions for this
-particular bit.
-
-With the blast-radius bit field, the second level function could look like
-this:
-
-     (define (set-blast-radius regval value)
-       (set-blast-radius-bits (value->bits blast-radius-map value)))
-
-And again, the know the connection from the ‘blast-radius-map’ variable to this
-particular bit-field. Again, technically there's nothing that should keep us
-from generating this code.
-
-So the plan is to provide a way to perform this sort of generation to remove a
-large chunk of manual typing work, while still providing the author the ability
-to incorporate unusual workarounds required for the device.
-
-Once you got second-level access code, you may think of generating third level
-code. Because usually, the dance goes like this: Get the current register value
-for the bit-field you want to modify from the device, modify the correct
-portion of the register-value and transmit the changed value back to the
-device.
-
-But again, we can't automate that generation process fully, because in the
-general case, things might not be as simple. Take the ADS4149 ADU from Texas
-Instruments for example: That device has a High-Performance mode. The state of
-that mode (active or not) is controlled by three bits that are spread across
-two registers in the device. So for that particular chip, you'd have to do
-this:
-
-     - Get the first register's value
-     - Get the second register's value
-     - Modify the first register at the right position
-     - Modify the second register at the right position
-     - Transmit the first register back to the device
-     - Transmit the second register back to the device
-
-While cases like that might indeed be special, they have to be considered. But
-still, the plan is to provide a way to generate third-level access code at some
-point, as a starting point for authors to manually deal with special cases
-afterwards.
-
-** Legacy Code
-
-The (chip-remote legacy ti cdce72010) module and its children are based on code
-for a predecessor of chip-remote. It does not use the usual abstractions and
-conventions. While it works, it should not be used as an example of how to
-write modules for new devices.
-
-At some point, it would probably be good to port this legacy code over to the
-new abstractions and conventions. If only for consistency's sake.
