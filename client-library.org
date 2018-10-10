@@ -22,7 +22,7 @@ from Texas Instruments are the following:
 
 - (chip-remote devices ti ads4149): The high-level module that offers
   functionality to conveniently deal with such a device connected to a remote
-  controller. This is also called third-level access.
+  controller.
 
 - (chip-remote devices ti ads4149 registers): Defines the device's
   register-map, custom decoding helpers as well as first-level access
@@ -36,6 +36,97 @@ from Texas Instruments are the following:
   functions.
 
   About the different levels of access, see “Levels of Access” below.
+
+
+** Syntactic Extension
+
+The client library uses Scheme's ~syntax-case~ macro system to implement
+syntactic extensions to the language in order to be able to express device
+descriptions in a concise manner. At the heart of these extensions lies the
+~(chip-remote process-plist)~ module. It offers utilities to implement macros
+that behave like this:
+
+#+BEGIN_SRC scheme
+(define-device foobar
+  #:manufacturer some-company
+  #:homepage "http://somecomp.tld/foobar"
+  #:datasheet "http://docs.somecomp.tld/foobar.pdf"
+  #:keywords '(foo and bar)
+  #:register-width 16
+  #:register (#:contents (enable-output? 0 1 #:default 'no)
+                         (shutdown? 1 1 #:default 'no)
+                         (reserved 2 2)
+                         (low-pass-cfg 4 8
+                                       #:validate range (>= 12) (<= 140)
+                                       #:semantics unsigned-int
+                                       #:default 48)
+                         (gain-cfg 12 4
+                                   #:semantics lookup gain-cfg
+                                   #:default '0dB)))
+#+END_SRC
+
+Keywords are used to group information into logical chunks. The grouping is
+configurable and completly controllable.
+
+
+** Device Descriptions
+
+One of the essential jobs of the library is its ability to describe devices in
+much detail. A device description consists of the following:
+
+- Device description, containing…
+  - Meta-Information about the device.
+  - A Page-Table.
+
+To understand page-tables it is useful to understand the organisation of data
+in a configurable device from the ground up. At its core a device can be
+described by items that are grouped into registers. An item is a sequence of
+bits, that represents a value using arbitrary semantics. Multiple registers are
+organised in register maps, that map addresses to actual registers.
+
+In some devices, designers choose — for one reason or another — to group
+registers in more than one table (register maps). This is where page maps come
+in. They map addresses to register maps. Page maps are sometimes called memory
+pages or memory banks.
+
+There are a great many device specific subtleties that the library tries to
+support. Many devices only have one register-map and therefore not a meaningful
+page-map. Some only have one register and therefore not a meaningful
+register-map either. In some devices, registers have fixed width; in others
+not.
+
+In some devices it's possible to read the values of registers. In others its
+not. In some devices registers can be accessed in random order. In others they
+can only be tranferred in bulk. And sometimes the registers even need to be
+programmed in specific order.
+
+In summary, the most important data types describing devices are:
+
+- device
+- page-map
+- register-map
+- register
+- item
+
+*** (chip-remote item)
+
+The item library is at the core of the description of an atom that makes up
+part of a device's configuration. The most important pieces of information
+captured by an item are these:
+
+- A name
+- An offset within a register
+- A width
+- Semantics converting from human to machine readable and vica verca
+- A validator
+
+The module supports a couple of built-in semantics and validators. To allow
+extensions to this system, there are the ~semantics~ and ~validate~ modules to
+define custom instances.
+
+**** (chip-remote semantics)
+
+**** (chip-remote validate)
 
 ** Non-Device-Specific Modules
 
