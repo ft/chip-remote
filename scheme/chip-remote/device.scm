@@ -17,6 +17,7 @@
             device-ref
             device-access
             device-address
+            device-value-address
             device-registers
             device-item-names
             device-name
@@ -156,3 +157,19 @@
      (register-map-address (page-map-address (device-page-map device)
                                              page-addr)
                            reg-addr name cnt))))
+
+(define device-value-address
+  (case-lambda
+    ((device value page-addr)
+     (list-ref value (or (page-address->index (device-page-map device)
+                                              page-addr)
+                         0)))
+    ((device value page-addr reg-addr)
+     (list-ref (device-value-address device value page-addr)
+               (or (register-address->index (device-address device page-addr)
+                                            reg-addr)
+                   0)))
+    ((device value page-addr reg-addr _)
+     (device-value-address device value page-addr reg-addr))
+    ((device value page-addr reg-addr _ __)
+     (device-value-address device value page-addr reg-addr))))
