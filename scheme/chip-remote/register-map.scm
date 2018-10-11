@@ -18,6 +18,7 @@
             register-map-register
             register-map-fold
             register-map-ref
+            register-map-ref->address
             register-map-address
             register-map-address->index
             register-address->index
@@ -82,6 +83,14 @@
 
 (define-syntax-rule (rm-iter init return rm fnc)
   (call/ec (lambda (return) (register-map-fold fnc init rm))))
+
+(define (register-map-ref->address rm name)
+  (rm-iter #f return rm
+           (lambda (ra reg acc)
+             (let ((item (register-ref->address reg name)))
+               (if item
+                   (return (cons ra item))
+                   #f)))))
 
 (define (register-map-ref rm name)
   (rm-iter #f return rm
