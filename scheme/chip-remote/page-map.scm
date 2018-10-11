@@ -70,24 +70,25 @@
         init
         (page-map-table pm)))
 
+(define-syntax-rule (pm-iter init return pm fnc)
+  (call/ec (lambda (return) (page-map-fold fnc init pm))))
+
 (define (page-map-ref pm name)
-  (call/ec (lambda (return)
-             (page-map-fold (lambda (pa rm pacc)
-                              (let ((item (register-map-ref rm name)))
-                                (if (item? item)
-                                    (return item)
-                                    #f)))
-                            #f pm))))
+  (pm-iter #f return pm
+           (lambda (pa rm pacc)
+             (let ((item (register-map-ref rm name)))
+               (if (item? item)
+                   (return item)
+                   #f)))))
 
 (define page-map-address
   (case-lambda
     ((pm page-addr)
-     (call/ec (lambda (return)
-                (page-map-fold (lambda (pa rm pacc)
-                                 (if (eqv? pa page-addr)
-                                     (return rm)
-                                     #f))
-                               #f pm))))
+     (pm-iter #f return pm
+              (lambda (pa rm pacc)
+                (if (eqv? pa page-addr)
+                    (return rm)
+                    #f))))
     ((pm page-addr reg-addr)
      (register-map-address (page-map-address pm page-addr) reg-addr))
     ((pm page-addr reg-addr item-addr)
