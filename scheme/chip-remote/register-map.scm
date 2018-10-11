@@ -20,6 +20,7 @@
             register-map-ref
             register-map-address
             register-map-address->index
+            register-address->index
             define-register-map))
 
 (define-record-type <register-map>
@@ -110,3 +111,10 @@
           (if (eqv? (car this) addr)
               idx
               (loop (cdr rest) (+ idx 1)))))))
+
+(define (register-address->index rm addr)
+  (rm-iter 0 return rm
+           (lambda (pa rm idx)
+             (if (eqv? pa addr)
+                 (return idx)
+                 (+ idx 1)))))
