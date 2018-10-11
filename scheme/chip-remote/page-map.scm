@@ -18,6 +18,7 @@
             page-map-fold
             page-map-ref
             page-map-address
+            page-address->index
             define-page-map))
 
 ;; How to share some registers between the register maps of all or even only
@@ -97,3 +98,10 @@
     ((pm page-addr reg-addr name cnt)
      (register-map-address (page-map-address pm page-addr)
                            reg-addr name cnt))))
+
+(define (page-address->index pm addr)
+  (pm-iter 0 return pm
+           (lambda (pa rm idx)
+             (if (eqv? pa addr)
+                 (return idx)
+                 (+ idx 1)))))
