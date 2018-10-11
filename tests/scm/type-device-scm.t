@@ -32,20 +32,21 @@
    (define-test "page-map table length correct with #:page-map*"
      (pass-if-= 2 (length (page-map-table (device-page-map dev))))))
 
- (let ((dev (generate-device
-             #:page-map
-             (0 #:table
-                (0 (#:default 128
-                    #:contents (thing 0 4) (fish 4 4)))
-                (1 (#:contents (more 0 4) (stuff 4 4))))
-             (1 #:table
-                (0 (#:contents (thing* 0 4) (fish* 4 4)))
-                (1 (#:contents (more* 0 4) (stuff* 4 4)))
-                (2 (#:contents (stuff 0 8 #:default 111))))
-             (10 #:table
-                (8    (#:contents (there 0 4) (really 4 4)))
-                (200  (#:contents (is 0 4) (lots 4 4)))
-                (1025 (#:contents (more-things 0 8 #:default 101)))))))
+ (let* ((dev (generate-device
+              #:page-map
+              (0 #:table
+                 (0 (#:default 128
+                     #:contents (thing 0 4) (fish 4 4)))
+                 (1 (#:contents (more 0 4) (stuff 4 4))))
+              (1 #:table
+                 (0 (#:contents (thing* 0 4) (fish* 4 4)))
+                 (1 (#:contents (more* 0 4) (stuff* 4 4)))
+                 (2 (#:contents (stuff 0 8 #:default 111))))
+              (10 #:table
+                  (8    (#:contents (there 0 4) (really 4 4)))
+                  (200  (#:contents (is 0 4) (lots 4 4)))
+                  (1025 (#:contents (more-things 0 8 #:default 101))))))
+        (dev-default (device-default dev)))
    (define-test "device-address by page-address works #1"
      (pass-if-= (length (register-map-table (device-address dev 0)))
                 2))
@@ -65,5 +66,4 @@
      (pass-if-eq? (item-name (device-address dev 1 1 'more* 0))
                   'more*))
    (define-test "device-default works"
-     (pass-if-equal? (device-default dev)
-                     '((128 0) (0 0 111) (0 0 101))))))
+     (pass-if-equal? dev-default '((128 0) (0 0 111) (0 0 101))))))
