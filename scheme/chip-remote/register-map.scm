@@ -79,23 +79,24 @@
         init
         (register-map-table rm)))
 
+(define-syntax-rule (rm-iter init return rm fnc)
+  (call/ec (lambda (return) (register-map-fold fnc init rm))))
+
 (define (register-map-ref rm name)
-  (call/ec (lambda (return)
-             (register-map-fold (lambda (ra reg acc)
-                                  (let ((item (register-ref reg name)))
-                                    (if (item? item)
-                                        (return item)
-                                        #f)))
-                                #f rm))))
+  (rm-iter #f return rm
+           (lambda (ra reg acc)
+             (let ((item (register-ref reg name)))
+               (if (item? item)
+                   (return item)
+                   #f)))))
 
 (define register-map-address
   (case-lambda
-    ((rm reg-addr) (call/ec (lambda (return)
-                              (register-map-fold (lambda (ra reg acc)
-                                                   (if (eqv? ra reg-addr)
-                                                       (return reg)
-                                                       #f))
-                                                 #f rm))))
+    ((rm reg-addr) (rm-iter #f return rm
+                            (lambda (ra reg acc)
+                              (if (eqv? ra reg-addr)
+                                  (return reg)
+                                  #f))))
     ((rm reg-addr item-addr)
      (register-ref/address (register-map-address rm reg-addr) item-addr))
     ((rm reg-addr name cnt)
