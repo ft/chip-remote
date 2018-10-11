@@ -21,6 +21,7 @@
             register-contains?
             register-address
             register-ref
+            register-ref->address
             register-ref/address
             register-set
             register-fold
@@ -99,6 +100,16 @@
 
 (define-syntax-rule (reg-iter init return reg fnc)
   (call/ec (lambda (return) (register-fold fnc init reg))))
+
+(define (register-ref->address reg name)
+  (let ((idx (reg-iter 0 return reg
+                       (lambda (item iacc)
+                         (if (eq? (item-name item) name)
+                             (return iacc)
+                             (+ iacc 1))))))
+    (if (>= idx (length (register-items reg)))
+        #f
+        (list idx))))
 
 (define (register-ref reg name)
   (reg-iter #f return reg
