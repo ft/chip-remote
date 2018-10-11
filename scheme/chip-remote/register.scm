@@ -97,14 +97,15 @@
 (define (register-contains? reg item)
   (!! (memq item (register-item-names reg))))
 
+(define-syntax-rule (reg-iter init return reg fnc)
+  (call/ec (lambda (return) (register-fold fnc init reg))))
+
 (define (register-ref reg name)
-  (call/ec (lambda (return)
-             (register-fold (lambda (item iacc)
-                              (if (eq? (item-name item)
-                                       name)
-                                  (return item)
-                                  #f))
-                            #f reg))))
+  (reg-iter #f return reg
+            (lambda (item iacc)
+              (if (eq? (item-name item) name)
+                  (return item)
+                  #f))))
 
 (define (register-set reg regval item itemval)
   (let ((item (register-ref reg item)))
