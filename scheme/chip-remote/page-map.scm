@@ -17,6 +17,7 @@
             page-map-merge
             page-map-fold
             page-map-ref
+            page-map-ref->address
             page-map-address
             page-address->index
             define-page-map))
@@ -73,6 +74,14 @@
 
 (define-syntax-rule (pm-iter init return pm fnc)
   (call/ec (lambda (return) (page-map-fold fnc init pm))))
+
+(define (page-map-ref->address pm name)
+  (pm-iter #f return pm
+           (lambda (pa rm pacc)
+             (let ((ra (register-map-ref->address rm name)))
+               (if ra
+                   (return (cons pa ra))
+                   #f)))))
 
 (define (page-map-ref pm name)
   (pm-iter #f return pm
