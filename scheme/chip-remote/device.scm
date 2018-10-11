@@ -15,6 +15,7 @@
             device-page-map
             device-register
             device-ref
+            device-ref->address
             device-access
             device-address
             device-value-address
@@ -137,6 +138,9 @@
              (eq? (caar pm) #f))
         (register-map-register (cdar pm))
         (throw 'more-than-single-register-map dev))))
+
+(define (device-ref->address device name)
+  (page-map-ref->address (device-page-map device) name))
 
 (define (device-ref device name)
   (page-map-ref (device-page-map device) name))

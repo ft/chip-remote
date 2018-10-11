@@ -14,7 +14,7 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (plan 15)
+ (plan 16)
 
  (define-test "generate-page-map, call structure works"
    (pass-if-true
@@ -78,4 +78,8 @@
    (define-test "Extract value by page-address and register-address and item-address"
      (pass-if-equal? (device-value-address dev dev-default 10 1025 2) 101))
    (define-test "Extract value by page-address and register-address and name+index"
-     (pass-if-equal? (device-value-address dev dev-default 10 1025 'is 1) 101))))
+     (pass-if-equal? (device-value-address dev dev-default 10 1025 'is 1) 101))
+   (define-test "device-ref->address works"
+     (pass-if-equal? (map (lambda (name) (device-ref->address dev name))
+                          '(thing fish stuff* lots more-things))
+                     '((0 0 0) (0 0 1) (1 1 1) (10 200 1) (10 1025 0))))))
