@@ -6,6 +6,7 @@
   #:use-module (ice-9 optargs)
   #:use-module (srfi srfi-9)
   #:use-module ((chip-remote decode) #:prefix cr:)
+  #:use-module (chip-remote item)
   #:use-module (chip-remote device)
   #:use-module (chip-remote device access)
   #:use-module (chip-remote device transfer)
@@ -78,7 +79,22 @@
 (define (cmdr-w/rest cmd args state)
   (case cmd
     ((decode)
-     (format #t "Decode with address~%"))
+     (let* ((dev (get-device state))
+            (data (get-data state))
+            (decode (show state))
+            (name (car args))
+            (part-desc (if (symbol? name)
+                           (device-ref dev name)
+                           (apply device-address (cons dev args))))
+            (part-data (apply device-value-address
+                              (cons dev
+                                    (cons data
+                                          (if (symbol? name)
+                                              (device-ref->address dev name)
+                                              args))))))
+       (decode part-desc (if (item? part-desc)
+                             ((item-get part-desc) part-data)
+                             part-data))))
     ((change!)
      (must-be-connected state)
      (format #t "Changing stuff~%"))
