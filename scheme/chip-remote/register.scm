@@ -173,6 +173,7 @@
 
 (define (spec->fnc spec)
   (match spec
+    ((? procedure? proc) proc)
     ((? number? n) (lambda (idx cnt item) (= idx n)))
     ((? symbol? x) (lambda (idx cnt item) (eq? x (item-name item))))
     (((? symbol? x) (? number? n)) (lambda (idx cnt item)
