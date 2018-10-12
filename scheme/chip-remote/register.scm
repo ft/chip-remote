@@ -25,6 +25,7 @@
             register-ref/address
             register-set
             register-fold
+            register->alist
             sorted-items
             define-register))
 
@@ -150,3 +151,6 @@
   (cond ((symbol? thing) (register-ref reg thing))
         ((integer? thing) (register-address reg thing))
         (else (throw 'invalid-item-address thing))))
+
+(define (register->alist reg)
+  (map item->list (register-items reg)))
