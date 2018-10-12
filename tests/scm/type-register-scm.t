@@ -18,7 +18,7 @@
   (generate-item #:name name #:offset 3 #:width 2))
 
 (with-fs-test-bundle
- (plan 26)
+ (plan 27)
 
  (define-test "generate-register, call structure works"
    (pass-if-true (register? (generate-register #:default #x12
@@ -100,7 +100,8 @@
                                (address 0 4 #:default 10)
                                (foo 4 4) (bar 8 4) (baz? 12 1) (reserved 13 3)
                                (thing? 16 1) (fish? 17 1) (reserved 18 24)))
-       (moar (generate-item moar 8 4)))
+       (moar (generate-item moar 8 4))
+       (at-the-end (generate-item at-the-end 32 4)))
    (define-test "Removing an item works (bar)"
      (pass-if-equal? (register->alist (change-register-items reg #:remove 'bar))
                      '((address 0 4) (foo 4 4) (baz? 12 1) (reserved 13 3)
@@ -116,4 +117,10 @@
                       (change-register-items reg #:insert moar #:remove 'bar))
                      '((address 0 4) (foo 4 4) (moar 8 4) (baz? 12 1)
                        (reserved 13 3) (thing? 16 1) (fish? 17 1)
-                       (reserved 18 24))))))
+                       (reserved 18 24))))
+   (define-test "Inserting at the end works"
+     (pass-if-equal? (register->alist
+                      (change-register-items reg #:insert at-the-end))
+                     '((address 0 4) (foo 4 4) (bar 8 4) (baz? 12 1)
+                       (reserved 13 3) (thing? 16 1) (fish? 17 1)
+                       (reserved 18 24) (at-the-end 32 4))))))

@@ -201,7 +201,8 @@
 
 (define (insert-item item lst)
   (let loop ((rest lst))
-    (if (null? rest) '()
+    (if (null? rest)
+        (cons item '())
         (let ((this (car lst)) (rest (cdr rest)))
           (if (<= (item-offset item) (item-offset this))
               (cons item (cons this rest))
