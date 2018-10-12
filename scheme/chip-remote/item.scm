@@ -49,7 +49,8 @@
             item-semantics
             item-validator
             item-decode
-            item-encode))
+            item-encode
+            item->list))
 
 (define-record-type <item>
   (make-item name offset width semantics validator meta get set)
@@ -178,3 +179,8 @@
 
 (define (item-encode item value)
   (item-codec semantics-encode item value))
+
+(define (item->list item)
+  (list (item-name item)
+        (item-offset item)
+        (item-width item)))
