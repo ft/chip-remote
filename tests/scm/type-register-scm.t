@@ -18,7 +18,7 @@
   (generate-item #:name name #:offset 3 #:width 2))
 
 (with-fs-test-bundle
- (plan 23)
+ (plan 26)
 
  (define-test "generate-register, call structure works"
    (pass-if-true (register? (generate-register #:default #x12
@@ -94,4 +94,26 @@
      (pass-if-eq? (item-name (register-ref/address reg 'foo))
                   'foo))
    (define-test "register-default works"
-     (pass-if-= (register-default reg) #x12))))
+     (pass-if-= (register-default reg) #x12)))
+
+ (let ((reg (generate-register #:contents
+                               (address 0 4 #:default 10)
+                               (foo 4 4) (bar 8 4) (baz? 12 1) (reserved 13 3)
+                               (thing? 16 1) (fish? 17 1) (reserved 18 24)))
+       (moar (generate-item moar 8 4)))
+   (define-test "Removing an item works (bar)"
+     (pass-if-equal? (register->alist (change-register-items reg #:remove 'bar))
+                     '((address 0 4) (foo 4 4) (baz? 12 1) (reserved 13 3)
+                       (thing? 16 1) (fish? 17 1) (reserved 18 24))))
+   (define-test "Inserting an item works (moar)"
+     (pass-if-equal? (register->alist
+                      (change-register-items reg #:insert moar))
+                     '((address 0 4) (foo 4 4) (moar 8 4) (bar 8 4) (baz? 12 1)
+                       (reserved 13 3) (thing? 16 1) (fish? 17 1)
+                       (reserved 18 24))))
+   (define-test "Removing and inserting an item works (moar for bar)"
+     (pass-if-equal? (register->alist
+                      (change-register-items reg #:insert moar #:remove 'bar))
+                     '((address 0 4) (foo 4 4) (moar 8 4) (baz? 12 1)
+                       (reserved 13 3) (thing? 16 1) (fish? 17 1)
+                       (reserved 18 24))))))

@@ -4,9 +4,10 @@
 
 (define-module (chip-remote register)
   #:use-module (ice-9 control)
+  #:use-module (ice-9 match)
   #:use-module (ice-9 pretty-print)
   #:use-module (srfi srfi-1)
-  #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote item)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote utilities)
@@ -26,14 +27,15 @@
             register-set
             register-fold
             register->alist
+            change-register-items
             sorted-items
             define-register))
 
-(define-record-type <register>
+(define-immutable-record-type <register>
   (make-register meta items)
   register?
   (meta register-meta)
-  (items register-items))
+  (items register-items replace-register-items))
 
 (define-syntax expand-content
   (lambda (x)
@@ -151,6 +153,69 @@
   (cond ((symbol? thing) (register-ref reg thing))
         ((integer? thing) (register-address reg thing))
         (else (throw 'invalid-item-address thing))))
+
+(define (assq-or-zero lst key)
+  (or (assq-ref lst key) 0))
+
+(define (just-seen db name)
+  (cons (cons name (+ 1 (assq-or-zero db name)))
+        (filter (lambda (x) (not (eq? name (car x)))) db)))
+
+(define (filter/items fnc items)
+  (let loop ((rest items) (idx 0) (seen '()))
+    (if (null? rest) '()
+        (let* ((this (car rest))
+               (this-name (item-name this))
+               (rest (cdr rest)))
+          (if (fnc idx (assq-or-zero seen this-name) this)
+              (cons this (loop rest (+ 1 idx) (just-seen seen this-name)))
+              (loop rest (+ 1 idx) (just-seen seen this-name)))))))
+
+(define (spec->fnc spec)
+  (match spec
+    ((? number? n) (lambda (idx cnt item) (= idx n)))
+    ((? symbol? x) (lambda (idx cnt item) (eq? x (item-name item))))
+    (((? symbol? x) (? number? n)) (lambda (idx cnt item)
+                                     (and (= cnt n)
+                                          (eq? (item-name item) x))))
+    (('offset (? procedure? compare) (? number? n))
+     (lambda (idx cnt item)
+       (compare (item-offset item) n)))
+    (('width (? procedure? compare) (? number? n))
+     (lambda (idx cnt item)
+       (compare (item-width item) n)))
+    (else (throw 'unknown-register-item-spec spec))))
+
+(define (specs->fnc lst)
+  (lambda (idx cnt item)
+    (let loop ((rest lst))
+      (if (null? rest)
+          #f
+          (or ((spec->fnc (car rest)) idx cnt item)
+              (loop (cdr rest)))))))
+
+(define (remove-items specs items)
+  (filter/items (lambda (idx cnt item)
+                  (not ((specs->fnc specs) idx cnt item))) items))
+
+(define (insert-item item lst)
+  (let loop ((rest lst))
+    (if (null? rest) '()
+        (let ((this (car lst)) (rest (cdr rest)))
+          (if (<= (item-offset item) (item-offset this))
+              (cons item (cons this rest))
+              (cons this (insert-item item rest)))))))
+
+(define (insert-items new target)
+  (if (null? new)
+      target
+      (insert-items (cdr new) (insert-item (car new) target))))
+
+(define* (change-register-items reg #:key (remove '()) (insert '()))
+  (define (change fnc x lst) (fnc (if (list? x) x (list x)) lst))
+  (define (ins x lst) (change insert-items x lst))
+  (define (rem x lst) (change remove-items x lst))
+  (replace-register-items reg (ins insert (rem remove (register-items reg)))))
 
 (define (register->alist reg)
   (map item->list (register-items reg)))
