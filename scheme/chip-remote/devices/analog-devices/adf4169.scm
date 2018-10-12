@@ -11,7 +11,7 @@
 
 (define-device adf4169
   #:manufacturer analog-devices
-  #:homepage "http://www.analog.com/en/products/rf-microwave/pll-synth/fractional-n-plls/adf4169.html"
+  #:homepage "http://www.analog.com/en/products/adf4169.html"
   #:datasheet "http://www.analog.com/media/en/technical-documentation/data-sheets/ADF4169.pdf"
   #:keywords '(fractional-n pll direct modulation fsk psk fmcw)
   #:bus (spi #:frame-width 32)
