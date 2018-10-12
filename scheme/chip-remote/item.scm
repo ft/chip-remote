@@ -30,7 +30,8 @@
 ;; arguments.
 
 (define-module (chip-remote item)
-  #:use-module (srfi srfi-9)
+  #:use-module (ice-9 optargs)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote interpreter)
@@ -52,11 +53,11 @@
             item-encode
             item->list))
 
-(define-record-type <item>
+(define-immutable-record-type <item>
   (make-item name offset width semantics validator meta get set)
   item?
   (name item-name)
-  (offset item-offset)
+  (offset item-offset new-item-offset)
   (width item-width)
   (semantics item-semantics)
   (validator item-validator)
@@ -184,3 +185,6 @@
   (list (item-name item)
         (item-offset item)
         (item-width item)))
+
+(define* (derive-item-from item #:key offset)
+  (new-item-offset item (or offset (item-offset item))))
