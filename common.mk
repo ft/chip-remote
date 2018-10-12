@@ -42,7 +42,10 @@ MODULES_MANUFACTURERS += $(CR)/manufacturer/decawave.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/linear-technology.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/texas-instruments.scm
 
-MODULES_DEVICES = $(CR)/devices/analog-devices/adf4169.scm
+MODULES_DEVICES = $(CR)/devices/analog-devices/adf4158.scm
+MODULES_DEVICES += $(CR)/devices/analog-devices/adf4158/registers.scm
+MODULES_DEVICES += $(CR)/devices/analog-devices/adf4158/tables.scm
+MODULES_DEVICES += $(CR)/devices/analog-devices/adf4169.scm
 MODULES_DEVICES += $(CR)/devices/analog-devices/adf4169/registers.scm
 MODULES_DEVICES += $(CR)/devices/analog-devices/adf4169/tables.scm
 MODULES_DEVICES += $(CR)/devices/bosch/bno055.scm
