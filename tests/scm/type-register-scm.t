@@ -103,24 +103,24 @@
        (moar (generate-item moar 8 4))
        (at-the-end (generate-item at-the-end 32 4)))
    (define-test "Removing an item works (bar)"
-     (pass-if-equal? (register->alist (change-register-items reg #:remove 'bar))
+     (pass-if-equal? (register->alist (derive-register-from reg #:remove 'bar))
                      '((address 0 4) (foo 4 4) (baz? 12 1) (reserved 13 3)
                        (thing? 16 1) (fish? 17 1) (reserved 18 24))))
    (define-test "Inserting an item works (moar)"
      (pass-if-equal? (register->alist
-                      (change-register-items reg #:insert moar))
+                      (derive-register-from reg #:insert moar))
                      '((address 0 4) (foo 4 4) (moar 8 4) (bar 8 4) (baz? 12 1)
                        (reserved 13 3) (thing? 16 1) (fish? 17 1)
                        (reserved 18 24))))
    (define-test "Removing and inserting an item works (moar for bar)"
      (pass-if-equal? (register->alist
-                      (change-register-items reg #:insert moar #:remove 'bar))
+                      (derive-register-from reg #:insert moar #:remove 'bar))
                      '((address 0 4) (foo 4 4) (moar 8 4) (baz? 12 1)
                        (reserved 13 3) (thing? 16 1) (fish? 17 1)
                        (reserved 18 24))))
    (define-test "Inserting at the end works"
      (pass-if-equal? (register->alist
-                      (change-register-items reg #:insert at-the-end))
+                      (derive-register-from reg #:insert at-the-end))
                      '((address 0 4) (foo 4 4) (bar 8 4) (baz? 12 1)
                        (reserved 13 3) (thing? 16 1) (fish? 17 1)
                        (reserved 18 24) (at-the-end 32 4))))))

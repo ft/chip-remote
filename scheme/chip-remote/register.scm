@@ -27,7 +27,7 @@
             register-set
             register-fold
             register->alist
-            change-register-items
+            derive-register-from
             sorted-items
             define-register))
 
@@ -213,7 +213,7 @@
       target
       (insert-items (cdr new) (insert-item (car new) target))))
 
-(define* (change-register-items reg #:key (remove '()) (insert '()))
+(define* (derive-register-from reg #:key (remove '()) (insert '()))
   (define (change fnc x lst) (fnc (if (list? x) x (list x)) lst))
   (define (ins x lst) (change insert-items x lst))
   (define (rem x lst) (change remove-items x lst))
