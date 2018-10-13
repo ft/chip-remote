@@ -74,7 +74,6 @@
          (real-word (if (zero? rest-len)
                         word
                         (substring word prefix-len rest-len))))
-    (format (current-error-port) "DEBUG: reformat-word ~a~%" real-word)
     (cat prefix
          (cond ((string-prefix? "#:" real-word) (cat "`" real-word "`"))
                ((string= "#t" real-word) (cat "`" real-word "`"))
