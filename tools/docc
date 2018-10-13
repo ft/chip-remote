@@ -1,0 +1,120 @@
+;; -*- scheme -*-
+
+(use-modules (ice-9 format)
+             (ice-9 getopt-long)
+             (ice-9 match)
+             (documentation module)
+             (documentation combine-markdown)
+             (documentation render-markdown))
+
+(setlocale LC_ALL "")
+
+(define (usage signal-sucess?)
+  (format #t "usage: docc [MAIN-OPTION(s)] <COMMAND> [COMMAND-OPTION(s)]~%")
+  (exit (if signal-sucess? 0 1)))
+
+(define (real-path p)
+  (catch #t
+    (lambda ()
+      (let ((old-pwd (getcwd)))
+        (chdir p)
+        (let ((new-pwd (getcwd)))
+          (chdir old-pwd)
+          new-pwd)))
+    (lambda (k . a)
+      (format (current-error-port)
+              "Invalid directory: ‘~a’~%" p))))
+
+(define *main-options*
+  (getopt-long (command-line)
+               '((help (single-char #\h) (value #f))
+                 (topdir (single-char #\t) (value #t)))
+               #:stop-at-first-non-option #t))
+
+(when (option-ref *main-options* 'help #f)
+  (usage #t))
+
+(define *topdir* (real-path (option-ref *main-options* 'topdir ".")))
+(define *cmd+args* (option-ref *main-options* '() '()))
+
+(when (null? *cmd+args*)
+  (usage #f))
+
+(define *common-cmd-options*
+  '((help (single-char #\h) (value #f))
+    (output (single-char #\o) (value #t))))
+
+(define (handle cmdline topdir work help optspec)
+  (let* ((options (getopt-long cmdline (append *common-cmd-options* optspec)))
+         (rest (option-ref options '() '()))
+         (input-file (if (null? rest) #f (car rest)))
+         (output-file (option-ref options 'output #f)))
+    (cond ((option-ref options 'help #f) (help #t))
+          ((not input-file) (help #f))
+          (else (with-output-to-port (if output-file
+                                         (open-output-file output-file)
+                                         (current-output-port))
+                  (lambda ()
+                    (work options topdir input-file)))))))
+
+(define (handle-combine cmdline topdir)
+  (handle cmdline topdir
+          (lambda (options topdir input-file)
+            (combine-markdown input-file #:topdir topdir))
+          (lambda (success?)
+            (format (current-error-port)
+                    "usage: docc combine [OPTION(s)] <INPUT>~%")
+            (exit (if success? 0 1)))
+          '()))
+
+(define (guess-module file)
+  (with-input-from-file file
+    (lambda ()
+      (let loop ((expr (read)))
+        (if (eof-object? expr)
+            (throw 'could-not-guess-module file)
+            (match expr
+              (('define-module mod . rest) mod)
+              (else (loop (read)))))))))
+
+(define (handle-module cmdline topdir)
+  (handle cmdline topdir
+          (lambda (options topdir input-file)
+            (let ((mod (if (option-ref options 'guess-module #f)
+                           (guess-module input-file)
+                           input-file)))
+              (list->markdown (module->documentation mod))))
+          (lambda (success?)
+            (format (current-error-port)
+                    "usage: docc module [OPTION(s)] <INPUT>~%")
+            (exit (if success? 0 1)))
+          '((guess-module (single-char #\g) (value #f)))))
+
+(define (handle-tool cmdline topdir)
+  (handle cmdline topdir
+          (lambda (options topdir input-file)
+            (format #t "undocumented~%"))
+          (lambda (success?)
+            (format (current-error-port)
+                    "usage: docc tool [OPTION(s)] <INPUT>~%")
+            (exit (if success? 0 1)))
+          '()))
+
+(let ((cmd (car *cmd+args*)))
+  (catch 'could-not-guess-module
+    (lambda ()
+      (catch 'system-error
+        (lambda ()
+          (cond ((string= cmd "module") (handle-module *cmd+args* *topdir*))
+                ((string= cmd "combine") (handle-combine *cmd+args* *topdir*))
+                ((string= cmd "tool") (handle-tool *cmd+args* *topdir*))
+                (else (format #t "Unknown command: ‘~a’~%~%" cmd)
+                      (usage #f))))
+        (lambda (key func fmt fmtargs data)
+          (format (current-error-port) "docc: FATAL Error!~%")
+          (apply format (current-error-port) fmt fmtargs)
+          (format (current-error-port) "~%")
+          (exit 1))))
+    (lambda (key file)
+      (format (current-error-port)
+              "docc: Could not guess module from file: ‘~a’~%" file))))

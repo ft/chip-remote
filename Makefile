@@ -7,8 +7,8 @@ RUNTESTS = SCHEME_INTERPRETER="$(GUILE_BINARY)" run-tests
 RUNTESTS += -strip-roots -dispatch-root "$(TEST_PATH)"
 #INSTALL = $(GUILE_CALL) $(TOPDIR)/tools/install
 
-INSTALL = sh ./install
-ORG_EXPORT = sh ./org-export
+INSTALL = sh ./tools/install
+ORG_EXPORT = sh ./tools/org-export
 
 CFLAGS = -Wunsupported-warning -Wunused-variable -Wunused-toplevel
 CFLAGS += -Wunbound-variable -Warity-mismatch -Wduplicate-case-datum
@@ -52,31 +52,11 @@ clean:
 	find . -name "*~" -exec rm -f '{}' +
 	find . -name "*.failure" -exec rm -f '{}' +
 
+doc:
+	(cd doc/ && $(MAKE) all;)
+
 install:
 	$(INSTALL)
-
-spec: rccep-spec.pdf rccep-spec.html rccep-spec.txt
-
-spec-clean:
-	rm -f rccep-spec.pdf rccep-spec.html rccep-spec.txt
-
-rccep-spec.pdf: rccep-spec.org
-	$(ORG_EXPORT) pdf $< $@
-
-rccep-spec.html: rccep-spec.org
-	$(ORG_EXPORT) html $< $@
-
-rccep-spec.txt: rccep-spec.org
-	$(ORG_EXPORT) txt $< $@
-
-client-library.pdf: client-library.org
-	$(ORG_EXPORT) pdf $< $@
-
-client-library.html: client-library.org
-	$(ORG_EXPORT) html $< $@
-
-client-library.txt: client-library.org
-	$(ORG_EXPORT) txt $< $@
 
 test:
 	$(RUNTESTS)
@@ -87,4 +67,4 @@ test-verbose:
 test-debug:
 	$(RUNTESTS) -verbose -dispatch-verbose -debug
 
-.PHONY: all compile clean fw-simulator install spec spec-clean test test-debug test-verbose
+.PHONY: all compile clean doc fw-simulator install test test-debug test-verbose

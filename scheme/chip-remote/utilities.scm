@@ -6,7 +6,8 @@
             map/last
             kwa-ref
             log2
-            fmt))
+            fmt
+            symbol-upcase))
 
 (define-syntax-rule (cat str ...)
   (string-concatenate (list str ...)))
@@ -42,3 +43,6 @@
   (cond ((null? lst) '())
         ((null? (cdr lst)) (cons (fnc #t (car lst)) '()))
         (else (cons (fnc #f (car lst)) (map/last fnc (cdr lst))))))
+
+(define (symbol-upcase sym)
+  (string->symbol (string-upcase (symbol->string sym))))
