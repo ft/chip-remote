@@ -1,3 +1,19 @@
+#+TITLE: Chip Remote Library Overview
+#+SUBTITLE: The Theoretical Minimum
+#+AUTHOR: Frank Terbeck
+#+EMAIL: ft@bewatermyfriend.org
+#+OPTIONS: num:t toc:nil
+#+ATTR_ASCII: :width 79
+#+LATEX_CLASS_OPTIONS: [a4paper]
+# #+LATEX_HEADER: \textwidth 13cm
+# #+LATEX_HEADER: \hoffset 0cm
+
+#+LATEX: \setlength\parskip{0.2cm}
+
+#+LATEX: \vspace{6cm}
+
+#+LATEX: \thispagestyle{empty}
+
 * Overview of the chip-remote client library
 
 The client library is written in Scheme (in particular, the GNU Guile
@@ -46,24 +62,25 @@ descriptions in a concise manner. At the heart of these extensions lies the
 ~(chip-remote process-plist)~ module. It offers utilities to implement macros
 that behave like this:
 
-#+BEGIN_SRC scheme
+#+BEGIN_EXAMPLE
 (define-device foobar
   #:manufacturer some-company
   #:homepage "http://somecomp.tld/foobar"
   #:datasheet "http://docs.somecomp.tld/foobar.pdf"
   #:keywords '(foo and bar)
   #:register-width 16
-  #:register (#:contents (enable-output? 0 1 #:default 'no)
-                         (shutdown? 1 1 #:default 'no)
-                         (reserved 2 2)
-                         (low-pass-cfg 4 8
-                                       #:validate range (>= 12) (<= 140)
-                                       #:semantics unsigned-int
-                                       #:default 48)
-                         (gain-cfg 12 4
-                                   #:semantics lookup gain-cfg
-                                   #:default '0dB)))
-#+END_SRC
+  #:register
+  (#:contents (enable-output? 0 1 #:default 'no)
+              (shutdown? 1 1 #:default 'no)
+              (reserved 2 2)
+              (low-pass-cfg 4 8
+                            #:validate range (>= 12) (<= 140)
+                            #:semantics unsigned-int
+                            #:default 48)
+              (gain-cfg 12 4
+                        #:semantics lookup gain-cfg
+                        #:default '0dB)))
+#+END_EXAMPLE
 
 Keywords are used to group information into logical chunks. The grouping is
 configurable and completly controllable.
@@ -241,19 +258,21 @@ accessors.
 
 *** The Datasheet
 
-Let's look at a finctional device called “bfg2000”. Its datasheet describes a
+Let's look at a fictional device called “bfg2000”. Its datasheet describes a
 register map that looks like this:
 
-        |                      3 |             2 |            1 |          0 |
-        |------------------------+---------------+--------------+------------|
-    0x0 | high-performance       |          blast-radius        | power-down |
-        |------------------------+---------------+--------------+------------|
-    0x1 |                         self-destruct-password                     |
-        |------------------------+---------------+--------------+------------|
-    0xa |                               fire-rate                            |
-        |------------------------+---------------+--------------+------------|
-    0xb |   remote-controlled    | self-destruct |        blast - type       |
-        |------------------------+---------------+--------------+------------|
+#+BEGIN_EXAMPLE
+    |                  3 |         2 |        1 |          0 |
+    |--------------------+-----------+----------+------------|
+0x0 | high-performance   |      blast-radius    | power-down |
+    |--------------------+-----------+----------+------------|
+0x1 |                   self-destruct-password               |
+    |--------------------+-----------+----------+------------|
+0xa |                        fire-rate                       |
+    |--------------------+-----------+----------+------------|
+0xb | remote-controlled  | sdestruct |     blast-type        |
+    |--------------------+-----------+----------+------------|
+#+END_EXAMPLE
 
 That's a pretty simple table, fixed width registers with no sub-addressing, but
 varying widths in its sub-fields and a hole consisting of the addresses between
@@ -264,37 +283,43 @@ varying widths in its sub-fields and a hole consisting of the addresses between
 So a first attempt at expressing that table using the register-map abstraction
 looks like this:
 
-      (define-register-map bfg2000
-        (#x0 (contents (power-down 0 1)
-                       (blast-radius 1 2)
-                       (high-performance 3 1)))
-        (#x1 (contents (self-destruct-password 0 4)))
-        (#xa (contents (fire-rate 0 4)))
-        (#xb (contents (blast-type 0 2)
-                       (self-destruct 2 1)
-                       (remote-controlled 3 1))))
+#+BEGIN_EXAMPLE
+(define-register-map bfg2000
+  (#x0 (contents (power-down 0 1)
+                 (blast-radius 1 2)
+                 (high-performance 3 1)))
+  (#x1 (contents (self-destruct-password 0 4)))
+  (#xa (contents (fire-rate 0 4)))
+  (#xb (contents (blast-type 0 2)
+                 (self-destruct 2 1)
+                 (remote-controlled 3 1))))
+#+END_EXAMPLE
 
 If you look at:
 
-        (#x0 (contents (power-down 0 1)
-                       (blast-radius 1 2)
-                       (high-performance 3 1)))
+#+BEGIN_EXAMPLE
+(#x0 (contents (power-down 0 1)
+               (blast-radius 1 2)
+               (high-performance 3 1)))
+#+END_EXAMPLE
 
 That means, it describes the register at address 0x0, which contains the
 following fields:
 
-      - power-down at offset 0 with width 1
-      - blast-radius at offset 1 with width 2
-      - high-performance at offset 3 with width 1
+- power-down at offset 0 with width 1
+- blast-radius at offset 1 with width 2
+- high-performance at offset 3 with width 1
 
 In short, it's a direct transcription of the register-map from the data-sheet
 into a scheme data-structure. The ‘define-register-map’ macro now goes ahead
 and defines the following set of first-level access (for the example of the
 ‘blast-radius’ bits:
 
+#+BEGIN_EXAMPLE
       (set-blast-radius-bits regval bits)
       (get-blast-radius-bits regval)
       (define regaddr:blast-radius #x0)
+#+END_EXAMPLE
 
 And it does this for all bit fields. You get the first-level access functions
 for free.
@@ -313,15 +338,17 @@ complement to encode its value. Fire-rate is an unsigned integer.
 
 Blast-Radius and Blast-Type are 2-bit values that are mapped like this:
 
-     (define blast-type-map '((projectile . #b00)
-                              (plasma     . #b01)
-                              (lightning  . #b10)
-                              (nuclear    . #b11)))
+#+BEGIN_EXAMPLE
+(define blast-type-map '((projectile . #b00)
+                         (plasma     . #b01)
+                         (lightning  . #b10)
+                         (nuclear    . #b11)))
 
-     (define blast-radius-map '((building  . #b00)
-                                (nation    . #b01)
-                                (planetary . #b10)
-                                (galaxy    . #b11)))
+(define blast-radius-map '((building  . #b00)
+                           (nation    . #b01)
+                           (planetary . #b10)
+                           (galaxy    . #b11)))
+#+END_EXAMPLE
 
 This information is crucial for writing second-level access code and for
 decoding register values back into human-readable form. Which means that you'd
@@ -329,12 +356,16 @@ like to inform the system about that, so it can do more work for you.
 
 Previously we had the following expression, describing the ‘power-down’ bit:
 
-        (power-down 0 1)
+#+BEGIN_EXAMPLE
+(power-down 0 1)
+#+END_EXAMPLE
 
 To tell the system, that that's a bit that works as “active-high” logic, that
 definition could be annotated like this:
 
-        (power-down 0 1 #,(=> logic-active-high))
+#+BEGIN_EXAMPLE
+(power-down 0 1 #,(=> logic-active-high))
+#+END_EXAMPLE
 
 Here ‘logic-active-high’ is a function, a bit into a boolean value.
 
@@ -342,22 +373,26 @@ Another example would be the “blast-radius” bits that are defined by the
 mapping defined earlier. To tell the system that connection, we add an
 annotation like this:
 
-        (blast-radius 1 2 #,(=> blast-radius-map))
+#+BEGIN_EXAMPLE
+(blast-radius 1 2 #,(=> blast-radius-map))
+#+END_EXAMPLE
 
 If no annotation is defined, the default is the ‘literal-binary’ function, that
 takes the bit-field literally without any other interpretation.
 
 A complete and annotated register map definition could look like this:
 
-      (define-register-map bfg2000
-        (#x0 (contents (power-down 0 1 #,(=> logic-active-high))
-                       (blast-radius 1 2 #,(=> blast-radius-map))
-                       (high-performance 3 1 #,(=> logic-active-high))))
-        (#x1 (contents (self-destruct-password 0 4 #,(=> twos-complement))))
-        (#xa (contents (fire-rate 0 4 #,(=> unsigned-integer))))
-        (#xb (contents (blast-type 0 2 #,(=> blast-type-map))
-                       (self-destruct 2 1 #,(=> logic-active-high))
-                       (remote-controlled 3 1 #,(=> logic-active-high)))))
+#+BEGIN_EXAMPLE
+(define-register-map bfg2000
+  (#x0 (contents (power-down 0 1 #,(=> logic-active-high))
+                 (blast-radius 1 2 #,(=> blast-radius-map))
+                 (high-performance 3 1 #,(=> logic-active-high))))
+  (#x1 (contents (self-destruct-password 0 4 #,(=> twos-complement))))
+  (#xa (contents (fire-rate 0 4 #,(=> unsigned-integer))))
+  (#xb (contents (blast-type 0 2 #,(=> blast-type-map))
+                 (self-destruct 2 1 #,(=> logic-active-high))
+                 (remote-controlled 3 1 #,(=> logic-active-high)))))
+#+END_EXAMPLE
 
 With careful definition and annotation such as this, the decoder part of the
 framework will just work.
