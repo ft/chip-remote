@@ -118,7 +118,7 @@
   (match data
     ((docstring args arity)
      (let-values (((req-args opt-args kw-args other? rest) (decode-args args)))
-       (format #t "Procedure: `(~a" name)
+       (format #t "~%Procedure: `(~a" name)
        (output-mdwn-req-args req-args)
        (output-mdwn-opt-args opt-args)
        (output-mdwn-kw-args kw-args)
@@ -129,13 +129,13 @@
 (define (output-mdwn-macro name data)
   (match data
     ((docstring args arity)
-     (format #t "Macro: `(~a ...)`~%" name)
+     (format #t "~%Macro: `(~a ...)`~%" name)
      (docstring->markdown docstring))))
 
 (define (output-mdwn-integer name data)
   (match data
     ((docstring)
-     (format #t "Integer: `~a`~%" name)
+     (format #t "~%Integer: `~a`~%" name)
      (docstring->markdown docstring))))
 
 (define (output-markdown item)
@@ -143,7 +143,7 @@
     ((name 'procedure . rest) (output-mdwn-procedure name rest))
     ((name 'macro . rest) (output-mdwn-macro name rest))
     ((name 'integer . rest) (output-mdwn-integer name rest))
-    (else (format #t "Unknown Type: `~a`~%:   undocumented~%" item))))
+    (else (format #t "~%Unknown Type: `~a`~%:   undocumented~%" item))))
 
 (define* (list->markdown source
                          #:key

@@ -17,7 +17,7 @@
   #:export (modify modify* chain-modify chain-modify* register-matches? regmap-matches?))
 
 (define (not-integer? x)
-  "Predicate for values that are anything BUT integers."
+  "Predicate for values that are anything **but** integers."
   (not (integer? x)))
 
 (define (modify-ref reg addr)
@@ -26,11 +26,11 @@
 This function supports all addressing schemes that chain-modify advertises at a
 register level:
 
-  INTEGER             Reference the Nth item in the register.
-  (INTEGER)           Same as the previous.
-  SYMBOL              Reference the first item named SYMBOL.
-  (SYMBOL)            Same as the previous.
-  (SYMBOL INTEGER)    Reference the Nth item named SYMBOL."
+    INTEGER             Reference the Nth item in the register.
+    (INTEGER)           Same as the previous.
+    SYMBOL              Reference the first item named SYMBOL.
+    (SYMBOL)            Same as the previous.
+    (SYMBOL INTEGER)    Reference the Nth item named SYMBOL."
   (match addr
     (((? integer? i)) (register-address reg i))
     ((? integer? i) (register-address reg i))
@@ -52,14 +52,16 @@ See the modify function about parameters' semantics."
         (throw 'invalid-value-for-item value item))))
 
 (define (register-matches? reg addr)
-  "Checks if an address references something in the given register."
+  "Checks if an address (`addr`) references something in the given
+register (`reg`)."
   (match addr
     ((ra . rest) (eqv? ra (car reg)))
     (name (register-ref (cdr reg) name))
     (_  #f)))
 
 (define (regmap-matches? regmap addr)
-  "Checks if an address references something in the given register-map."
+  "Checks if an address (`addr`) references something in the given
+register-map (`regmap`)."
   (match addr
     ((rma . rest) (eqv? rma (car regmap)))
     (name (register-map-ref (cdr regmap) name))
@@ -100,9 +102,9 @@ See the modify function about parameters' semantics."
 (define (modify target init address value)
   "Performs a modification on a target
 
-The ADDRESS parameter will be used to reference an item in the target. The INIT
-parameter is the value to apply the modification to. And VALUE is the value
-used with the item's semantics to produce the desired result."
+The ‘address’ parameter will be used to reference an item in the target. The
+‘init’ parameter is the value to apply the modification to. And ‘value’ is the
+value used with the item's semantics to produce the desired result."
   ((cond ((register? target) modify-register)
          ((register-map? target) modify-register-map)
          ((page-map? target) modify-page-map)
@@ -120,29 +122,31 @@ used with the item's semantics to produce the desired result."
    target))
 
 (define (modify* target address value)
+  "This is the same as ‘modify’ with its ‘init’ parameter set to the default
+value that can be derived for ‘target’."
   (modify target (default-by-target target) address value))
 
 (define (chain-modify target init . lst)
   "Apply multiple modifications to a target
 
-With a target being one of: register, register-map, page-map or device. The
-init parameter is the value from which to start applying all the listed
-modifications, which are passed to the function as all parameters following the
-init parameter.
+With a `target` being one of: `register`, `register-map`, `page-map` or
+`device`. The `init` parameter is the value from which to start applying all
+the listed modifications, which are passed to the function as all parameters
+following the `init` parameter.
 
 Example:
 
-  (chain-modify (device-default adf4169)
-                adf4169
-                '(deviation-offset 9)
-                '(phase -12)
-                '(delay-clock-select pfd-clock-times-clock1)
-                '(ramp-mode triangular)
-                '(ramp-enabled? yes)))
+    (chain-modify (device-default adf4169)
+                  adf4169
+                  '(deviation-offset 9)
+                  '(phase -12)
+                  '(delay-clock-select pfd-clock-times-clock1)
+                  '(ramp-mode triangular)
+                  '(ramp-enabled? yes)))
 
 The modifications are of the form (ADRESS VALUE), where ADDRESS is either a
-symbol, that could be passed to one of the *-ref functions (like device-ref) or
-a list that could be passed to one of the *-address functions (like
+symbol, that could be passed to one of the `*-ref` functions (like device-ref)
+or a list that could be passed to one of the `*-address` functions (like
 device-address) to reference an item."
   (if (null? lst)
       init
@@ -152,5 +156,6 @@ device-address) to reference an item."
                          (cdr lst))))))
 
 (define (chain-modify* target . lst)
-  "Like chain-modify* but with the INIT parameter set to the target's default."
+  "This is the same as ‘chain-modify’ with its ‘init’ parameter set to the
+default value that can be derived for ‘target’."
   (apply chain-modify (cons target (cons (default-by-target target) lst))))

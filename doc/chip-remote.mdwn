@@ -1,51 +1,230 @@
+---
+title: Chip Remote
+subtitle: Reference Manual
+author:
+- name: Frank Terbeck
+  email: ft@bewatermyfriend.org
+section: 7
+date: Oct, 2018
+...
+
+# NAME
+
+`chip-remote` — A library device configuration manipulation
+
+# MODULE REFERENCE
+
+## Core Modules
+
+### `(chip-remote protocol)`
+
 @include scheme/chip-remote/protocol.mdwn@
+
+### `(chip-remote item)`
+
 @include scheme/chip-remote/item.mdwn@
-@include scheme/chip-remote/manufacturer/bosch.mdwn@
-@include scheme/chip-remote/manufacturer/decawave.mdwn@
-@include scheme/chip-remote/manufacturer/analog-devices.mdwn@
-@include scheme/chip-remote/manufacturer/texas-instruments.mdwn@
-@include scheme/chip-remote/manufacturer/linear-technology.mdwn@
+
+### `(chip-remote item builder)`
+
 @include scheme/chip-remote/item/builder.mdwn@
+
+### `(chip-remote commander)`
+
 @include scheme/chip-remote/commander.mdwn@
+
+### `(chip-remote units)`
+
 @include scheme/chip-remote/units.mdwn@
+
+### `(chip-remote register)`
+
 @include scheme/chip-remote/register.mdwn@
+
+### `(chip-remote decode to-c-values)`
+
 @include scheme/chip-remote/decode/to-c-values.mdwn@
+
+### `(chip-remote decode types)`
+
 @include scheme/chip-remote/decode/types.mdwn@
+
+### `(chip-remote decode to-text)`
+
 @include scheme/chip-remote/decode/to-text.mdwn@
+
+### `(chip-remote interpreter)`
+
 @include scheme/chip-remote/interpreter.mdwn@
+
+### `(chip-remote codecs)`
+
 @include scheme/chip-remote/codecs.mdwn@
+
+### `(chip-remote process-plist)`
+
 @include scheme/chip-remote/process-plist.mdwn@
+
+### `(chip-remote register-window)`
+
 @include scheme/chip-remote/register-window.mdwn@
+
+### `(chip-remote device)`
+
 @include scheme/chip-remote/device.mdwn@
+
+### `(chip-remote decode)`
+
 @include scheme/chip-remote/decode.mdwn@
+
+### `(chip-remote combination)`
+
 @include scheme/chip-remote/combination.mdwn@
+
+### `(chip-remote bit-operations)`
+
 @include scheme/chip-remote/bit-operations.mdwn@
+
+### `(chip-remote named-value)`
+
 @include scheme/chip-remote/named-value.mdwn@
+
+### `(chip-remote device transfer)`
+
 @include scheme/chip-remote/device/transfer.mdwn@
+
+### `(chip-remote device access)`
+
 @include scheme/chip-remote/device/access.mdwn@
+
+### `(chip-remote device spi)`
+
 @include scheme/chip-remote/device/spi.mdwn@
+
+### `(chip-remote semantics)`
+
 @include scheme/chip-remote/semantics.mdwn@
+
+### `(chip-remote modify)`
+
 @include scheme/chip-remote/modify.mdwn@
+
+### `(chip-remote io)`
+
 @include scheme/chip-remote/io.mdwn@
+
+### `(chip-remote register-map)`
+
 @include scheme/chip-remote/register-map.mdwn@
+
+### `(chip-remote manufacturer)`
+
 @include scheme/chip-remote/manufacturer.mdwn@
+
+### `(chip-remote validate)`
+
 @include scheme/chip-remote/validate.mdwn@
+
+### `(chip-remote page-map)`
+
 @include scheme/chip-remote/page-map.mdwn@
+
+### `(chip-remote utilities)`
+
 @include scheme/chip-remote/utilities.mdwn@
+
+
+## Device Support Modules
+
+### `(chip-remote devices analog-devices adf4158 tables)`
+
 @include scheme/chip-remote/devices/analog-devices/adf4158/tables.mdwn@
+
+### `(chip-remote devices analog-devices adf4158 registers)`
+
 @include scheme/chip-remote/devices/analog-devices/adf4158/registers.mdwn@
+
+### `(chip-remote devices analog-devices adf4158)`
+
 @include scheme/chip-remote/devices/analog-devices/adf4158.mdwn@
+
+### `(chip-remote devices analog-devices adf4169 tables)`
+
 @include scheme/chip-remote/devices/analog-devices/adf4169/tables.mdwn@
+
+### `(chip-remote devices analog-devices adf4169 registers)`
+
 @include scheme/chip-remote/devices/analog-devices/adf4169/registers.mdwn@
+
+### `(chip-remote devices analog-devices adf4169)`
+
 @include scheme/chip-remote/devices/analog-devices/adf4169.mdwn@
+
+### `(chip-remote devices bosch bno055)`
+
 @include scheme/chip-remote/devices/bosch/bno055.mdwn@
+
+### `(chip-remote devices linear-technology ltc6603)`
+
 @include scheme/chip-remote/devices/linear-technology/ltc6603.mdwn@
+
+### `(chip-remote devices texas-instruments cdce72010)`
+
 @include scheme/chip-remote/devices/texas-instruments/cdce72010.mdwn@
+
+### `(chip-remote devices texas-instruments ads4149)`
+
 @include scheme/chip-remote/devices/texas-instruments/ads4149.mdwn@
+
+### `(chip-remote devices decawave dw1000 tables)`
+
 @include scheme/chip-remote/devices/decawave/dw1000/tables.mdwn@
+
+### `(chip-remote devices decawave dw1000 registers)`
+
 @include scheme/chip-remote/devices/decawave/dw1000/registers.mdwn@
+
+### `(chip-remote devices decawave dw1000)`
+
 @include scheme/chip-remote/devices/decawave/dw1000.mdwn@
+
+
+## Manufacturer Definition Modules
+
+### `(chip-remote manufacturer bosch)`
+
+@include scheme/chip-remote/manufacturer/bosch.mdwn@
+
+### `(chip-remote manufacturer decawave)`
+
+@include scheme/chip-remote/manufacturer/decawave.mdwn@
+
+### `(chip-remote manufacturer analog-devices)`
+
+@include scheme/chip-remote/manufacturer/analog-devices.mdwn@
+
+### `(chip-remote manufacturer texas-instruments)`
+
+@include scheme/chip-remote/manufacturer/texas-instruments.mdwn@
+
+### `(chip-remote manufacturer linear-technology)`
+
+@include scheme/chip-remote/manufacturer/linear-technology.mdwn@
+
+
+## Documentation Generation Modules
+
+### `(documentation combine-markdown)`
+
 @include scheme/documentation/combine-markdown.mdwn@
+
+### `(documentation render-markdown)`
+
 @include scheme/documentation/render-markdown.mdwn@
+
+### `(documentation module)`
+
 @include scheme/documentation/module.mdwn@
+
+### `(documentation more)`
+
 @include scheme/documentation/more.mdwn@
