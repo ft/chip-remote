@@ -11,5 +11,4 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (validate-device mcp43xx
-                  #:multi-items '(address reserved)))
+ (validate-device mcp43xx #:multi-items '(reserved)))
