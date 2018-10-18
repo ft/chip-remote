@@ -2,7 +2,7 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
-(define-module (chip-remote devices microchip mcp43xx registers)
+(define-module (chip-remote devices microchip mcp4351 registers)
   #:use-module (chip-remote item)
   #:use-module (chip-remote item builder)
   #:use-module (chip-remote register)

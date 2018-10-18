@@ -55,8 +55,8 @@ MODULES_DEVICES += $(CR)/devices/decawave/dw1000.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw1000/registers.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw1000/tables.scm
 MODULES_DEVICES += $(CR)/devices/linear-technology/ltc6603.scm
-MODULES_DEVICES += $(CR)/devices/microchip/mcp43xx.scm
-MODULES_DEVICES += $(CR)/devices/microchip/mcp43xx/registers.scm
+MODULES_DEVICES += $(CR)/devices/microchip/mcp4351.scm
+MODULES_DEVICES += $(CR)/devices/microchip/mcp4351/registers.scm
 MODULES_DEVICES += $(CR)/devices/texas-instruments/ads4149.scm
 MODULES_DEVICES += $(CR)/devices/texas-instruments/cdce72010.scm
 

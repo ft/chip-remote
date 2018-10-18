@@ -6,9 +6,9 @@
 
 (use-modules (test tap)
              (test validate-device)
-             (chip-remote devices microchip mcp43xx))
+             (chip-remote devices microchip mcp4351))
 
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (validate-device mcp43xx #:multi-items '(reserved)))
+ (validate-device mcp4351 #:multi-items '(reserved)))
