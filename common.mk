@@ -41,6 +41,7 @@ MODULES_MANUFACTURERS = $(CR)/manufacturer/analog-devices.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/bosch.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/decawave.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/linear-technology.scm
+MODULES_MANUFACTURERS += $(CR)/manufacturer/microchip.scm
 MODULES_MANUFACTURERS += $(CR)/manufacturer/texas-instruments.scm
 
 MODULES_DEVICES = $(CR)/devices/analog-devices/adf4158.scm
@@ -54,6 +55,8 @@ MODULES_DEVICES += $(CR)/devices/decawave/dw1000.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw1000/registers.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw1000/tables.scm
 MODULES_DEVICES += $(CR)/devices/linear-technology/ltc6603.scm
+MODULES_DEVICES += $(CR)/devices/microchip/mcp43xx.scm
+MODULES_DEVICES += $(CR)/devices/microchip/mcp43xx/registers.scm
 MODULES_DEVICES += $(CR)/devices/texas-instruments/ads4149.scm
 MODULES_DEVICES += $(CR)/devices/texas-instruments/cdce72010.scm
 

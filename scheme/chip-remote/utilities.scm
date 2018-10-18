@@ -7,6 +7,7 @@
             kwa-ref
             log2
             fmt
+            number->symbol
             symbol-upcase))
 
 (define-syntax-rule (cat str ...)
@@ -46,3 +47,6 @@
 
 (define (symbol-upcase sym)
   (string->symbol (string-upcase (symbol->string sym))))
+
+(define (number->symbol n)
+  (string->symbol (number->string n)))
