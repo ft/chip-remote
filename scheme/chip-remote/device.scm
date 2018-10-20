@@ -1,10 +1,12 @@
 (define-module (chip-remote device)
   #:use-module (srfi srfi-9)
-  #:use-module (ice-9 pretty-print)
+  #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
+  #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote device access)
   #:use-module (chip-remote device transfer)
   #:use-module (chip-remote device spi)
+  #:use-module (chip-remote item)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote page-map)
@@ -23,7 +25,9 @@
             device-item-names
             device-name
             device-default
-            define-device))
+            define-device
+            find-canonical-address
+            device-extract))
 
 (define-record-type <device>
   (make-device meta page-map access)
@@ -177,3 +181,35 @@
      (device-value-address device value page-addr reg-addr))
     ((device value page-addr reg-addr _ __)
      (device-value-address device value page-addr reg-addr))))
+
+(define (false? x)
+  (not x))
+
+(define (find-canonical-address dev addr)
+  (define (maybe-address? a)
+    (or (not a) (integer? a)))
+  (match addr
+    ;; Just a symbol
+    ((? symbol? addr)
+     (device-ref->address dev addr))
+    ;; Just an integer, assume register address
+    ((? integer? ra)
+     (list #f ra))
+    ;; (#f n) => address register n in page #f
+    (((? false? pa) (? integer? ra))
+     (list #f ra))
+    ;; (n m) => Address specific item in page #f
+    (((? integer? ra) (? integer? io))
+     (list #f ra io))
+    ;; This is a fully qualified address already
+    (((? maybe-address? pa) (? maybe-address? ra) (? integer? io))
+     (list pa ra io))))
+
+(define (device-extract dev value addr)
+  (let* ((faddr (apply find-canonical-address (cons dev addr)))
+         (part (apply device-address (cons dev faddr)))
+         (pv (apply device-value-address (cons* dev value faddr))))
+    `((address . ,faddr)
+      (part . ,part)
+      (value . ,pv)
+      (item . ,(if (item? part) ((item-get part) pv) pv)))))
