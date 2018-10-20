@@ -1,4 +1,5 @@
 (define-module (chip-remote utilities)
+  #:use-module (ice-9 control)
   #:export (!!
             2e
             cat
@@ -8,7 +9,11 @@
             log2
             fmt
             number->symbol
-            symbol-upcase))
+            symbol-upcase
+            either
+            all
+            list-of-integers?
+            list-of-list-of-integers?))
 
 (define-syntax-rule (cat str ...)
   (string-concatenate (list str ...)))
@@ -50,3 +55,29 @@
 
 (define (number->symbol n)
   (string->symbol (number->string n)))
+
+(define (either pred lst)
+  (call/ec (lambda (return)
+             (let loop ((rest lst))
+               (if (null? (cdr rest))
+                   (pred (car rest))
+                   (if (pred (car rest))
+                       (return #t)
+                       (loop (cdr rest))))))))
+
+(define (all pred lst)
+  (call/ec (lambda (return)
+             (let loop ((rest lst))
+               (if (null? (cdr rest))
+                   (pred (car rest))
+                   (if (not (pred (car rest)))
+                       (return #f)
+                       (loop (cdr rest))))))))
+
+(define (list-of-list-of-integers? v)
+  (and (list? v)
+       (all list-of-integers? v)))
+
+(define (list-of-integers? v)
+  (and (list? v)
+       (all integer? v)))

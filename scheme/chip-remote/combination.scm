@@ -14,6 +14,7 @@
   #:use-module (chip-remote register)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote item)
+  #:use-module (chip-remote utilities)
   #:export (make-combination
             combination?
             cmb-parts
@@ -29,41 +30,6 @@
             part-address
             part-transform-from
             part-transform-into))
-
-(define (either pred lst)
-  (call/ec (lambda (return)
-             (let loop ((rest lst))
-               (if (null? (cdr rest))
-                   (pred (car rest))
-                   (if (pred (car rest))
-                       (return #t)
-                       (loop (cdr rest))))))))
-
-(define (all pred lst)
-  (call/ec (lambda (return)
-             (let loop ((rest lst))
-               (if (null? (cdr rest))
-                   (pred (car rest))
-                   (if (not (pred (car rest)))
-                       (return #f)
-                       (loop (cdr rest))))))))
-
-(define (list-of-list-of-integers? v)
-  (and (list? v)
-       (all list-of-integers? v)))
-
-(define (list-of-integers? v)
-  (and (list? v)
-       (all integer? v)))
-
-(define (value-fits-target? target value)
-  (cond ((or (device? target)
-             (page-map? target))
-         (list-of-list-of-integers? value))
-        ((register-map? target)
-         (list-of-integers? value))
-        ((register? target) (integer? value))
-        (else (throw 'unknown-target target))))
 
 (define (find-register-value target addr value)
   (unless (value-fits-target? target value)
