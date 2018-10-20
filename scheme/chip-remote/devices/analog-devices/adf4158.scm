@@ -19,7 +19,9 @@
   #:datasheet "http://www.analog.com/media/en/technical-documentation/data-sheets/ADF4158.pdf"
   #:keywords '(fractional-n pll direct modulation fsk psk fmcw)
   #:bus (spi #:frame-width 32)
-  #:transfer (write-only full-table (lambda (value) (reverse (flatten value))))
+  #:transfer (write-only full-table (lambda (lst)
+                                      (sort lst (lambda (a b)
+                                                  (> (cadr a) (cadr b))))))
   #:register-width 32
   #:register-map (#:table* (0 adf4169:reg:frac/int)
                            (1 reg:lsb-frac)

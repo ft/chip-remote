@@ -70,10 +70,9 @@
             (transfer (da-transfer acc))
             (transform (transfer-transform transfer))
             (write-data (da-write acc)))
-       (for-each (lambda (datum)
-                   (transmit (get-connection state) datum))
-                 (map write-data
-                      (transform (get-data state))))))
+       (for-each
+        (lambda (addr) (cmdr-w/rest 'transmit! (list addr) state))
+        (transform (address-map->addresses (device-address-map dev))))))
 
     ;; Unknown commands error out.
     (else (throw 'unknown-simple-command cmd))))
