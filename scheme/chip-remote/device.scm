@@ -20,6 +20,8 @@
             device-ref->address
             device-access
             device-address
+            device-address-map
+            address-map->addresses
             device-value-address
             device-registers
             device-item-names
@@ -213,3 +215,30 @@
       (part . ,part)
       (value . ,pv)
       (item . ,(if (item? part) ((item-get part) pv) pv)))))
+
+(define (addr< a b)
+  (and (integer? a)
+       (integer? b)
+       (< a b)))
+
+(define (device-address-map dev)
+  (sort (page-map-fold
+         (lambda (page-addr page acc)
+           (cons (cons page-addr
+                       (sort (register-map-fold
+                              (lambda (reg-addr reg acc)
+                                (cons reg-addr acc))
+                              '() page)
+                             addr<))
+                 acc))
+         '() (device-page-map dev))
+        (lambda (a b)
+          (addr< (car a) (car b)))))
+
+(define (address-map->addresses lst)
+  (apply append
+         (map (lambda (a)
+                (map (lambda (b)
+                       (list (car a) b))
+                     (cdr a)))
+              lst)))
