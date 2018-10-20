@@ -15,6 +15,7 @@
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote item)
   #:use-module (chip-remote utilities)
+  #:use-module (chip-remote type-operations)
   #:export (make-combination
             combination?
             cmb-parts
