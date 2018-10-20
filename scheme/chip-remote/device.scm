@@ -197,7 +197,7 @@
      (list #f ra))
     ;; (#f n) => address register n in page #f
     (((? false? pa) (? integer? ra))
-     (list #f ra))
+     (list pa ra))
     ;; (n m) => Address specific item in page #f
     (((? integer? ra) (? integer? io))
      (list #f ra io))
