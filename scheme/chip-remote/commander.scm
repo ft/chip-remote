@@ -4,6 +4,7 @@
 
 (define-module (chip-remote commander)
   #:use-module (ice-9 optargs)
+  #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module ((chip-remote decode) #:prefix cr:)
   #:use-module (chip-remote item)
@@ -77,6 +78,13 @@
     ;; Unknown commands error out.
     (else (throw 'unknown-simple-command cmd))))
 
+(define (transmit-data c dev data)
+  (let ((addr (assq-ref data 'address))
+        (part (assq-ref data 'part))
+        (value (assq-ref data 'value))
+        (write-data (da-write (device-access dev))))
+    (transmit c (write-data (first addr) (second addr) value))))
+
 (define (cmdr-w/rest cmd args state)
   (case cmd
     ((decode)
@@ -93,7 +101,9 @@
                                    (cons (get-data state) args)))))
     ((transmit!)
      (must-be-connected state)
-     (format #t "Transmitting stuff~%"))
+     (let ((c (get-connection state))
+           (extr (device-extract (get-device state) (get-data state) args)))
+       (transmit-data c (get-device state) extr)))
 
     ;; Unknown commands error out here as well.
     (else (throw 'unknown-complex-command cmd args))))
