@@ -26,6 +26,6 @@
 (define* (make-device-access #:key
                              (bus (make-device-access-spi))
                              (transfer (make-device-transfer))
-                             (read identity)
-                             (write identity))
+                             (read (lambda (pa ra) ra))
+                             (write (lambda (pa ra value) value)))
   (make-device-access* bus transfer read write))
