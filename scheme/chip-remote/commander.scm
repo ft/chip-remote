@@ -85,6 +85,13 @@
         (write-data (da-write (device-access dev))))
     (transmit c (write-data (first addr) (second addr) value))))
 
+(define (touched-registers dev lst)
+  (let loop ((rest lst) (acc '()))
+    (if (null? rest)
+        acc
+        (let ((this (car rest)))
+          (loop (cdr rest) (if (member this acc) acc (cons this acc)))))))
+
 (define (cmdr-w/rest cmd args state)
   (case cmd
     ((decode)
@@ -92,7 +99,18 @@
        ((show state) (assq-ref extr 'part) (assq-ref extr 'item))))
     ((change!)
      (must-be-connected state)
-     (format #t "Changing stuff~%"))
+     (cmdr-w/rest 'set! args state)
+     (let ((dev (get-device state)))
+       (for-each
+        (lambda (addr)
+          (cmdr-w/rest 'transmit! (list addr) state))
+        (touched-registers dev
+                           (map (compose (lambda (addr)
+                                           (take addr 2))
+                                         (lambda (addr)
+                                           (find-canonical-address dev addr))
+                                         car)
+                                args)))))
     ((load!)
      (set-data! state (car args)))
     ((set!)
