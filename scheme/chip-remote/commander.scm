@@ -18,11 +18,12 @@
   #:export (make-commander))
 
 (define-record-type <cmdr-state>
-  (make-cmdr-state dev con port default data decode)
+  (make-cmdr-state dev con port address default data decode)
   cmdr-state?
   (dev get-device)
   (con get-connection)
   (port get-port)
+  (address get-address)
   (default get-default)
   (data get-data set-data!)
   (decode show))
@@ -53,7 +54,9 @@
     ((focus!)
      (must-be-connected state)
      (format #t "Focusing port on remote controller~%")
-     (focus (get-connection state) (get-port state)))
+     (let ((c (get-connection state)))
+       (focus c (get-port state))
+       (address c (get-address state))))
     ((open!)
      (format #t "Opening io...~%")
      (let ((c (get-connection state)))
@@ -125,7 +128,9 @@
     ;; Unknown commands error out here as well.
     (else (throw 'unknown-complex-command cmd args))))
 
-(define* (make-commander #:key device connection (port 0) data decode)
+(define* (make-commander #:key
+                         device connection data decode
+                         (port 0) (address 0))
   "Return a device commander object
 
 The chip-remote library provides a powerful framework to express configuration
@@ -146,6 +151,9 @@ The constructor takes a number of keyword arguments:
 
 - ‘#:port’ → The port (in RCCEP terms) the device is accessible through. This
   defaults to 0.
+
+- ‘#:address’ → Configure the address of the device within the RCCEP port, if
+  applicable. Defaults to 0.
 
 - ‘#:data’ → This can be used to initialise the object's register memory. It
   has to fit the device referenced by the commander object. This defaults to the
@@ -173,7 +181,8 @@ Commands without further arguments are called \"simple commands\". They are:
 
 - ‘close!’ → Closes the objects connection
 
-- ‘focus!’ → Focus the port that the device is connected to via RCCEP.
+- ‘focus!’ → Focus port and addres of the device that the object is connected
+  to via RCCEP.
 
 - ‘reset!’ → Resets the register memory to the value supplied at contruction
   time.
@@ -238,7 +247,7 @@ Examples:
     (throw 'cr-missing-data 'connection connection))
   (let* ((default (or data (device-default device)))
          (state (make-cmdr-state device connection port
-                                 default default
+                                 address default default
                                  (or decode cr:decode))))
     (case-lambda
       (()
