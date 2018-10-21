@@ -10,7 +10,7 @@
   #:use-module (chip-remote item)
   #:use-module (chip-remote device)
   #:use-module (chip-remote device access)
-  #:use-module (chip-remote device transfer)
+  #:use-module (chip-remote device transmit)
   #:use-module (chip-remote page-map)
   #:use-module (chip-remote io)
   #:use-module (chip-remote modify)
@@ -67,8 +67,8 @@
      (must-be-connected state)
      (let* ((dev (get-device state))
             (acc (device-access dev))
-            (transfer (da-transfer acc))
-            (transform (transfer-transform transfer))
+            (transmit (da-transmit acc))
+            (transform (transmit-transform transmit))
             (write-data (da-write acc)))
        (for-each
         (lambda (addr) (cmdr-w/rest 'transmit! (list addr) state))
@@ -208,7 +208,7 @@ of them are specialised forms of \"simple commands\":
   referenced by ‘ADDRESS’.
 
 - ‘`change! KEY-VALUE-SPEC` ...’ → This is like ‘set!’, except that when it is
-  done mutating the register memory, it uses ‘`transfer! ADDRESS`’ for all
+  done mutating the register memory, it uses ‘`transmit! ADDRESS`’ for all
   registers that where touched by the changes made to the register memory.
 
 - ‘`load! VALUE`’ → Override the register memory using ‘VALUE’. This only
@@ -234,7 +234,7 @@ Examples:
     (pll 'set! '(power-down? #f)
                '(reference-div-by-2? #t)
                '(ramp-mode triangular))
-    ;; Transfer the local register memory into the device, while
+    ;; Transmit the local register memory into the device, while
     ;; respecting the proper order in which the registers need to
     ;; be transferred as specified in the ADF4169's description.
     (pll 'transmit!)"

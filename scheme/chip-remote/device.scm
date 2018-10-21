@@ -4,7 +4,7 @@
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote device access)
-  #:use-module (chip-remote device transfer)
+  #:use-module (chip-remote device transmit)
   #:use-module (chip-remote device spi)
   #:use-module (chip-remote item)
   #:use-module (chip-remote process-plist)
@@ -78,22 +78,22 @@
                 #'(#:bus (make-type e* ...))))
              (else e)))))
 
-(define group:transfer
-  (group 'transfer
+(define group:transmit
+  (group 'transmit
          #:type 'list
-         #:predicate (lambda (x) (memq x '(#:transfer)))
+         #:predicate (lambda (x) (memq x '(#:transmit)))
          #:transformer
          (lambda (e)
            (syntax-case e ()
-             ((#:transfer (type var transf))
-              #'(make-device-transfer #:type 'type #:variant 'var
+             ((#:transmit (type var transf))
+              #'(make-device-transmit #:type 'type #:variant 'var
                                       #:transform transf))
-             ((#:transfer (type var))
-              #'(make-device-transfer #:type 'type #:variant 'var))
-             ((#:transfer (type))
-              #'(make-device-transfer #:type 'type))
-             ((#:transfer type)
-              #'(make-device-transfer #:type 'type))))))
+             ((#:transmit (type var))
+              #'(make-device-transmit #:type 'type #:variant 'var))
+             ((#:transmit (type))
+              #'(make-device-transmit #:type 'type))
+             ((#:transmit type)
+              #'(make-device-transmit #:type 'type))))))
 
 (define-syntax generate-device
   (lambda (x)
@@ -106,7 +106,7 @@
                       (process-plist #'(pl ...)
                                      group:page
                                      group:access
-                                     group:transfer
+                                     group:transmit
                                      (group 'meta))))
          #`(make-device
             (list (cons key value) ...)
@@ -114,7 +114,7 @@
             (make-device-access #,@(zip-syms #'(acc-key ...)
                                              #'(acc-value ...))
                                 #,@(if (null? #'(transf ...)) #'()
-                                       #'(#:transfer transf ...)))))))))
+                                       #'(#:transmit transf ...)))))))))
 
 (define-syntax-rule (define-device binding e0 e* ...)
   (define binding (generate-device #:name 'binding e0 e* ...)))
