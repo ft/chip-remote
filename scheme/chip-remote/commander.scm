@@ -18,7 +18,7 @@
   #:export (make-commander))
 
 (define-record-type <cmdr-state>
-  (make-cmdr-state dev con port address default data decode)
+  (make-cmdr-state dev con port address default data decode open-hook)
   cmdr-state?
   (dev get-device)
   (con get-connection)
@@ -26,7 +26,8 @@
   (address get-address)
   (default get-default)
   (data get-data set-data!)
-  (decode show))
+  (decode show)
+  (open-hook get-open-hook))
 
 (define (must-be-connected state)
   (let* ((conn (get-connection state))
@@ -63,7 +64,8 @@
     ((open!)
      (let ((c (get-connection state)))
        (io-open c)
-       (hi* c)))
+       (hi* c)
+       ((get-open-hook state) (get-connection state) (get-port state))))
     ((reset!)
      (set-data! state (get-default state)))
     ((trace!)
@@ -132,7 +134,8 @@
 
 (define* (make-commander #:key
                          device connection data decode
-                         (port 0) (address 0))
+                         (port 0) (address 0)
+                         open-hook)
   "Return a device commander object
 
 The chip-remote library provides a powerful framework to express configuration
@@ -250,7 +253,8 @@ Examples:
   (let* ((default (or data (device-default device)))
          (state (make-cmdr-state device connection port
                                  address default default
-                                 (or decode cr:decode))))
+                                 (or decode cr:decode)
+                                 (or open-hook (lambda (c n) #t)))))
     (case-lambda
       (()
        ((show state) (get-device state) (get-data state)))
