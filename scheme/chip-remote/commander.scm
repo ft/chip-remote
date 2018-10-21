@@ -37,6 +37,9 @@
       (throw 'connection-not-opened conn)))
   #t)
 
+(define (setup-port c idx bus)
+  ((access-bus->proc bus) c idx))
+
 (define (cmdr-command cmd state)
   (case cmd
     ((close!)
@@ -53,6 +56,8 @@
     ((focus!)
      (must-be-connected state)
      (let ((c (get-connection state)))
+       (setup-port c (get-port state)
+                   ((compose da-bus device-access get-device) state))
        (focus c (get-port state))
        (address c (get-address state))))
     ((open!)

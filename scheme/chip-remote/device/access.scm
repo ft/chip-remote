@@ -7,7 +7,9 @@
   #:use-module (ice-9 optargs)
   #:use-module (chip-remote device spi)
   #:use-module (chip-remote device transmit)
-  #:export (make-device-access
+  #:use-module (chip-remote protocol)
+  #:export (access-bus->proc
+            make-device-access
             device-access?
             da-bus
             da-transmit
@@ -29,3 +31,15 @@
                              (read (lambda (pa ra) ra))
                              (write (lambda (pa ra value) value)))
   (make-device-access* bus transmit read write))
+
+(define (access-bus->proc bus)
+  (cond ((device-access-spi? bus)
+         (lambda (conn port-idx)
+           (let ((set* (lambda (k v) (set conn port-idx k v))))
+             (set* 'frame-length (spi-frame-width bus))
+             (set* 'bit-order (spi-bit-order bus))
+             (set* 'bit-rate (spi-bit-rate bus))
+             (set* 'clk-phase-delay (spi-clk-phase-delay bus))
+             (set* 'clk-polarity (spi-clk-polarity bus))
+             (set* 'cs-polarity (spi-cs-polarity bus)))))
+        (else (throw 'unknown-bus-description bus))))
