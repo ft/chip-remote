@@ -30,7 +30,7 @@
                                  (frame-width 8)
                                  (bit-order 'msb-first)
                                  (bit-rate 10000)
-                                 (clk-phase-delay #f)
+                                 (clk-phase-delay #t)
                                  (clk-polarity 'leading-edge)
                                  (cs-polarity 'active-low))
   (make-device-access-spi* frame-width bit-order
