@@ -28,7 +28,7 @@
 
 (define* (make-device-access-spi #:key
                                  (frame-width 8)
-                                 (bit-order 'lsb-first)
+                                 (bit-order 'msb-first)
                                  (bit-rate 10000)
                                  (clk-phase-delay #f)
                                  (clk-polarity 'leading-edge)
