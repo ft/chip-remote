@@ -64,5 +64,6 @@ void board_init(void);
 #define CR_PORT0_PIN1 GPIO_PIN_12
 #define CR_PORT0_PIN2 GPIO_PIN_14
 #define CR_PORT0_PIN3 GPIO_PIN_15
+#define CR_PORT0_PIN4 GPIO_PIN_2
 
 #endif /* INC_BOARD_H */

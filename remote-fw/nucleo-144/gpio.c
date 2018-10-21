@@ -67,4 +67,10 @@ board_gpio_init(void)
     GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(CR_PORT0, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = CR_PORT0_PIN4;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(CR_PORT0, &GPIO_InitStruct);
 }

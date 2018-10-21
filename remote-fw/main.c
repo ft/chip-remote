@@ -61,6 +61,7 @@ static struct cr_line port0_lines[] = {
     NEW_LINE(access_port0, dir_port0, 12),
     NEW_LINE(access_port0, dir_port0, 14),
     NEW_LINE(access_port0, dir_port0, 15),
+    NEW_LINE(access_port0, dir_port0, 2),
     LINE_LIST_END
 };
 
