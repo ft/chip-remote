@@ -41,5 +41,6 @@
              (set* 'bit-rate (spi-bit-rate bus))
              (set* 'clk-phase-delay (spi-clk-phase-delay bus))
              (set* 'clk-polarity (spi-clk-polarity bus))
-             (set* 'cs-polarity (spi-cs-polarity bus)))))
+             (set* 'cs-polarity (spi-cs-polarity bus)))
+           (init conn port-idx)))
         (else (throw 'unknown-bus-description bus))))
