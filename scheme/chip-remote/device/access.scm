@@ -38,7 +38,7 @@
            (let ((set* (lambda (k v) (set conn port-idx k v))))
              (set* 'frame-length (spi-frame-width bus))
              (set* 'bit-order (spi-bit-order bus))
-             (set* 'bit-rate (spi-bit-rate bus))
+             (set* 'rate (spi-bit-rate bus))
              (set* 'clk-phase-delay (spi-clk-phase-delay bus))
              (set* 'clk-polarity (spi-clk-polarity bus))
              (set* 'cs-polarity (spi-cs-polarity bus)))
