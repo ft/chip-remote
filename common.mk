@@ -1,8 +1,8 @@
 LOAD_PATH = $(TOPDIR)/scheme
 TEST_PATH = $(TOPDIR)/tests
-GUILE_BINARY = guile
+GUILE_BINARY ?= guile
 GUILE_CALL = $(GUILE_BINARY) -L $(LOAD_PATH) -C $(LOAD_PATH) --no-auto-compile
-GUILD_BINARY = guild
+GUILD_BINARY ?= guild
 
 CR = $(LOAD_PATH)/chip-remote
 CRD = $(LOAD_PATH)/documentation
