@@ -18,8 +18,9 @@
 
 (define reg:lsb-frac
   (derive-register-from adf4169:reg:lsb-frac
-    #:remove '(phase-adjust reserved)
-    #:insert (reserved 28 4)))
+    #:remove '(phase phase-adjust reserved)
+    #:insert (list (reserved 3 12)
+                   (reserved 28 4))))
 
 (define reg:function
   (derive-register-from adf4169:reg:function
