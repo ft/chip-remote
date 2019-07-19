@@ -115,6 +115,14 @@ add_chunk(char *dst, uint32_t dstsize, uint32_t fill,
         return fill;
     }
 
+#ifdef WITH_SEMIHOSTING
+    printf("src[%lu] = {", srcsize);
+    for (size_t i = 0; i < srcsize; ++i) {
+        printf(" 0x%02x", src[i]);
+    }
+    printf(" }\n");
+#endif /* WITH_SEMIHOSTING */
+
     /* We're in copy-mode and the source fits into the destination. Good. */
     memcpy(dst + fill, src, srcsize);
     {
