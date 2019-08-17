@@ -6,6 +6,7 @@ GUILD_BINARY ?= guild
 
 CR = $(LOAD_PATH)/chip-remote
 CRD = $(LOAD_PATH)/documentation
+CRDS = $(LOAD_PATH)/data-structures
 
 MODULES_CORE = $(CR)/bit-operations.scm
 MODULES_CORE += $(CR)/codecs.scm
@@ -63,10 +64,12 @@ MODULES_DEVICES += $(CR)/devices/microchip/mcp4351/registers.scm
 MODULES_DEVICES += $(CR)/devices/texas-instruments/ads4149.scm
 MODULES_DEVICES += $(CR)/devices/texas-instruments/cdce72010.scm
 
+MODULES_DATASTRUCT += $(CRDS)/loadable-fifo.scm
+
 MODULES_DOC = $(CRD)/combine-markdown.scm
 MODULES_DOC += $(CRD)/module.scm
 MODULES_DOC += $(CRD)/more.scm
 MODULES_DOC += $(CRD)/render-markdown.scm
 
 MODULES = $(MODULES_CORE) $(MODULES_MANUFACTURERS) $(MODULES_DEVICES)
-MODULES += $(MODULES_DOC)
+MODULES += $(MODULES_DOC) $(MODULES_DATASTRUCT)
