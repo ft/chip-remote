@@ -167,10 +167,16 @@
         (cons (sof enc) with-eof)
         with-eof)))
 
-(define* (slip-encode state data #:key (full-frame? #t))
+(define (slip-encode-bv state data)
   (let ((len (bytevector-length data)))
     (let loop ((n 0) (acc '()))
       (if (<= len n)
-          (u8-list->bytevector (if full-frame? (enclose! state acc) acc))
+          acc
           (loop (1+ n)
                 (append! acc (encode-octet state (bytevector-u8-ref data n))))))))
+
+(define* (slip-encode state data #:key (full-frame? #t))
+  (let loop ((rest (if (list? data) data (list data))) (acc '()))
+    (if (null? rest)
+        (u8-list->bytevector (if full-frame? (enclose! state acc) acc))
+        (loop (cdr rest) (append! acc (slip-encode-bv state (car rest)))))))
