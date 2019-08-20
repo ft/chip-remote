@@ -33,6 +33,7 @@ MODULES_CORE += $(CR)/protocol.scm
 MODULES_CORE += $(CR)/register-map.scm
 MODULES_CORE += $(CR)/register-window.scm
 MODULES_CORE += $(CR)/register.scm
+MODULES_CORE += $(CR)/register/common.scm
 MODULES_CORE += $(CR)/semantics.scm
 MODULES_CORE += $(CR)/type-operations.scm
 MODULES_CORE += $(CR)/units.scm
