@@ -41,6 +41,7 @@
             make-item
             item?
             item-name
+            new-item-name
             item-offset
             item-width
             item-meta
@@ -56,7 +57,7 @@
 (define-immutable-record-type <item>
   (make-item name offset width semantics validator meta get set)
   item?
-  (name item-name)
+  (name item-name new-item-name)
   (offset item-offset new-item-offset)
   (width item-width)
   (semantics item-semantics)

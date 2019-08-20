@@ -27,6 +27,8 @@
             register-set
             register-fold
             register->alist
+            rename-register
+            prefix-register
             derive-register-from
             sorted-items
             define-register))
@@ -221,3 +223,13 @@
 
 (define (register->alist reg)
   (map item->list (register-items reg)))
+
+(define (prefix-register reg prefix)
+  (rename-register reg
+                   (lambda (item)
+                     (new-item-name item
+                                    (symbol-append prefix
+                                                   (item-name item))))))
+
+(define (rename-register reg fnc)
+  (replace-register-items reg (map fnc (register-items reg))))
