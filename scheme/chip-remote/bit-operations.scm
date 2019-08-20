@@ -5,7 +5,9 @@
 (define-module (chip-remote bit-operations)
   #:export (bit-extract-width
             clear-bits
+            extract-octet
             one-bits
+            put-octet
             set-bits
             logclear))
 
@@ -40,6 +42,12 @@ extract from ‘value’ is addressed by ‘start’ and ‘width’:
     (bit-extract      #b01101010 3 7) => #b1101
     (bit-extract-with #b01101010 3 4) => #b1101"
   (bit-extract value start (+ start width)))
+
+(define (extract-octet value n)
+  (bit-extract-width value (* n 8) 8))
+
+(define (put-octet value octet n)
+  (set-bits value octet 8 (* n 8)))
 
 (define (logclear value bits)
   "Clear ‘bits’ in ‘value’.
