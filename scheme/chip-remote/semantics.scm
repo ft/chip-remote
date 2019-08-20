@@ -62,7 +62,9 @@
         (ones-complement decode-ones-complement encode-ones-complement)
         (twos-complement decode-twos-complement encode-twos-complement)
         (offset-binary decode-offset-binary encode-offset-binary)
-        (signed-magnitude decode-signed-magnitude encode-signed-magnitude)))
+        (signed-magnitude decode-signed-magnitude encode-signed-magnitude)
+        (ieee-754-single decode-ieee-754-single encode-ieee-754-single)
+        (ieee-754-double decode-ieee-754-double encode-ieee-754-double)))
 
     (define (width-type? syn)
       (memq (syntax->datum syn) (map car width-table)))

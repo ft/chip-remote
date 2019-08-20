@@ -5,6 +5,7 @@
 (define-module (chip-remote codecs)
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote named-value)
+  #:use-module (rnrs bytevectors)
   #:export (boolean-true?
             boolean-false?
             decode-boolean
@@ -21,6 +22,10 @@
             encode-offset-binary
             decode-signed-magnitude
             encode-signed-magnitude
+            decode-ieee-754-single
+            encode-ieee-754-single
+            decode-ieee-754-double
+            encode-ieee-754-double
             decode-with-table
             make-table-decoder
             encode-with-table
@@ -114,6 +119,34 @@
 (define (decode-offset-binary width value)
   (let ((half (ash 1 (- width 1))))
     (- value half)))
+
+(define (ensure-width! tag actual required)
+  (unless (= actual required)
+    (throw 'invalid-width tag required actual)))
+
+(define (encode-ieee-754-single width value)
+  (ensure-width! 'ieee-754-single width 32)
+  (let ((bv (make-bytevector 4 0)))
+    (bytevector-ieee-single-set! bv 0 value 'big)
+    (bytevector-u32-ref bv 0 'big)))
+
+(define (decode-ieee-754-single width value)
+  (ensure-width! 'ieee-754-single width 32)
+  (let ((bv (make-bytevector 4 0)))
+    (bytevector-u32-set! bv 0 value 'big)
+    (bytevector-ieee-single-ref bv 0 'big)))
+
+(define (encode-ieee-754-double width value)
+  (ensure-width! 'ieee-754-double width 64)
+  (let ((bv (make-bytevector 8 0)))
+    (bytevector-ieee-double-set! bv 0 value 'big)
+    (bytevector-u64-ref bv 0 'big)))
+
+(define (decode-ieee-754-double width value)
+  (ensure-width! 'ieee-754-double width 64)
+  (let ((bv (make-bytevector 8 0)))
+    (bytevector-u64-set! bv 0 value 'big)
+    (bytevector-ieee-double-ref bv 0 'big)))
 
 ;; Table lookup based codecs
 
