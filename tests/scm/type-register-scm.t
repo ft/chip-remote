@@ -12,7 +12,7 @@
 
 (define (address default)
   (generate-item #:name 'address #:offset 14 #:width 2
-                 #:access 'read-only #:default default))
+                 #:access read-only #:default default))
 
 (define (fnct-that-returns-an-item name)
   (generate-item #:name name #:offset 3 #:width 2))

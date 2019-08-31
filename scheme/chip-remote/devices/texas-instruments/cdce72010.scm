@@ -11,7 +11,7 @@
 ;; The lower four bits of a register represent the register's address.
 (define-register reg-x0
   #:default #x002c0040
-  #:contents (address #:offset 0 #:width 4 #:force #x0 #:access 'read-only)
+  #:contents (address #:offset 0 #:width 4 #:force #x0 #:access read-only)
              (input-buffer-select #:offset 4 #:width 2)
              (primary-secondary-select #:offset 6 #:width 2)
              (vcxo-select #:offset 8 #:width 1)
@@ -30,7 +30,7 @@
 
 (define-register reg-x1
   #:default #x83840051
-  #:contents (address #:offset 0 #:width 4 #:force #x1 #:access 'read-only)
+  #:contents (address #:offset 0 #:width 4 #:force #x1 #:access read-only)
              (ac-dc-select #:offset 4 #:width 1)
              (hysteresis-enable #:offset 5 #:width 1)
              (input-termination #:offset 6 #:width 1)

@@ -35,10 +35,12 @@
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote interpreter)
+  #:use-module (chip-remote item access)
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote validate)
   #:export (generate-item
             make-item
+            derive-item-from
             item?
             item-name
             new-item-name
@@ -55,20 +57,44 @@
             item->list))
 
 (define-immutable-record-type <item>
-  (make-item name offset width semantics validator meta get set)
+  (make-item name offset width semantics validator access meta get set)
   item?
   (name item-name new-item-name)
   (offset item-offset new-item-offset)
   (width item-width)
   (semantics item-semantics)
   (validator item-validator)
+  (access item-access new-item-access)
   (meta item-meta)
   (get item-get)
   (set item-set))
 
+(define access-group
+  (group 'access
+         #:type 'single
+         #:context 'scalar
+         #:predicate (lambda (x) (memq x '(#:access #:access*)))
+         #:transformer (lambda (e)
+                         (syntax-case e ()
+                           ((#:access access)
+                            (syntax-case #'access (none forbidden
+                                                   rw   read-write
+                                                   ro   read-only
+                                                   wo   write-only)
+                              (none       #'(none))
+                              (forbidden  #'(none))
+                              (rw         #'(rw))
+                              (read-write #'(rw))
+                              (ro         #'(ro))
+                              (read-only  #'(ro))
+                              (wo         #'(wo))
+                              (write-only  #'(wo))))
+                           ((#:access* expr)  #'expr)))))
+
 (define semantics-group
   (group 'semantics
          #:type 'list
+         #:context 'scalar
          #:predicate (lambda (x) (memq x '(#:semantics #:semantics*)))
          #:transformer (lambda (e)
                          (syntax-case e ()
@@ -78,6 +104,7 @@
 (define validator-group
   (group 'validator
          #:type 'list
+         #:context 'scalar
          #:predicate
          (lambda (x)
            (memq x '(#:validate #:validate* #:and-validate #:or-validate)))
@@ -95,26 +122,29 @@
 
 (define-syntax generate-item*
   (lambda (x)
+    (define (with-default exp)
+      (syntax-case exp ()
+        (() #'#f)
+        (_ exp)))
     (syntax-case x ()
-      ((kw name offset width (semantics s* ...) () ((key value) ...))
-       #'(kw name offset width (semantics s* ...) (#f) ((key value) ...)))
-      ((kw name offset width () (validator v* ...) ((key value) ...))
-       #'(kw name offset width (#f) (validator v* ...) ((key value) ...)))
-      ((kw name offset width () () ((key value) ...))
-       #'(kw name offset width (#f) (#f) ((key value) ...)))
-      ((kw name offset width (semantics s* ...) (validator v* ...) ((key value) ...))
-       #'(let ((v:name name)
-               (v:width width)
-               (v:offset offset)
-               (v:meta (list (cons key value) ...))
-               (v:semantics semantics)
-               (v:validator validator))
-           (make-item v:name v:offset v:width
-                      (deduce-semantics v:width v:meta v:semantics)
-                      v:validator
-                      v:meta
-                      (lambda (r) (bit-extract-width r v:offset v:width))
-                      (lambda (r v) (set-bits r v v:width v:offset))))))))
+      ((kw name offset width access sem valid? ((key value) ...))
+       (with-syntax ((access (with-default #'access))
+                     (semantics (with-default #'sem))
+                     (validator (with-default #'valid?)))
+         #'(let ((v:name name)
+                 (v:width width)
+                 (v:offset offset)
+                 (v:meta (list (cons key value) ...))
+                 (v:semantics semantics)
+                 (v:validator validator)
+                 (v:access (or access (rw))))
+             (make-item v:name v:offset v:width
+                        (deduce-semantics v:width v:meta v:semantics)
+                        v:validator
+                        v:access
+                        v:meta
+                        (lambda (r) (bit-extract-width r v:offset v:width))
+                        (lambda (r v) (set-bits r v v:width v:offset)))))))))
 
 (define-syntax generate-item
   (lambda (x)
@@ -123,38 +153,43 @@
        (and (not-kw? #'name)
             (not-kw? #'offset)
             (not-kw? #'width))
-       (with-syntax ((((semantics ...) (validator ...) (meta ...))
+       (with-syntax (((access semantics validator (meta ...))
                       (process-plist #'(m ...)
+                                     access-group
                                      semantics-group
                                      validator-group
                                      (group 'meta))))
          #'(generate-item* 'name offset width
-                           (semantics ...) (validator ...)
+                           access semantics validator
                            (meta ...))))
       ((kw name exp0 expn ...)
        (and (not-kw? #'name)
             (is-kw? #'exp0))
-       (with-syntax (((width offset (semantics ...) (validator ...) (meta ...))
+       (with-syntax (((width offset access semantics validator (meta ...))
                       (process-plist #'(exp0 expn ...)
                                      (scalar-group 'width)
                                      (scalar-group 'offset)
+                                     access-group
                                      semantics-group
                                      validator-group
                                      (group 'meta))))
          #'(generate-item* 'name offset width
-                           (semantics ...) (validator ...) (meta ...))))
+                           access semantics validator
+                           (meta ...))))
       ((kw exp0 expn ...)
        (is-kw? #'exp0)
-       (with-syntax (((width offset name (semantics ...) (validator ...) (meta ...))
+       (with-syntax (((width offset name access semantics validator (meta ...))
                       (process-plist #'(exp0 expn ...)
                                      (scalar-group 'width)
                                      (scalar-group 'offset)
                                      (scalar-group 'name)
+                                     access-group
                                      semantics-group
                                      validator-group
                                      (group 'meta))))
          #'(generate-item* name offset width
-                           (semantics ...) (validator ...) (meta ...)))))))
+                           access semantics validator
+                           (meta ...)))))))
 
 (define (item-default item)
   (let ((default (assq #:default (item-meta item)))
@@ -187,5 +222,7 @@
         (item-offset item)
         (item-width item)))
 
-(define* (derive-item-from item #:key offset)
-  (new-item-offset item (or offset (item-offset item))))
+(define* (derive-item-from item #:key offset access)
+  (set-fields item
+              ((item-offset) (or offset (item-offset item)))
+              ((item-access) (or access (item-access item)))))

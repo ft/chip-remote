@@ -5,9 +5,10 @@
 (define-module (chip-remote item builder)
   #:use-module (ice-9 optargs)
   #:use-module (chip-remote item)
+  #:use-module (chip-remote item access)
   #:export (make-address reserved reserved*))
 
-(define* (make-address #:key (access 'read-only) (offset 0) (width #f))
+(define* (make-address #:key (access (ro)) (offset 0) (width #f))
   (unless width (throw 'missing-argument 'width))
   (unless (and (integer? width)
                (>= width 0))
@@ -16,14 +17,14 @@
     (generate-item #:name 'address
                    #:offset offset
                    #:width width
-                   #:access access
+                   #:access* access
                    #:default addr)))
 
 (define (res o w d)
   (generate-item #:name 'reserved
                  #:offset o
                  #:width w
-                 #:access 'read-only
+                 #:access ro
                  #:default d))
 
 (define* (reserved offset width #:key (default 0))
