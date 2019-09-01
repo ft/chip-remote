@@ -56,10 +56,8 @@
 
 (define reg:delay
   (derive-register-from adf4169:reg:delay
-    #:remove `((offset ,= 18)
-               (offset ,>= 21))
-    #:insert (list (reserved 19 1)
-                   (reserved 21 11)
+    #:remove `((offset ,>= 18))
+    #:insert (list (reserved 19 13)
                    (generate-item ramp-delay-fast-lock?
                      #:offset 18
                      #:width 1
