@@ -42,6 +42,7 @@
             make-item
             derive-item-from
             item?
+            item-access
             item-name
             new-item-access
             new-item-name
