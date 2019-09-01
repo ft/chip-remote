@@ -43,6 +43,7 @@
             derive-item-from
             item?
             item-name
+            new-item-access
             new-item-name
             item-offset
             item-width

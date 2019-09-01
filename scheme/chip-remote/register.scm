@@ -30,6 +30,7 @@
             rename-register
             prefix-register
             derive-register-from
+            replace-register-items
             sorted-items
             define-register))
 
