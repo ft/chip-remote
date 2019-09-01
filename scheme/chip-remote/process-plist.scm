@@ -32,6 +32,38 @@
                 (predicate (lambda (x) #t))
                 (transformer default-transformer)
                 (context 'list)) ;; 'scalar
+  "Define a group for processing in plist expressions.
+
+In plists, keys are keywords and anything else is a value. In particular:
+
+  (foobar #:thing   abc 123 def
+          #:another bar
+          #:finally even more stuff here)
+
+Groups are ways to specify how these key/value(s) combinations should be parsed
+into groups of data. These groups are commonly used in (with-syntax ...) forms
+to transform plist-style languages to scheme function calls.
+
+Groups match on keywords: The ‘#:predicate’ parameter should specify a function
+that lets the group pick exactly the parts of the plist that it is supposed to.
+The default here is a function that matches all keywords. This is useful to
+swoop up every key value pair in a plist.
+
+The ‘#:type’ parameter allows the user to control whether the group allows more
+than one value to follow a keyword. This can be achieved be setting this
+parameter to ‘list’. The default is ‘single’.
+
+Another parameter, that must not be confused with the previous is ‘#:context’.
+It allows to differentiate between ’list’ (which is the default) and ‘scalar’.
+With ‘list’, multiple occurances of a group cause the different values to be
+appended into a resulting list. With ‘scalar’ context, multiple occurances of
+the same group cause later occurances to override prior ones.
+
+Finally, the ’#:transformer’ parameter allows transformations on the parsed
+group data.
+
+Chip-remote's test-suite contains ‘process-plist-scm.t’, which has a number of
+illustrative examples uses of ‘plist-process’ and ‘group’."
   (list name type predicate transformer context))
 
 (define (scalar-group name)
