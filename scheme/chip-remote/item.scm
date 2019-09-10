@@ -46,6 +46,8 @@
             item-name
             new-item-access
             new-item-name
+            new-item-meta
+            move-item
             item-offset
             item-width
             item-meta
@@ -67,9 +69,16 @@
   (semantics item-semantics)
   (validator item-validator)
   (access item-access new-item-access)
-  (meta item-meta)
-  (get item-get)
-  (set item-set))
+  (meta item-meta new-item-meta)
+  (get item-get new-item-get)
+  (set item-set new-item-set))
+
+(define (move-item item n)
+  (set-fields
+   item
+   ((item-offset) n)
+   ((item-get) (lambda (r) (bit-extract-width r n (item-width item))))
+   ((item-set) (lambda (r v) (set-bits r v (item-width item) n)))))
 
 (define access-group
   (group 'access
