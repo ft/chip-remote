@@ -23,7 +23,7 @@ timedomain.add_line(tdline);
 spectrum.add_line(fdline);
 
 timedomain.set_xlim(1, 2200)
-timedomain.set_ylim(-0.05, 0.05)
+timedomain.set_ylim(-100, 100)
 spectrum.set_xlim(1, 1100)
 spectrum.set_ylim(-70, 0)
 
@@ -54,7 +54,7 @@ def update(frame):
 
 
     windowed = np.hanning(n) * frame
-    fd = np.multiply(20, np.log10(np.abs(np.fft.fft(windowed)))) - 30
+    fd = np.multiply(20, np.log10(np.abs(np.fft.fft(windowed)))) - 100
     n = int(len(fd) / 2)
     fd = fd[0:n]
     fs = list(range(1, n + 1))
