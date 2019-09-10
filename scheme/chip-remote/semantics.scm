@@ -103,9 +103,7 @@
       ((kw interpreter #:decode d #:encode e)
        #'(generate-semantics interpreter #:encode e #:decode d))
       ((kw scheme #:encode e #:decode d)
-       #'(make-semantics #f 'scheme #f
-                         (make-evaluation d)
-                         (make-evaluation e)))
+       #'(make-semantics #f 'scheme #f d e))
       ((kw scheme #:decode d #:encode e)
        #'(generate-semantics scheme #:encode e #:decode d)))))
 
