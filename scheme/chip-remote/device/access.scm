@@ -4,10 +4,12 @@
 
 (define-module (chip-remote device access)
   #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 optargs)
   #:use-module (chip-remote device spi)
   #:use-module (chip-remote device transmit)
   #:use-module (chip-remote protocol)
+  #:use-module (chip-remote pretty-print)
   #:export (access-bus->proc
             make-device-access
             device-access?
@@ -24,6 +26,18 @@
   ;; These shoud be interpreter script or scheme procedures too.
   (read da-read)
   (write da-write))
+
+(define (pp-device-access port indent da)
+  (let ((pp (make-printer port indent)))
+    (pp-record port 'device-access (lambda ()
+                                     (pp 'bus (da-bus da))
+                                     (pp 'transmit (da-transmit da))
+                                     (pp 'read (da-read da))
+                                     (pp 'write (da-write da))))))
+
+(set-record-type-printer! <device-access>
+  (lambda (rec port)
+    (pp-device-access port (pp-indent) rec)))
 
 (define* (make-device-access #:key
                              (bus (make-device-access-spi))
