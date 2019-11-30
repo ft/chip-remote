@@ -1,6 +1,8 @@
 (define-module (chip-remote manufacturer)
   #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 optargs)
+  #:use-module (chip-remote pretty-print)
   #:export (make-manufacturer
             manufacturer?
             manufacturer-name
@@ -14,6 +16,18 @@
   (name manufacturer-name)
   (homepage manufacturer-homepage)
   (wikipedia manufacturer-wikipedia))
+
+(define (pp-manufacturer port indent man)
+  (let ((pp (make-printer port indent)))
+    (pp-record port 'manufacturer
+               (lambda ()
+                 (pp 'name (manufacturer-name man))
+                 (pp 'homepage (manufacturer-homepage man))
+                 (pp 'wikipedia (manufacturer-wikipedia man))))))
+
+(set-record-type-printer! <manufacturer>
+  (lambda (rec port)
+    (pp-manufacturer port (pp-indent) rec)))
 
 (define* (make-manufacturer #:key
                             (name #f)

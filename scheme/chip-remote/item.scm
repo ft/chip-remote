@@ -38,6 +38,7 @@
   #:use-module (chip-remote item access)
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote validate)
+  #:use-module (chip-remote pretty-print)
   #:export (generate-item
             make-item
             derive-item-from
@@ -72,6 +73,24 @@
   (meta item-meta new-item-meta)
   (get item-get new-item-get)
   (set item-set new-item-set))
+
+(define (pp-item port indent item)
+  (let ((pp (make-printer port indent))
+        (cplx (make-printer/record port indent)))
+    (pp-record port 'item (lambda ()
+                            (pp 'name (item-name item))
+                            (pp 'offset (item-offset item))
+                            (pp 'width (item-width item))
+                            (cplx 'semantics (item-semantics item)
+                                  (@@ (chip-remote semantics) pp-semantics))
+                            (pp 'access (item-access item))
+                            (pp 'meta (item-meta item))
+                            (pp 'get (item-get item))
+                            (pp 'set (item-set item))))))
+
+(set-record-type-printer! <item>
+  (lambda (rec port)
+    (pp-item port (pp-indent) rec)))
 
 (define (move-item item n)
   (set-fields

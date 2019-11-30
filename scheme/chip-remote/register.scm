@@ -9,6 +9,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote item)
+  #:use-module (chip-remote pretty-print)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote utilities)
   #:export (generate-register
@@ -39,6 +40,18 @@
   register?
   (meta register-meta)
   (items register-items replace-register-items))
+
+(define (pp-register port indent reg)
+  (let ((pp (make-printer/assoc port indent))
+        (ppl (make-printer/list port indent)))
+    (pp-record port 'register
+               (lambda ()
+                 (pp 'meta (register-meta reg))
+                 (ppl 'items (register-items reg))))))
+
+(set-record-type-printer! <register>
+  (lambda (rec port)
+    (pp-register port (pp-indent) rec)))
 
 (define-syntax expand-content
   (lambda (x)

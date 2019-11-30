@@ -1,10 +1,12 @@
 (define-module (chip-remote register-map)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 control)
   #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote item)
+  #:use-module (chip-remote pretty-print)
   #:use-module (chip-remote register)
   #:use-module (chip-remote utilities)
   #:export (generate-register-map
@@ -29,6 +31,17 @@
   register-map?
   (meta register-map-meta)
   (table register-map-table))
+
+(define (pp-register-map port indent tab)
+  (let ((pp (make-printer/assoc port indent)))
+    (pp-record port 'register-map
+               (lambda ()
+                 (pp 'meta (register-map-meta tab))
+                 (pp 'table (register-map-table tab))))))
+
+(set-record-type-printer! <register-map>
+  (lambda (rec port)
+    (pp-register-map port (pp-indent) rec)))
 
 (define group:table
   (group 'table
