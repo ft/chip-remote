@@ -8,10 +8,12 @@
   #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote codecs)
   #:use-module (chip-remote interpreter)
+  #:use-module (chip-remote pretty-print)
   #:export (make-semantics
             generate-semantics
             define-semantics
             semantics?
+            semantics-name
             semantics-type
             semantics-data
             semantics-decode
@@ -26,6 +28,20 @@
   (data semantics-data)
   (decode semantics-decode amend-decoder)
   (encode semantics-encode amend-encoder))
+
+(define (pp-semantics port indent sem)
+  (let ((pp (make-printer port indent))
+        (ppo (make-printer/object port indent)))
+    (pp-record port 'semantics (lambda ()
+                                 (pp 'name (semantics-name sem))
+                                 (pp 'type (semantics-type sem))
+                                 (ppo 'data (semantics-data sem))
+                                 (pp 'encode (semantics-encode sem))
+                                 (pp 'decode (semantics-decode sem))))))
+
+(set-record-type-printer! <semantics>
+  (lambda (rec port)
+    (pp-semantics port (pp-indent) rec)))
 
 (define (deduce-semantics width meta semantics)
   (match semantics
