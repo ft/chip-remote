@@ -1,5 +1,6 @@
 (define-module (chip-remote device)
   #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 pretty-print)
@@ -7,6 +8,7 @@
   #:use-module (chip-remote device transmit)
   #:use-module (chip-remote device spi)
   #:use-module (chip-remote item)
+  #:use-module (chip-remote pretty-print)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote page-map)
@@ -37,6 +39,21 @@
   (meta device-meta)
   (page-map device-page-map)
   (access device-access))
+
+(define (pp-device port indent dev)
+  (let ((pp-meta (make-printer/assoc port indent #:simple '(#:keywords)))
+        (cplx (make-printer/record port indent)))
+    (pp-record port 'device
+               (lambda ()
+                 (pp-meta 'meta (device-meta dev))
+                 (cplx 'page-map (device-page-map dev)
+                       (@@ (chip-remote page-map) pp-page-map))
+                 (cplx 'access (device-access dev)
+                       (@@ (chip-remote device access) pp-device-access))))))
+
+(set-record-type-printer! <device>
+  (lambda (rec port)
+    (pp-device port (pp-indent) rec)))
 
 (define group:page
   (group 'pages
