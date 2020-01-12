@@ -41,17 +41,16 @@
   (meta register-meta)
   (items register-items replace-register-items))
 
-(define (pp-register port indent reg)
-  (let ((pp (make-printer/assoc port indent))
-        (ppl (make-printer/list port indent)))
-    (pp-record port 'register
-               (lambda ()
-                 (pp 'meta (register-meta reg))
-                 (ppl 'items (register-items reg))))))
+(define (pp-register reg)
+  `(wrap "#<" ">"
+         (type register) (newline)
+         (indent complex
+                 (key meta) (space ,(register-meta reg)) (newline)
+                 (key items) (space ,(register-items reg)))))
 
 (set-record-type-printer! <register>
-  (lambda (rec port)
-    (pp-register port (pp-indent) rec)))
+  (lambda (reg port)
+    (pp-eval port (pp-register reg))))
 
 (define-syntax expand-content
   (lambda (x)

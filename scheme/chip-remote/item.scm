@@ -41,6 +41,7 @@
   #:use-module (chip-remote pretty-print)
   #:export (generate-item
             make-item
+            pp-item
             derive-item-from
             item?
             item-access
@@ -74,23 +75,22 @@
   (get item-get new-item-get)
   (set item-set new-item-set))
 
-(define (pp-item port indent item)
-  (let ((pp (make-printer port indent))
-        (cplx (make-printer/record port indent)))
-    (pp-record port 'item (lambda ()
-                            (pp 'name (item-name item))
-                            (pp 'offset (item-offset item))
-                            (pp 'width (item-width item))
-                            (cplx 'semantics (item-semantics item)
-                                  (@@ (chip-remote semantics) pp-semantics))
-                            (pp 'access (item-access item))
-                            (pp 'meta (item-meta item))
-                            (pp 'get (item-get item))
-                            (pp 'set (item-set item))))))
+(define (pp-item item)
+  `(wrap "#<" ">"
+         (type item) (newline)
+         (indent complex
+                 (key name) (space ,(item-name item)) (newline)
+                 (key offset) (space ,(item-offset item)) (newline)
+                 (key width) (space ,(item-width item)) (newline)
+                 (key semantics) (space ,(pp-semantics (item-semantics item))) (newline)
+                 (key access) (space ,(item-access item)) (newline)
+                 (key meta) (space ,(item-meta item)) (newline)
+                 (key get) (space ,(item-get item)) (newline)
+                 (key set) (space ,(item-set item)))))
 
 (set-record-type-printer! <item>
-  (lambda (rec port)
-    (pp-item port (pp-indent) rec)))
+  (lambda (item port)
+    (pp-eval port (pp-item item))))
 
 (define (move-item item n)
   (set-fields

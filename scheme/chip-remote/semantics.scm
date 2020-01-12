@@ -10,6 +10,7 @@
   #:use-module (chip-remote interpreter)
   #:use-module (chip-remote pretty-print)
   #:export (make-semantics
+            pp-semantics
             generate-semantics
             define-semantics
             semantics?
@@ -29,19 +30,19 @@
   (decode semantics-decode amend-decoder)
   (encode semantics-encode amend-encoder))
 
-(define (pp-semantics port indent sem)
-  (let ((pp (make-printer port indent))
-        (ppo (make-printer/object port indent)))
-    (pp-record port 'semantics (lambda ()
-                                 (pp 'name (semantics-name sem))
-                                 (pp 'type (semantics-type sem))
-                                 (ppo 'data (semantics-data sem))
-                                 (pp 'encode (semantics-encode sem))
-                                 (pp 'decode (semantics-decode sem))))))
+(define (pp-semantics sem)
+  `(wrap "#<" ">"
+         (type semantics) (newline)
+         (indent complex
+                 (key name) (space ,(semantics-name sem)) (newline)
+                 (key type) (space ,(semantics-type sem)) (newline)
+                 (key data) (space ,(semantics-data sem)) (newline)
+                 (key encode) (space ,(semantics-encode sem)) (newline)
+                 (key decode) (space ,(semantics-decode sem)))))
 
 (set-record-type-printer! <semantics>
-  (lambda (rec port)
-    (pp-semantics port (pp-indent) rec)))
+  (lambda (sem port)
+    (pp-eval port (pp-semantics sem))))
 
 (define (deduce-semantics width meta semantics)
   (match semantics

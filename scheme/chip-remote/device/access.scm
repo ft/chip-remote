@@ -27,17 +27,18 @@
   (read da-read)
   (write da-write))
 
-(define (pp-device-access port indent da)
-  (let ((pp (make-printer port indent)))
-    (pp-record port 'device-access (lambda ()
-                                     (pp 'bus (da-bus da))
-                                     (pp 'transmit (da-transmit da))
-                                     (pp 'read (da-read da))
-                                     (pp 'write (da-write da))))))
+(define (pp-device-access da)
+  `(wrap "#<" ">"
+         (type device-access) (newline)
+         (indent complex
+                 (key bus) (space ,(da-bus da)) (newline)
+                 (key transmit) (space ,(da-transmit da)) (newline)
+                 (key read) (space ,(da-read da)) (newline)
+                 (key write) (space ,(da-write da)) (newline))))
 
 (set-record-type-printer! <device-access>
-  (lambda (rec port)
-    (pp-device-access port (pp-indent) rec)))
+  (lambda (da port)
+    (pp-eval port (pp-device-access da))))
 
 (define* (make-device-access #:key
                              (bus (make-device-access-spi))

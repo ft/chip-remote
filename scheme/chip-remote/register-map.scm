@@ -32,16 +32,16 @@
   (meta register-map-meta)
   (table register-map-table))
 
-(define (pp-register-map port indent tab)
-  (let ((pp (make-printer/assoc port indent)))
-    (pp-record port 'register-map
-               (lambda ()
-                 (pp 'meta (register-map-meta tab))
-                 (pp 'table (register-map-table tab))))))
+(define (pp-register-map rm)
+  `(wrap "#<" ">"
+         (type register-map) (newline)
+         (indent complex
+                 (key meta) (space ,(register-map-meta rm))
+                 (key table) (space ,(register-map-table rm)))))
 
 (set-record-type-printer! <register-map>
-  (lambda (rec port)
-    (pp-register-map port (pp-indent) rec)))
+  (lambda (rm port)
+    (pp-eval port (pp-register-map rm))))
 
 (define group:table
   (group 'table

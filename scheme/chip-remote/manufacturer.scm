@@ -4,6 +4,7 @@
   #:use-module (ice-9 optargs)
   #:use-module (chip-remote pretty-print)
   #:export (make-manufacturer
+            pp-manufacturer
             manufacturer?
             manufacturer-name
             manufacturer-homepage
@@ -25,9 +26,17 @@
                  (pp 'homepage (manufacturer-homepage man))
                  (pp 'wikipedia (manufacturer-wikipedia man))))))
 
+(define (pp-manufacturer man)
+  `(wrap "#<" ">"
+         (type man) (newline)
+         (indent complex
+                 (key name) (space ,(manufacturer-name man)) (newline)
+                 (key homepage) (space ,(manufacturer-homepage man)) (newline)
+                 (key wikipedia) (space ,(manufacturer-wikipedia man)))))
+
 (set-record-type-printer! <manufacturer>
-  (lambda (rec port)
-    (pp-manufacturer port (pp-indent) rec)))
+  (lambda (man port)
+    (pp-eval port (pp-manufacturer man))))
 
 (define* (make-manufacturer #:key
                             (name #f)

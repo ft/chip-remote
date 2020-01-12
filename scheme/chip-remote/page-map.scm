@@ -11,6 +11,7 @@
   #:use-module (chip-remote utilities)
   #:export (generate-page-map
             make-page-map
+            pp-page-map
             page-map?
             page-map-table
             page-map-register-maps
@@ -41,9 +42,15 @@
                (lambda ()
                  (pp 'table (page-map-table tab))))))
 
+(define (pp-page-map pm)
+  `(wrap "#<" ">"
+         (type page-map) (newline)
+         (indent complex
+                 (key table) (space ,(page-map-table pm)))))
+
 (set-record-type-printer! <page-map>
-  (lambda (rec port)
-    (pp-page-map port (pp-indent) rec)))
+  (lambda (pm port)
+    (pp-eval port (pp-page-map pm))))
 
 (define (page-map-register-maps pm)
   (map cdr (page-map-table pm)))

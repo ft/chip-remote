@@ -14,6 +14,7 @@
   #:use-module (chip-remote page-map)
   #:export (generate-device
             make-device
+            pp-device
             device?
             device-meta
             device-page-map
@@ -40,20 +41,17 @@
   (page-map device-page-map)
   (access device-access))
 
-(define (pp-device port indent dev)
-  (let ((pp-meta (make-printer/assoc port indent #:simple '(#:keywords)))
-        (cplx (make-printer/record port indent)))
-    (pp-record port 'device
-               (lambda ()
-                 (pp-meta 'meta (device-meta dev))
-                 (cplx 'page-map (device-page-map dev)
-                       (@@ (chip-remote page-map) pp-page-map))
-                 (cplx 'access (device-access dev)
-                       (@@ (chip-remote device access) pp-device-access))))))
+(define (pp-device device)
+  `(wrap "#<" ">"
+         (type device) (newline)
+         (indent complex
+                 (key meta) (space ,(device-meta device)) (newline)
+                 (key page-map) (space ,(device-page-map device)) (newline)
+                 (key data) (space ,(device-access device)))))
 
 (set-record-type-printer! <device>
-  (lambda (rec port)
-    (pp-device port (pp-indent) rec)))
+  (lambda (device port)
+    (pp-eval port (pp-device device))))
 
 (define group:page
   (group 'pages
