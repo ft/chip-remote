@@ -194,3 +194,5 @@
     (write-char #\newline port)
     (pp-do-indent port (+ (pp-indent 'complex) indent))
     (pp-object port indent value #:first? #t)))
+
+(define make-pp-script list)
