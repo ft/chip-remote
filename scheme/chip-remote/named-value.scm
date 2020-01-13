@@ -20,11 +20,12 @@
   (value value-data))
 
 (define (pp-named-value named-value)
-  `(wrap "#<" ">"
-         (type named-value) (newline)
-         (indent complex
-                 (key name) (space ,(value-name named-value)) (newline)
-                 (key value) (space ,(value-data named-value)))))
+  (pp-script
+   `(wrap "#<" ">"
+          (type named-value) (newline)
+          (indent complex
+                  (key name) (space ,(value-name named-value)) (newline)
+                  (key value) (space ,(value-data named-value))))))
 
 (set-record-type-printer! <named-value>
   (lambda (named-value port)

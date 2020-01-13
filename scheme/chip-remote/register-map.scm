@@ -33,11 +33,12 @@
   (table register-map-table))
 
 (define (pp-register-map rm)
-  `(wrap "#<" ">"
-         (type register-map) (newline)
-         (indent complex
-                 (key meta) (space ,(register-map-meta rm))
-                 (key table) (space ,(register-map-table rm)))))
+  (pp-script
+   `(wrap "#<" ">"
+          (type register-map) (newline)
+          (indent complex
+                  (key meta) (space ,(register-map-meta rm)) (newline)
+                  (key table) (space ,(register-map-table rm))))))
 
 (set-record-type-printer! <register-map>
   (lambda (rm port)

@@ -28,13 +28,14 @@
   (write da-write))
 
 (define (pp-device-access da)
-  `(wrap "#<" ">"
-         (type device-access) (newline)
-         (indent complex
-                 (key bus) (space ,(da-bus da)) (newline)
-                 (key transmit) (space ,(da-transmit da)) (newline)
-                 (key read) (space ,(da-read da)) (newline)
-                 (key write) (space ,(da-write da)) (newline))))
+  (pp-script
+   `(wrap "#<" ">"
+          (type device-access) (newline)
+          (indent complex
+                  (key bus) (space ,(da-bus da)) (newline)
+                  (key transmit) (space ,(da-transmit da)) (newline)
+                  (key read) (space ,(da-read da)) (newline)
+                  (key write) (space ,(da-write da))))))
 
 (set-record-type-printer! <device-access>
   (lambda (da port)

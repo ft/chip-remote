@@ -43,10 +43,11 @@
                  (pp 'table (page-map-table tab))))))
 
 (define (pp-page-map pm)
-  `(wrap "#<" ">"
-         (type page-map) (newline)
-         (indent complex
-                 (key table) (space ,(page-map-table pm)))))
+  (pp-script
+   `(wrap "#<" ">"
+          (type page-map) (newline)
+          (indent complex
+                  (key table) (space ,(page-map-table pm))))))
 
 (set-record-type-printer! <page-map>
   (lambda (pm port)

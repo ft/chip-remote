@@ -42,11 +42,12 @@
   (items register-items replace-register-items))
 
 (define (pp-register reg)
-  `(wrap "#<" ">"
-         (type register) (newline)
-         (indent complex
-                 (key meta) (space ,(register-meta reg)) (newline)
-                 (key items) (space ,(register-items reg)))))
+  (pp-script
+   `(wrap "#<" ">"
+          (type register) (newline)
+          (indent complex
+                  (key meta) (space ,(register-meta reg)) (newline)
+                  (key items) (space ,(register-items reg))))))
 
 (set-record-type-printer! <register>
   (lambda (reg port)

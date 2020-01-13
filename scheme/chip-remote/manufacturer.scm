@@ -27,12 +27,13 @@
                  (pp 'wikipedia (manufacturer-wikipedia man))))))
 
 (define (pp-manufacturer man)
-  `(wrap "#<" ">"
-         (type man) (newline)
-         (indent complex
-                 (key name) (space ,(manufacturer-name man)) (newline)
-                 (key homepage) (space ,(manufacturer-homepage man)) (newline)
-                 (key wikipedia) (space ,(manufacturer-wikipedia man)))))
+  (pp-script
+   `(wrap "#<" ">"
+          (type man) (newline)
+          (indent complex
+                  (key name) (space ,(manufacturer-name man)) (newline)
+                  (key homepage) (space ,(manufacturer-homepage man)) (newline)
+                  (key wikipedia) (space ,(manufacturer-wikipedia man))))))
 
 (set-record-type-printer! <manufacturer>
   (lambda (man port)

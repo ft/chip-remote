@@ -4,14 +4,27 @@
 
 (define-module (chip-remote pretty-print)
   #:use-module (ice-9 match)
-  #:export (pp-indent pp-do-indent pp-eval* pp-eval))
+  #:use-module (srfi srfi-9 gnu)
+  #:export (pp-indent
+            pp-do-indent
+            pp-eval*
+            pp-eval
+            pp-script
+            pp-dispatch))
+
+(define-immutable-record-type <pp-script>
+  (pp-script script)
+  pp-script?
+  (script pp-get-script))
 
 (define* (pp-indent #:optional (kind 'default))
-  (case kind
-    ((default) 4)
-    ((complex) 2)
-    ((list)    1)
-    (else      0)))
+  (if (integer? kind)
+      kind
+      (case kind
+        ((default) 4)
+        ((complex) 2)
+        ((list)    1)
+        (else      0))))
 
 (define (pp-do-indent port indent)
   (let loop ((n indent))
@@ -26,8 +39,10 @@
                 prg
                 (list prg))))
 
-(define (pp-eval* port prg last-op indent)
-  (match prg
+(define (pp-eval* port script last-op indent)
+  (match (if (pp-script? script)
+             (pp-get-script script)
+             script)
     (('wrap open close . rest)
      (format port "~a" open)
      (pp-eval* port rest last-op indent)
@@ -46,7 +61,10 @@
      (format port "~a:" key) 'key)
 
     (('space value)
-     (format port " ~a" value)
+     (display #\space port)
+     (if (pp-script? value)
+         (pp-eval* port value last-op (cons 10 indent))
+         (format port "~a" value))
      'space)
 
     (('type type)
@@ -70,3 +88,16 @@
 
 (define (pp-eval port prg)
   (pp-eval* port prg 'nop '()))
+
+(define-syntax pp-dispatch-table
+  (lambda (x)
+    (syntax-case x ()
+      ((_ value (mod type? pp-type) ...)
+       #'(cond (((@ (chip-remote mod) type?) value)
+                ((@ (chip-remote mod) pp-type) value)) ...
+                (else value))))))
+
+(define (pp-dispatch x)
+  (pp-dispatch-table x
+                     (device device? pp-device)
+                     (named-value named-value? pp-named-value)))

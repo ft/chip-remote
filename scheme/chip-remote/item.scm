@@ -76,17 +76,18 @@
   (set item-set new-item-set))
 
 (define (pp-item item)
-  `(wrap "#<" ">"
-         (type item) (newline)
-         (indent complex
-                 (key name) (space ,(item-name item)) (newline)
-                 (key offset) (space ,(item-offset item)) (newline)
-                 (key width) (space ,(item-width item)) (newline)
-                 (key semantics) (space ,(pp-semantics (item-semantics item))) (newline)
-                 (key access) (space ,(item-access item)) (newline)
-                 (key meta) (space ,(item-meta item)) (newline)
-                 (key get) (space ,(item-get item)) (newline)
-                 (key set) (space ,(item-set item)))))
+  (pp-script
+   `(wrap "#<" ">"
+          (type item) (newline)
+          (indent complex
+                  (key name) (space ,(item-name item)) (newline)
+                  (key offset) (space ,(item-offset item)) (newline)
+                  (key width) (space ,(item-width item)) (newline)
+                  (key semantics) (space ,(pp-semantics (item-semantics item))) (newline)
+                  (key access) (space ,(item-access item)) (newline)
+                  (key meta) (space ,(item-meta item)) (newline)
+                  (key get) (space ,(item-get item)) (newline)
+                  (key set) (space ,(item-set item))))))
 
 (set-record-type-printer! <item>
   (lambda (item port)
