@@ -39,6 +39,11 @@
                 prg
                 (list prg))))
 
+(define (key-indent value)
+  (+ 2 (string-length (if (symbol? value)
+                          (symbol->string value)
+                          value))))
+
 (define (pp-eval* port script last-op indent)
   (match (if (pp-script? script)
              (pp-get-script script)
@@ -55,6 +60,12 @@
      (pp-eval* port rest last-op (cons kind indent))
      'indent)
 
+    (('key/value key value)
+     (pp-eval* port `(key ,key) last-op indent)
+     (pp-eval* port `(space ,value) last-op
+               (cons (key-indent key) indent))
+     'key/value)
+
     (('key key)
      (and (eq? last-op 'indent)
           (eval-indent port indent))
@@ -63,7 +74,7 @@
     (('space value)
      (display #\space port)
      (if (pp-script? value)
-         (pp-eval* port value last-op (cons 10 indent))
+         (pp-eval* port value last-op indent)
          (format port "~a" value))
      'space)
 
@@ -83,7 +94,7 @@
      (eval-indent port indent)
      'newline)
 
-    (else (format #t "not-handled-yet ~a~%" prg)
+    (else (format #t "not-handled-yet ~a~%" script)
           'unknown-instruction)))
 
 (define (pp-eval port prg)

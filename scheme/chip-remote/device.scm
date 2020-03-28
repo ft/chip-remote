@@ -47,8 +47,8 @@
           (type device) (newline)
           (indent complex
                   (key meta) (space ,(device-meta device)) (newline)
-                  (key page-map) (space ,(device-page-map device)) (newline)
-                  (key data) (space ,(device-access device))))))
+                  (key access) (space ,(device-access device)) (newline)
+                  (key page-map) (space ,(device-page-map device))))))
 
 (set-record-type-printer! <device>
   (lambda (device port)

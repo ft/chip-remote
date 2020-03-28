@@ -37,7 +37,7 @@
           (indent complex
                   (key name) (space ,(semantics-name sem)) (newline)
                   (key type) (space ,(semantics-type sem)) (newline)
-                  (key data) (space ,(pp-dispatch (semantics-data sem))) (newline)
+                  (key/value data ,(pp-dispatch (semantics-data sem))) (newline)
                   (key encode) (space ,(semantics-encode sem)) (newline)
                   (key decode) (space ,(semantics-decode sem))))))
 

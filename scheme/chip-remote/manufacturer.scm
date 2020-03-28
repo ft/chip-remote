@@ -29,7 +29,7 @@
 (define (pp-manufacturer man)
   (pp-script
    `(wrap "#<" ">"
-          (type man) (newline)
+          (type manufacturer) (newline)
           (indent complex
                   (key name) (space ,(manufacturer-name man)) (newline)
                   (key homepage) (space ,(manufacturer-homepage man)) (newline)
