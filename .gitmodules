@@ -1,0 +1,6 @@
+[submodule "firmware/ufw"]
+	path = firmware/ufw
+	url = https://github.com/ft/ufw.git
+[submodule "firmware/libtap"]
+	path = firmware/libtap
+	url = https://github.com/zorgnax/libtap.git

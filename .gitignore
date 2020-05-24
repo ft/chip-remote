@@ -20,6 +20,7 @@ tags
 TAGS
 core
 core.*
+firmware/build/
 doc/*.pdf
 doc/*.tex
 doc/*.txt
