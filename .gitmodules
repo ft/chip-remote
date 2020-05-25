@@ -4,3 +4,6 @@
 [submodule "firmware/libtap"]
 	path = firmware/libtap
 	url = https://github.com/zorgnax/libtap.git
+[submodule "kernel/zephyr"]
+	path = kernel/zephyr
+	url = https://github.com/zephyrproject-rtos/zephyr.git
