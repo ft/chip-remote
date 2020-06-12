@@ -7,3 +7,9 @@
 [submodule "kernel/zephyr"]
 	path = kernel/zephyr
 	url = https://github.com/zephyrproject-rtos/zephyr.git
+[submodule "kernel/modules/hal_stm32"]
+	path = kernel/modules/hal_stm32
+	url = https://github.com/zephyrproject-rtos/hal_stm32.git
+[submodule "kernel/modules/cmsis"]
+	path = kernel/modules/cmsis
+	url = https://github.com/zephyrproject-rtos/cmsis.git

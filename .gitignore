@@ -18,9 +18,13 @@
 gmon.out
 tags
 TAGS
+GPATH
+GRTAGS
+GTAGS
 core
 core.*
 firmware/build/
+firmware/build-*
 doc/*.pdf
 doc/*.tex
 doc/*.txt
