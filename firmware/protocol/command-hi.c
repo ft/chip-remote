@@ -12,7 +12,7 @@
 #include <common/compiler.h>
 
 #include <chip-remote.h>
-#include <command-hi.h>
+#include <commands-private.h>
 
 /**
  * Implement HI command

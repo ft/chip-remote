@@ -12,7 +12,7 @@
 #include <common/compiler.h>
 
 #include <chip-remote.h>
-#include <command-bye.h>
+#include <commands-private.h>
 
 /**
  * Implement BYE command

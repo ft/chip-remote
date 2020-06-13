@@ -17,8 +17,7 @@
 
 #include <chip-remote.h>
 #include <commands.h>
-#include <command-bye.h>
-#include <command-hi.h>
+#include <commands-private.h>
 
 #define CMD(x)   (CR_PROTO_CMD_   ## x)
 #define STATE(x) (CR_PROTO_STATE_ ## x)

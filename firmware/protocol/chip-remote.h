@@ -13,6 +13,7 @@
 #define INC_CHIP_REMOTE_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #define CR_PROTO_MAX_ARGS 4u
@@ -26,7 +27,13 @@ enum cr_proto_result {
     CR_PROTO_RESULT_MALFORMED,
     CR_PROTO_RESULT_BROKEN_VALUE,
     CR_PROTO_RESULT_VALUE_OUTOFRANGE,
-    CR_PROTO_RESULT_DONE
+    CR_PROTO_RESULT_DONE /* Why is this here? */
+};
+
+enum cr_process_result {
+    CR_PROCESS_PENDING,
+    CR_PROCESS_COMMAND,
+    CR_PROCESS_INPUT_TO_LONG
 };
 
 /**
@@ -139,62 +146,19 @@ enum cr_input_state {
 };
 
 struct cr_protocol {
-    enum cr_proto_state state;
-    enum cr_input_state input;
-};
-
-#define CR_PROTOCOL_STATIC_INIT {               \
-        .state = CR_PROTO_STATE_IDLE,           \
-        .input = CR_INPUT_PROCESS }
-
-enum cr_port_type {
-    CR_PORT_TYPE_SPI,
-    CR_PORT_TYPE_IO
-};
-
-enum cr_bit_order {
-    CR_BIT_MSB_FIRST,
-    CR_BIT_LSB_FIRST
-};
-
-enum cr_active_high_low {
-    CR_ACTIVE_HIGH,
-    CR_ACTIVE_LOW
-};
-
-enum cr_edge_rising_falling {
-    CR_RISING_EDGE,
-    CR_FALLING_EDGE
-};
-
-struct cr_line {
-    unsigned int flags;
-};
-
-struct cr_port_spi {
-    uint16_t frame_length;
-    enum cr_bit_order bit_order;
     struct {
-        uint16_t number;
-        enum cr_active_high_low polarity;
-    } cs;
+        enum cr_proto_state protocol;
+        enum cr_input_state input;
+    } state;
     struct {
-        uint32_t rate;
-        enum cr_edge_rising_falling polarity;
-        bool phase_delay;
-    } clk;
-};
-
-struct cr_port_io {
-    unsigned int flags;
-};
-
-struct cr_port {
-    enum cr_port_type type;
-    union {
-        struct cr_port_spi spi;
-        struct cr_port_io io;
-    } impl;
+        char *buffer;
+        size_t size;
+        size_t idx;
+    } in;
+    struct {
+        struct cr_proto_parse parsed;
+        enum cr_proto_result result;
+    } cmd;
 };
 
 #endif /* INC_CHIP_REMOTE_H */
