@@ -11,7 +11,7 @@
 
 #include <chip-remote.h>
 
-#define RETURN_TYPE enum cr_proto_result
+#define RETURN_TYPE struct cr_command_result
 
 #define ARGUMENTS (const struct cr_command*,    \
                    const struct cr_value*,      \

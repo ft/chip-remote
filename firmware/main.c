@@ -21,20 +21,42 @@ K_MSGQ_DEFINE(cr_charqueue, sizeof(char), CR_QUEUE_SIZE, 4u);
 #define CR_MAX_LINE_SIZE 64u
 char cr_input[CR_MAX_LINE_SIZE];
 
+void
+handle_error(struct cr_protocol *proto)
+{
+    printk("cr: Error in command processing: %d\n", proto->cmd.result);
+}
+
 enum cr_proto_state
 run_command(struct cr_protocol *proto)
 {
-    switch (proto->cmd.result) {
-    case CR_PROTO_RESULT_OK:
-        printk("%s: OK\n", proto->cmd.parsed.cmd->name);
-        proto->cmd.parsed.cmd->cb(proto->cmd.parsed.cmd,
-                                  proto->cmd.parsed.args,
-                                  proto->cmd.parsed.argn);
-        break;
-    default:
-        printk("run_command: Something went wrong: %d\n", proto->cmd.result);
+    struct cr_command_result res;
+    if (proto->cmd.result != CR_PROTO_RESULT_OK) {
+        handle_error(proto);
+        return proto->state.protocol;
     }
-    return CR_PROTO_STATE_ACTIVE;
+
+    if (proto->state.protocol != proto->cmd.parsed.cmd->state) {
+        printk("cr: Command %s expects state %d but %d is current.\n",
+               proto->cmd.parsed.cmd->name,
+               proto->cmd.parsed.cmd->state,
+               proto->state.protocol);
+        return proto->state.protocol;
+    }
+
+    res = proto->cmd.parsed.cmd->cb(proto->cmd.parsed.cmd,
+                                    proto->cmd.parsed.args,
+                                    proto->cmd.parsed.argn);
+
+    proto->state.protocol = res.next_state;
+    proto->cmd.result = res.result;
+    printk("%s: %d\n", proto->cmd.parsed.cmd->name, proto->cmd.result);
+
+    if (proto->cmd.result != CR_PROTO_RESULT_OK) {
+        handle_error(proto);
+    }
+
+    return proto->state.protocol;
 }
 
 void

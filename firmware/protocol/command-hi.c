@@ -27,10 +27,13 @@
  * @return OK or MALFORMED
  * @sideeffects none
  */
-enum cr_proto_result
+struct cr_command_result
 cr_handle_hi(UNUSED const struct cr_command *cmd,
              UNUSED const struct cr_value *arg,
              unsigned int argn)
 {
-    return (argn == 0u) ? CR_PROTO_RESULT_OK : CR_PROTO_RESULT_MALFORMED;
+    struct cr_command_result rv = {
+        .result = (argn == 0u) ? CR_PROTO_RESULT_OK : CR_PROTO_RESULT_MALFORMED,
+        .next_state = CR_PROTO_STATE_ACTIVE };
+    return rv;
 }

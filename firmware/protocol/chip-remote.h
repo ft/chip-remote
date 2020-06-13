@@ -95,9 +95,15 @@ struct cr_value {
 
 struct cr_command;
 
-typedef enum cr_proto_result(*cr_command_callback)(const struct cr_command*,
-                                                   const struct cr_value*,
-                                                   unsigned int);
+struct cr_command_result {
+    enum cr_proto_result result;
+    enum cr_proto_state next_state;
+};
+
+typedef struct cr_command_result(*cr_command_callback)(
+    const struct cr_command*,
+    const struct cr_value*,
+    unsigned int);
 
 /**
  * Description of command argument specification
