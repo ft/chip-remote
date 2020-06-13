@@ -30,12 +30,6 @@ enum cr_proto_result {
     CR_PROTO_RESULT_DONE /* Why is this here? */
 };
 
-enum cr_process_result {
-    CR_PROCESS_PENDING,
-    CR_PROCESS_COMMAND,
-    CR_PROCESS_INPUT_TO_LONG
-};
-
 /**
  * Encoding of commands (requests) of the protocol
  */
@@ -138,27 +132,6 @@ struct cr_proto_parse {
     struct cr_command *cmd;
     struct cr_value args[CR_PROTO_MAX_ARGS];
     unsigned int argn;
-};
-
-enum cr_input_state {
-    CR_INPUT_PROCESS,
-    CR_INPUT_IGNORE
-};
-
-struct cr_protocol {
-    struct {
-        enum cr_proto_state protocol;
-        enum cr_input_state input;
-    } state;
-    struct {
-        char *buffer;
-        size_t size;
-        size_t idx;
-    } in;
-    struct {
-        struct cr_proto_parse parsed;
-        enum cr_proto_result result;
-    } cmd;
 };
 
 #endif /* INC_CHIP_REMOTE_H */

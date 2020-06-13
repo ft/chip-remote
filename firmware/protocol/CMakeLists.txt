@@ -4,6 +4,7 @@ add_library(chip-remote-protocol STATIC
   commands.c
   command-bye.c
   command-hi.c
+  cr-process.c
   parse-string.c)
 
 target_include_directories(chip-remote-protocol
