@@ -59,6 +59,12 @@ run_command(struct cr_protocol *proto)
     return proto->state.protocol;
 }
 
+int
+text_transmit(struct cr_port *port, uint32_t tx, uint32_t *rx)
+{
+    printk("Sending stuff: 0x%08x\n", tx);
+}
+
 void
 cr_run(void *a, void *b, void *c)
 {
@@ -66,7 +72,7 @@ cr_run(void *a, void *b, void *c)
     char ch = 0;
 
     printk("ChipRemote Command Processor online!\n");
-    cr_process_init(&proto, cr_input, CR_MAX_LINE_SIZE);
+    cr_process_init(&proto, cr_input, CR_MAX_LINE_SIZE, text_transmit);
     for (;;) {
         k_msgq_get(&cr_charqueue, &ch, K_FOREVER);
         switch (cr_process_octet(&proto, ch)) {

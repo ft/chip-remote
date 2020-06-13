@@ -2,6 +2,7 @@
 #define INC_PROCESS_H
 
 #include <chip-remote.h>
+#include <cr-port.h>
 
 enum cr_process_result {
     CR_PROCESS_PENDING,
@@ -13,6 +14,8 @@ enum cr_input_state {
     CR_INPUT_PROCESS,
     CR_INPUT_IGNORE
 };
+
+typedef int (*transmit_impl)(struct cr_port*, uint32_t, uint32_t*);
 
 struct cr_protocol {
     struct {
@@ -28,9 +31,10 @@ struct cr_protocol {
         struct cr_proto_parse parsed;
         enum cr_proto_result result;
     } cmd;
+    transmit_impl transmit;
 };
 
-void cr_process_init(struct cr_protocol*, char*, size_t);
+void cr_process_init(struct cr_protocol*, char*, size_t, transmit_impl);
 enum cr_process_result cr_process_octet(struct cr_protocol*, const char);
 
 #endif /* INC_PROCESS_H */

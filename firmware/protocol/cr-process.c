@@ -3,13 +3,16 @@
 #include <parse-string.h>
 
 void
-cr_process_init(struct cr_protocol *proto, char *buf, size_t n)
+cr_process_init(struct cr_protocol *proto,
+                char *buf, size_t n,
+                transmit_impl transmit)
 {
     proto->state.protocol = CR_PROTO_STATE_IDLE;
     proto->state.input = CR_INPUT_PROCESS;
     proto->in.buffer = buf;
     proto->in.size = n;
     proto->in.idx = 0u;
+    proto->transmit = transmit;
 }
 
 enum cr_process_result
