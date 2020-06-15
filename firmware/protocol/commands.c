@@ -47,7 +47,7 @@ struct cr_argument no_arguments[] = {
 struct cr_command cr_commands[] = {
     MISSING_COMMAND(ADDRESS),
     COMMAND(BYE,      ACTIVE,    cr_handle_bye,      no_arguments),
-    MISSING_COMMAND(FEATURES),
+    COMMAND(FEATURES, ACTIVE,    cr_handle_features, no_arguments),
     MISSING_COMMAND(FOCUS),
     MISSING_COMMAND(HASHED),
     COMMAND(HI,       IDLE,      cr_handle_hi,       no_arguments),
@@ -55,7 +55,7 @@ struct cr_command cr_commands[] = {
     MISSING_COMMAND(LINES),
     MISSING_COMMAND(LINE),
     MISSING_COMMAND(MODES),
-    MISSING_COMMAND(MORE),
+    COMMAND(MORE,     MULTILINE, NULL,               no_arguments),
     MISSING_COMMAND(PORT),
     MISSING_COMMAND(SET),
     MISSING_COMMAND(TRANSMIT),
@@ -68,7 +68,7 @@ cr_lookup_command(const char *name)
 {
     size_t i;
     for (i = 0u; cr_commands[i].id != CR_PROTO_CMD_UNKNOWN; ++i) {
-        if (cr_commands[i].cb == NULL)
+        if (cr_commands[i].name == NULL)
             continue;
         if (strcmp(cr_commands[i].name, name) == 0)
             return cr_commands + i;

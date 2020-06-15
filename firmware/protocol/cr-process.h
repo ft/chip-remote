@@ -32,6 +32,7 @@ struct cr_protocol {
         enum cr_proto_result result;
     } cmd;
     transmit_impl transmit;
+    cr_command_callback multiline_cb;
 };
 
 void cr_process_init(struct cr_protocol*, char*, size_t, transmit_impl);

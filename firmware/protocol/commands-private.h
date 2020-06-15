@@ -11,6 +11,8 @@
 
 #include <chip-remote.h>
 
+extern struct cr_command cr_commands[];
+
 #define RETURN_TYPE struct cr_command_result
 
 #define ARGUMENTS (const struct cr_command*,    \
@@ -20,6 +22,7 @@
 #define DECLARE_COMMAND(name) RETURN_TYPE cr_handle_ ## name ARGUMENTS
 
 DECLARE_COMMAND(bye);
+DECLARE_COMMAND(features);
 DECLARE_COMMAND(hi);
 
 #undef ARGUMENTS

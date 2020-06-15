@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.9)
 add_library(chip-remote-protocol STATIC
   commands.c
   command-bye.c
+  command-features.c
   command-hi.c
   cr-process.c
   parse-string.c)

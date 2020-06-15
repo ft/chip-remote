@@ -44,13 +44,38 @@ run_command(struct cr_protocol *proto)
         return proto->state.protocol;
     }
 
-    res = proto->cmd.parsed.cmd->cb(proto->cmd.parsed.cmd,
-                                    proto->cmd.parsed.args,
-                                    proto->cmd.parsed.argn);
+    if (proto->state.protocol == CR_PROTO_STATE_MULTILINE) {
+        res = proto->multiline_cb(proto->cmd.parsed.cmd,
+                                  proto->cmd.parsed.args,
+                                  proto->cmd.parsed.argn);
+    } else {
+        res = proto->cmd.parsed.cmd->cb(proto->cmd.parsed.cmd,
+                                        proto->cmd.parsed.args,
+                                        proto->cmd.parsed.argn);
+    }
+
+    switch (res.next_state) {
+    case CR_PROTO_STATE_MULTILINE:
+        if (proto->state.protocol == CR_PROTO_STATE_ACTIVE) {
+            /* ACTIVE -> MULTI */
+            printk("cr: Going to multiline mode\n");
+            proto->multiline_cb = proto->cmd.parsed.cmd->cb;
+        }
+        break;
+    case CR_PROTO_STATE_ACTIVE:
+        if (proto->state.protocol == CR_PROTO_STATE_MULTILINE) {
+            /* MULTI -> ACTIVE */
+            printk("cr: Going back to active mode\n");
+            proto->multiline_cb = NULL;
+        }
+        break;
+    default:
+        /* Nothing to do in the other cases. */
+        break;
+    }
 
     proto->state.protocol = res.next_state;
     proto->cmd.result = res.result;
-    printk("%s: %d\n", proto->cmd.parsed.cmd->name, proto->cmd.result);
 
     if (proto->cmd.result != CR_PROTO_RESULT_OK) {
         handle_error(proto);
@@ -63,6 +88,7 @@ int
 text_transmit(struct cr_port *port, uint32_t tx, uint32_t *rx)
 {
     printk("Sending stuff: 0x%08x\n", tx);
+    return 0;
 }
 
 void
