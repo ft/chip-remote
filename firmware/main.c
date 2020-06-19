@@ -67,20 +67,25 @@ run_command(struct cr_protocol *proto)
     switch (res.next_state) {
     case CR_PROTO_STATE_MULTILINE:
         if (proto->state.protocol == CR_PROTO_STATE_ACTIVE) {
-            /* ACTIVE -> MULTI */
-            printk("cr: Going to multiline mode\n");
+            printk("cr: Protocol state active->multiline\n");
             proto->multiline_cb = parsed->cmd->cb;
         }
         break;
     case CR_PROTO_STATE_ACTIVE:
         if (proto->state.protocol == CR_PROTO_STATE_MULTILINE) {
-            /* MULTI -> ACTIVE */
-            printk("cr: Going back to active mode\n");
+            printk("cr: Protocol state multiline->active\n");
             proto->multiline_cb = NULL;
+        } else if (proto->state.protocol == CR_PROTO_STATE_IDLE) {
+            printk("cr: Protocol state idle->active\n");
+        }
+        break;
+    case CR_PROTO_STATE_IDLE:
+        if (proto->state.protocol == CR_PROTO_STATE_ACTIVE) {
+            printk("cr: Protocol state active->idle\n");
         }
         break;
     default:
-        /* Nothing to do in the other cases. */
+        /* Switch statement is exhaustive with enum cr_proto_state */
         break;
     }
 
