@@ -30,7 +30,7 @@ handle_error(struct cr_protocol *proto)
 enum cr_proto_state
 run_command(struct cr_protocol *proto)
 {
-    struct cr_command_result res;
+    enum cr_proto_state next;
 
     /* Exit early, if the protocol parser signalled an error in proto */
     if (proto->cmd.result != CR_PROTO_RESULT_OK) {
@@ -63,10 +63,10 @@ run_command(struct cr_protocol *proto)
     }
 
     /* Actually run the callback picked depending on current protocol state */
-    res = cb(proto, parsed->cmd, parsed->args, parsed->argn);
+    next = cb(proto, parsed->cmd, parsed->args, parsed->argn);
 
     /* Perform multiline-mode setup in protocol state */
-    switch (res.next_state) {
+    switch (next) {
     case CR_PROTO_STATE_MULTILINE:
         if (proto->state.protocol == CR_PROTO_STATE_ACTIVE) {
             printk("cr: Protocol state active->multiline\n");
@@ -91,14 +91,7 @@ run_command(struct cr_protocol *proto)
         break;
     }
 
-    /* Manipulate protocol state to reflect callback return value */
-    proto->state.protocol = res.next_state;
-    proto->cmd.result = res.result;
-
-    if (proto->cmd.result != CR_PROTO_RESULT_OK) {
-        handle_error(proto);
-    }
-
+    proto->state.protocol = next;
     return proto->state.protocol;
 }
 

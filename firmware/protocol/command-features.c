@@ -16,20 +16,13 @@
 #include <commands.h>
 #include <commands-private.h>
 
-struct cr_command_result
+enum cr_proto_state
 cr_handle_features(const struct cr_protocol *proto,
                    const struct cr_command *cmd,
                    UNUSED const struct cr_value *arg,
-                   unsigned int argn)
+                   UNUSED unsigned int argn)
 {
     static unsigned int idx = 0u;
-    struct cr_command_result rv = {
-        .result = (argn == 0u) ? CR_PROTO_RESULT_OK
-                               : CR_PROTO_RESULT_MALFORMED,
-        .next_state = CR_PROTO_STATE_MULTILINE };
-
-    if (rv.result == CR_PROTO_RESULT_MALFORMED)
-        return rv;
 
     if (cmd->id == CR_PROTO_CMD_FEATURES) {
         idx = 0u;
@@ -50,8 +43,8 @@ cr_handle_features(const struct cr_protocol *proto,
 
     if (cr_commands[idx].id == CR_PROTO_CMD_UNKNOWN) {
         proto->reply("DONE\n");
-        rv.next_state = CR_PROTO_STATE_ACTIVE;
+        return CR_PROTO_STATE_ACTIVE;
     }
 
-    return rv;
+    return CR_PROTO_STATE_MULTILINE;
 }

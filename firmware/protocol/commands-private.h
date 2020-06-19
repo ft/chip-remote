@@ -14,7 +14,7 @@
 
 extern struct cr_command cr_commands[];
 
-#define RETURN_TYPE struct cr_command_result
+#define RETURN_TYPE enum cr_proto_state
 
 #define ARGUMENTS (const struct cr_protocol*,   \
                    const struct cr_command*,    \

@@ -96,14 +96,9 @@ struct cr_value {
 struct cr_command;
 struct cr_protocol;
 
-struct cr_command_result {
-    enum cr_proto_result result;
-    enum cr_proto_state next_state;
-};
-
 typedef void (*string_sink)(const char*);
 
-typedef struct cr_command_result(*cr_command_callback)(
+typedef enum cr_proto_state(*cr_command_callback)(
     const struct cr_protocol*,
     const struct cr_command*,
     const struct cr_value*,

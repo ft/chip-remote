@@ -61,21 +61,16 @@ put_u32(const struct cr_protocol *proto, const uint32_t value)
     proto->reply(buffer);
 }
 
-struct cr_command_result
+enum cr_proto_state
 cr_handle_transmit(const struct cr_protocol *proto,
                    UNUSED const struct cr_command *cmd,
                    const struct cr_value *arg,
-                   unsigned int argn)
+                   UNUSED unsigned int argn)
 {
-    struct cr_command_result rv = {
-        .result = (argn == 1u) ? CR_PROTO_RESULT_OK
-                               : CR_PROTO_RESULT_MALFORMED,
-        .next_state = CR_PROTO_STATE_ACTIVE };
     uint32_t rx;
-
     proto->transmit(proto->ports.table + proto->ports.current,
                     arg[0].data.u32, &rx);
     put_u32(proto, rx);
     proto->reply("\n");
-    return rv;
+    return CR_PROTO_STATE_ACTIVE;
 }
