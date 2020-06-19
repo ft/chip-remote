@@ -28,12 +28,14 @@
  * @sideeffects none
  */
 struct cr_command_result
-cr_handle_hi(UNUSED const struct cr_command *cmd,
+cr_handle_hi(const string_sink reply,
+             UNUSED const struct cr_command *cmd,
              UNUSED const struct cr_value *arg,
              unsigned int argn)
 {
     struct cr_command_result rv = {
         .result = (argn == 0u) ? CR_PROTO_RESULT_OK : CR_PROTO_RESULT_MALFORMED,
         .next_state = CR_PROTO_STATE_ACTIVE };
+    reply("Hi there, stranger!\n");
     return rv;
 }

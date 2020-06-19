@@ -51,17 +51,19 @@ run_command(struct cr_protocol *proto)
                proto->cmd.parsed.cmd->name,
                proto->cmd.parsed.cmd->state,
                proto->state.protocol);
+        proto->reply("WTF Wrong state for command to be issued.\n");
         return proto->state.protocol;
     }
 
     if (cb == NULL) {
         printk("cr: Got NULL callback in command processing.\n");
         printk("cr: This should never happend and is likely a bug.\n");
+        proto->reply("WTF NULL Callback. This is a bug!\n");
         return proto->state.protocol;
     }
 
     /* Actually run the callback picked depending on current protocol state */
-    res = cb(parsed->cmd, parsed->args, parsed->argn);
+    res = cb(proto->reply, parsed->cmd, parsed->args, parsed->argn);
 
     /* Perform multiline-mode setup in protocol state */
     switch (res.next_state) {
@@ -107,6 +109,16 @@ text_transmit(struct cr_port *port, uint32_t tx, uint32_t *rx)
     return 0;
 }
 
+struct device *uart0;
+void
+uart_sink(const char *str)
+{
+    const size_t len = strlen(str);
+    for (size_t i = 0u; i < len; ++i) {
+        uart_poll_out(uart0, str[i]);
+    }
+}
+
 void
 cr_run(void *a, void *b, void *c)
 {
@@ -114,7 +126,8 @@ cr_run(void *a, void *b, void *c)
     char ch = 0;
 
     printk("ChipRemote Command Processor online!\n");
-    cr_process_init(&proto, cr_input, CR_MAX_LINE_SIZE, text_transmit);
+    cr_process_init(&proto, cr_input, CR_MAX_LINE_SIZE,
+                    text_transmit, uart_sink);
     for (;;) {
         k_msgq_get(&cr_charqueue, &ch, K_FOREVER);
         switch (cr_process_octet(&proto, ch)) {
@@ -140,9 +153,9 @@ K_THREAD_DEFINE(cr_run_thread, CR_STACK_SIZE,
 void
 main(void)
 {
-    struct device * const uart = device_get_binding(DT_LABEL(DT_NODELABEL(uart0)));
-    if (uart == NULL) {
-        printk("Could not access uart-0. Giving up.\n");
+    uart0 = device_get_binding(DT_LABEL(DT_NODELABEL(uart0)));
+    if (uart0 == NULL) {
+        printk("Could not access uart0. Giving up.\n");
         return;
     }
     char board[MAX_BOARD_NAME_LENGTH];
@@ -152,7 +165,7 @@ main(void)
     char ch = 0;
     for (;;) {
         /* Poll controlling UART port and feed fifo */
-        const int rc = uart_poll_in(uart, &ch);
+        const int rc = uart_poll_in(uart0, &ch);
         if (rc == 0) {
             k_msgq_put(&cr_charqueue, &ch, K_FOREVER);
         } else {

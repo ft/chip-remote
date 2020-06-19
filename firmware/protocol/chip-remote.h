@@ -100,7 +100,10 @@ struct cr_command_result {
     enum cr_proto_state next_state;
 };
 
+typedef void (*string_sink)(const char*);
+
 typedef struct cr_command_result(*cr_command_callback)(
+    const string_sink,
     const struct cr_command*,
     const struct cr_value*,
     unsigned int);

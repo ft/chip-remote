@@ -5,7 +5,8 @@
 void
 cr_process_init(struct cr_protocol *proto,
                 char *buf, size_t n,
-                transmit_impl transmit)
+                transmit_impl transmit,
+                string_sink reply)
 {
     proto->state.protocol = CR_PROTO_STATE_IDLE;
     proto->state.input = CR_INPUT_PROCESS;
@@ -13,6 +14,7 @@ cr_process_init(struct cr_protocol *proto,
     proto->in.size = n;
     proto->in.idx = 0u;
     proto->transmit = transmit;
+    proto->reply = reply;
 }
 
 enum cr_process_result

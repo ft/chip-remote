@@ -31,11 +31,13 @@ struct cr_protocol {
         struct cr_proto_parse parsed;
         enum cr_proto_result result;
     } cmd;
+    string_sink reply;
     transmit_impl transmit;
     cr_command_callback multiline_cb;
 };
 
-void cr_process_init(struct cr_protocol*, char*, size_t, transmit_impl);
+void cr_process_init(struct cr_protocol*, char*, size_t,
+                     transmit_impl, string_sink);
 enum cr_process_result cr_process_octet(struct cr_protocol*, const char);
 
 #endif /* INC_PROCESS_H */

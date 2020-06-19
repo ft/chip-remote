@@ -10,12 +10,14 @@
  */
 
 #include <chip-remote.h>
+#include <cr-process.h>
 
 extern struct cr_command cr_commands[];
 
 #define RETURN_TYPE struct cr_command_result
 
-#define ARGUMENTS (const struct cr_command*,    \
+#define ARGUMENTS (const string_sink,           \
+                   const struct cr_command*,    \
                    const struct cr_value*,      \
                    unsigned int)
 
