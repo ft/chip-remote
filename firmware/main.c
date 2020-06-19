@@ -31,11 +31,21 @@ enum cr_proto_state
 run_command(struct cr_protocol *proto)
 {
     struct cr_command_result res;
+
+    /* Exit early, if the protocol parser signalled an error in proto */
     if (proto->cmd.result != CR_PROTO_RESULT_OK) {
         handle_error(proto);
         return proto->state.protocol;
     }
 
+    /* Install a couple of shorthands */
+    const struct cr_proto_parse *parsed = &proto->cmd.parsed;
+    const cr_command_callback cb =
+        (proto->state.protocol == CR_PROTO_STATE_MULTILINE)
+        ? proto->multiline_cb
+        : parsed->cmd->cb;
+
+    /* Perform plausibility checks; exit early if that's required */
     if (proto->state.protocol != proto->cmd.parsed.cmd->state) {
         printk("cr: Command %s expects state %d but %d is current.\n",
                proto->cmd.parsed.cmd->name,
@@ -44,22 +54,22 @@ run_command(struct cr_protocol *proto)
         return proto->state.protocol;
     }
 
-    if (proto->state.protocol == CR_PROTO_STATE_MULTILINE) {
-        res = proto->multiline_cb(proto->cmd.parsed.cmd,
-                                  proto->cmd.parsed.args,
-                                  proto->cmd.parsed.argn);
-    } else {
-        res = proto->cmd.parsed.cmd->cb(proto->cmd.parsed.cmd,
-                                        proto->cmd.parsed.args,
-                                        proto->cmd.parsed.argn);
+    if (cb == NULL) {
+        printk("cr: Got NULL callback in command processing.\n");
+        printk("cr: This should never happend and is likely a bug.\n");
+        return proto->state.protocol;
     }
 
+    /* Actually run the callback picked depending on current protocol state */
+    res = cb(parsed->cmd, parsed->args, parsed->argn);
+
+    /* Perform multiline-mode setup in protocol state */
     switch (res.next_state) {
     case CR_PROTO_STATE_MULTILINE:
         if (proto->state.protocol == CR_PROTO_STATE_ACTIVE) {
             /* ACTIVE -> MULTI */
             printk("cr: Going to multiline mode\n");
-            proto->multiline_cb = proto->cmd.parsed.cmd->cb;
+            proto->multiline_cb = parsed->cmd->cb;
         }
         break;
     case CR_PROTO_STATE_ACTIVE:
@@ -74,6 +84,7 @@ run_command(struct cr_protocol *proto)
         break;
     }
 
+    /* Manipulate protocol state to reflect callback return value */
     proto->state.protocol = res.next_state;
     proto->cmd.result = res.result;
 
