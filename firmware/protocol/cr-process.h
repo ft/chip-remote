@@ -7,7 +7,7 @@
 enum cr_process_result {
     CR_PROCESS_PENDING,
     CR_PROCESS_COMMAND,
-    CR_PROCESS_INPUT_TO_LONG
+    CR_PROCESS_INPUT_TOO_LONG
 };
 
 enum cr_input_state {
@@ -15,7 +15,7 @@ enum cr_input_state {
     CR_INPUT_IGNORE
 };
 
-typedef int (*transmit_impl)(struct cr_port*, uint32_t, uint32_t*);
+typedef int (*transmit_impl)(const struct cr_port*, uint32_t, uint32_t*);
 
 struct cr_protocol {
     struct {
@@ -31,6 +31,12 @@ struct cr_protocol {
         struct cr_proto_parse parsed;
         enum cr_proto_result result;
     } cmd;
+    struct {
+        struct cr_port *table;
+        size_t tablesize;
+        size_t current;
+        bool focused;
+    } ports;
     string_sink reply;
     transmit_impl transmit;
     cr_command_callback multiline_cb;

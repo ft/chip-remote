@@ -28,7 +28,7 @@
  * @sideeffects none
  */
 struct cr_command_result
-cr_handle_bye(const string_sink reply,
+cr_handle_bye(const struct cr_protocol *proto,
               UNUSED const struct cr_command *cmd,
               UNUSED const struct cr_value *arg,
               unsigned int argn)
@@ -36,6 +36,6 @@ cr_handle_bye(const string_sink reply,
     struct cr_command_result rv = {
         .result = (argn == 0u) ? CR_PROTO_RESULT_OK : CR_PROTO_RESULT_MALFORMED,
         .next_state = CR_PROTO_STATE_IDLE };
-    reply("Have a nice day!\n");
+    proto->reply("Have a nice day!\n");
     return rv;
 }

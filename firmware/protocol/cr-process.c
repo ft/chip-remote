@@ -24,8 +24,8 @@ cr_process_octet(struct cr_protocol *proto, const char ch)
     case CR_INPUT_IGNORE:
         if (ch == '\n') {
             proto->in.idx = 0u;
-            proto->state.protocol = CR_INPUT_PROCESS;
-            return CR_PROCESS_INPUT_TO_LONG;
+            proto->state.input = CR_INPUT_PROCESS;
+            return CR_PROCESS_INPUT_TOO_LONG;
         }
         break;
     case CR_INPUT_PROCESS:

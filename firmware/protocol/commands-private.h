@@ -16,7 +16,7 @@ extern struct cr_command cr_commands[];
 
 #define RETURN_TYPE struct cr_command_result
 
-#define ARGUMENTS (const string_sink,           \
+#define ARGUMENTS (const struct cr_protocol*,   \
                    const struct cr_command*,    \
                    const struct cr_value*,      \
                    unsigned int)
@@ -26,6 +26,8 @@ extern struct cr_command cr_commands[];
 DECLARE_COMMAND(bye);
 DECLARE_COMMAND(features);
 DECLARE_COMMAND(hi);
+extern struct cr_argument transmit_arguments[];
+DECLARE_COMMAND(transmit);
 
 #undef ARGUMENTS
 #undef RETURN_TYPE

@@ -63,7 +63,7 @@ run_command(struct cr_protocol *proto)
     }
 
     /* Actually run the callback picked depending on current protocol state */
-    res = cb(proto->reply, parsed->cmd, parsed->args, parsed->argn);
+    res = cb(proto, parsed->cmd, parsed->args, parsed->argn);
 
     /* Perform multiline-mode setup in protocol state */
     switch (res.next_state) {
@@ -103,9 +103,13 @@ run_command(struct cr_protocol *proto)
 }
 
 int
-text_transmit(struct cr_port *port, uint32_t tx, uint32_t *rx)
+text_transmit(const struct cr_port *port, const uint32_t tx, uint32_t *rx)
 {
-    printk("Sending stuff: 0x%08x\n", tx);
+    static uint32_t state = 0u;
+    printk("cr>> 0x%08x\n", tx);
+    printk("cr<< 0x%08x\n", state);
+    *rx = state;
+    state++;
     return 0;
 }
 
@@ -137,7 +141,7 @@ cr_run(void *a, void *b, void *c)
         case CR_PROCESS_COMMAND:
             proto.state.protocol = run_command(&proto);
             break;
-        case CR_PROCESS_INPUT_TO_LONG:
+        case CR_PROCESS_INPUT_TOO_LONG:
             printk("cr: Input too long (max: %d); line ignored.\n",
                    CR_MAX_LINE_SIZE);
             break;

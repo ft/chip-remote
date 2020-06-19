@@ -17,7 +17,7 @@
 #include <commands-private.h>
 
 struct cr_command_result
-cr_handle_features(const string_sink reply,
+cr_handle_features(const struct cr_protocol *proto,
                    const struct cr_command *cmd,
                    UNUSED const struct cr_value *arg,
                    unsigned int argn)
@@ -41,15 +41,15 @@ cr_handle_features(const string_sink reply,
         }
 
         if (cr_commands[idx].cb != NULL) {
-            reply(cr_commands[idx].name);
-            reply("\n");
+            proto->reply(cr_commands[idx].name);
+            proto->reply("\n");
             idx++;
             break;
         }
     }
 
     if (cr_commands[idx].id == CR_PROTO_CMD_UNKNOWN) {
-        reply("DONE\n");
+        proto->reply("DONE\n");
         rv.next_state = CR_PROTO_STATE_ACTIVE;
     }
 

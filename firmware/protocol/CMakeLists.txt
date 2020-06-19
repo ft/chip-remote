@@ -5,6 +5,7 @@ add_library(chip-remote-protocol STATIC
   command-bye.c
   command-features.c
   command-hi.c
+  command-transmit.c
   cr-process.c
   parse-string.c)
 

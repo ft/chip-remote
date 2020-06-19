@@ -189,6 +189,7 @@ cr_parse_string(char *input, struct cr_proto_parse *result)
 
         current = next_word(current.end + 1);
         result->args[argn] = parse_argument(spec, current.start);
+        argn++;
     }
 
     if (spec_missing_arg(cmd, argn))

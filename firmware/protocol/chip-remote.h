@@ -94,6 +94,7 @@ struct cr_value {
 };
 
 struct cr_command;
+struct cr_protocol;
 
 struct cr_command_result {
     enum cr_proto_result result;
@@ -103,7 +104,7 @@ struct cr_command_result {
 typedef void (*string_sink)(const char*);
 
 typedef struct cr_command_result(*cr_command_callback)(
-    const string_sink,
+    const struct cr_protocol*,
     const struct cr_command*,
     const struct cr_value*,
     unsigned int);
