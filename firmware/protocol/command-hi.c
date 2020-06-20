@@ -33,6 +33,6 @@ cr_handle_hi(const struct cr_protocol *proto,
              UNUSED const struct cr_value *arg,
              UNUSED unsigned int argn)
 {
-    proto->reply("Hi there, stranger!\n");
+    proto->reply("Hi there, stranger.\n");
     return CR_PROTO_STATE_ACTIVE;
 }

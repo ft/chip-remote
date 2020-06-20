@@ -33,6 +33,6 @@ cr_handle_bye(const struct cr_protocol *proto,
               UNUSED const struct cr_value *arg,
               UNUSED unsigned int argn)
 {
-    proto->reply("Have a nice day!\n");
+    proto->reply("Have a nice day.\n");
     return CR_PROTO_STATE_IDLE;
 }
