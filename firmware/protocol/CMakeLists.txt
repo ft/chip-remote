@@ -1,5 +1,8 @@
 cmake_minimum_required (VERSION 3.9)
 
+include(InitialiseToolchain)
+initialise_toolchain()
+
 add_library(chip-remote-protocol STATIC
   commands.c
   command-bye.c
