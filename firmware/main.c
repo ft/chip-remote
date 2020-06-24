@@ -1,7 +1,11 @@
 #include <device.h>
 #include <kernel.h>
 
+#include <drivers/gpio.h>
 #include <drivers/uart.h>
+#if defined(CONFIG_BOARD_NUCLEO_F767ZI)
+#include <usb/usb_device.h>
+#endif /* CONFIG_BOARD_NUCLEO_F767ZI */
 
 #include <string.h>
 #include <c/compat.h>
@@ -111,9 +115,13 @@ void
 uart_sink(const char *str)
 {
     const size_t len = strlen(str);
+#if defined(CONFIG_BOARD_NATIVE_POSIX)
     for (size_t i = 0u; i < len; ++i) {
         uart_poll_out(uart0, str[i]);
     }
+#elif defined(CONFIG_BOARD_NUCLEO_F767ZI)
+    uart_fifo_fill(uart0, str, len);
+#endif
 }
 
 void
@@ -146,7 +154,7 @@ K_THREAD_DEFINE(cr_run_thread, CR_STACK_SIZE,
                 cr_run, NULL, NULL, NULL,
                 CR_PRIORITY, 0, 0);
 
-#ifdef CONFIG_BOARD_NATIVE_POSIX
+#if defined(CONFIG_BOARD_NATIVE_POSIX)
 void
 main(void)
 {
@@ -170,4 +178,55 @@ main(void)
         }
     }
 }
-#endif /* CONFIG_BOARD_NATIVE_POSIX */
+#elif defined(CONFIG_BOARD_NUCLEO_F767ZI)
+
+static void
+cr_handle_usb(struct device *dev)
+{
+    char ch;
+    while (uart_fifo_read(dev, &ch, 1u) > 0u)
+        k_msgq_put(&cr_charqueue, &ch, K_NO_WAIT);
+}
+
+#define LED0_NODE DT_ALIAS(led0)
+#define LED0 DT_GPIO_LABEL(LED0_NODE, gpios)
+#define PIN DT_GPIO_PIN(LED0_NODE, gpios)
+
+void
+main(void)
+{
+    uart0 = device_get_binding("CDC_ACM_0");
+    if (uart0 == NULL) {
+        printk("Could not access usb. Giving up.\n");
+        return;
+    }
+
+    if (usb_enable(NULL) != 0) {
+        printk("Could not enable usb. Giving up.\n");
+        return;
+    }
+
+    printk("Registering usb callback.\n");
+    uart_irq_callback_set(uart0, cr_handle_usb);
+    printk("Enabling usb rx interrupt.\n");
+    uart_irq_rx_enable(uart0);
+
+    struct device *led = device_get_binding(LED0);
+    if (led == NULL) {
+        printk("Could not access LED.\n");
+        return;
+    }
+
+    int ret = gpio_pin_configure(led, PIN, GPIO_OUTPUT_ACTIVE);
+    if (ret < 0) {
+        return;
+    }
+
+    bool led_is_on = true;
+    for (;;) {
+        gpio_pin_set(led, PIN, (int)led_is_on);
+        led_is_on = !led_is_on;
+        k_msleep(200);
+    }
+}
+#endif /* CONFIG_BOARD_NATIVE_POSIX || CONFIG_BOARD_NUCLEO_F767ZI */
