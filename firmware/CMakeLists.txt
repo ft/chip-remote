@@ -6,6 +6,14 @@ project(chip-remote-firmware)
 target_sources(app PRIVATE
   src/main.c)
 
+if (${BOARD} STREQUAL nucleo_f767zi)
+  target_sources(app PRIVATE src/init-usb-cdc-acm.c)
+elseif (${BOARD} STREQUAL native_posix_64)
+  target_sources(app PRIVATE src/init-posix.c)
+else()
+  message(WARNING "Unsupported board: ${BOARD}")
+endif()
+
 include(CTest)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ufw/cmake/modules)
@@ -17,6 +25,7 @@ if (${ARCH} STREQUAL posix)
   include(Libtap)
   add_libtap(libtap)
 endif()
+
 add_subdirectory(ufw)
 add_subdirectory(protocol)
 add_subdirectory(tests)
