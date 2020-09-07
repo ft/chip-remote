@@ -2,6 +2,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 control)
+  #:use-module (ice-9 optargs)
   #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote item)
@@ -25,10 +26,30 @@
             define-register-map))
 
 (define-record-type <register-map>
-  (make-register-map meta table)
+  (make-register-map* meta table)
   register-map?
   (meta register-map-meta)
   (table register-map-table))
+
+(define (reasonable-entry? entry)
+  (let ((address (car entry))
+        (reg (cdr entry)))
+    (and (integer? address)
+         (or (zero? address)
+             (positive? address))
+         (register? reg))))
+
+(define (ensure-register-map! tab)
+  (when (null? tab)
+    (throw 'cr/empty-register-table tab))
+  (for-each (lambda (entry)
+              (unless (reasonable-entry? entry)
+                (throw 'cr/not-a-register-table-entry entry)))
+            tab)
+  tab)
+
+(define* (make-register-map #:key (meta '()) (table '()))
+  (make-register-map* meta (ensure-register-map! table)))
 
 (define group:table
   (group 'table
@@ -51,8 +72,8 @@
                       (process-plist #'(exp0 expn ...)
                                      group:table
                                      (group 'meta))))
-         #'(make-register-map (list meta ...)
-                              (list table ... ...)))))))
+         #'(make-register-map* (list meta ...)
+                               (list table ... ...)))))))
 
 (define (register-map-default rm)
   (map (lambda (x) (register-default (cdr x)))
