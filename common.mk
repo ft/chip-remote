@@ -33,6 +33,7 @@ MODULES_CORE += $(CR)/page-map.scm
 MODULES_CORE += $(CR)/process-plist.scm
 MODULES_CORE += $(CR)/protocol.scm
 MODULES_CORE += $(CR)/register-map.scm
+MODULES_CORE += $(CR)/register-map/utilities.scm
 MODULES_CORE += $(CR)/register-window.scm
 MODULES_CORE += $(CR)/register.scm
 MODULES_CORE += $(CR)/register/common.scm
