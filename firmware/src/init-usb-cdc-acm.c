@@ -5,6 +5,8 @@
 #include <drivers/uart.h>
 #include <usb/usb_device.h>
 
+#include <common/compiler.h>
+
 #include "init-common.h"
 
 void
@@ -15,7 +17,7 @@ uart_sink(const char *str)
 }
 
 static void
-cr_handle_usb(struct device *dev)
+cr_handle_usb(const struct device *dev, UNUSED void *userdata)
 {
     char ch;
     while (uart_fifo_read(dev, &ch, 1u) > 0u)
@@ -45,7 +47,7 @@ main(void)
     printk("Enabling usb rx interrupt.\n");
     uart_irq_rx_enable(uart0);
 
-    struct device *led = device_get_binding(LED0);
+    const struct device *led = device_get_binding(LED0);
     if (led == NULL) {
         printk("Could not access LED.\n");
         return;

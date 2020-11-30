@@ -19,7 +19,7 @@ K_MSGQ_DEFINE(cr_charqueue, sizeof(char), CR_QUEUE_SIZE, 4u);
 
 char cr_input[CR_MAX_LINE_SIZE];
 
-struct device *uart0;
+const struct device *uart0;
 
 void
 handle_error(struct cr_protocol *proto)

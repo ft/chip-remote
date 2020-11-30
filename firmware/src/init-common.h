@@ -8,7 +8,7 @@
 
 extern char cr_input[CR_MAX_LINE_SIZE];
 extern struct k_msgq cr_charqueue;
-extern struct device *uart0;
+extern const struct device *uart0;
 
 void uart_sink(const char*);
 
