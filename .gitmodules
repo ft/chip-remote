@@ -1,15 +1,15 @@
 [submodule "firmware/ufw"]
-	path = firmware/ufw
+	path = firmware/libraries/ufw
 	url = https://github.com/ft/ufw.git
 [submodule "firmware/libtap"]
-	path = firmware/libtap
+	path = firmware/libraries/libtap
 	url = https://github.com/zorgnax/libtap.git
 [submodule "kernel/zephyr"]
-	path = kernel/zephyr
+	path = firmware/zephyr/kernel
 	url = https://github.com/zephyrproject-rtos/zephyr.git
 [submodule "kernel/modules/hal_stm32"]
-	path = kernel/modules/hal_stm32
+	path = firmware/zephyr/modules/hal-stm32
 	url = https://github.com/zephyrproject-rtos/hal_stm32.git
 [submodule "kernel/modules/cmsis"]
-	path = kernel/modules/cmsis
+	path = firmware/zephyr/modules/cmsis
 	url = https://github.com/zephyrproject-rtos/cmsis.git
