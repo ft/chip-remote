@@ -11,5 +11,5 @@
 	path = firmware/zephyr/modules/hal-stm32
 	url = https://github.com/zephyrproject-rtos/hal_stm32.git
 [submodule "kernel/modules/cmsis"]
-	path = firmware/zephyr/modules/cmsis
+	path = firmware/zephyr/modules/arm-cmsis
 	url = https://github.com/zephyrproject-rtos/cmsis.git

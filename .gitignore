@@ -23,8 +23,10 @@ GRTAGS
 GTAGS
 core
 core.*
+build/
+build-*/
 firmware/build/
-firmware/build-*
+firmware/build-*/
 doc/*.pdf
 doc/*.tex
 doc/*.txt
