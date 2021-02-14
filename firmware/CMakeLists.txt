@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.1)
-project(generic-h7-system NONE)
+project(chip-remote NONE)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/libraries/ufw/cmake/modules)
 include(SetupUFW)
