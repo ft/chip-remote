@@ -13,7 +13,7 @@ macro(add_chip_remote variant)
     KERNEL      ${CMAKE_SOURCE_DIR}/zephyr/kernel
     APPLICATION ${CMAKE_SOURCE_DIR}/application
     MODULE_ROOT ${CMAKE_SOURCE_DIR}/zephyr/modules
-    BUILDTYPES  Release Debug
+    BUILDTYPES  Debug Release
     ${ARGN})
 endmacro()
 
