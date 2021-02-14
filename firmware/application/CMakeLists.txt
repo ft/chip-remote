@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.13.1)
 project(chip-remote-firmware)
 
+include(InitialiseToolchain)
+initialise_toolchain()
+
 include(GitIntegration)
 
 target_sources(app PRIVATE main.c)
@@ -13,9 +16,6 @@ else()
   message(WARNING "Unsupported board: ${BOARD}")
 endif()
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ufw/cmake/modules)
-include(InitialiseToolchain)
-initialise_toolchain()
 target_link_libraries(app PRIVATE ufw chip-remote-protocol)
 
 if (${BOARD} MATCHES "^native")
