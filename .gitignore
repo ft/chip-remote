@@ -3,6 +3,7 @@
 !.clang-format
 *~
 \#*
+compile_commands.json
 *.tmp
 *.orig
 *.o
