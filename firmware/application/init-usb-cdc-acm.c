@@ -8,6 +8,7 @@
 #include <common/compiler.h>
 
 #include "init-common.h"
+#include "bitbang-spi.h"
 
 void
 uart_sink(const char *str)
@@ -59,9 +60,15 @@ main(void)
     }
 
     bool led_is_on = true;
+    uint32_t cnt = 0ul;
     for (;;) {
+#if 0
+        if ((cnt % 10u) == 0u)
+            printk("Still here.\n");
+#endif
+        cnt += 1u;
         gpio_pin_set(led, PIN, (int)led_is_on);
         led_is_on = !led_is_on;
-        k_msleep(200);
+        k_msleep(100);
     }
 }

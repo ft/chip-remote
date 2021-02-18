@@ -9,7 +9,9 @@ include(GitIntegration)
 target_sources(app PRIVATE main.c)
 
 if (${BOARD} STREQUAL nucleo_f767zi)
-  target_sources(app PRIVATE init-usb-cdc-acm.c)
+  target_sources(app PRIVATE
+    bitbang-spi.c
+    init-usb-cdc-acm.c)
 elseif (${BOARD} STREQUAL native_posix_64)
   target_sources(app PRIVATE init-posix.c)
 else()

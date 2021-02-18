@@ -11,6 +11,10 @@
 
 #include "init-common.h"
 
+#ifndef CONFIG_ARCH_POSIX
+#include "bitbang-spi.h"
+#endif /* CONFIG_ARCH_POSIX */
+
 #define CR_QUEUE_SIZE 16u
 K_MSGQ_DEFINE(cr_charqueue, sizeof(char), CR_QUEUE_SIZE, 4u);
 
@@ -95,6 +99,8 @@ run_command(struct cr_protocol *proto)
     return proto->state.protocol;
 }
 
+#ifdef CONFIG_ARCH_POSIX
+
 int
 text_transmit(const struct cr_port *port, const uint32_t tx, uint32_t *rx)
 {
@@ -106,6 +112,19 @@ text_transmit(const struct cr_port *port, const uint32_t tx, uint32_t *rx)
     return 0;
 }
 
+#else
+
+int
+spi_transmit(const struct cr_port *port, const uint32_t tx, uint32_t *rx)
+{
+    printk("cr>> 0x%08x\n", tx);
+    *rx = cr_spi_xfer(&bbspi, tx);
+    printk("cr<< 0x%08x\n", *rx);
+    return 0;
+}
+
+#endif /* CONFIG_ARCH_POSIX */
+
 void
 cr_run(void *a, void *b, void *c)
 {
@@ -113,8 +132,15 @@ cr_run(void *a, void *b, void *c)
     char ch = 0;
 
     printk("ChipRemote Command Processor online!\n");
+
+    cr_spi_init(&bbspi);
+#ifdef CONFIG_ARCH_POSIX
     cr_process_init(&proto, cr_input, CR_MAX_LINE_SIZE,
                     text_transmit, uart_sink);
+#else
+    cr_process_init(&proto, cr_input, CR_MAX_LINE_SIZE,
+                    spi_transmit, uart_sink);
+#endif /* CONFIG_ARCH_POSIX */
     for (;;) {
         k_msgq_get(&cr_charqueue, &ch, K_FOREVER);
         switch (cr_process_octet(&proto, ch)) {
