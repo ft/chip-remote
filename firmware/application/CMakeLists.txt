@@ -20,13 +20,11 @@ target_link_libraries(app PRIVATE ufw chip-remote-protocol)
 
 if (${BOARD} MATCHES "^native")
   gitint_install(
-    NAME ${PROJECT_NAME}
     LATEST_ARTIFACTS
     FILES
     ${CMAKE_BINARY_DIR}/zephyr/zephyr.exe)
 else()
   gitint_install(
-    NAME ${PROJECT_NAME}
     LATEST_ARTIFACTS
     FILES
     ${CMAKE_BINARY_DIR}/zephyr/zephyr.elf
