@@ -45,5 +45,6 @@ struct cr_protocol {
 void cr_process_init(struct cr_protocol*, char*, size_t,
                      transmit_impl, string_sink);
 enum cr_process_result cr_process_octet(struct cr_protocol*, const char);
+void cr_toplevel(struct cr_protocol*, const char);
 
 #endif /* INC_PROCESS_H */
