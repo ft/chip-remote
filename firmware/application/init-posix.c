@@ -6,6 +6,8 @@
 #include <string.h>
 #include <c/compat.h>
 
+#include <cr-process.h>
+
 #include "init-common.h"
 
 #define MAX_BOARD_NAME_LENGTH 32u
@@ -36,7 +38,7 @@ main(void)
         /* Poll controlling UART port and feed fifo */
         const int rc = uart_poll_in(uart0, &ch);
         if (rc == 0) {
-            k_msgq_put(&cr_charqueue, &ch, K_FOREVER);
+            cr_toplevel(&proto, ch);
         } else {
             k_usleep(1000);
         }

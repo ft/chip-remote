@@ -7,6 +7,8 @@
 
 #include <common/compiler.h>
 
+#include <cr-process.h>
+
 #include "init-common.h"
 #include "bitbang-spi.h"
 
@@ -22,7 +24,7 @@ cr_handle_usb(const struct device *dev, UNUSED void *userdata)
 {
     char ch;
     while (uart_fifo_read(dev, &ch, 1u) > 0u)
-        k_msgq_put(&cr_charqueue, &ch, K_NO_WAIT);
+        cr_toplevel(&proto, ch);
 }
 
 #define LED0_NODE DT_ALIAS(led0)
@@ -54,10 +56,14 @@ main(void)
         return;
     }
 
+    cr_spi_init(&bbspi);
+
     int ret = gpio_pin_configure(led, PIN, GPIO_OUTPUT_ACTIVE);
     if (ret < 0) {
         return;
     }
+
+    printk("ChipRemote Command Processor online!\n");
 
     bool led_is_on = true;
     uint32_t cnt = 0ul;
