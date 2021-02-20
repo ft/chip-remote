@@ -133,11 +133,11 @@ cr_run(void *a, void *b, void *c)
 
     printk("ChipRemote Command Processor online!\n");
 
-    cr_spi_init(&bbspi);
 #ifdef CONFIG_ARCH_POSIX
     cr_process_init(&proto, cr_input, CR_MAX_LINE_SIZE,
                     text_transmit, uart_sink);
 #else
+    cr_spi_init(&bbspi);
     cr_process_init(&proto, cr_input, CR_MAX_LINE_SIZE,
                     spi_transmit, uart_sink);
 #endif /* CONFIG_ARCH_POSIX */
