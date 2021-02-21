@@ -1,6 +1,5 @@
 #include <cr-process.h>
 
-#include "bitbang-spi.h"
 #include "init-common.h"
 
 #ifdef CONFIG_ARCH_POSIX
