@@ -22,9 +22,9 @@ int
 spi_transmit(const struct cr_port *port, const uint32_t tx, uint32_t *rx)
 {
     printk("cr>> 0x%08x\n", tx);
-    *rx = cr_spi_xfer(&bbspi, tx);
+    int rv = port00_spi.api->xfer(&port00_spi, tx, rx);
     printk("cr<< 0x%08x\n", *rx);
-    return 0;
+    return rv;
 }
 
 #endif /* CONFIG_ARCH_POSIX */

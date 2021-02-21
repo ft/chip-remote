@@ -7,12 +7,52 @@
 
 #include <common/compiler.h>
 
+#include <cr-port.h>
 #include <cr-process.h>
 
 #include "init-common.h"
-#include "bitbang-spi.h"
+#include "ifc/bb/spi.h"
 
-void
+#define P_GPIOC DEVICE_DT_GET(DT_NODELABEL(gpioc))
+
+struct cr_line port00_lines[] = {
+    { .port = P_GPIOC, .pin =  8u, .mode = CR_LINE_OUTPUT_PUSHPULL },
+    { .port = P_GPIOC, .pin =  9u, .mode = CR_LINE_OUTPUT_PUSHPULL },
+    { .port = P_GPIOC, .pin = 10u, .mode = CR_LINE_OUTPUT_PUSHPULL },
+    { .port = P_GPIOC, .pin = 11u, .mode = CR_LINE_INPUT_PULLDOWN }
+};
+
+struct cr_port_spi_bb port00_spi_bb = {
+    .cs   = &port00_lines[0],
+    .clk  = &port00_lines[1],
+    .mosi = &port00_lines[2],
+    .miso = &port00_lines[3]
+};
+
+struct cr_port port00_spi = {
+    .name = "port00-spi",
+    .type = CR_PORT_TYPE_SPI_BB,
+    .api  = &cr_port_impl_spi_bb,
+    .data = &port00_spi_bb,
+    .cfg.spi = {
+        .frame_length = 16u,
+        .bit_order = CR_BIT_MSB_FIRST,
+        .cs = {
+            .number = 1u,
+            .polarity = CR_LOGIC_INVERTED
+        },
+        .clk = {
+            .rate = 0u,
+            .edge = CR_EDGE_RISING,
+            .phase_delay = false
+        }
+    },
+    .lines = sizeof(port00_lines)/sizeof(*port00_lines),
+    .line = port00_lines,
+    .initialised = false
+};
+
+void 
 uart_sink(const char *str)
 {
     const size_t len = strlen(str);
@@ -56,7 +96,7 @@ main(void)
         return;
     }
 
-    cr_spi_init(&bbspi);
+    port00_spi.api->init(&port00_spi);
 
     int ret = gpio_pin_configure(led, PIN, GPIO_OUTPUT_ACTIVE);
     if (ret < 0) {
