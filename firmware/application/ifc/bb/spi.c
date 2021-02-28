@@ -85,13 +85,14 @@ cr_spi_bb_xfer(struct cr_port *port, uint32_t tx, uint32_t *rx)
     uint32_t rv = 0ull;
     const size_t len = 16;
 
+    *rx = 0u;
     cr_spi_line_set(spi->cs, 0u);
     for (size_t i = 0ull; i < len; ++i) {
         const size_t idx = len - i - 1;
         cr_spi_line_set(spi->mosi, BITLL_GET(tx, 1u, idx));
         cr_spi_line_set(spi->clk, 1u);
         if (cr_spi_line_get(spi->miso) > 0) {
-            rv |= BITLL(idx);
+            *rx |= BITLL(idx);
         }
         cr_spi_line_set(spi->clk, 0u);
     }

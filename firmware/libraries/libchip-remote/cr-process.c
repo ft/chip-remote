@@ -5,18 +5,14 @@
 #include <parse-string.h>
 
 void
-cr_process_init(struct cr_protocol *proto,
-                char *buf, size_t n,
-                transmit_impl transmit,
-                string_sink reply)
+cr_process_init(struct cr_protocol *p, char *b, size_t n, string_sink r)
 {
-    proto->state.protocol = CR_PROTO_STATE_IDLE;
-    proto->state.input = CR_INPUT_PROCESS;
-    proto->in.buffer = buf;
-    proto->in.size = n;
-    proto->in.idx = 0u;
-    proto->transmit = transmit;
-    proto->reply = reply;
+    p->state.protocol = CR_PROTO_STATE_IDLE;
+    p->state.input = CR_INPUT_PROCESS;
+    p->in.buffer = b;
+    p->in.size = n;
+    p->in.idx = 0u;
+    p->reply = r;
 }
 
 static void
@@ -134,7 +130,7 @@ cr_toplevel(struct cr_protocol *proto, const char ch)
         proto->state.protocol = run_command(proto);
         break;
     case CR_PROCESS_INPUT_TOO_LONG:
-        printf("cr: Input too long (max: %d); line ignored.\n",
+        printf("cr: Input too long (max: %zu); line ignored.\n",
                proto->in.size);
         break;
     }

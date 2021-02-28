@@ -15,6 +15,7 @@
 
 #include <commands.h>
 #include <commands-private.h>
+#include <cr-port.h>
 
 struct cr_argument transmit_arguments[] = {
     { .optional = false, .type = CR_PROTO_ARG_TYPE_INTEGER },
@@ -61,6 +62,12 @@ put_u32(const struct cr_protocol *proto, const uint32_t value)
     proto->reply(buffer);
 }
 
+static inline struct cr_port*
+current_port(const struct cr_protocol *proto)
+{
+    return proto->ports.table[proto->ports.current];
+}
+
 enum cr_proto_state
 cr_handle_transmit(const struct cr_protocol *proto,
                    UNUSED const struct cr_command *cmd,
@@ -68,8 +75,7 @@ cr_handle_transmit(const struct cr_protocol *proto,
                    UNUSED unsigned int argn)
 {
     uint32_t rx;
-    proto->transmit(proto->ports.table + proto->ports.current,
-                    arg[0].data.u32, &rx);
+    cr_transmit(current_port(proto), arg[0].data.u32, &rx);
     put_u32(proto, rx);
     proto->reply("\n");
     return CR_PROTO_STATE_ACTIVE;

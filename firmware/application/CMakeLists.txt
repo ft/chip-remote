@@ -6,14 +6,16 @@ initialise_toolchain()
 
 include(GitIntegration)
 
-target_sources(app PRIVATE main.c)
+target_sources(app PRIVATE common.c)
 
 if (${BOARD} STREQUAL nucleo_f767zi)
   target_sources(app PRIVATE
     ifc/bb/spi.c
     init-usb-cdc-acm.c)
 elseif (${BOARD} STREQUAL native_posix_64)
-  target_sources(app PRIVATE init-posix.c)
+  target_sources(app PRIVATE
+    ifc/text/spi.c
+    init-posix.c)
 else()
   message(WARNING "Unsupported board: ${BOARD}")
 endif()

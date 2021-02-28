@@ -31,7 +31,7 @@ struct cr_port_spi_bb port00_spi_bb = {
 
 struct cr_port port00_spi = {
     .name = "port00-spi",
-    .type = CR_PORT_TYPE_SPI_BB,
+    .type = CR_PORT_TYPE_SPI,
     .api  = &cr_port_impl_spi_bb,
     .data = &port00_spi_bb,
     .cfg.spi = {

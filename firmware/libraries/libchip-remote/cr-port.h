@@ -21,7 +21,6 @@ enum cr_port_type {
     CR_PORT_TYPE_FLEX,
     CR_PORT_TYPE_UART,
     CR_PORT_TYPE_SPI,
-    CR_PORT_TYPE_SPI_BB,
     CR_PORT_TYPE_I2C,
     CR_PORT_TYPE_IO
 };
@@ -51,7 +50,7 @@ enum cr_line_mode {
 };
 
 struct cr_line {
-    const void * port;
+    const void *port;
     unsigned int pin;
     enum cr_line_mode mode;
 };
@@ -92,7 +91,7 @@ struct cr_port_api {
 struct cr_port {
     const char *name;
     enum cr_port_type type;
-    const void *data;
+    void *data;
     const struct cr_port_api *api;
     union {
         struct cr_port_spi spi;
@@ -102,5 +101,7 @@ struct cr_port {
     struct cr_line *line;
     bool initialised;
 };
+
+int cr_transmit(struct cr_port*, uint32_t, uint32_t*);
 
 #endif /* INC_CR_PORT_H */

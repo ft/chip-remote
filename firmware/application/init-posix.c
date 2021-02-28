@@ -9,8 +9,34 @@
 #include <cr-process.h>
 
 #include "init-common.h"
+#include "ifc/text/spi.h"
 
 #define MAX_BOARD_NAME_LENGTH 32u
+
+uint32_t port00_spi_state = 0u;
+
+struct cr_port port00_spi = {
+    .name = "port00-spi",
+    .type = CR_PORT_TYPE_SPI,
+    .api  = &cr_port_impl_spi_text,
+    .data = &port00_spi_state,
+    .cfg.spi = {
+        .frame_length = 16u,
+        .bit_order = CR_BIT_MSB_FIRST,
+        .cs = {
+            .number = 1u,
+            .polarity = CR_LOGIC_INVERTED
+        },
+        .clk = {
+            .rate = 0u,
+            .edge = CR_EDGE_RISING,
+            .phase_delay = false
+        }
+    },
+    .lines = 0u,
+    .line = 0u,
+    .initialised = false
+};
 
 void
 uart_sink(const char *str)
