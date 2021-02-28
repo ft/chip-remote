@@ -28,6 +28,7 @@ DECLARE_COMMAND(features);
 DECLARE_COMMAND(hi);
 extern struct cr_argument transmit_arguments[];
 DECLARE_COMMAND(transmit);
+DECLARE_COMMAND(version);
 
 #undef ARGUMENTS
 #undef RETURN_TYPE

@@ -59,7 +59,7 @@ struct cr_command cr_commands[] = {
     MISSING_COMMAND(PORT),
     MISSING_COMMAND(SET),
     COMMAND(TRANSMIT, ACTIVE,    cr_handle_transmit, transmit_arguments),
-    MISSING_COMMAND(VERSION),
+    COMMAND(VERSION, ACTIVE,     cr_handle_version,  no_arguments),
     END_OF_COMMAND_TABLE
 };
 

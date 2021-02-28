@@ -18,6 +18,10 @@
 
 #define CR_PROTO_MAX_ARGS 4u
 
+#define CR_PROTOCOL_VERSION_MAJOR      2u
+#define CR_PROTOCOL_VERSION_MINOR      0u
+#define CR_PROTOCOL_VERSION_PATCHLEVEL 0u
+
 /**
  * Flags that encode possible outcomes of requests within the protocol
  */

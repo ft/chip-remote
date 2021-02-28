@@ -9,8 +9,10 @@ add_library(chip-remote-protocol STATIC
   command-features.c
   command-hi.c
   command-transmit.c
+  command-version.c
   cr-process.c
   cr-port.c
+  cr-utilities.c
   parse-string.c)
 
 target_include_directories(chip-remote-protocol
