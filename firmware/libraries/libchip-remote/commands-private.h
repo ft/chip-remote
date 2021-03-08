@@ -21,15 +21,20 @@ extern struct cr_command cr_commands[];
                    const struct cr_value*,      \
                    unsigned int)
 
-#define DECLARE_COMMAND(name) RETURN_TYPE cr_handle_ ## name ARGUMENTS
+#define DECLARE_COMMAND(name)                   \
+    RETURN_TYPE cr_handle_ ## name ARGUMENTS
+
+#define DECLARE_ARGS_COMMAND(name)                   \
+    extern struct cr_argument name ## _arguments[];  \
+    DECLARE_COMMAND(name)
 
 DECLARE_COMMAND(bye);
 DECLARE_COMMAND(features);
 DECLARE_COMMAND(hi);
-extern struct cr_argument transmit_arguments[];
-DECLARE_COMMAND(transmit);
+DECLARE_ARGS_COMMAND(transmit);
 DECLARE_COMMAND(version);
 
+#undef DECLARE_ARGS_COMMAND
+#undef DECLARE_COMMAND
 #undef ARGUMENTS
 #undef RETURN_TYPE
-#undef DECLARE_COMMAND
