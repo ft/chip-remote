@@ -15,7 +15,6 @@ struct cr_protocol proto = {
         .current = 0u,
         .focused = true
     },
-    .state.protocol = CR_PROTO_STATE_IDLE,
     .state.input = CR_INPUT_PROCESS,
     .in.buffer = cr_input,
     .in.size = CR_MAX_LINE_SIZE,

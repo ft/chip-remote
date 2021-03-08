@@ -17,7 +17,6 @@ enum cr_input_state {
 
 struct cr_protocol {
     struct {
-        enum cr_proto_state protocol;
         enum cr_input_state input;
     } state;
     struct {

@@ -62,15 +62,6 @@ enum cr_proto_command {
 };
 
 /**
- * Flags to encode possible states the protocol can be in.
- */
-enum cr_proto_state {
-    CR_PROTO_STATE_ACTIVE,
-    CR_PROTO_STATE_IDLE,
-    CR_PROTO_STATE_MULTILINE
-};
-
-/**
  * Encoding for different types of values within the protocol
  *
  * The VOID type is used to signify something empty, like a list of arguments
@@ -102,7 +93,7 @@ struct cr_protocol;
 
 typedef void (*string_sink)(const char*);
 
-typedef enum cr_proto_state(*cr_command_callback)(
+typedef int(*cr_command_callback)(
     const struct cr_protocol*,
     const struct cr_command*,
     const struct cr_value*,
@@ -125,7 +116,6 @@ struct cr_argument {
 struct cr_command {
     enum cr_proto_command id;
     const char *name;
-    enum cr_proto_state state;
     struct cr_argument *args;
     cr_command_callback cb;
 };

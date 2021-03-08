@@ -19,18 +19,16 @@
 #include <commands.h>
 #include <commands-private.h>
 
-#define CMD(x)   (CR_PROTO_CMD_   ## x)
-#define STATE(x) (CR_PROTO_STATE_ ## x)
+#define CMD(x) (CR_PROTO_CMD_ ## x)
 
 struct cr_argument no_arguments[] = {
     { .optional = false, .type = CR_PROTO_ARG_TYPE_VOID }
 };
 
-#define COMMAND(_name, _state, _callback, _arguments)   \
+#define COMMAND(_name, _callback, _arguments)   \
     [CMD(_name)]  = {                                   \
         .id = CMD(_name),                               \
         .name = #_name,                                 \
-        .state = STATE(_state),                         \
         .cb = _callback,                                \
         .args = _arguments }
 
@@ -38,28 +36,26 @@ struct cr_argument no_arguments[] = {
     [CMD(_name)]  = {                           \
         .id = CMD(_name),                       \
         .name = NULL,                           \
-        .state = STATE(IDLE),                   \
         .cb = NULL,                             \
         .args = NULL }
 
-#define END_OF_COMMAND_TABLE COMMAND(UNKNOWN, IDLE, NULL, NULL)
+#define END_OF_COMMAND_TABLE COMMAND(UNKNOWN, NULL, NULL)
 
 struct cr_command cr_commands[] = {
     MISSING_COMMAND(ADDRESS),
-    COMMAND(BYE,      ACTIVE,    cr_handle_bye,      no_arguments),
-    COMMAND(FEATURES, ACTIVE,    cr_handle_features, no_arguments),
+    COMMAND(BYE,      cr_handle_bye,      no_arguments),
+    COMMAND(FEATURES, cr_handle_features, no_arguments),
     MISSING_COMMAND(FOCUS),
     MISSING_COMMAND(HASHED),
-    COMMAND(HI,       IDLE,      cr_handle_hi,       no_arguments),
+    COMMAND(HI,       cr_handle_hi,       no_arguments),
     MISSING_COMMAND(INIT),
     MISSING_COMMAND(LINES),
     MISSING_COMMAND(LINE),
     MISSING_COMMAND(MODES),
-    COMMAND(MORE,     MULTILINE, NULL,               no_arguments),
     MISSING_COMMAND(PORT),
     MISSING_COMMAND(SET),
-    COMMAND(TRANSMIT, ACTIVE,    cr_handle_transmit, transmit_arguments),
-    COMMAND(VERSION, ACTIVE,     cr_handle_version,  no_arguments),
+    COMMAND(TRANSMIT, cr_handle_transmit, transmit_arguments),
+    COMMAND(VERSION,  cr_handle_version,  no_arguments),
     END_OF_COMMAND_TABLE
 };
 

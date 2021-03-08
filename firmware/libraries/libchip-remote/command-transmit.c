@@ -27,7 +27,7 @@ current_port(const struct cr_protocol *proto)
     return proto->ports.table[proto->ports.current];
 }
 
-enum cr_proto_state
+int
 cr_handle_transmit(const struct cr_protocol *proto,
                    UNUSED const struct cr_command *cmd,
                    const struct cr_value *arg,
@@ -37,5 +37,5 @@ cr_handle_transmit(const struct cr_protocol *proto,
     cr_transmit(current_port(proto), arg[0].data.u32, &rx);
     cr_proto_put_u32(proto, rx);
     cr_proto_put_newline(proto);
-    return CR_PROTO_STATE_ACTIVE;
+    return 0;
 }

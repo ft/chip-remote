@@ -27,12 +27,12 @@
  * @return OK or MALFORMED
  * @sideeffects none
  */
-enum cr_proto_state
+int
 cr_handle_hi(const struct cr_protocol *proto,
              UNUSED const struct cr_command *cmd,
              UNUSED const struct cr_value *arg,
              UNUSED unsigned int argn)
 {
     proto->reply("Hi there, stranger.\n");
-    return CR_PROTO_STATE_ACTIVE;
+    return 0;
 }

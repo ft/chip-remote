@@ -15,7 +15,7 @@
 #include <commands-private.h>
 #include <cr-utilities.h>
 
-enum cr_proto_state
+int
 cr_handle_version(const struct cr_protocol *proto,
                   UNUSED const struct cr_command *cmd,
                   UNUSED const struct cr_value *arg,
@@ -27,5 +27,5 @@ cr_handle_version(const struct cr_protocol *proto,
     cr_proto_put_space(proto);
     cr_proto_put_u32(proto, CR_PROTOCOL_VERSION_PATCHLEVEL);
     cr_proto_put_newline(proto);
-    return CR_PROTO_STATE_ACTIVE;
+    return 0;
 }
