@@ -25,12 +25,15 @@ struct cr_argument no_arguments[] = {
     { .optional = false, .type = CR_PROTO_ARG_TYPE_VOID }
 };
 
-#define COMMAND(_name, _callback, _arguments)   \
+#define ACOMMAND(_name, _callback, _arguments)          \
     [CMD(_name)]  = {                                   \
         .id = CMD(_name),                               \
         .name = #_name,                                 \
         .cb = _callback,                                \
         .args = _arguments }
+
+#define SCOMMAND(_name, _callback)              \
+    ACOMMAND(_name, _callback, no_arguments)
 
 #define MISSING_COMMAND(_name)                  \
     [CMD(_name)]  = {                           \
@@ -39,23 +42,23 @@ struct cr_argument no_arguments[] = {
         .cb = NULL,                             \
         .args = NULL }
 
-#define END_OF_COMMAND_TABLE COMMAND(UNKNOWN, NULL, NULL)
+#define END_OF_COMMAND_TABLE ACOMMAND(UNKNOWN, NULL, NULL)
 
 struct cr_command cr_commands[] = {
     MISSING_COMMAND(ADDRESS),
-    COMMAND(BYE,      cr_handle_bye,      no_arguments),
-    COMMAND(FEATURES, cr_handle_features, no_arguments),
+    SCOMMAND(BYE,      cr_handle_bye),
+    SCOMMAND(FEATURES, cr_handle_features),
     MISSING_COMMAND(FOCUS),
     MISSING_COMMAND(HASHED),
-    COMMAND(HI,       cr_handle_hi,       no_arguments),
+    SCOMMAND(HI,       cr_handle_hi),
     MISSING_COMMAND(INIT),
     MISSING_COMMAND(LINES),
     MISSING_COMMAND(LINE),
     MISSING_COMMAND(MODES),
     MISSING_COMMAND(PORT),
     MISSING_COMMAND(SET),
-    COMMAND(TRANSMIT, cr_handle_transmit, transmit_arguments),
-    COMMAND(VERSION,  cr_handle_version,  no_arguments),
+    ACOMMAND(TRANSMIT, cr_handle_transmit, transmit_arguments),
+    SCOMMAND(VERSION,  cr_handle_version),
     END_OF_COMMAND_TABLE
 };
 
