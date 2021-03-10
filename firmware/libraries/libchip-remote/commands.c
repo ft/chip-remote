@@ -25,15 +25,24 @@ struct cr_argument no_arguments[] = {
     { .optional = false, .type = CR_PROTO_ARG_TYPE_VOID }
 };
 
-#define ACOMMAND(_name, _callback, _arguments)          \
-    [CMD(_name)]  = {                                   \
-        .id = CMD(_name),                               \
-        .name = #_name,                                 \
-        .cb = _callback,                                \
+#define COMMAND(_eprefix, _nprefix, _name, _callback, _arguments)       \
+    [CMD(_eprefix ## _name)]  = {                                       \
+        .id = CMD(_name),                                               \
+        .name = (#_nprefix #_name),                                     \
+        .cb = _callback,                                                \
         .args = _arguments }
 
-#define SCOMMAND(_name, _callback)              \
-    ACOMMAND(_name, _callback, no_arguments)
+#define CRaCOMMAND(_name, _callback, _arguments)                \
+    COMMAND(/*none*/, /*none*/, _name, _callback, _arguments)
+
+#define CRsCOMMAND(_name, _callback)            \
+    CRaCOMMAND(_name, _callback, no_arguments)
+
+#define FWaCOMMAND(_name, _callback, _arguments)        \
+    COMMAND(FW_, +, _name, _callback, _arguments)
+
+#define FWsCOMMAND(_name, _callback)            \
+    FWaCOMMAND(_name, _callback, no_arguments)
 
 #define MISSING_COMMAND(_name)                  \
     [CMD(_name)]  = {                           \
@@ -42,23 +51,24 @@ struct cr_argument no_arguments[] = {
         .cb = NULL,                             \
         .args = NULL }
 
-#define END_OF_COMMAND_TABLE ACOMMAND(UNKNOWN, NULL, NULL)
+#define END_OF_COMMAND_TABLE CRaCOMMAND(UNKNOWN, NULL, NULL)
 
 struct cr_command cr_commands[] = {
     MISSING_COMMAND(ADDRESS),
-    SCOMMAND(BYE,      cr_handle_bye),
-    SCOMMAND(FEATURES, cr_handle_features),
+    CRsCOMMAND(BYE,      cr_handle_bye),
+    CRsCOMMAND(FEATURES, cr_handle_features),
     MISSING_COMMAND(FOCUS),
     MISSING_COMMAND(HASHED),
-    SCOMMAND(HI,       cr_handle_hi),
+    CRsCOMMAND(HI,       cr_handle_hi),
     MISSING_COMMAND(INIT),
     MISSING_COMMAND(LINES),
     MISSING_COMMAND(LINE),
     MISSING_COMMAND(MODES),
     MISSING_COMMAND(PORT),
     MISSING_COMMAND(SET),
-    ACOMMAND(TRANSMIT, cr_handle_transmit, transmit_arguments),
-    SCOMMAND(VERSION,  cr_handle_version),
+    CRaCOMMAND(TRANSMIT, cr_handle_transmit, transmit_arguments),
+    CRsCOMMAND(VERSION,  cr_handle_version),
+    FWsCOMMAND(VERSION,  cr_handle_fw_version),
     END_OF_COMMAND_TABLE
 };
 

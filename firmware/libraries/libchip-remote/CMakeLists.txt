@@ -10,6 +10,7 @@ add_library(chip-remote-protocol STATIC
   command-hi.c
   command-transmit.c
   command-version.c
+  command-fw-version.c
   cr-process.c
   cr-port.c
   cr-utilities.c

@@ -21,18 +21,24 @@ extern struct cr_command cr_commands[];
                    const struct cr_value*,      \
                    unsigned int)
 
-#define DECLARE_COMMAND(name)                   \
-    RETURN_TYPE cr_handle_ ## name ARGUMENTS
+#define xDECLARE_COMMAND(prefix, name)                  \
+    RETURN_TYPE cr_handle_ ## prefix ## name ARGUMENTS
 
-#define DECLARE_ARGS_COMMAND(name)                   \
-    extern struct cr_argument name ## _arguments[];  \
-    DECLARE_COMMAND(name)
+#define xDECLARE_ARGS_COMMAND(prefix, name)                     \
+    extern struct cr_argument prefix ## name ## _arguments[];  \
+    xDECLARE_COMMAND(prefix, name)
+
+#define DECLARE_COMMAND(name) xDECLARE_COMMAND(/*none*/, name)
+#define DECLARE_ARGS_COMMAND(name) xDECLARE_ARGS_COMMAND(/*none*/, name)
+#define FW_DECLARE_COMMAND(name) xDECLARE_COMMAND(fw_, name)
+#define FW_DECLARE_ARGS_COMMAND(name) xDECLARE_ARGS_COMMAND(fw_, name)
 
 DECLARE_COMMAND(bye);
 DECLARE_COMMAND(features);
 DECLARE_COMMAND(hi);
 DECLARE_ARGS_COMMAND(transmit);
 DECLARE_COMMAND(version);
+FW_DECLARE_COMMAND(version);
 
 #undef DECLARE_ARGS_COMMAND
 #undef DECLARE_COMMAND
