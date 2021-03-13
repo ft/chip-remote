@@ -49,11 +49,11 @@ cr_process_octet(struct cr_protocol *proto, const char ch)
         }
         break;
     case CR_INPUT_PROCESS:
-        proto->in.buffer[proto->in.idx] = ch;
         if (proto->in.idx >= proto->in.size) {
             proto->state.input = CR_INPUT_IGNORE;
             break;
         }
+        proto->in.buffer[proto->in.idx] = ch;
         if (proto->in.buffer[proto->in.idx] == '\n') {
             proto->in.buffer[proto->in.idx] = '\0';
             proto->cmd.result = cr_parse_string(proto->reply,
