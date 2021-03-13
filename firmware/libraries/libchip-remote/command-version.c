@@ -15,11 +15,9 @@
 #include <commands-private.h>
 #include <cr-utilities.h>
 
-int
+cr_callback_value
 cr_handle_version(const struct cr_protocol *proto,
-                  UNUSED const struct cr_command *cmd,
-                  UNUSED const struct cr_value *arg,
-                  UNUSED unsigned int argn)
+                  UNUSED const struct cr_proto_parse *cmd)
 {
     cr_proto_put_u32(proto, CR_PROTOCOL_VERSION_MAJOR);
     cr_proto_put_space(proto);
@@ -27,5 +25,5 @@ cr_handle_version(const struct cr_protocol *proto,
     cr_proto_put_space(proto);
     cr_proto_put_u32(proto, CR_PROTOCOL_VERSION_PATCHLEVEL);
     cr_proto_put_newline(proto);
-    return 0;
+    return CR_CB_OK;
 }

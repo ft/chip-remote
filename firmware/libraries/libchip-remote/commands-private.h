@@ -14,12 +14,9 @@
 
 extern struct cr_command cr_commands[];
 
-#define RETURN_TYPE int
+#define RETURN_TYPE cr_callback_value
 
-#define ARGUMENTS (const struct cr_protocol*,   \
-                   const struct cr_command*,    \
-                   const struct cr_value*,      \
-                   unsigned int)
+#define ARGUMENTS (const struct cr_protocol*, const struct cr_proto_parse*)
 
 #define xDECLARE_COMMAND(prefix, name)                  \
     RETURN_TYPE cr_handle_ ## prefix ## name ARGUMENTS

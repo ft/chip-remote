@@ -4,6 +4,8 @@
 #include <cr-process.h>
 #include <parse-string.h>
 
+#include <common/compiler.h>
+
 void
 cr_process_init(struct cr_protocol *p, char *b, size_t n, string_sink r)
 {
@@ -15,7 +17,7 @@ cr_process_init(struct cr_protocol *p, char *b, size_t n, string_sink r)
 }
 
 static void
-handle_error(struct cr_protocol *proto)
+handle_proto_error(const struct cr_protocol *proto)
 {
     switch (proto->cmd.result) {
     case CR_PROTO_RESULT_WTF:
@@ -36,14 +38,20 @@ handle_error(struct cr_protocol *proto)
         break;
     }
 }
+static void
+handle_cb_error(UNUSED const struct cr_protocol *proto,
+                UNUSED const struct cr_proto_parse *parsed,
+                UNUSED cr_callback_value value)
+{
+}
 
-static int
+static void
 run_command(struct cr_protocol *proto)
 {
     /* Exit early, if the protocol parser signalled an error in proto */
     if (proto->cmd.result != CR_PROTO_RESULT_OK) {
-        handle_error(proto);
-        return -1;
+        handle_proto_error(proto);
+        return;
     }
 
     /* Install a couple of shorthands */
@@ -54,11 +62,14 @@ run_command(struct cr_protocol *proto)
         printf("cr: Got NULL callback in command processing.\n");
         printf("cr: This should never happend and is likely a bug.\n");
         proto->reply("WTF NULL Callback. This is a bug!\n");
-        return -2;
+        return;
     }
 
     /* Actually run the callback picked depending on current protocol state */
-    return cb(proto, parsed->cmd, parsed->args, parsed->argn);
+    const cr_callback_value rv = cb(proto, parsed);
+    if (rv != CR_CB_OK) {
+        handle_cb_error(proto, parsed, rv);
+    }
 }
 
 enum cr_process_result
@@ -99,7 +110,6 @@ cr_toplevel(struct cr_protocol *proto, const char ch)
         /* Nothing to do. */
         break;
     case CR_PROCESS_COMMAND:
-        /* TODO: Handle errors */
         run_command(proto);
         break;
     case CR_PROCESS_INPUT_TOO_LONG:

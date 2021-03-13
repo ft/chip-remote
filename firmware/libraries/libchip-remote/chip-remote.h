@@ -95,14 +95,17 @@ struct cr_value {
 
 struct cr_command;
 struct cr_protocol;
+struct cr_proto_parse;
 
 typedef void (*string_sink)(const char*);
 
-typedef int(*cr_command_callback)(
-    const struct cr_protocol*,
-    const struct cr_command*,
-    const struct cr_value*,
-    unsigned int);
+typedef enum cr_callback_value {
+    CR_CB_OK = 0
+} cr_callback_value;
+
+typedef cr_callback_value
+(*cr_command_callback)(const struct cr_protocol*,
+                       const struct cr_proto_parse*);
 
 /**
  * Description of command argument specification

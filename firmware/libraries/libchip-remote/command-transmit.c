@@ -27,15 +27,13 @@ current_port(const struct cr_protocol *proto)
     return proto->ports.table[proto->ports.current];
 }
 
-int
+cr_callback_value
 cr_handle_transmit(const struct cr_protocol *proto,
-                   UNUSED const struct cr_command *cmd,
-                   const struct cr_value *arg,
-                   UNUSED unsigned int argn)
+                   const struct cr_proto_parse *cmd)
 {
     uint32_t rx;
-    cr_transmit(current_port(proto), arg[0].data.u32, &rx);
+    cr_transmit(current_port(proto), cmd->args[0].data.u32, &rx);
     cr_proto_put_u32(proto, rx);
     cr_proto_put_newline(proto);
-    return 0;
+    return CR_CB_OK;
 }
