@@ -124,7 +124,7 @@ parse_u32(const char *buf, int *err)
 }
 
 static struct cr_value
-parse_argument(const struct cr_argument *spec, char *input)
+parse_argument(string_sink reply, const struct cr_argument *spec, char *input)
 {
     struct cr_value result;
     result.type = spec->type;
@@ -133,6 +133,9 @@ parse_argument(const struct cr_argument *spec, char *input)
         if (string_bool_true(input)) {
         } else if (string_bool_false(input)) {
         } else {
+            reply("BROKEN-VALUE Not a boolean: ");
+            reply(input);
+            reply("\n");
             result.type = CR_PROTO_ARG_TYPE_VOID;
         }
         break;
@@ -140,6 +143,9 @@ parse_argument(const struct cr_argument *spec, char *input)
         int error = 0;
         result.data.u32 = parse_u32(input, &error);
         if (error != 0) {
+            reply("BROKEN-VALUE Not an integer: ");
+            reply(input);
+            reply("\n");
             result.type = CR_PROTO_ARG_TYPE_VOID;
         }
     } break;
@@ -201,7 +207,10 @@ cr_parse_string(string_sink reply,
         }
 
         current = next_word(current.end + 1);
-        result->args[argn] = parse_argument(spec, current.start);
+        result->args[argn] = parse_argument(reply, spec, current.start);
+        if (result->args[argn].type == CR_PROTO_ARG_TYPE_VOID) {
+            return CR_PROTO_RESULT_BROKEN_VALUE;
+        }
         argn++;
     }
 
