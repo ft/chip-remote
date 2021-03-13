@@ -12,6 +12,7 @@ struct cr_protocol proto = {
             [0] = &port00_spi
         },
 
+        .tablesize = 1u,
         .current = 0u,
         .focused = true
     },
