@@ -131,7 +131,9 @@ parse_argument(string_sink reply, const struct cr_argument *spec, char *input)
     switch(spec->type) {
     case CR_PROTO_ARG_TYPE_BOOLEAN:
         if (string_bool_true(input)) {
+            result.data.boolean = true;
         } else if (string_bool_false(input)) {
+            result.data.boolean = false;
         } else {
             reply("BROKEN-VALUE Not a boolean: ");
             reply(input);
