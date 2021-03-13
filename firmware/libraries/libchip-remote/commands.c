@@ -60,7 +60,7 @@ struct cr_command cr_commands[] = {
     MISSING_COMMAND(FOCUS),
     MISSING_COMMAND(HASHED),
     CRsCOMMAND(HI,       cr_handle_hi),
-    MISSING_COMMAND(INIT),
+    CRaCOMMAND(INIT,     cr_handle_init,     init_arguments),
     MISSING_COMMAND(LINES),
     MISSING_COMMAND(LINE),
     MISSING_COMMAND(MODES),
