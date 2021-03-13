@@ -27,10 +27,9 @@
  * @return OK or MALFORMED
  * @sideeffects none
  */
-cr_callback_value
+void
 cr_handle_bye(const struct cr_protocol *proto,
               UNUSED const struct cr_proto_parse *cmd)
 {
     proto->reply("Have a nice day.\n");
-    return CR_CB_OK;
 }

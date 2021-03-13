@@ -16,7 +16,7 @@
 #include <commands.h>
 #include <commands-private.h>
 
-cr_callback_value
+void
 cr_handle_features(const struct cr_protocol *proto,
                    UNUSED const struct cr_proto_parse *cmd)
 {
@@ -32,5 +32,4 @@ cr_handle_features(const struct cr_protocol *proto,
     }
 
     proto->reply("\n");
-    return CR_CB_OK;
 }

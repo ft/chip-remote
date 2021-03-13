@@ -14,7 +14,7 @@
 
 extern struct cr_command cr_commands[];
 
-#define RETURN_TYPE cr_callback_value
+#define RETURN_TYPE void
 
 #define ARGUMENTS (const struct cr_protocol*, const struct cr_proto_parse*)
 

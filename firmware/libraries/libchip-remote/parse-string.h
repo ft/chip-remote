@@ -14,6 +14,7 @@
 
 #include <chip-remote.h>
 
-enum cr_proto_result cr_parse_string(char*, struct cr_proto_parse*);
+enum cr_proto_result cr_parse_string(
+    string_sink, char*, struct cr_proto_parse*);
 
 #endif /* INC_PARSE_STRING_H */

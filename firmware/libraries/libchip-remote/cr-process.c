@@ -17,42 +17,10 @@ cr_process_init(struct cr_protocol *p, char *b, size_t n, string_sink r)
 }
 
 static void
-handle_proto_error(const struct cr_protocol *proto)
-{
-    switch (proto->cmd.result) {
-    case CR_PROTO_RESULT_WTF:
-        proto->reply("WTF\n");
-        break;
-    case CR_PROTO_RESULT_MALFORMED:
-        proto->reply("MALFORMED-REQUEST\n");
-        break;
-    case CR_PROTO_RESULT_BROKEN_VALUE:
-        proto->reply("BROKEN-VALUE\n");
-        break;
-    case CR_PROTO_RESULT_VALUE_OUTOFRANGE:
-        proto->reply("VALUE-OUT-OF-RANGE\n");
-        break;
-    case CR_PROTO_RESULT_OK:
-    default:
-        printf("cr: Error signaled, but detected none: This is a bug!\n");
-        break;
-    }
-}
-static void
-handle_cb_error(UNUSED const struct cr_protocol *proto,
-                UNUSED const struct cr_proto_parse *parsed,
-                UNUSED cr_callback_value value)
-{
-}
-
-static void
 run_command(struct cr_protocol *proto)
 {
-    /* Exit early, if the protocol parser signalled an error in proto */
-    if (proto->cmd.result != CR_PROTO_RESULT_OK) {
-        handle_proto_error(proto);
+    if (proto->cmd.result != CR_PROTO_RESULT_OK)
         return;
-    }
 
     /* Install a couple of shorthands */
     const struct cr_proto_parse *parsed = &proto->cmd.parsed;
@@ -66,10 +34,7 @@ run_command(struct cr_protocol *proto)
     }
 
     /* Actually run the callback picked depending on current protocol state */
-    const cr_callback_value rv = cb(proto, parsed);
-    if (rv != CR_CB_OK) {
-        handle_cb_error(proto, parsed, rv);
-    }
+    cb(proto, parsed);
 }
 
 enum cr_process_result
@@ -91,7 +56,8 @@ cr_process_octet(struct cr_protocol *proto, const char ch)
         }
         if (proto->in.buffer[proto->in.idx] == '\n') {
             proto->in.buffer[proto->in.idx] = '\0';
-            proto->cmd.result = cr_parse_string(proto->in.buffer,
+            proto->cmd.result = cr_parse_string(proto->reply,
+                                                proto->in.buffer,
                                                 &proto->cmd.parsed);
             proto->in.idx = 0u;
             return CR_PROCESS_COMMAND;

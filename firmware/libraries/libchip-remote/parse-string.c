@@ -10,6 +10,7 @@
  */
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <commands.h>
@@ -165,35 +166,50 @@ string_bool_false(const char *input)
 }
 
 enum cr_proto_result
-cr_parse_string(char *input, struct cr_proto_parse *result)
+cr_parse_string(string_sink reply,
+                char *input,
+                struct cr_proto_parse *result)
 {
     /* Find first word in input buffer and do a command lookup on it */
     const char *end_of_input = input + strlen(input);
     struct word current = next_word(input);
     struct cr_command *cmd = cr_lookup_command(current.start);
 
-    if (cmd->id == CR_PROTO_CMD_UNKNOWN)
+    if (cmd->id == CR_PROTO_CMD_UNKNOWN) {
+        reply("WTF Unknown command: ");
+        reply(current.start);
+        reply("\n");
         return CR_PROTO_RESULT_WTF;
+    }
 
     /* Iterate through arguments and parse them according to spec */
     unsigned int argn = 0u;
     while (current.end < end_of_input) {
         /* Make sure we're not overflowing argument list */
-        if (argn >= CR_PROTO_MAX_ARGS)
+        if (argn >= CR_PROTO_MAX_ARGS) {
+            reply("MALFORMED-REQUEST Broken command definition. This is a bug!");
+            reply("\n");
             return CR_PROTO_RESULT_MALFORMED;
+        }
 
         struct cr_argument *spec = cmd->args + argn;
         /* Check if we're exceeding the command's argument spec */
-        if (spec->type == CR_PROTO_ARG_TYPE_VOID)
+        if (spec->type == CR_PROTO_ARG_TYPE_VOID) {
+            reply("MALFORMED-REQUEST Too many arguments");
+            reply("\n");
             return CR_PROTO_RESULT_MALFORMED;
+        }
 
         current = next_word(current.end + 1);
         result->args[argn] = parse_argument(spec, current.start);
         argn++;
     }
 
-    if (spec_missing_arg(cmd, argn))
+    if (spec_missing_arg(cmd, argn)) {
+        reply("MALFORMED-REQUEST Not enough arguments");
+        reply("\n");
         return CR_PROTO_RESULT_MALFORMED;
+    }
 
     /* All good; Before returning make sure all result data is correct. */
     result->cmd = cmd;
