@@ -17,7 +17,24 @@ cr_process_init(struct cr_protocol *p, char *b, size_t n, string_sink r)
 static void
 handle_error(struct cr_protocol *proto)
 {
-    printf("cr: Error in command processing: %d\n", proto->cmd.result);
+    switch (proto->cmd.result) {
+    case CR_PROTO_RESULT_WTF:
+        proto->reply("WTF\n");
+        break;
+    case CR_PROTO_RESULT_MALFORMED:
+        proto->reply("MALFORMED-REQUEST\n");
+        break;
+    case CR_PROTO_RESULT_BROKEN_VALUE:
+        proto->reply("BROKEN-VALUE\n");
+        break;
+    case CR_PROTO_RESULT_VALUE_OUTOFRANGE:
+        proto->reply("VALUE-OUT-OF-RANGE\n");
+        break;
+    case CR_PROTO_RESULT_OK:
+    default:
+        printf("cr: Error signaled, but detected none: This is a bug!\n");
+        break;
+    }
 }
 
 static int
