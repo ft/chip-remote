@@ -81,6 +81,7 @@ cr_toplevel(struct cr_protocol *proto, const char ch)
     case CR_PROCESS_INPUT_TOO_LONG:
         printf("cr: Input too long (max: %zu); line ignored.\n",
                proto->in.size);
+        proto->reply("WTF Input too long\n");
         break;
     }
 }
