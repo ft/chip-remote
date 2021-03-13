@@ -56,6 +56,7 @@ struct cr_line {
 };
 
 struct cr_port_spi {
+    uint32_t address;
     uint16_t frame_length;
     enum cr_bit_order bit_order;
     struct {

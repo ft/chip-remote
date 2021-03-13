@@ -54,7 +54,7 @@ struct cr_argument no_arguments[] = {
 #define END_OF_COMMAND_TABLE CRaCOMMAND(UNKNOWN, NULL, NULL)
 
 struct cr_command cr_commands[] = {
-    MISSING_COMMAND(ADDRESS),
+    CRaCOMMAND(ADDRESS,  cr_handle_address,  address_arguments),
     CRsCOMMAND(BYE,      cr_handle_bye),
     CRsCOMMAND(FEATURES, cr_handle_features),
     MISSING_COMMAND(FOCUS),

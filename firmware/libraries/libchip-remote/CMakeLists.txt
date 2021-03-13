@@ -5,6 +5,7 @@ initialise_toolchain()
 
 add_library(chip-remote-protocol STATIC
   commands.c
+  command-address.c
   command-bye.c
   command-features.c
   command-hi.c

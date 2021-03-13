@@ -30,6 +30,7 @@ extern struct cr_command cr_commands[];
 #define FW_DECLARE_COMMAND(name) xDECLARE_COMMAND(fw_, name)
 #define FW_DECLARE_ARGS_COMMAND(name) xDECLARE_ARGS_COMMAND(fw_, name)
 
+DECLARE_ARGS_COMMAND(address);
 DECLARE_COMMAND(bye);
 DECLARE_COMMAND(features);
 DECLARE_COMMAND(hi);

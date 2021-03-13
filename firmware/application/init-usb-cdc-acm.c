@@ -35,6 +35,7 @@ struct cr_port port00_spi = {
     .api  = &cr_port_impl_spi_bb,
     .data = &port00_spi_bb,
     .cfg.spi = {
+        .address = 0u,
         .frame_length = 16u,
         .bit_order = CR_BIT_MSB_FIRST,
         .cs = {
