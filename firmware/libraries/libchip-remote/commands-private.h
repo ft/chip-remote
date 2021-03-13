@@ -33,6 +33,7 @@ extern struct cr_command cr_commands[];
 DECLARE_COMMAND(bye);
 DECLARE_COMMAND(features);
 DECLARE_COMMAND(hi);
+DECLARE_COMMAND(ports);
 DECLARE_ARGS_COMMAND(transmit);
 DECLARE_COMMAND(version);
 FW_DECLARE_COMMAND(version);
