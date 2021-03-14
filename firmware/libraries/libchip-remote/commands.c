@@ -66,7 +66,7 @@ struct cr_command cr_commands[] = {
     MISSING_COMMAND(MODES),
     CRsCOMMAND(PORTS,    cr_handle_ports),
     MISSING_COMMAND(PORT),
-    MISSING_COMMAND(SET),
+    CRaCOMMAND(SET,      cr_handle_set,      set_arguments),
     CRaCOMMAND(TRANSMIT, cr_handle_transmit, transmit_arguments),
     CRsCOMMAND(VERSION,  cr_handle_version),
     FWsCOMMAND(VERSION,  cr_handle_fw_version),
