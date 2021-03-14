@@ -109,6 +109,8 @@ cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
         } else {
             return -3;
         }
+    } else if (strcmp(key, "MODE") == 0) {
+        return 1;
     } else {
         return -2;
     }

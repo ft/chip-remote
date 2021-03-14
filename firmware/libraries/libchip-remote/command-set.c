@@ -43,6 +43,9 @@ cr_handle_set(const struct cr_protocol *proto,
     case 0:
         proto->reply("OK\n");
         break;
+    case 1:
+        proto->reply("WTF Port does not support mode changes\n");
+        break;
     case -1:
         proto->reply("VALUE-OUT-OF-RANGE ");
         proto->reply(key);
