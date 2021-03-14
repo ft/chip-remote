@@ -51,7 +51,12 @@ cr_handle_set(const struct cr_protocol *proto,
         cr_proto_put_newline(proto);
         break;
     case -2:
-        proto->reply("MALFORMED-REQUEST Invalid argument for");
+        proto->reply("MALFORMED-REQUEST Invalid parameter: ");
+        proto->reply(key);
+        cr_proto_put_newline(proto);
+        break;
+    case -3:
+        proto->reply("BROKEN-VALUE Invalid argument for ");
         proto->reply(key);
         proto->reply(": ");
         proto->reply(value);

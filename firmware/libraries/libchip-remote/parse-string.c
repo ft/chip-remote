@@ -30,8 +30,6 @@ static char* find_token_start(char*);
 static struct word next_word(char*);
 static inline void split_input_at(char*);
 static inline bool spec_missing_arg(const struct cr_command*, unsigned int);
-static inline bool string_bool_true(const char*);
-static inline bool string_bool_false(const char*);
 
 static bool
 space(const char c)
@@ -124,18 +122,6 @@ parse_argument(string_sink reply, const struct cr_argument *spec, char *input)
     }
 
     return result;
-}
-
-static inline bool
-string_bool_true(const char *input)
-{
-    return (strcmp(input, "TRUE") == 0);
-}
-
-static inline bool
-string_bool_false(const char *input)
-{
-    return (strcmp(input, "FALSE") == 0);
 }
 
 enum cr_proto_result

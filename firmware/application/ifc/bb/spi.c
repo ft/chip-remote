@@ -9,9 +9,11 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <common/bit-operations.h>
 #include <cr-port.h>
+#include <cr-utilities.h>
 
 #include "spi.h"
 
@@ -54,6 +56,68 @@ cr_spi_bb_input(struct cr_line *line)
 }
 
 int
+cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
+{
+    int err;
+
+    if (strcmp(key, "RATE") == 0) {
+        (void)cr_parse_u32(value, &err);
+        if (err > 0) {
+            return -3;
+        }
+        /* Accept any and all rates; this bit-bang implementation will use its
+         * native rate in any case. */
+        port->cfg.spi.clk.rate = 0;
+    } else if (strcmp(key, "CLK-PHASE-DELAY") == 0) {
+        if (string_bool_true(value)) {
+            port->cfg.spi.clk.phase_delay = true;
+        } else if (string_bool_false(value)) {
+            port->cfg.spi.clk.phase_delay = false;
+        } else {
+            return -3;
+        }
+    } else if (strcmp(key, "FRAME-LENGTH") == 0) {
+        const uint32_t n = cr_parse_u32(value, &err);
+        if (err > 0) {
+            return -3;
+        }
+        if (n < 1 || n > 32) {
+            return -1;
+        }
+        port->cfg.spi.frame_length = n;
+    } else if (strcmp(key, "BIT-ORDER") == 0) {
+        if (strcmp(value, "LSB-FIRST") == 0) {
+            port->cfg.spi.bit_order = CR_BIT_LSB_FIRST;
+        } else if (strcmp(value, "MSB-FIRST") == 0) {
+            port->cfg.spi.bit_order = CR_BIT_MSB_FIRST;
+        } else {
+            return -3;
+        }
+    } else if (strcmp(key, "CS-POLARITY") == 0) {
+        if (strcmp(value, "ACTIVE-HIGH") == 0) {
+            port->cfg.spi.cs.polarity = CR_LOGIC_DIRECT;
+        } else if (strcmp(value, "ACTIVE-LOW") == 0) {
+            port->cfg.spi.cs.polarity = CR_LOGIC_INVERTED;
+        } else {
+            return -3;
+        }
+    } else if (strcmp(key, "CLK-POLARITY") == 0) {
+        if (strcmp(value, "RISING-EDGE") == 0) {
+            port->cfg.spi.clk.edge = CR_EDGE_RISING;
+        } else if (strcmp(value, "FALLING-EDGE") == 0) {
+            port->cfg.spi.clk.edge = CR_EDGE_FALLING;
+        } else {
+            return -3;
+        }
+    } else {
+        return -2;
+    }
+
+    port->initialised = false;
+    return 0;
+}
+
+int
 cr_spi_bb_init(struct cr_port *port)
 {
     const struct cr_port_spi_bb *spi = port->data;
@@ -74,8 +138,40 @@ cr_spi_bb_init(struct cr_port *port)
         return rv;
     rv = cr_spi_bb_input(spi->miso);
 
+    if (port->cfg.spi.clk.edge == CR_EDGE_RISING) {
+        cr_spi_line_set(spi->clk, 0u);
+    } else {
+        cr_spi_line_set(spi->clk, 1u);
+    }
+
     port->initialised = true;
     return rv;
+}
+
+inline static uint32_t
+cr_spi_bb_xfer_bit(const struct cr_port *port,
+                   const struct cr_port_spi_bb *spi,
+                   const size_t bit,
+                   const uint32_t tx,
+                   uint32_t rx)
+{
+    cr_spi_line_set(spi->mosi, BITLL_GET(tx, 1u, bit));
+
+    if (port->cfg.spi.clk.edge == CR_EDGE_RISING) {
+        cr_spi_line_set(spi->clk, 1u);
+    } else {
+        cr_spi_line_set(spi->clk, 0u);
+    }
+
+    rx |= (cr_spi_line_get(spi->miso) > 0) ? BITLL(bit) : 0u;
+
+    if (port->cfg.spi.clk.edge == CR_EDGE_RISING) {
+        cr_spi_line_set(spi->clk, 0u);
+    } else {
+        cr_spi_line_set(spi->clk, 1u);
+    }
+
+    return rx;
 }
 
 int
@@ -83,20 +179,31 @@ cr_spi_bb_xfer(struct cr_port *port, uint32_t tx, uint32_t *rx)
 {
     const struct cr_port_spi_bb *spi = port->data;
     uint32_t rv = 0ull;
-    const size_t len = 16;
+    const size_t len = port->cfg.spi.frame_length;
 
     *rx = 0u;
-    cr_spi_line_set(spi->cs, 0u);
-    for (size_t i = 0ull; i < len; ++i) {
-        const size_t idx = len - i - 1;
-        cr_spi_line_set(spi->mosi, BITLL_GET(tx, 1u, idx));
-        cr_spi_line_set(spi->clk, 1u);
-        if (cr_spi_line_get(spi->miso) > 0) {
-            *rx |= BITLL(idx);
-        }
-        cr_spi_line_set(spi->clk, 0u);
+    if (port->cfg.spi.cs.polarity == CR_LOGIC_DIRECT) {
+        cr_spi_line_set(spi->cs, 1u);
+    } else {
+        cr_spi_line_set(spi->cs, 0u);
     }
-    cr_spi_line_set(spi->cs, 1u);
+
+    if (port->cfg.spi.bit_order == CR_BIT_MSB_FIRST) {
+        for (size_t i = 0ull; i < len; ++i) {
+            const size_t idx = len - i - 1;
+            *rx = cr_spi_bb_xfer_bit(port, spi, idx, tx, *rx);
+        }
+    } else {
+        for (size_t idx = 0ull; idx < len; ++idx) {
+            *rx = cr_spi_bb_xfer_bit(port, spi, idx, tx, *rx);
+        }
+    }
+
+    if (port->cfg.spi.cs.polarity == CR_LOGIC_DIRECT) {
+        cr_spi_line_set(spi->cs, 0u);
+    } else {
+        cr_spi_line_set(spi->cs, 1u);
+    }
 
     return rv;
 }
@@ -105,5 +212,5 @@ struct cr_port_api cr_port_impl_spi_bb = {
     .init = cr_spi_bb_init,
     .xfer = cr_spi_bb_xfer,
     .address = NULL,
-    .set = NULL
+    .set = cr_spi_bb_set
 };
