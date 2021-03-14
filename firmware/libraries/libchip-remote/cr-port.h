@@ -87,6 +87,7 @@ struct cr_port_api {
     int (*init)(struct cr_port*);
     int (*xfer)(struct cr_port*, uint32_t, uint32_t*);
     int (*address)(struct cr_port*, uint32_t);
+    int (*set)(struct cr_port*, const char*, const char*);
 };
 
 struct cr_port {

@@ -8,5 +8,6 @@
 void cr_proto_put_space(const struct cr_protocol*);
 void cr_proto_put_newline(const struct cr_protocol*);
 void cr_proto_put_u32(const struct cr_protocol*, uint32_t);
+uint32_t cr_parse_u32(const char*, int*);
 
 #endif /* INC_CR_UTILITIES_H */

@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "cr-process.h"
 #include "cr-utilities.h"
 
@@ -43,6 +45,41 @@ stringify_u32(uint32_t num, char *buf)
         buf[max-i] = chtable[(num & (uint32_t)(0xful << step)) >> step];
     }
     buf[8] = '\0';
+}
+
+uint32_t
+cr_parse_u32(const char *buf, int *err)
+{
+    const size_t len = strlen(buf);
+    char c;
+    int idx, i;
+    uint32_t rc, tmp;
+
+    *err = 0;
+    rc = 0;
+    idx = len - 1;
+
+    if (idx > 7) {
+        *err = 1;
+        return 0u;
+    }
+
+    for (i = idx; i >= 0; --i) {
+        c = buf[i];
+        if (c >= '0' && c <= '9')
+            tmp = c - '0';
+        else if (c >= 'a' && c <= 'f')
+            tmp = c - 'a' + 10;
+        else if (c >= 'A' && c <= 'F')
+            tmp = c - 'A' + 10;
+        else {
+            *err = 2;
+            return 0u;
+        }
+
+        rc |= tmp << ((idx - i) * 4);
+    }
+    return rc;
 }
 
 void

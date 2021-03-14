@@ -104,5 +104,6 @@ cr_spi_bb_xfer(struct cr_port *port, uint32_t tx, uint32_t *rx)
 struct cr_port_api cr_port_impl_spi_bb = {
     .init = cr_spi_bb_init,
     .xfer = cr_spi_bb_xfer,
-    .address = NULL
+    .address = NULL,
+    .set = NULL
 };

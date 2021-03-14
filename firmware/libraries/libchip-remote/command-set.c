@@ -10,6 +10,7 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 
 #include <common/compiler.h>
 
@@ -29,11 +30,35 @@ cr_handle_set(const struct cr_protocol *proto,
               const struct cr_proto_parse *cmd)
 {
     const uint32_t idx = cmd->args[0].data.u32;
-    proto->reply("WTF Not implemented yet: SET ");
-    cr_proto_put_u32(proto, idx);
-    cr_proto_put_space(proto);
-    proto->reply(cmd->args[1].data.string);
-    cr_proto_put_space(proto);
-    proto->reply(cmd->args[2].data.string);
-    cr_proto_put_newline(proto);
+    const char *key = cmd->args[1].data.string;
+    const char *value = cmd->args[2].data.string;
+    struct cr_port *p = proto->ports.table[idx];
+
+    if (p->api->set == NULL) {
+        proto->reply("WTF Port does not support configuration!\n");
+        return;
+    }
+
+    switch (p->api->set(p, key, value)) {
+    case 0:
+        proto->reply("OK\n");
+        break;
+    case -1:
+        proto->reply("VALUE-OUT-OF-RANGE ");
+        proto->reply(key);
+        proto->reply(": ");
+        proto->reply(value);
+        cr_proto_put_newline(proto);
+        break;
+    case -2:
+        proto->reply("MALFORMED-REQUEST Invalid argument for");
+        proto->reply(key);
+        proto->reply(": ");
+        proto->reply(value);
+        cr_proto_put_newline(proto);
+        break;
+    default:
+        proto->reply("WTF Unknown configuration error.\n");
+        break;
+    }
 }

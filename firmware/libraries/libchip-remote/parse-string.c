@@ -15,6 +15,7 @@
 
 #include <commands.h>
 #include <chip-remote.h>
+#include <cr-utilities.h>
 #include <parse-string.h>
 
 struct word {
@@ -29,7 +30,6 @@ static char* find_token_start(char*);
 static struct word next_word(char*);
 static inline void split_input_at(char*);
 static inline bool spec_missing_arg(const struct cr_command*, unsigned int);
-static uint32_t parse_u32(const char*, int*);
 static inline bool string_bool_true(const char*);
 static inline bool string_bool_false(const char*);
 
@@ -88,41 +88,6 @@ spec_missing_arg(const struct cr_command *cmd, unsigned int argn)
     return ((arg->type != CR_PROTO_ARG_TYPE_VOID) && arg->optional == false);
 }
 
-static uint32_t
-parse_u32(const char *buf, int *err)
-{
-    const size_t len = strlen(buf);
-    char c;
-    int idx, i;
-    uint32_t rc, tmp;
-
-    *err = 0;
-    rc = 0;
-    idx = len - 1;
-
-    if (idx > 7) {
-        *err = 1;
-        return 0u;
-    }
-
-    for (i = idx; i >= 0; --i) {
-        c = buf[i];
-        if (c >= '0' && c <= '9')
-            tmp = c - '0';
-        else if (c >= 'a' && c <= 'f')
-            tmp = c - 'a' + 10;
-        else if (c >= 'A' && c <= 'F')
-            tmp = c - 'A' + 10;
-        else {
-            *err = 2;
-            return 0u;
-        }
-
-        rc |= tmp << ((idx - i) * 4);
-    }
-    return rc;
-}
-
 static struct cr_value
 parse_argument(string_sink reply, const struct cr_argument *spec, char *input)
 {
@@ -143,7 +108,7 @@ parse_argument(string_sink reply, const struct cr_argument *spec, char *input)
         break;
     case CR_PROTO_ARG_TYPE_INTEGER: {
         int error = 0;
-        result.data.u32 = parse_u32(input, &error);
+        result.data.u32 = cr_parse_u32(input, &error);
         if (error != 0) {
             reply("BROKEN-VALUE Not an integer: ");
             reply(input);

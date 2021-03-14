@@ -36,5 +36,6 @@ cr_spi_text_xfer(struct cr_port *port, uint32_t tx, uint32_t *rx)
 struct cr_port_api cr_port_impl_spi_text = {
     .init = cr_spi_text_init,
     .xfer = cr_spi_text_xfer,
-    .address = NULL
+    .address = NULL,
+    .set = NULL
 };
