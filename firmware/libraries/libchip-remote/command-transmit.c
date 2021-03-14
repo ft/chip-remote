@@ -32,7 +32,12 @@ cr_handle_transmit(const struct cr_protocol *proto,
                    const struct cr_proto_parse *cmd)
 {
     uint32_t rx;
-    cr_transmit(current_port(proto), cmd->args[0].data.u32, &rx);
+    struct cr_port *p = current_port(proto);
+    if (p->initialised == false) {
+        proto->reply("WTF Focused port is not initialised!\n");
+        return;
+    }
+    cr_transmit(p, cmd->args[0].data.u32, &rx);
     cr_proto_put_u32(proto, rx);
     cr_proto_put_newline(proto);
 }

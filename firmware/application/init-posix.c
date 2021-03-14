@@ -50,6 +50,8 @@ uart_sink(const char *str)
 void
 main(void)
 {
+    port00_spi.api->init(&port00_spi);
+
     uart0 = device_get_binding(DT_LABEL(DT_NODELABEL(uart0)));
     if (uart0 == NULL) {
         printk("Could not access uart0. Giving up.\n");
