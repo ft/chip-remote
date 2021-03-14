@@ -90,17 +90,21 @@ struct cr_port_api {
 };
 
 struct cr_port {
+    /* Generic data */
     const char *name;
     enum cr_port_type type;
-    void *data;
+    bool initialised;
+    /* Generic port API */
     const struct cr_port_api *api;
+    /* Port type specific configuration */
     union {
         struct cr_port_spi spi;
     } cfg;
     /* Line table */
     size_t lines;
     struct cr_line *line;
-    bool initialised;
+    /* Implementation specific data */
+    void *data;
 };
 
 int cr_transmit(struct cr_port*, uint32_t, uint32_t*);
