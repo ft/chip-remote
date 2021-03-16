@@ -59,6 +59,7 @@ MODULES_DEVICES += $(CR)/devices/analog-devices/adf4158/tables.scm
 MODULES_DEVICES += $(CR)/devices/analog-devices/adf4169.scm
 MODULES_DEVICES += $(CR)/devices/analog-devices/adf4169/registers.scm
 MODULES_DEVICES += $(CR)/devices/analog-devices/adf4169/tables.scm
+MODULES_DEVICES += $(CR)/devices/bosch/bme280.scm
 MODULES_DEVICES += $(CR)/devices/bosch/bno055.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw1000.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw1000/registers.scm
