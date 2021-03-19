@@ -11,7 +11,6 @@ CRP = $(LOAD_PATH)/protocol
 
 MODULES_CORE = $(CR)/bit-operations.scm
 MODULES_CORE += $(CR)/codecs.scm
-MODULES_CORE += $(CR)/combination.scm
 MODULES_CORE += $(CR)/commander.scm
 MODULES_CORE += $(CR)/decode.scm
 MODULES_CORE += $(CR)/decode/to-text.scm
@@ -36,6 +35,7 @@ MODULES_CORE += $(CR)/register-map.scm
 MODULES_CORE += $(CR)/register-map/utilities.scm
 MODULES_CORE += $(CR)/register-window.scm
 MODULES_CORE += $(CR)/register.scm
+MODULES_CORE += $(CR)/register/combination.scm
 MODULES_CORE += $(CR)/register/common.scm
 MODULES_CORE += $(CR)/register/modifiers.scm
 MODULES_CORE += $(CR)/register/predicates.scm

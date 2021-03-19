@@ -2,6 +2,7 @@
   #:use-module (ice-9 control)
   #:export (!!
             2e
+            addr<
             cat
             flatten
             map/last
@@ -81,3 +82,15 @@
 (define (list-of-integers? v)
   (and (list? v)
        (all integer? v)))
+
+(define (addr< a b)
+  (if (or (null? a)
+          (null? b))
+      #f
+      (cond ((not (car a))
+             (and (not (car b))
+                  (addr< (cdr a) (cdr b))))
+            ((not (car b)) #f)
+            ((< (car a) (car b)) #t)
+            ((= (car a) (car b)) (addr< (cdr a) (cdr b)))
+            (else #f))))

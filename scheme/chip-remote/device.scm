@@ -208,7 +208,9 @@
      (list pa ra io))))
 
 (define (device-extract dev value addr)
-  (let* ((faddr (apply find-canonical-address (cons dev addr)))
+  (let* ((faddr (apply find-canonical-address (cons dev (if (symbol? addr)
+                                                            (list addr)
+                                                            addr))))
          (part (apply device-address (cons dev faddr)))
          (pv (apply device-value-address (cons* dev value faddr))))
     `((address . ,faddr)
