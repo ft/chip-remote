@@ -5,6 +5,7 @@
 (define-module (chip-remote interpreter)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 match)
+  #:use-module (chip-remote bit-operations)
   #:export (cr-eval
             make-evaluation
             evaluation?
@@ -23,7 +24,7 @@
 ;; Scheme environment.
 
 (define (default-environment x)
-  (error (format #f "Unknown variable: ~s" x)))
+  (throw 'cr/interpreter:unknown-variable x))
 
 (define (cr-eval expression)
   (cr-eval* expression default-environment))
@@ -43,13 +44,29 @@
        (ash (just-eval target) (just-eval how-much)))
       (('right-shift target how-much)
        (ash (just-eval target) (* -1 (just-eval how-much))))
-      ((e1 'greater-than? e2) (> (just-eval e1) (just-eval e2)))
-      ((e1 'less-than? e2) (< (just-eval e1) (just-eval e2)))
-      ((e1 'equal-to? e2) (= (just-eval e1) (just-eval e2)))
+      (('bit-and a b) (logand (just-eval a) (just-eval b)))
+      (('bit-ior a b) (logior (just-eval a) (just-eval b)))
+      (('bit-xor a b) (logxor (just-eval a) (just-eval b)))
+      (('bit-mask n x) (logand (one-bits (just-eval n)) (just-eval x)))
+      (('bit-extract o n x) (bit-extract-width (just-eval x)
+                                               (just-eval o)
+                                               (just-eval n)))
+      (('complement n) (lognot (just-eval n)))
+      ((e1 '> e2) (> (just-eval e1) (just-eval e2)))
+      ((e1 '< e2) (< (just-eval e1) (just-eval e2)))
+      ((e1 '= e2) (= (just-eval e1) (just-eval e2)))
+      ((e1 '<= e2) (<= (just-eval e1) (just-eval e2)))
+      ((e1 '>= e2) (>= (just-eval e1) (just-eval e2)))
       (('if condition consequence alternative)
        (if (just-eval condition)
            (just-eval consequence)
            (just-eval alternative)))
+      (('let ((? symbol? name) expr) body)
+       (let ((value (cr-eval* expr environment)))
+         (cr-eval* body (lambda (y)
+                          (if (eq? name y)
+                              value
+                              (environment y))))))
       ((? symbol? b) (environment b))
       ;; This interpreter supports functions with one or two arguments. This
       ;; can likely be implemented more elegantly. But I won't bother for now.
@@ -69,7 +86,7 @@
       ((rator rand1 rand2) ((just-eval rator)
                             (just-eval rand1)
                             (just-eval rand2)))
-      (_ (error (format #f "Invalid expression: ~s~%" expression))))))
+      (_ (throw 'cr/interpreter:invalid-expression expression)))))
 
 (define-immutable-record-type <evaluation>
   (make-evaluation* name expression value)

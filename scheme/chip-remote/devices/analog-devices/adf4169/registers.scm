@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices analog-devices adf4169 registers)
+  #:use-module (chip-remote codecs)
   #:use-module (chip-remote item builder)
   #:use-module (chip-remote register)
   #:use-module (chip-remote semantics)
@@ -35,7 +36,7 @@
   #:contents
   (=> (address 1))
   (phase 3 12
-         #:semantics twos-complement
+         #:semantics* twos-complement
          #:default 0)
   (div-fractional-lsb 15 13 #:default 0)
   (phase-adjust 28 1 #:default #f)
@@ -85,11 +86,11 @@
              #:default 'sawtooth)
   (=> (reserved 12 2))
   (sigma-delta-reset? 14 1
-                      #:semantics boolean/active-low
+                      #:semantics* boolean/active-low
                       #:default #t)
   (n-divider-load-delay? 15 1 #:default #t)
   (loss-of-lock-enable? 16 1
-                        #:semantics boolean/active-low
+                        #:semantics* boolean/active-low
                         #:default #f)
   (=> (reserved 17 4 #:default #b0001))
   (negative-bleed-enable? 21 1 #:default #f)
@@ -124,10 +125,10 @@
   #:contents
   (=> (address 5))
   (deviation 3 16
-             #:semantics twos-complement
+             #:semantics* twos-complement
              #:default 0)
   (deviation-offset 19 4
-                    #:semantics unsigned-integer
+                    #:semantics* unsigned-integer
                     #:validate range (>= 0) (<= 9)
                     #:default 0)
   (deviation-select 23 1

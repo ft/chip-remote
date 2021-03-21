@@ -27,7 +27,7 @@
    (let ((boolean-item (car items)))
      (define-test (format #f "Device's first item is boolean (~a)"
                           (item-name boolean-item))
-       (pass-if-eq? (semantics-type (item-semantics boolean-item)) 'boolean))
+       (pass-if-eq? (semantics-name (item-semantics boolean-item)) 'boolean))
      (define-test "Decoding a boolean item works (enabled)"
        (pass-if-equal? (decode boolean-item 1) '(enable-output? . enabled)))
      (define-test "Decoding a boolean item works (disabled)"

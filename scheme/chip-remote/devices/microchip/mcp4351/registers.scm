@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices microchip mcp4351 registers)
+  #:use-module (chip-remote codecs)
   #:use-module (chip-remote item)
   #:use-module (chip-remote item builder)
   #:use-module (chip-remote register)
@@ -36,7 +37,7 @@
                                        '-term- terminal '-connect?)
                  #:offset offset
                  #:width 1
-                 #:semantics boolean
+                 #:semantics* boolean
                  #:default #t))
 
 (define* (make-wiper-pin #:key offset idx)
@@ -44,14 +45,14 @@
                                        '-wiper-connect?)
                  #:offset offset
                  #:width 1
-                 #:semantics boolean
+                 #:semantics* boolean
                  #:default #t))
 
 (define* (make-enabled-bit #:key offset idx)
   (generate-item #:name (symbol-append 'res- (number->symbol idx) '-enabled?)
                  #:offset offset
                  #:width 1
-                 #:semantics boolean
+                 #:semantics* boolean
                  #:default #t))
 
 (define-register reg:terminal-ctrl-0

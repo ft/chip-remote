@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices bosch bno055)
+  #:use-module (chip-remote codecs)
   #:use-module (chip-remote device)
   #:use-module (chip-remote manufacturer bosch)
   #:use-module (chip-remote page-map)

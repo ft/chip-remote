@@ -11,31 +11,29 @@
 (primitive-load "tests/test-tap-cfg.scm")
 
 (with-fs-test-bundle
- (plan 8)
+    (plan 8)
 
- (define-test "default semantics for width 1 work (boolean)"
-   (pass-if-eq? (semantics-type (deduce-semantics 1 '() #f))
-                'boolean))
- (define-test "default semantics for width 2.. work (unsigned-integer)"
-   (pass-if-eq? (semantics-type (deduce-semantics 2 '() #f))
-                'unsigned-integer))
- (let* ((table '((a . 1) (b . 2)))
-        (sem (generate-semantics lookup table)))
-   (define-test "table lookup semantics work"
-     (pass-if-eq? (semantics-type sem)
-                  'table-lookup))
-   (define-test "table lookup decoder works"
-     (pass-if-eq? 'b ((semantics-decode sem) 2)))
-   (define-test "table lookup encoder works"
-     (pass-if-= 1 ((semantics-encode sem) 'a))))
+  (let ((sem (generate-semantics interpreter
+                                 #:decode '(lambda (x) (increment x 2))
+                                 #:encode '(lambda (x) (decrement x 2)))))
+    (define-test "interpreter codec type checks out"
+      (pass-if-eq? (semantics-type sem) 'interpreter))
+    (define-test "interpreter decoder works"
+      (pass-if-= 8 ((evaluation-value (semantics-decode sem)) 6)))
+    (define-test "interpreter encoder works"
+      (pass-if-= 6 ((evaluation-value (semantics-encode sem)) 8))))
 
- (let ((sem (generate-semantics interpreter
-                                #:decode '(lambda (x) (increment x 2))
-                                #:encode '(lambda (x) (decrement x 2)))))
-   (define-test "interpreter codecs work"
-     (pass-if-eq? (semantics-type sem)
-                  'interpreter))
-   (define-test "interpreter decoder works"
-     (pass-if-= 8 ((evaluation-value (semantics-decode sem)) 6)))
-   (define-test "interpreter encoder works"
-     (pass-if-= 6 ((evaluation-value (semantics-encode sem)) 8)))))
+  (let* ((s (generate-semantics lookup '((something . 3)
+                                         (more . 5)
+                                         (stuff . 23)))))
+    (define-test "table lookup semantics type checks out"
+      (pass-if-eq? (semantics-type s) 'table-lookup))
+    (define-test "table decoding works"
+      (pass-if-eq? (s:decode s 4 3) 'something))
+    (define-test "table decoding works (undefined)"
+      (pass-if-eq? (s:decode s 4 42) 'chip-remote:undefined))
+    (define-test "table encoding works"
+      (pass-if-= (s:encode s 4 'more) 5))
+    (define-test "table encoding works (undefined)"
+      (pass-if-eq? (s:encode s 4 'does-not-exist)
+                   'chip-remote:undefined))))

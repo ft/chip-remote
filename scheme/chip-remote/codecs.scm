@@ -1,66 +1,64 @@
-;; Copyright (c) 2017-2018 chip-remote workers, All rights reserved.
+;; Copyright (c) 2017-2021 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote codecs)
   #:use-module (chip-remote bit-operations)
-  #:use-module (chip-remote named-value)
+  #:use-module (chip-remote interpreter)
+  #:use-module (chip-remote semantics)
+  #:use-module (chip-remote utilities)
   #:use-module (rnrs bytevectors)
-  #:export (boolean-true?
+  #:export (deduce-semantics
+            ;; boolean semantics
             boolean-false?
-            decode-boolean
-            decode-boolean/active-low
-            encode-boolean
-            encode-boolean/active-low
-            decode-unsigned-integer
-            encode-unsigned-integer
-            decode-ones-complement
-            encode-ones-complement
-            decode-twos-complement
-            encode-twos-complement
-            decode-offset-binary
-            encode-offset-binary
-            decode-signed-magnitude
-            encode-signed-magnitude
-            decode-ieee-754-single
-            encode-ieee-754-single
-            decode-ieee-754-double
-            encode-ieee-754-double
-            decode-with-table
-            make-table-decoder
-            encode-with-table
-            make-table-encoder))
+            boolean-true?
+            boolean
+            boolean/active-low
+            ;; integer semantics
+            unsigned-integer
+            ones-complement
+            twos-complement
+            signed-magnitude
+            offset-binary
+            ;; floating point semantics
+            ieee-754-single
+            ieee-754-double))
+
+(define (deduce-semantics w s)
+  (or s (if (= w 1) boolean unsigned-integer)))
 
 ;; Boolean codecs
 
-(define (invert-bit x)
-  (logxor x 1))
+(define boolean-true  '(#t 1  on true  enable  enabled  yes))
+(define boolean-false '(#f 0 off false disable disabled no))
+(define true-and-false (append boolean-true boolean-false))
 
 (define (boolean-true? x)
-  (case x
-    ((#t 1 on true enable enabled yes) #t)
-    (else #f)))
+  (!! (member x boolean-true)))
 
 (define (boolean-false? x)
-  (case x
-    ((#f 0 off false disable disabled no) #t)
-    (else #f)))
+  (!! (member x boolean-false)))
 
-(define (decode-boolean x)
-  (cond ((zero? x) 'disabled)
-        ((= 1 x) 'enabled)
-        (else (throw 'invalid-boolean x))))
+(define (boolean-range s w)
+  true-and-false)
 
-(define (decode-boolean/active-low x)
-  (decode-boolean (invert-bit x)))
+(define-semantics boolean scheme
+  #:range boolean-range
+  #:encode (lambda (w x)
+             (cond ((boolean-true? x) 1)
+                   ((boolean-false? x) 0)
+                   (else (throw 'invalid-boolean x))))
+  #:decode (lambda (w x)
+             (cond ((zero? x) 'disabled)
+                   ((= 1 x) 'enabled)
+                   (else (throw 'invalid-boolean x)))))
 
-(define (encode-boolean x)
-  (cond ((boolean-true? x) 1)
-        ((boolean-false? x) 0)
-        (else (throw 'invalid-boolean x))))
+(define invert-bit '(lambda (w x) (bit-xor x 1)))
 
-(define (encode-boolean/active-low x)
-  (invert-bit (encode-boolean x)))
+(define-semantics boolean/active-low interpreter
+  #:derive-from boolean
+  #:encode invert-bit
+  #:decode invert-bit)
 
 ;; Integer codecs. For a nice summary of common signed integer encodings (un-
 ;; signed ones are easy, because that's just the identity function) take a look
@@ -69,56 +67,88 @@
 ;; https://www.intersil.com/content/dam/Intersil/documents/an96/an9657.pdf
 ;;
 ;; All encodings need to know the width of an item to work.
+;;
+;; With some of these integer encodings you get the notion of two encodings for
+;; zero (namely with one's complement and signed magnitude), often referred to
+;; positive and negative zero. When encoding, these semantics opt for the posi-
+;; tive variant of zero. The decoders map both variants to an unsigned zero.
 
-(define (encode-unsigned-integer width value)
-  (logand (one-bits width) value))
+(define uint-codec '(lambda (w x) (bit-mask w x)))
 
-(define decode-unsigned-integer encode-unsigned-integer)
+(define (unsigned-integer-max w) (1- (2e w)))
+(define (unsigned-integer-min w) 0)
 
-(define (encode-twos-complement width value)
-  (if (>= value 0)
-      value
-      (+ 1 (logxor (one-bits width) (* -1 value)))))
+(define-semantics unsigned-integer interpreter
+  #:range (lambda (s w) (cons (unsigned-integer-min w)
+                              (unsigned-integer-max w)))
+  #:encode uint-codec
+  #:decode uint-codec)
 
-(define (decode-twos-complement width value)
-  (let* ((top-bit (ash 1 (- width 1)))
-         (rest (- top-bit 1)))
-    (if (< value top-bit)
-        value
-        (* -1 (+ 1 (logxor rest (logand rest value)))))))
+(define (twos-complement-min w) (- (2e (1- w))))
+(define (twos-complement-max w) (1- (2e (1- w))))
 
-(define (encode-ones-complement width value)
-  (if (>= value 0)
-      value
-      (logxor (one-bits width) (* -1 value))))
+(define-semantics twos-complement interpreter
+  #:range (lambda (s w) (cons (twos-complement-min w)
+                              (twos-complement-max w)))
+  #:encode '(lambda (w x)
+              (if (x >= 0)
+                  (bit-mask (decrement w) x)
+                  (bit-mask w (increment (complement (multiply -1 x))))))
+  #:decode '(lambda (w x)
+              (let (t (left-shift 1 (decrement w)))
+                (let (r (decrement t))
+                  (if (x < t)
+                      (bit-mask (decrement w) x)
+                      (multiply -1 (increment (bit-xor r (bit-and r x)))))))))
 
-(define (decode-ones-complement width value)
-  (let* ((top-bit (ash 1 (- width 1)))
-         (rest (- top-bit 1)))
-    (if (< value top-bit)
-        value
-        (* -1 (logxor rest (logand rest value))))))
+(define (ones-complement-min w) (- (1- (2e (1- w)))))
+(define ones-complement-max twos-complement-max)
 
-(define (encode-signed-magnitude width value)
-  (if (negative? value)
-      value
-      (let ((top-bit (ash 1 (- width 1))))
-        (logior top-bit value))))
+(define-semantics ones-complement interpreter
+  #:range (lambda (s w) (cons (ones-complement-min w)
+                              (ones-complement-max w)))
+  #:encode '(lambda (w x)
+              (if (x >= 0)
+                  (bit-mask (decrement w) x)
+                  (bit-mask w (complement (multiply -1 x)))))
+  #:decode '(lambda (w x)
+              (let (t (left-shift 1 (decrement w)))
+                (let (r (decrement t))
+                  (if (x < t)
+                      (bit-mask (decrement w) x)
+                      (multiply -1 (bit-xor r (bit-and r x))))))))
 
-(define (decode-signed-magnitude width value)
-  (let* ((w (- width 1))
-         (v (bit-extract-width value 0 w)))
-    (if (zero? (bit-extract-width value w 1))
-        (* -1 v)
-        v)))
+(define signed-magnitude-min ones-complement-min)
+(define signed-magnitude-max ones-complement-min)
 
-(define (encode-offset-binary width value)
-  (let ((half (ash 1 (- width 1))))
-    (+ value half)))
+(define-semantics signed-magnitude interpreter
+  #:range (lambda (s w) (cons (signed-magnitude-min w)
+                              (signed-magnitude-max w)))
+  #:encode '(lambda (w x)
+              (let (n (decrement w))
+                (if (x < 0)
+                    (bit-mask n (multiply -1 x))
+                    (bit-ior (left-shift 1 n) (bit-mask n x)))))
+  #:decode '(lambda (w x)
+              (let (n (decrement w))
+                (let (v (bit-mask n x))
+                  (let (s (bit-extract n 1 x))
+                    (if (s = 0)
+                        (multiply -1 v)
+                        v))))))
 
-(define (decode-offset-binary width value)
-  (let ((half (ash 1 (- width 1))))
-    (- value half)))
+(define offset-binary-min twos-complement-min)
+(define offset-binary-max twos-complement-max)
+
+(define-semantics offset-binary interpreter
+  #:range (lambda (s w) (cons (offset-binary-min w)
+                              (offset-binary-max w)))
+  #:encode '(lambda (w x)
+              (let (half (left-shift 1 (decrement w)))
+                (bit-mask w (increment x half))))
+  #:decode '(lambda (w x)
+              (let (half (left-shift 1 (decrement w)))
+                (decrement (bit-mask w x) half))))
 
 (define (ensure-width! tag actual required)
   (unless (= actual required)
@@ -136,6 +166,10 @@
     (bytevector-u32-set! bv 0 value 'big)
     (bytevector-ieee-single-ref bv 0 'big)))
 
+(define-semantics ieee-754-single scheme
+  #:encode encode-ieee-754-single
+  #:decode decode-ieee-754-single)
+
 (define (encode-ieee-754-double width value)
   (ensure-width! 'ieee-754-double width 64)
   (let ((bv (make-bytevector 8 0)))
@@ -148,28 +182,6 @@
     (bytevector-u64-set! bv 0 value 'big)
     (bytevector-ieee-double-ref bv 0 'big)))
 
-;; Table lookup based codecs
-
-(define (make-table-decoder table)
-  (lambda (x) (decode-with-table table x)))
-
-(define (decode-with-table table value)
-  (let loop ((rest (if (named-value? table) (value-data table) table)))
-    (if (null? rest)
-        'undefined
-        (let ((k (caar rest))
-              (v (cdar rest)))
-          (if (= value v)
-              k
-              (loop (cdr rest)))))))
-
-(define (make-table-encoder table)
-  (lambda (x) (encode-with-table table x)))
-
-(define (encode-with-table table key)
-  (let ((value (assoc key (if (named-value? table)
-                              (value-data table)
-                              table))))
-    (if value
-        (cdr value)
-        'undefined)))
+(define-semantics ieee-754-double scheme
+  #:encode encode-ieee-754-double
+  #:decode decode-ieee-754-double)

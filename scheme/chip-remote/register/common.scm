@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote register common)
+  #:use-module (chip-remote codecs)
   #:use-module (chip-remote register)
   #:export (generate-simple-register
             define-simple-register
@@ -34,61 +35,61 @@
   (define name (generate-simple-register name width rest ...)))
 
 (define-syntax-rule (generate-u8-register name rest ...)
-  (generate-simple-register name 8 #:semantics unsigned-integer rest ...))
+  (generate-simple-register name 8 #:semantics* unsigned-integer rest ...))
 
 (define-syntax-rule (define-u8-register name rest ...)
   (define name (generate-u8-register name rest ...)))
 
 (define-syntax-rule (generate-u16-register name rest ...)
-  (generate-simple-register name 16 #:semantics unsigned-integer rest ...))
+  (generate-simple-register name 16 #:semantics* unsigned-integer rest ...))
 
 (define-syntax-rule (define-u16-register name rest ...)
   (define name (generate-u16-register name rest ...)))
 
 (define-syntax-rule (generate-u32-register name rest ...)
-  (generate-simple-register name 32 #:semantics unsigned-integer rest ...))
+  (generate-simple-register name 32 #:semantics* unsigned-integer rest ...))
 
 (define-syntax-rule (define-u32-register name rest ...)
   (define name (generate-u32-register name rest ...)))
 
 (define-syntax-rule (generate-u64-register name rest ...)
-  (generate-simple-register name 64 #:semantics unsigned-integer rest ...))
+  (generate-simple-register name 64 #:semantics* unsigned-integer rest ...))
 
 (define-syntax-rule (define-u64-register name rest ...)
   (define name (generate-u64-register name rest ...)))
 
 (define-syntax-rule (generate-s8-register name rest ...)
-  (generate-simple-register name 8 #:semantics twos-complement rest ...))
+  (generate-simple-register name 8 #:semantics* twos-complement rest ...))
 
 (define-syntax-rule (define-s8-register name rest ...)
   (define name (generate-s8-register name rest ...)))
 
 (define-syntax-rule (generate-s16-register name rest ...)
-  (generate-simple-register name 16 #:semantics twos-complement rest ...))
+  (generate-simple-register name 16 #:semantics* twos-complement rest ...))
 
 (define-syntax-rule (define-s16-register name rest ...)
   (define name (generate-s16-register name rest ...)))
 
 (define-syntax-rule (generate-s32-register name rest ...)
-  (generate-simple-register name 32 #:semantics twos-complement rest ...))
+  (generate-simple-register name 32 #:semantics* twos-complement rest ...))
 
 (define-syntax-rule (define-s32-register name rest ...)
   (define name (generate-s32-register name rest ...)))
 
 (define-syntax-rule (generate-s64-register name rest ...)
-  (generate-simple-register name 64 #:semantics twos-complement rest ...))
+  (generate-simple-register name 64 #:semantics* twos-complement rest ...))
 
 (define-syntax-rule (define-s64-register name rest ...)
   (define name (generate-s64-register name rest ...)))
 
 (define-syntax-rule (generate-f32-register name rest ...)
-  (generate-simple-register name 32 #:semantics ieee-754-single rest ...))
+  (generate-simple-register name 32 #:semantics* ieee-754-single rest ...))
 
 (define-syntax-rule (define-f32-register name rest ...)
   (define name (generate-f32-register name rest ...)))
 
 (define-syntax-rule (generate-f64-register name rest ...)
-  (generate-simple-register name 64 #:semantics ieee-754-double rest ...))
+  (generate-simple-register name 64 #:semantics* ieee-754-double rest ...))
 
 (define-syntax-rule (define-f64-register name rest ...)
   (define name (generate-f64-register name rest ...)))

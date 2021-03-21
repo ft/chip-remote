@@ -7,6 +7,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote bit-operations)
+  #:use-module (chip-remote codecs)
   #:use-module (chip-remote device)
   #:use-module (chip-remote item)
   #:use-module (chip-remote semantics)
@@ -34,7 +35,7 @@
   (width c:width))
 
 (define (make-default-combination device spec)
-  (make-combination device spec 0 'unsigned-integer 0))
+  (make-combination device spec 0 unsigned-integer 0))
 
 (define (assemble:concatenate state value items*)
   (let* ((device (c:device state))

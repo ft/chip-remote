@@ -33,6 +33,7 @@
   #:use-module (ice-9 optargs)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote bit-operations)
+  #:use-module (chip-remote codecs)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote interpreter)
   #:use-module (chip-remote item access)
@@ -150,7 +151,7 @@
                  (v:validator validator)
                  (v:access (or access (rw))))
              (make-item v:name v:offset v:width
-                        (deduce-semantics v:width v:meta v:semantics)
+                        (deduce-semantics v:width v:semantics)
                         v:validator
                         v:access
                         v:meta
@@ -209,24 +210,11 @@
           (default-raw (cdr default-raw))
           (else 0))))
 
-(define (item-codec what item value)
-  (let* ((semantics (item-semantics item))
-         (worker (what semantics))
-         (proc (if (evaluation? worker)
-                   (evaluation-value worker)
-                   worker))
-         (arity (car (procedure-minimum-arity proc))))
-    (cond ((= arity 1) (proc value))
-          ((= arity 2) (proc (item-width item) value))
-          (else (throw 'invalid-arity
-                       what item value
-                       semantics proc arity)))))
-
 (define (item-decode item value)
-  (item-codec semantics-decode item value))
+  (s:decode (item-semantics item) (item-width item) value))
 
 (define (item-encode item value)
-  (item-codec semantics-encode item value))
+  (s:encode (item-semantics item) (item-width item) value))
 
 (define (item->list item)
   (list (item-name item)

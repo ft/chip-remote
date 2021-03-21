@@ -10,7 +10,10 @@ RUNTESTS += -strip-roots -dispatch-root "$(TEST_PATH)"
 INSTALL = sh ./tools/install
 ORG_EXPORT = sh ./tools/org-export
 
-CFLAGS = -Wunsupported-warning -Wunused-variable -Wunused-toplevel
+CFLAGS = -Wunsupported-warning
+# These results in lots of warnings from record-type definitions, so I'm
+# turning them off for now:
+#CFLAGS += -Wunused-variable -Wunused-toplevel
 CFLAGS += -Wunbound-variable -Warity-mismatch -Wduplicate-case-datum
 CFLAGS += -Wbad-case-datum -Wformat -L$(LOAD_PATH)
 

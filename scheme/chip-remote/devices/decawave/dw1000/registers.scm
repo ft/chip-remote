@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices decawave dw1000 registers)
+  #:use-module (chip-remote codecs)
   #:use-module (chip-remote item builder)
   #:use-module (chip-remote register)
   #:use-module (chip-remote semantics)
@@ -104,25 +105,25 @@
                  #:semantics lookup spi-data-edge-map
                  #:default 'miso-at-sampling-edge)
   (frame-error-check 11 1
-                     #:semantics boolean/active-low
+                     #:semantics* boolean/active-low
                      #:default #t)
   (double-buffer-operation 12 1
-                           #:semantics boolean/active-low
+                           #:semantics* boolean/active-low
                            #:default #f)
   (rx-abort-on-phy-header-error 13 1
-                                #:semantics boolean/active-low
+                                #:semantics* boolean/active-low
                                 #:default #t)
   (rx-abort-on-reed-solomon-error 14 1
-                                  #:semantics boolean/active-low
+                                  #:semantics* boolean/active-low
                                   #:default #t)
   (standard-frame-check-seed 15 1
-                             #:semantics boolean/active-low
+                             #:semantics* boolean/active-low
                              #:default #t)
   (phy-header-mode 16 2
                    #:semantics lookup phy-header-mode-map
                    #:default 'standard-frame)
   (smart-tx-power-operation 18 1
-                            #:semantics boolean/active-low
+                            #:semantics* boolean/active-low
                             #:default #t)
   (reserved 19 3)
   (rx-110kbaud-mode 22 1)
@@ -131,7 +132,7 @@
   (rx-auto-reenable 29 1)
   (auto-ack-enable 30 1)
   (auto-ack-pending-bit-default 31 1
-                                #:semantics unsigned-integer
+                                #:semantics* unsigned-integer
                                 #:default 0))
 
 (define-register reg:system-time
@@ -191,7 +192,7 @@
   #:double-buffer? #f
   #:register-width (octets 4)
   #:contents
-  (tx-auto-frame-check 0 1 #:semantics boolean/active-low #:default #t)
+  (tx-auto-frame-check 0 1 #:semantics* boolean/active-low #:default #t)
   (tx-start 1 1)
   (tx-delayed-enable 2 1 #:default #f)
   (tx-cancel-auto-fcs-suppression 3 1 #:default #f)
@@ -202,7 +203,7 @@
   (rx-delayed-enable 9 1 #:default #f)
   (reserved 10 14)
   (host-side-rx-buffer-pointer-toggle 24 1
-                                      #:semantics unsigned-integer
+                                      #:semantics* unsigned-integer
                                       #:default 0)
   (reserved 25 7))
 
@@ -333,7 +334,7 @@
   #:double-buffer? #t
   #:register-width (octets 5)
   #:contents
-  (rx-time-tracking-offset 0 19 #:semantics twos-complement)
+  (rx-time-tracking-offset 0 19 #:semantics* twos-complement)
   (reserved 19 5)
   (internal-resampler-delay 24 8)
   (rx-carrier-phase-adjust 32 7)
@@ -665,31 +666,31 @@
   (gpio-8-clear-irq-flag (offset #x20 8) 1 #:default #f)
   (reserved (offset #x20 9) 23)
   (gpio-0-irq-debounce-enable (offset #x24 0) 1
-                              #:semantics boolean/active-low
+                              #:semantics* boolean/active-low
                               #:default #f)
   (gpio-1-irq-debounce-enable (offset #x24 1) 1
-                              #:semantics boolean/active-low
+                              #:semantics* boolean/active-low
                               #:default #f)
   (gpio-2-irq-debounce-enable (offset #x24 2) 1
-                              #:semantics boolean/active-low
+                              #:semantics* boolean/active-low
                               #:default #f)
   (gpio-3-irq-debounce-enable (offset #x24 3) 1
-                              #:semantics boolean/active-low
+                              #:semantics* boolean/active-low
                               #:default #f)
   (gpio-4-irq-debounce-enable (offset #x24 4) 1
-                              #:semantics boolean/active-low
+                              #:semantics* boolean/active-low
                               #:default #f)
   (gpio-5-irq-debounce-enable (offset #x24 5) 1
-                              #:semantics boolean/active-low
+                              #:semantics* boolean/active-low
                               #:default #f)
   (gpio-6-irq-debounce-enable (offset #x24 6) 1
-                              #:semantics boolean/active-low
+                              #:semantics* boolean/active-low
                               #:default #f)
   (gpio-7-irq-debounce-enable (offset #x24 7) 1
-                              #:semantics boolean/active-low
+                              #:semantics* boolean/active-low
                               #:default #f)
   (gpio-8-irq-debounce-enable (offset #x24 8) 1
-                              #:semantics boolean/active-low
+                              #:semantics* boolean/active-low
                               #:default #f)
   (reserved (offset #x24 9) 23)
   (gpio-0-raw-io-state (offset #x28 0) 1 #:default #f)
@@ -818,9 +819,9 @@
   (reserved 11 4)
   (accumulator-memory-clock-enable 15 1 #:default #f)
   (gpio-clock-enable 16 1 #:default #f)
-  (gpio-reset 17 1 #:semantics boolean/active-low #:default #t)
+  (gpio-reset 17 1 #:semantics* boolean/active-low #:default #t)
   (gpio-debounce-clock-enable 18 1 #:default #f)
-  (gpio-debounce-reset 19 1 #:semantics boolean/active-low #:default #t)
+  (gpio-debounce-reset 19 1 #:semantics* boolean/active-low #:default #t)
   (reserved 20 3 #:default #b011)
   (kilohertz-clock-enable 23 1 #:default #f)
   (reserved 24 4)

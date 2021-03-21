@@ -15,6 +15,7 @@
   #:use-module (chip-remote decode)
   #:use-module (chip-remote decode types)
   #:use-module (chip-remote item)
+  #:use-module (chip-remote named-value)
   #:use-module (chip-remote register)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote register-window)
@@ -237,9 +238,21 @@
                 (d:item:highlight:name
                  (maybe-string (item-name (decoder-item-description d:item)))))
                " (semantics: "
-               (d:item:highlight:semantics (if (semantics? sem)
-                                               (maybe-string (semantics-type sem))
-                                               "*unknown-semantics*"))
+               (d:item:highlight:semantics
+                (if (semantics? sem)
+                    (let ((type (semantics-type sem))
+                          (sname (semantics-name sem)))
+                      (if (eq? 'table-lookup type)
+                          (let* ((data (semantics-data sem))
+                                 (tname (if (named-value? data)
+                                            (value-name data)
+                                            "*unnamed-table*")))
+                            (string-concatenate
+                             (list (maybe-string type)
+                                   ": "
+                                   (or sname (maybe-string tname)))))
+                          (maybe-string (or sname "*unnamed-semantics*"))))
+                    "*unknown-semantics*"))
                "):")
           (d:item-raw-value d:item (+ 2 lvl))
           (d:item-decoded-value d:item (+ 2 lvl)))))

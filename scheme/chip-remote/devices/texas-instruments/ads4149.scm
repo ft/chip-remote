@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices texas-instruments ads4149)
+  #:use-module (chip-remote codecs)
   #:use-module (chip-remote device)
   #:use-module (chip-remote item builder)
   #:use-module (chip-remote manufacturer texas-instruments)
@@ -158,7 +159,7 @@
                     (=> (reserved 1 7))))
   (#xbf (#:contents (=> (reserved 0 2))
                     (offset-pedestal 2 6
-                                     #:semantics twos-complement)))
+                                     #:semantics* twos-complement)))
   (#xcf (#:contents (=> (reserved 0 2))
                     (offset-correction-time-constant
                      2 4 #:semantics lookup correction-time-map)
