@@ -103,11 +103,14 @@
           sorted)))
 
 (define (partition:merge value state)
-  (match (c:raw state)
-    (('concatenate parts ...)
-     (set-field state (c:raw)
-                (partition:merge:concatenation (c:device state) value parts)))
-    (_ (throw 'cr/invalid-combination-type (c:raw state)))))
+  (let ((raw-value (s:encode (c:semantics state) (c:width state) value)))
+    (match (c:raw state)
+      (('concatenate parts ...)
+       (set-field state (c:raw)
+                  (partition:merge:concatenation (c:device state)
+                                                 raw-value
+                                                 parts)))
+      (_ (throw 'cr/invalid-combination-type (c:raw state))))))
 
 (define (resolve-semantics state)
   (let ((s (c:semantics state)))
