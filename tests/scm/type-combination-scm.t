@@ -12,7 +12,7 @@
              (chip-remote page-map)
              (chip-remote semantics)
              (chip-remote register-map)
-             (chip-remote register combination))
+             (chip-remote combination))
 
 (primitive-load "tests/test-tap-cfg.scm")
 
