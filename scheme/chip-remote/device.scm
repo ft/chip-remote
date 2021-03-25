@@ -24,6 +24,7 @@
             address-map->addresses
             device-value-address
             device-registers
+            device-combinations
             device-item-names
             device-name
             device-default
@@ -85,7 +86,7 @@
          #:predicate (lambda (x) (eq? x #:combinations))
          #:transformer (lambda (e)
                          (syntax-case e ()
-                           ((#:combinations e* ...) #'(e* ...))))))
+                           ((#:combinations e0 e* ...)  #'(list e0 e* ...))))))
 
 (define group:transmit
   (group 'transmit
@@ -109,7 +110,7 @@
     (syntax-case x ()
       ((_ pl ...)
        (with-syntax ((((mp ...)
-                       ((cmb) ...)
+                       (cmb ...)
                        ((acc-key acc-value) ...)
                        (transf ...)
                        ((key value) ...))
@@ -122,7 +123,7 @@
          #`(make-device
             (list (cons key value) ...)
             (page-map-merge (list mp ...))
-            (list cmb ...)
+            cmb ...
             (make-device-access #,@(zip-syms #'(acc-key ...)
                                              #'(acc-value ...))
                                 #,@(if (null? #'(transf ...)) #'()
