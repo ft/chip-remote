@@ -32,10 +32,11 @@
             device-extract))
 
 (define-record-type <device>
-  (make-device meta page-map access)
+  (make-device meta page-map combinations access)
   device?
   (meta device-meta)
   (page-map device-page-map)
+  (combinations device-combinations)
   (access device-access))
 
 (define group:page
@@ -78,6 +79,14 @@
                 #'(#:bus (make-type e* ...))))
              (else e)))))
 
+(define group:combinations
+  (group 'combinations
+         #:type 'list
+         #:predicate (lambda (x) (eq? x #:combinations))
+         #:transformer (lambda (e)
+                         (syntax-case e ()
+                           ((#:combinations e* ...) #'(e* ...))))))
+
 (define group:transmit
   (group 'transmit
          #:type 'list
@@ -100,17 +109,20 @@
     (syntax-case x ()
       ((_ pl ...)
        (with-syntax ((((mp ...)
+                       ((cmb) ...)
                        ((acc-key acc-value) ...)
                        (transf ...)
                        ((key value) ...))
                       (process-plist #'(pl ...)
                                      group:page
+                                     group:combinations
                                      group:access
                                      group:transmit
                                      (group 'meta))))
          #`(make-device
             (list (cons key value) ...)
             (page-map-merge (list mp ...))
+            (list cmb ...)
             (make-device-access #,@(zip-syms #'(acc-key ...)
                                              #'(acc-value ...))
                                 #,@(if (null? #'(transf ...)) #'()
