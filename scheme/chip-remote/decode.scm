@@ -246,6 +246,6 @@
           desc))
         (else (throw 'invalid-data-type desc))))
 
-(define (decode description value)
-  (process (make-processor) (make-processor-state #:debug? #f)
+(define* (decode description value #:key debug?)
+  (process (make-processor) (make-processor-state #:debug? debug?)
            (decode* description value)))
