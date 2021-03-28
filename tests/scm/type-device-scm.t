@@ -86,8 +86,8 @@
   (define-test "Single combination parses correctly"
     (pass-if-equal?
      (device-combinations (generate-device #:combinations '(a 1 2)))
-     '((a ~ 1 2))))
+     '((a 1 2))))
   (define-test "Multiple combinations parse correctly"
     (pass-if-equal?
      (device-combinations (generate-device #:combinations '(a 1) '(b 3 4)))
-     '((a 1) (b ~ 3 4)))))
+     '((a 1) (b 3 4)))))
