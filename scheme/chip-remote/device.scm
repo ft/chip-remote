@@ -108,8 +108,7 @@
 
 (define (make-combinations-script x)
   (match x
-    ((name e) x)
-    ((name e* ...) (cons* name '~ e*))
+    ((name e0 e* ...) (cons* name e0 e*))
     (_ (throw 'cr/empty-combination-definition x))))
 
 (define (elaborate-combinations . lst)

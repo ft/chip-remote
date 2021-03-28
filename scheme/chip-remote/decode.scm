@@ -7,6 +7,7 @@
   #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 optargs)
   #:use-module (chip-remote codecs)
+  #:use-module (chip-remote combination)
   #:use-module (chip-remote decode types)
   #:use-module (chip-remote interpreter)
   #:use-module (chip-remote device)
@@ -30,6 +31,8 @@
             p:window
             p:register-map
             p:page-map
+            p:combination
+            p:combinations
             p:device
             p:list
             p:pair
@@ -51,13 +54,15 @@
   (new-level state (cons lvl (ps-level state))))
 
 (define-immutable-record-type <processor>
-  (make-processor* item register window rm pm dev lst pair other)
+  (make-processor* item register window rm pm cmb cmbs dev lst pair other)
   processor?
   (item p:item)
   (register p:register)
   (window p:window)
   (rm p:register-map)
   (pm p:page-map)
+  (cmb p:combination)
+  (cmbs p:combinations)
   (dev p:device)
   (lst p:list)
   (pair p:pair)
@@ -79,6 +84,14 @@
                           (cons (ps-address state) (ps-content state))))
           (page-map (lambda (proc state d:pm)
                       (ps-content state)))
+          (combination (lambda (proc state d:combination)
+                         (cons (decoder-combination-name d:combination)
+                               (c:raw (decoder-combination-data d:combination)))))
+          (combinations (lambda (proc state d:combinations)
+                          (let ((c (ps-content state)))
+                            (if (null? c)
+                                c
+                                (cons 'combinations c)))))
           (device (lambda (proc state d:dev)
                     (ps-content state)))
           (lst (lambda (proc state d:lst)
@@ -87,7 +100,8 @@
                   (ps-content state)))
           (other (lambda (proc state d:other)
                    d:other)))
-  (make-processor* item register window register-map page-map device
+  (make-processor* item register window register-map page-map
+                   combination combinations device
                    lst pair other))
 
 (define (into-item proc state item)
@@ -135,12 +149,30 @@
         (new-content state (map into (decoder-page-map-register-maps pagemap)))
         pagemap)))
 
+(define (into-combination proc state cmb)
+  ((p:combination proc) proc state cmb))
+
+(define (into-combinations proc state cmbs)
+  (define (into combination)
+    (process proc (ps-level-up state 'combination) combination))
+  (let ((cb (p:combinations proc)))
+    (cb proc (new-content state
+                          (map into (decoder-combinations cmbs)))
+        cmbs)))
+
 (define (into-device proc state device)
-  (let ((cb (p:device proc)))
-    (cb proc
-        (new-content state (process proc
-                                    (ps-level-up state 'device)
-                                    (decoder-device-page-map device)))
+  (let* ((cb (p:device proc))
+         (next-level (ps-level-up state 'device))
+         (with/page-map (process proc
+                                 next-level
+                                 (decoder-device-page-map device)))
+         (with/combinations (process proc
+                                     next-level
+                                     (decoder-device-combinations device))))
+    (cb proc (new-content state (if (null? with/combinations)
+                                    with/page-map
+                                    (cons with/combinations
+                                          with/page-map)))
         device)))
 
 (define (into-list proc state lst)
@@ -165,6 +197,8 @@
         ((decoder-register-window? 'register-window))
         ((decoder-register-map? 'register-map))
         ((decoder-page-map? 'page-map))
+        ((decoder-combination? thing) 'combination)
+        ((decoder-combinations? thing) 'combinations)
         ((decoder-device? 'device))
         ((list? 'list))
         ((pair? 'pair))
@@ -176,6 +210,8 @@
         ((decoder-register-window? thing) into-register-window)
         ((decoder-register-map? thing) into-register-map)
         ((decoder-page-map? thing) into-page-map)
+        ((decoder-combination? thing) into-combination)
+        ((decoder-combinations? thing) into-combinations)
         ((decoder-device? thing) into-device)
         ((list? thing) into-list)
         ((pair? thing) into-pair)
@@ -243,6 +279,15 @@
                   (page-map-table pm)
                   value)
              pm))
+          (let ((cs (device-combinations desc)))
+            (make-combinations/decoder
+             (map (lambda (c)
+                    (make-combination/decoder
+                     (car c)
+                     (combination-assemble desc (cdr c) value)
+                     c))
+                  cs)
+             cs))
           desc))
         (else (throw 'invalid-data-type desc))))
 

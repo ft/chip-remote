@@ -25,10 +25,21 @@
             decoder-page-map-raw
             decoder-page-map-register-maps
             decoder-page-map-description
+            make-combination/decoder
+            decoder-combination?
+            decoder-combination-name
+            decoder-combination-data
+            decoder-combination-description
+            make-combinations/decoder
+            decoder-combinations?
+            decoder-combinations-raw
+            decoder-combinations
+            decoder-combinations-description
             make-device/decoder
             decoder-device?
             decoder-device-raw
             decoder-device-page-map
+            decoder-device-combinations
             decoder-device-description))
 
 ;; The decoder front end produces decoded values of raw values of things in
@@ -76,9 +87,23 @@
   (register-maps decoder-page-map-register-maps)
   (description decoder-page-map-description))
 
+(define-record-type <decoder-combination>
+  (make-combination/decoder name data description)
+  decoder-combination?
+  (name decoder-combination-name)
+  (data decoder-combination-data)
+  (description decoder-combination-description))
+
+(define-record-type <decoder-combinations>
+  (make-combinations/decoder combinations description)
+  decoder-combinations?
+  (combinations decoder-combinations)
+  (description decoder-combinations-description))
+
 (define-record-type <decoder-device>
-  (make-device/decoder raw page-map description)
+  (make-device/decoder raw page-map combinations description)
   decoder-device?
   (raw decoder-device-raw)
   (page-map decoder-device-page-map)
+  (combinations decoder-device-combinations)
   (description decoder-device-description))
