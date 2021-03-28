@@ -1,4 +1,5 @@
 (define-module (chip-remote device)
+  #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
@@ -105,6 +106,17 @@
              ((#:transmit type)
               #'(make-device-transmit #:type 'type))))))
 
+(define (make-combinations-script x)
+  (match x
+    ((name e) x)
+    ((name e* ...) (cons* name '~ e*))
+    (_ (throw 'cr/empty-combination-definition x))))
+
+(define (elaborate-combinations . lst)
+  (if (null? lst)
+      lst
+      (map make-combinations-script (car lst))))
+
 (define-syntax generate-device
   (lambda (x)
     (syntax-case x ()
@@ -123,7 +135,7 @@
          #`(make-device
             (list (cons key value) ...)
             (page-map-merge (list mp ...))
-            cmb ...
+            (elaborate-combinations cmb ...)
             (make-device-access #,@(zip-syms #'(acc-key ...)
                                              #'(acc-value ...))
                                 #,@(if (null? #'(transf ...)) #'()
