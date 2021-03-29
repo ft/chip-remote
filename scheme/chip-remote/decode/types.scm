@@ -29,6 +29,7 @@
             decoder-combination?
             decoder-combination-name
             decoder-combination-data
+            decoder-combination-decoded
             decoder-combination-description
             make-combinations/decoder
             decoder-combinations?
@@ -88,10 +89,11 @@
   (description decoder-page-map-description))
 
 (define-record-type <decoder-combination>
-  (make-combination/decoder name data description)
+  (make-combination/decoder name data decoded description)
   decoder-combination?
   (name decoder-combination-name)
   (data decoder-combination-data)
+  (decoded decoder-combination-decoded)
   (description decoder-combination-description))
 
 (define-record-type <decoder-combinations>
