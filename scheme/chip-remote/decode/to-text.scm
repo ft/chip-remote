@@ -25,7 +25,8 @@
   #:use-module (chip-remote device)
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote utilities)
-  #:export (decode-to-text))
+  #:export (decode-to-text
+            decode-to-text*))
 
 (define (string-ends-in-newline s)
   (char=? #\newline (string-ref s (1- (string-length s)))))
@@ -448,17 +449,20 @@
            "")
      (ps-content state))))
 
+(define (decode-to-text* desc value)
+  (flatten (process (make-processor #:item d:item-value
+                                    #:register d:register
+                                    #:window d:register-window-value
+                                    #:register-map d:register-map
+                                    #:page-map d:page-map
+                                    #:combinations d:combinations
+                                    #:combination d:combination
+                                    #:device d:device)
+                    (make-processor-state #:debug? #f)
+                    (decode* desc value))))
+
 (define (decode-to-text desc value)
-  (let ((lst (flatten (process (make-processor #:item d:item-value
-                                               #:register d:register
-                                               #:window d:register-window-value
-                                               #:register-map d:register-map
-                                               #:page-map d:page-map
-                                               #:combinations d:combinations
-                                               #:combination d:combination
-                                               #:device d:device)
-                               (make-processor-state #:debug? #f)
-                               (decode* desc value)))))
+  (let ((lst (decode-to-text* desc value)))
     (for-each (lambda (s)
                 (unless (eq? s #:ignore)
                   (display s)
