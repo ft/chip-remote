@@ -429,21 +429,23 @@
                     (d:device:highlight:name (maybe-string name))
                     ": ")
                (d:device:highlight:title "Decoding Device:"))
+           ""
            (if man
                (list
                 (maybe-add man-name
                            (thunk (d:device:key/value "Manufacturer"
-                                                      man-name level)))
+                                                      man-name (+ 2 level))))
                 (maybe-add man-hp
                            (thunk (d:device:key/value "Homepage"
-                                                      man-hp (+ 2 level))))
+                                                      man-hp (+ 4 level))))
                 (maybe-add man-wp
                            (thunk (d:device:key/value "Wikipedia"
-                                                      man-wp (+ 2 level)))))
+                                                      man-wp (+ 4 level)))))
                '())
-           (maybe-add hp (thunk (d:device:key/value "Device Page" hp level)))
-           (maybe-add ds (thunk (d:device:key/value "Datasheet" ds level)))
-           (maybe-add kw (thunk (d:device:key/value "Keywords" kw level))))
+           (maybe-add hp (thunk (d:device:key/value "Device Page" hp (+ 2 level))))
+           (maybe-add ds (thunk (d:device:key/value "Datasheet" ds (+ 2 level))))
+           (maybe-add kw (thunk (d:device:key/value "Keywords" kw (+ 2 level))))
+           "")
      (ps-content state))))
 
 (define (decode-to-text desc value)
