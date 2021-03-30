@@ -10,8 +10,10 @@
   #:use-module (srfi srfi-11)
   #:use-module (ice-9 format)
   #:use-module (ice-9 optargs)
+  #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote manufacturer)
+  #:use-module (chip-remote combination)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote decode types)
   #:use-module (chip-remote item)
@@ -24,6 +26,38 @@
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote utilities)
   #:export (decode-to-text))
+
+(define (string-ends-in-newline s)
+  (char=? #\newline (string-ref s (1- (string-length s)))))
+
+(define (string-strip-newlines s)
+  (cond ((string-null? s) s)
+        ((string-ends-in-newline s)
+         (string-strip-newlines (substring s 0 (1- (string-length s)))))
+        (else s)))
+
+(define (pp-to-list obj indent)
+  (string-split
+   (string-strip-newlines
+    (with-output-to-string
+      (lambda ()
+        (pretty-print obj
+                      #:display? #t
+                      #:per-line-prefix (make-indent indent)
+                      #:width 128
+                      #:max-expr-width 96))))
+   #\newline))
+
+(define (pp:combination-spec spec)
+  (cond ((null? spec) spec)
+        ((list? spec) (map pp:combination-spec spec))
+        ((pair? spec) (cons (pp:combination-spec (car (spec)))
+                            (pp:combination-spec (cdr (spec)))))
+        ((semantics? spec)
+         (format #f "#<semantics ~a ~a>"
+                 (semantics-type spec)
+                 (semantics-name spec)))
+        (else spec)))
 
 (define colour-map '((black . "30")
                      (blue . "34")
@@ -128,6 +162,8 @@
 (define d:item:highlight:semantics (make-highlighter 'magenta #:bold? #t))
 (define d:regmap:highlight:name (make-highlighter 'yellow))
 (define d:pagemap:highlight:name (make-highlighter 'white #:bold? #t))
+(define d:combination:highlight:name (make-highlighter 'yellow))
+(define d:combinations:highlight:title (make-highlighter 'white #:bold? #t))
 (define d:device:highlight:title (make-highlighter 'white #:bold? #t))
 (define d:device:highlight:name (make-highlighter 'cyan))
 (define d:device:highlight:key (make-highlighter 'white))
@@ -229,6 +265,23 @@
          "Decoded: "
          (d:item:highlight:decoded (maybe-string v)))))
 
+(define (pp:semantics sem)
+  (d:item:highlight:semantics
+   (if (semantics? sem)
+       (let ((type (semantics-type sem))
+             (sname (semantics-name sem)))
+         (if (eq? 'table-lookup type)
+             (let* ((data (semantics-data sem))
+                    (tname (if (named-value? data)
+                               (value-name data)
+                               "*unnamed-table*")))
+               (string-concatenate
+                (list (maybe-string type)
+                      ": "
+                      (or sname (maybe-string tname)))))
+             (maybe-string (or sname "*unnamed-semantics*"))))
+       "*unknown-semantics*")))
+
 (define (d:item-value proc state d:item)
   (let ((sem (item-semantics (decoder-item-description d:item)))
         (lvl (d:indent state 'item)))
@@ -237,23 +290,7 @@
                (double-quote
                 (d:item:highlight:name
                  (maybe-string (item-name (decoder-item-description d:item)))))
-               " (semantics: "
-               (d:item:highlight:semantics
-                (if (semantics? sem)
-                    (let ((type (semantics-type sem))
-                          (sname (semantics-name sem)))
-                      (if (eq? 'table-lookup type)
-                          (let* ((data (semantics-data sem))
-                                 (tname (if (named-value? data)
-                                            (value-name data)
-                                            "*unnamed-table*")))
-                            (string-concatenate
-                             (list (maybe-string type)
-                                   ": "
-                                   (or sname (maybe-string tname)))))
-                          (maybe-string (or sname "*unnamed-semantics*"))))
-                    "*unknown-semantics*"))
-               "):")
+               " (semantics: " (pp:semantics sem) "):")
           (d:item-raw-value d:item (+ 2 lvl))
           (d:item-decoded-value d:item (+ 2 lvl)))))
 
@@ -327,6 +364,53 @@
        ": "
        (d:device:highlight:value (maybe-string v))))
 
+(define (d:combinations proc state value)
+  (let ((c (ps-content state))
+        (level (d:indent state 'combination)))
+    (if (null? c)
+        c
+        (cons (cat (make-indent level)
+                   (d:combinations:highlight:title "Decoding combined items:"))
+              c))))
+
+(define (d:combination-raw-value combination indent)
+  (let* ((c (decoder-combination-data combination))
+         (v (c:raw c))
+         (w (c:width c)))
+    (cat (make-indent indent)
+         "Value: "
+         (d:item:decimal v w)
+         " "
+         (d:item:hex v w)
+         " "
+         (d:item:octal v w)
+         " "
+         (d:item:binary v w)
+         " - width: "
+         (d:item:offset+width (number->string w)))))
+
+(define (d:combination-decoded-value combination indent)
+  (let ((v (decoder-combination-decoded combination)))
+    (cat (make-indent indent)
+         "Decoded: "
+         (d:item:highlight:decoded (maybe-string v)))))
+
+(define (d:combination proc state value)
+  (let  ((name (decoder-combination-name value))
+         (sem (c:semantics (decoder-combination-data value)))
+         (spec (c:spec (decoder-combination-data value)))
+         (decoded (decoder-combination-decoded value))
+         (level (d:indent state 'combination)))
+    (list (cat (make-indent level)
+               "Combination "
+               (double-quote (d:combination:highlight:name (maybe-string name)))
+               " (semantics: " (pp:semantics sem) "):")
+          (d:combination-raw-value value (+ 2 level))
+          (d:combination-decoded-value value (+ 2 level))
+          (cat (make-indent (+ 2 level))
+               "Specification:")
+          (pp-to-list (pp:combination-spec spec) (+ 4 level)))))
+
 (define (d:device proc state d:device)
   (let* ((dev (decoder-device-description d:device))
          (meta (device-meta dev))
@@ -368,6 +452,8 @@
                                                #:window d:register-window-value
                                                #:register-map d:register-map
                                                #:page-map d:page-map
+                                               #:combinations d:combinations
+                                               #:combination d:combination
                                                #:device d:device)
                                (make-processor-state #:debug? #f)
                                (decode* desc value)))))
