@@ -25,13 +25,16 @@
             update-capabilities))
 
 ;; Protocol version of this implementation
-(define client-version '((major . 2)
+(define client-version '((major . 3)
                          (minor . 0)
                          (micro . 0)))
 
 (define (protocol-tokenize string)
   "Take ‘string’ and return a list of tokens."
   (string-tokenize string protocol-char-set))
+
+(define (multi-tokenize string)
+  (string-split string #\;))
 
 (define (protocol-read conn)
   "Read a reply from the connection ‘conn’ and return it.
@@ -227,24 +230,6 @@ this:
                        (cdr (with-read-raw-string (conn reply)
                              (expect-read reply '("VERSION" int int int)))))))
 
-;; A set of commands return more than one reply. The host triggers the 2nd to
-;; the N-th reply by saying "MORE". The board will reply with DONE when there
-;; is nothing more to say. This function does exactly that and returns a list
-;; of replies for further processing.
-(define (list-more-done conn request)
-  "Send ‘request’ via ‘conn’ and receive all lines of a multiline reply. Return
-a list of raw replies.
-
-Implementation note: The order of replies in the returned list is currently
-reversed."
-  (io-write conn request)
-  (let next ((f '())
-             (reply (protocol-read conn)))
-    (cond ((string=? reply "DONE") f)
-          (else (io-write conn "MORE")
-                (next (cons reply f)
-                      (protocol-read conn))))))
-
 (define (reply->symbol s)
   "Turns a string into a lower-cased symbol: \"FOO\" => foo"
   (string->symbol (string-downcase s)))
@@ -252,7 +237,8 @@ reversed."
 (define (request->list-of-symbols conn request)
   "Apply ‘reply->symbol’ to a list of strings and return a list of the
 resulting symbols."
-  (map reply->symbol (list-more-done conn request)))
+  (io-write conn request)
+  (map reply->symbol (multi-tokenize (protocol-read conn))))
 
 (define (features conn)
   "Via ‘conn’, query the remote controller for a list of optional `RCCEP`
@@ -271,9 +257,9 @@ and an integer: (string+int->pair \"FOO e\") => (foo . 14)"
 
 (define (ports conn)
   "Via ‘conn’, query the remote controller for a list of ports it contains."
-  (push-capability-and-return conn 'ports
-                              (map string+int->pair
-                                   (list-more-done conn "PORTS"))))
+  (io-write conn "PORTS")
+  (push-capability-and-return
+   conn 'ports (map string+int->pair (multi-tokenize (protocol-read conn)))))
 
 (define (modes conn)
   "Via ‘conn’, query the remote controller for a list of modes it implements."
@@ -396,7 +382,8 @@ list of return values from those function applications.
 connected to via ‘conn’.
 
 TODO: Needs caching to capabilities structure."
-  (map parse-lines (list-more-done conn (request-with-index "LINES" index))))
+  (io-write conn (request-with-index "LINES" index))
+  (map parse-lines (multi-tokenize (protocol-read conn))))
 
 (define (fixed->symbol string)
   "Turn ‘string’ into a symbol and make sure it is the ‘FIXED’ symbol."
@@ -462,7 +449,8 @@ of allowed symbols supplied as ‘ls’."
 connected to via ‘conn’.
 
 TODO: Needs caching to capabilities structure."
-  (map parse-port (list-more-done conn (request-with-index "PORT" index))))
+  (io-write conn (request-with-index "PORT" index))
+  (map parse-port (multi-tokenize (protocol-read conn))))
 
 (define (boolean->protocol-string bool)
   (if bool "TRUE" "FALSE"))
