@@ -21,6 +21,7 @@ MODULES_CORE += $(CR)/device.scm
 MODULES_CORE += $(CR)/device/access.scm
 MODULES_CORE += $(CR)/device/transmit.scm
 MODULES_CORE += $(CR)/device/spi.scm
+MODULES_CORE += $(CR)/interact.scm
 MODULES_CORE += $(CR)/interpreter.scm
 MODULES_CORE += $(CR)/item.scm
 MODULES_CORE += $(CR)/item/access.scm
