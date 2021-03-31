@@ -11,6 +11,7 @@
   #:export (cr-connection?
             cr-connection-uri
             cr-connection-port
+            cr-capabilities
             get-cr-capability
             set-cr-capability!
             cr-path
@@ -48,6 +49,7 @@
       (throw 'unsupported-uri-scheme uri))
     (let ((new (make-bare-cr-connection)))
       (set-cr-connection-uri! new uri)
+      (set-cr-capabilities! new '())
       new)))
 
 (define (cr-path connection)
