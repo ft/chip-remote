@@ -64,7 +64,7 @@
     ((open!)
      (let ((c (get-connection state)))
        (io-open c)
-       (hi* c)
+       (hi c)
        ((get-open-hook state) (get-connection state) (get-port state))))
     ((reset!)
      (set-data! state (get-default state)))
