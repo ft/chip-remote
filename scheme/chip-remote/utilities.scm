@@ -14,7 +14,9 @@
             either
             all
             list-of-integers?
-            list-of-list-of-integers?))
+            list-of-list-of-integers?
+            string-ends-in-newline?
+            string-strip-newlines))
 
 (define-syntax-rule (cat str ...)
   (string-concatenate (list str ...)))
@@ -94,3 +96,12 @@
             ((< (car a) (car b)) #t)
             ((= (car a) (car b)) (addr< (cdr a) (cdr b)))
             (else #f))))
+
+(define (string-ends-in-newline? s)
+  (char=? #\newline (string-ref s (1- (string-length s)))))
+
+(define (string-strip-newlines s)
+  (cond ((string-null? s) s)
+        ((string-ends-in-newline? s)
+         (string-strip-newlines (substring s 0 (1- (string-length s)))))
+        (else s)))

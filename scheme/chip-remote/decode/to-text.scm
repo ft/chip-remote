@@ -24,18 +24,10 @@
   #:use-module (chip-remote page-map)
   #:use-module (chip-remote device)
   #:use-module (chip-remote semantics)
+  #:use-module (chip-remote simplify)
   #:use-module (chip-remote utilities)
   #:export (decode-to-text
             decode-to-text*))
-
-(define (string-ends-in-newline s)
-  (char=? #\newline (string-ref s (1- (string-length s)))))
-
-(define (string-strip-newlines s)
-  (cond ((string-null? s) s)
-        ((string-ends-in-newline s)
-         (string-strip-newlines (substring s 0 (1- (string-length s)))))
-        (else s)))
 
 (define (pp-to-list obj indent)
   (string-split
@@ -48,17 +40,6 @@
                       #:width 128
                       #:max-expr-width 96))))
    #\newline))
-
-(define (pp:combination-spec spec)
-  (cond ((null? spec) spec)
-        ((list? spec) (map pp:combination-spec spec))
-        ((pair? spec) (cons (pp:combination-spec (car (spec)))
-                            (pp:combination-spec (cdr (spec)))))
-        ((semantics? spec)
-         (format #f "#<semantics ~a ~a>"
-                 (semantics-type spec)
-                 (semantics-name spec)))
-        (else spec)))
 
 (define colour-map '((black . "30")
                      (blue . "34")
@@ -410,7 +391,7 @@
           (d:combination-decoded-value value (+ 2 level))
           (cat (make-indent (+ 2 level))
                "Specification:")
-          (pp-to-list (pp:combination-spec spec) (+ 4 level)))))
+          (pp-to-list (pp:simplify spec) (+ 4 level)))))
 
 (define (d:device proc state d:device)
   (let* ((dev (decoder-device-description d:device))
