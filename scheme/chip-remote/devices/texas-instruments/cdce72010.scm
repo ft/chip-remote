@@ -3,8 +3,11 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices texas-instruments cdce72010)
+  #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote device)
+  #:use-module (chip-remote interact)
   #:use-module (chip-remote manufacturer texas-instruments)
+  #:use-module (chip-remote protocol)
   #:use-module (chip-remote register)
   #:export (cdce72010))
 
@@ -194,11 +197,48 @@
              (secondary-ref-clk-present #:offset 30 #:width 1)
              (reserved #:offset 31 #:width 1))
 
+(define (write-register c n v)
+  ;; The registers are setup in a way such that transmitting them in a 32-bit
+  ;; word will write their value to RAM. So there is nothing fancy to do here.
+  (transmit c v))
+
+(define-register ctrl-frame #:contents (control 0 4) (data 4 28))
+
+(define (cdce72010-read-bugfix n v)
+  (set-bits v n 4 0))
+
+(define *cdce72010-read*         #b1110)
+(define *cdce72010-eeprom*       #b1111)
+(define *cdce72010-eeprom-write*   #b01)
+(define *cdce72010-eeprom-lock*    #b11)
+
+(define (read-register c n)
+  ;; Reading is done in two transmissions, first you send a control word with
+  ;; the data set to the register you want to read, then you transmit whatever
+  ;; you like and in return get the register's value. Note that the cdce72010
+  ;; has a hardware bug that causes the LSB of the address that the chip re-
+  ;; turns to be stuck to zero. We're working around this issue by setting the
+  ;; address bits to the register we requested.
+  (transmit c (control-data-frame:encode ctrl-frame *cdce72010-read* n))
+  (cdce72010-read-bugfix n (transmit c 0)))
+
+(define (eeprom-cmd c cmd)
+  (transmit c (control-data-frame:encode ctrl-frame *cdce72010-eeprom* cmd)))
+
+(define (cdce72010-write-eeprom c)
+  (eeprom-cmd c *cdce72010-eeprom-write*))
+
+(define (cdce72010-lock-eeprom c)
+  (eeprom-cmd c *cdce72010-eeprom-lock*))
+
 (define-device cdce72010
   #:manufacturer texas-instruments
   #:homepage "http://www.ti.com/product/cdce72010"
   #:datasheet "http://www.ti.com/lit/ds/symlink/cdce72010.pdf"
   #:keywords '(clock distribution synchonisation pll jitter cleaner)
+  #:bus (spi #:frame-width 32)
+  #:read read-register
+  #:write write-register
   #:register-width 32
   #:register-map (#:table* (#x0 reg-x0) (#x1 reg-x1) (#x2 reg-x2) (#x3 reg-x3)
                            (#x4 reg-x4) (#x5 reg-x5) (#x6 reg-x6) (#x7 reg-x7)
