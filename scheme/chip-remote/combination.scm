@@ -119,11 +119,9 @@
         state)))
 
 (define* (run state spec value #:key (post identity) (concatenate identity))
-  (define (sem-ish? x) (or (semantics? x)
-                           (procedure? x)))
   (match spec
     (() (post state))
-    ((? sem-ish? x) (set-field state (c:semantics) x))
+    ((? semantics? x) (set-field state (c:semantics) x))
     (('~ exprs ...) (post (fold (lambda (x a)
                                   (run a x value
                                        #:post post
