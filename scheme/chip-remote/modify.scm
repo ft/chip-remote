@@ -5,6 +5,7 @@
 (define-module (chip-remote modify)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
+  #:use-module (chip-remote combination)
   #:use-module (chip-remote device)
   #:use-module (chip-remote page-map)
   #:use-module (chip-remote register-map)
@@ -13,8 +14,18 @@
   #:use-module (chip-remote codecs)
   #:use-module (chip-remote interpreter)
   #:use-module (chip-remote semantics)
+  #:use-module (chip-remote simplify)
+  #:use-module (chip-remote utilities)
   #:use-module (chip-remote validate)
-  #:export (modify modify* chain-modify chain-modify* register-matches? regmap-matches?))
+  #:export (modify
+            modify*
+            chain-modify
+            chain-modify*
+            chain-modify-script
+            apply-modify-script
+            register-matches?
+            regmap-matches?
+            make-item-mod-expr))
 
 (define (not-integer? x)
   "Predicate for values that are anything **but** integers."
@@ -148,14 +159,80 @@ The modifications are of the form (ADRESS VALUE), where ADDRESS is either a
 symbol, that could be passed to one of the `*-ref` functions (like device-ref)
 or a list that could be passed to one of the `*-address` functions (like
 device-address) to reference an item."
-  (if (null? lst)
-      init
-      (apply chain-modify
-             (cons target
-                   (cons (modify target init (caar lst) (cadar lst))
-                         (cdr lst))))))
+  (if (device? target)
+      (apply-modify-script target init
+                           (apply chain-modify-script (cons target lst)))
+      (if (null? lst)
+          init
+          (apply chain-modify
+                 (cons target
+                       (cons (modify target init (caar lst) (cadar lst))
+                             (cdr lst)))))))
 
 (define (chain-modify* target . lst)
   "This is the same as ‘chain-modify’ with its ‘init’ parameter set to the
 default value that can be derived for ‘target’."
   (apply chain-modify (cons target (cons (default-by-target target) lst))))
+
+(define (make-item-mod-expr d addr v)
+  (match addr
+    ((p r i) (let* ((reg (device-address d p r))
+                    (item (register-address reg i)))
+               (list reg p r i v item)))))
+
+(define (chain-modify-script device . lst)
+  (fold (lambda (av acc)
+          (match av
+            ((addr value)
+             (let* ((full-addr (find-canonical-address device addr))
+                    (description (device-canonical-address device full-addr)))
+               (match full-addr
+                 (('combinations name)
+                  (append acc (combination-partition device description value)))
+                 (else (append acc (list (make-item-mod-expr device full-addr value)))))))))
+        '()
+        lst))
+
+(define (modify-value-by-index device-value index item item-value)
+  (match index
+    ((pi ri ii)
+     (let loop:page ((i 0) (rest:pages device-value))
+       (cond
+        ((null? rest:pages) '())
+        ((= i pi)
+         (cons (let loop:register ((j 0) (rest:registers (car rest:pages)))
+                 (cond
+                  ((null? rest:registers) '())
+                  ((= j ri)
+                   (cons ((item-set item)
+                          (car rest:registers)
+                          (item-encode item item-value))
+                         (loop:register (1+ j) (cdr rest:registers))))
+                  ((< j ri)
+                   (cons (car rest:registers)
+                         (loop:register (1+ j) (cdr rest:registers))))
+                  ((> j ri) rest:registers)))
+               (loop:page (1+ i) (cdr rest:pages))))
+        ((< i pi)
+         (cons (car rest:pages)
+               (loop:page (1+ i)
+                          (cdr rest:pages))))
+        ((> i pi) rest:pages))))))
+
+(define (apply-modify-expr device value expr)
+  (match expr
+    ((reg p r i v item) ;; Item modification expression
+     (modify-value-by-index value
+                            (canonical-address->index device (list p r i))
+                            item v))
+    (((reg p r) ((is os vs items) ...)) ;; Combination modification expression
+     (fold (lambda (i v item acc)
+             (apply-modify-expr device acc `(,reg ,p ,r ,i ,v ,item)))
+           value
+           is vs items))))
+
+(define (apply-modify-script device value script)
+  (fold (lambda (expr acc)
+          (apply-modify-expr device acc expr))
+        value
+        script))
