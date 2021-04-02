@@ -18,8 +18,8 @@ use POSIX qw{ :sys_wait_h
               :termios_h };
 use IO::Pty;
 
-my $VERSION = q{VERSION 2 0 0};
-my (%cb, %cnf, $done, $retval, $cpid, $state);
+my $VERSION = q{VERSION 3 0 0};
+my (%cb, %cnf, $done, $retval, $cpid);
 
 ### Callbacks #################################################################
 
@@ -28,38 +28,19 @@ sub cb_ports;
 sub cb_more;
 
 %cb = (
-    'HI' => { state => q{init},
-              code  => sub { $state = q{main};
-                             return "Hi there, stranger." } },
-    'VERSION' => { state => q{main},
-                   code  => sub { return $VERSION } },
-    'FOCUS' => { state => q{main},
-                 code  => \&cb_focus },
-    'FEATURES' => { state => q{main},
-                    code  => sub { $state = q{features};
-                                   return cb_features(@_) } },
-    'MODES' => { state => q{main},
-                 code => sub { $state = q{modes},
-                               return cb_modes(@_) } },
-    'PORTS' => { state => q{main},
-                 code  => sub { $state = q{ports};
-                                return cb_ports(@_) } },
-    'INIT' => { state => q{main},
-                code => sub { return "OK" } },
-    'LINE' => { state => q{main},
-                code => sub { return "OK" } },
-    'SET' => { state => q{main},
-               code => sub { return "OK" } },
-    'ADDRESS' => { state => q{main},
-                   code => sub { return "OK" } },
-    'TRANSMIT' => { state => q{main},
-                    code => sub { return "0" } },
-    'MORE' => { state => [ qw{ features modes ports } ],
-                code  => \&cb_more },
-    'BYE' => { state => q{main},
-               code  => sub { $done = 1 unless ($cnf{endless});
-                              $state = q{init};
-                              return "Have a nice day." } }
+    'HI'       => sub { return "Hi there, stranger." },
+    'VERSION'  => sub { return $VERSION },
+    'FOCUS'    => \&cb_focus,
+    'FEATURES' => \&cb_features,
+    'MODES'    => \&cb_modes,
+    'PORTS'    => \&cb_ports,
+    'INIT'     => sub { return "OK" },
+    'LINE'     => sub { return "OK" },
+    'SET'      => sub { return "OK" },
+    'ADDRESS'  => sub { return "OK" },
+    'TRANSMIT' => sub { return "0" },
+    'BYE'      => sub { $done = 1 unless ($cnf{endless});
+                        return "Have a nice day." }
 );
 
 sub __hexstring2num {
@@ -85,50 +66,16 @@ sub __hexstring2num {
     return $neg * $n;
 }
 
-my $__list_cnt;
-sub __cb_list_more {
-    my ($l, $c, $p, $cmd) = @_;
-    shift; shift; shift;
-
-    return "MALFORMED-COMMAND" if ($#_ != 0);
-
-    if ($cmd eq $c) {
-        $__list_cnt = 0;
-    } else {
-        $__list_cnt++;
-    }
-
-    if ($__list_cnt > $#{ $l }) {
-        $state = $p;
-        return "DONE";
-    }
-
-    return $l->[$__list_cnt];
-}
-
 sub cb_features {
-    my @f = ( qw{ FOCUS INIT LINES LINE MODES PORT PORTS SET } );
-    return __cb_list_more(\@f, 'FEATURES', 'main', @_);
+    return join(';', qw{ FOCUS INIT LINES LINE MODES PORT PORTS SET });
 }
 
 sub cb_modes {
-    my @f = ( qw{ SPI } );
-    return __cb_list_more(\@f, 'MODES', 'main', @_);
+    return 'SPI';
 }
 
 sub cb_ports {
-    my @o = ( q{PORTS 1},
-              q{FOCUS 0} );
-    return __cb_list_more(\@o, 'PORTS', 'main', @_);
-}
-
-sub cb_more {
-    my ($cmd) = @_;
-
-    return cb_features($cmd) if ($state eq q{features});
-    return cb_ports($cmd) if ($state eq q{ports});
-    return cb_modes($cmd) if ($state eq q{modes});
-    return "BUG-SHOULD-NOT-BE-REACHED";
+    return join(';', ( q{PORTS 1}, q{FOCUS 0} ));
 }
 
 sub cb_focus {
@@ -244,20 +191,6 @@ $dev->setcc(VTIME, 0);
 
 $dev->setattr(fileno($fh), TCSANOW) or die "Could not set attributes: $ERRNO\n";
 
-sub allowed_state {
-    my ($state, $allowed) = @_;
-
-    if (ref $allowed eq 'ARRAY') {
-        for my $i (@{ $allowed}) {
-            return 1 if ($state eq $i);
-        }
-    } else {
-        return 1 if ($state eq $allowed);
-    }
-
-    return 0;
-}
-
 sub handle_sigchld {
     my $p;
     while (($p = waitpid(-1, &WNOHANG)) > 0) {
@@ -283,23 +216,20 @@ if ($cnf{fork}) {
 
 # Read-Reply loop
 $done = 0;
-$state = q{init};
 RR: while (my $input = <$pty>) {
-    my (@cmd, $f, $pstate);
+    my (@cmd, $f);
 
-    $pstate = $state;
     $input = board_rx($input);
     @cmd = split /\s+/, $input;
     $f = $cb{$cmd[0]};
 
-    if (defined $f->{code} and ref($f->{code}) eq q{CODE}) {
-        my $ret = $f->{code}->(@cmd) if (allowed_state($state, $f->{state}));
+    if (defined $f and ref($f) eq q{CODE}) {
+        my $ret = $f->(@cmd);
         board_tx($pty, (defined $ret) ? $ret : q{WTF});
     } else {
         board_tx($pty, qq{WTF Unknown command: $cmd[0]});
     }
 
-    print "# -!- Changed state: $pstate -> $state\n" if ($pstate ne $state);
     last RR if ($done);
 }
 
