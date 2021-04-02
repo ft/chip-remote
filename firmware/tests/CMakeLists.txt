@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
 
-if (NOT TARGET tap)
-  message(STATUS "Libtap wasn't found, giving up on test-suite!")
-  return()
-endif()
-
 list(APPEND test_names
   t-parse-string)
 
@@ -15,7 +10,7 @@ foreach (tst ${test_names})
   if ("${CMAKE_BUILD_TYPE}" STREQUAL Debug)
     ufw_toolchain(${tst} FEATURES sanitize-address sanitize-undefined-behaviour)
   endif()
-  target_link_libraries(${tst} PRIVATE chip-remote-protocol tap)
+  target_link_libraries(${tst} PRIVATE chip-remote-protocol ufw-tap)
   MakeStrictCompilerC(${tst})
   MakeFatalCompilerC(${tst})
   set_target_cpu(${tst})

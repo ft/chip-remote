@@ -1,9 +1,6 @@
 [submodule "firmware/libraries/ufw"]
 	path = firmware/libraries/ufw
 	url = https://github.com/ft/ufw.git
-[submodule "firmware/libraries/libtap"]
-	path = firmware/libraries/libtap
-	url = https://github.com/zorgnax/libtap.git
 [submodule "firmware/zephyr/kernel"]
 	path = firmware/zephyr/kernel
 	url = https://github.com/zephyrproject-rtos/zephyr.git
