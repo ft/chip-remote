@@ -21,6 +21,7 @@
             device-ref->address
             device-access
             device-address
+            device-canonical-address
             device-address-map
             address-map->addresses
             device-value-address
@@ -31,6 +32,7 @@
             device-default
             define-device
             find-canonical-address
+            canonical-address->index
             device-extract))
 
 (define-record-type <device>
@@ -180,9 +182,11 @@
     ((device page-addr)
      (page-map-address (device-page-map device) page-addr))
     ((device page-addr reg-addr)
-     (register-map-address (page-map-address (device-page-map device)
-                                             page-addr)
-                           reg-addr))
+     (if (eq? page-addr 'combinations)
+         (assq-ref (device-combinations device) reg-addr)
+         (register-map-address (page-map-address (device-page-map device)
+                                                 page-addr)
+                               reg-addr)))
     ((device page-addr reg-addr item-addr)
      (register-map-address (page-map-address (device-page-map device)
                                              page-addr)
@@ -191,6 +195,9 @@
      (register-map-address (page-map-address (device-page-map device)
                                              page-addr)
                            reg-addr name cnt))))
+
+(define (device-canonical-address device addr-lst)
+  (apply device-address (cons device addr-lst)))
 
 (define device-value-address
   (case-lambda
@@ -217,13 +224,19 @@
   (match addr
     ;; Just a symbol
     ((? symbol? addr)
-     (device-ref->address dev addr))
+     (let ((c (device-address dev 'combinations addr)))
+       (if c
+           (list 'combinations addr)
+           (device-ref->address dev addr))))
     ;; Just an integer, assume register address
     ((? integer? ra)
      (list #f ra))
     ;; (#f n) => address register n in page #f
     (((? false? pa) (? integer? ra))
      (list pa ra))
+    ;; (combinations name) => address combination name
+    (('combinations (? symbol? name))
+     (list 'combinations name))
     ;; (n m) => Address specific item in page #f
     (((? integer? ra) (? integer? io))
      (list #f ra io))
@@ -268,3 +281,10 @@
                        (list (car a) b))
                      (cdr a)))
               lst)))
+
+(define (canonical-address->index device lst)
+  (let* ((pm (device-page-map device))
+         (pi (page-address->index pm (car lst)))
+         (rm (cdr (list-ref (page-map-table pm) pi)))
+         (ri (register-map-address->index rm (cadr lst))))
+    (list pi ri (caddr lst))))
