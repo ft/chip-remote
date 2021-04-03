@@ -1,6 +1,6 @@
 (define-module (chip-remote device)
   #:use-module (srfi srfi-1)
-  #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 pretty-print)
@@ -11,9 +11,12 @@
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote page-map)
+  #:use-module (data-structures sized-stack)
   #:export (generate-device
             make-device
             device?
+            device-state
+            new-device-state
             device-meta
             device-page-map
             device-register
@@ -35,13 +38,18 @@
             canonical-address->index
             device-extract))
 
-(define-record-type <device>
-  (make-device meta page-map combinations access)
+(define-immutable-record-type <device>
+  (make-device* meta page-map combinations access state)
   device?
   (meta device-meta)
   (page-map device-page-map)
   (combinations device-combinations)
-  (access device-access))
+  (access device-access)
+  (state device-state new-device-state))
+
+(define* (make-device meta page-map combinations access
+                      #:key (state (make-sized-stack 128)))
+  (make-device* meta page-map combinations access state))
 
 (define group:page
   (group 'pages
