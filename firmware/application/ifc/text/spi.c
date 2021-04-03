@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <common/compiler.h>
+
 #include <cr-port.h>
 
 #include "spi.h"
@@ -33,9 +35,17 @@ cr_spi_text_xfer(struct cr_port *port, uint32_t tx, uint32_t *rx)
     return 0;
 }
 
+int
+cr_spi_text_set(UNUSED struct cr_port *port,
+                UNUSED const char *key,
+                UNUSED const char *value)
+{
+    return 0;
+}
+
 struct cr_port_api cr_port_impl_spi_text = {
     .init = cr_spi_text_init,
     .xfer = cr_spi_text_xfer,
     .address = NULL,
-    .set = NULL
+    .set = cr_spi_text_set
 };
