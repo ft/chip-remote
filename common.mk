@@ -77,7 +77,8 @@ MODULES_DEVICES += $(CR)/devices/texas-instruments/cdce72010.scm
 
 MODULES_PROTO = $(CRP)/slip.scm
 
-MODULES_DATASTRUCT += $(CRDS)/loadable-fifo.scm
+MODULES_DATASTRUCT = $(CRDS)/loadable-fifo.scm
+MODULES_DATASTRUCT += $(CRDS)/sized-stack.scm
 
 MODULES_DOC = $(CRD)/combine-markdown.scm
 MODULES_DOC += $(CRD)/module.scm
