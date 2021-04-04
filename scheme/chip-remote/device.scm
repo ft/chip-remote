@@ -17,6 +17,9 @@
             device?
             device-state
             new-device-state
+            current-device-state
+            push-device-state
+            reset-device-state
             device-meta
             device-page-map
             device-register
@@ -47,9 +50,22 @@
   (access device-access)
   (state device-state new-device-state))
 
+(define (current-device-state device)
+  (let ((state (device-state device)))
+    (if (sized-stack-empty? state)
+        (device-default device)
+        (sized-stack-peek state))))
+
+(define (push-device-state device value)
+  (new-device-state device (sized-stack-push (device-state device) value)))
+
+(define (reset-device-state device)
+  (push-device-state device (device-default device)))
+
 (define* (make-device meta page-map combinations access
                       #:key (state (make-sized-stack 128)))
-  (make-device* meta page-map combinations access state))
+  (reset-device-state
+   (make-device* meta page-map combinations access state)))
 
 (define group:page
   (group 'pages
