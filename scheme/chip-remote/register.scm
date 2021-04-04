@@ -131,7 +131,7 @@
     ((item-set item) regval itemval)))
 
 (define (register-fold fnc init reg)
-  (fold fnc init (register-items reg)))
+  (fold fnc init (sorted-items reg)))
 
 (define (sorted-items reg)
   (sort (register-items reg)
