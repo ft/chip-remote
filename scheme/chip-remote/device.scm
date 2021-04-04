@@ -54,13 +54,14 @@
   (let ((state (device-state device)))
     (if (sized-stack-empty? state)
         (device-default device)
-        (sized-stack-peek state))))
+        (cdr (sized-stack-peek state)))))
 
-(define (push-device-state device value)
-  (new-device-state device (sized-stack-push (device-state device) value)))
+(define (push-device-state device annotation value)
+  (new-device-state device (sized-stack-push (device-state device)
+                                             (cons annotation value))))
 
 (define (reset-device-state device)
-  (push-device-state device (device-default device)))
+  (push-device-state device 'default (device-default device)))
 
 (define* (make-device meta page-map combinations access
                       #:key (state (make-sized-stack 128)))
