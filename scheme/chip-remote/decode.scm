@@ -293,6 +293,10 @@
           desc))
         (else (throw 'invalid-data-type desc))))
 
-(define* (decode description value #:key debug?)
-  (process (make-processor) (make-processor-state #:debug? debug?)
-           (decode* description value)))
+(define* (decode description #:optional value #:key debug?)
+  (when (and (not (device? description))
+             (not value))
+    (throw 'missing-value-argument 'decode))
+  (let ((value* (or value (current-device-state description))))
+    (process (make-processor) (make-processor-state #:debug? debug?)
+             (decode* description value*))))
