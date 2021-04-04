@@ -44,8 +44,8 @@
 
 (define-semantics unsigned-zero-is-32
   interpreter
-  #:encode '(lambda (x) (if (x equal-to? 32) 0 x))
-  #:decode '(lambda (x) (if (x equal-to? 0) 32 x)))
+  #:encode '(lambda (w x) (if (x = 32) 0 x))
+  #:decode '(lambda (w x) (if (x = 0) 32 x)))
 
 (define-register reg:r-divider
   #:contents
