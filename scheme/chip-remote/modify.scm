@@ -22,6 +22,9 @@
             chain-modify
             chain-modify*
             chain-modify-script
+            minimise-modify-script
+            merge-minimised-script
+            values-for-minimised-script
             apply-modify-script
             register-matches?
             regmap-matches?
@@ -220,6 +223,85 @@ default value that can be derived for ‘target’."
                (loop:page (1+ i)
                           (cdr rest:pages))))
         ((> i pi) rest:pages))))))
+
+(define (script-expression->register-address expr)
+  (match expr
+    ((reg p r i v item) (list p r))
+    (((reg p r) ((is os vs items) ...)) (list p r))))
+
+(define (script-address< a b)
+  (addr< (script-expression->register-address a)
+         (script-expression->register-address b)))
+
+(define (expr->segmented-expr expr)
+  (match expr
+    ((reg p r i v item) (list (list i 0 v item)))
+    (((reg p r) (segmented-expr ...)) segmented-expr)))
+
+(define (make-segmented-script-state first script)
+  (match first
+    ((reg p r i v item)
+     (list (list p r) (list reg p r) (list (list i 0 v item)) script))
+    (((reg p r) (expr ...))
+     (list (list p r) (list reg p r) expr script))))
+
+(define (add-expr-to-segment expr last-address segment segment-exprs script)
+  (list last-address
+        segment
+        (append (expr->segmented-expr expr) segment-exprs)
+        script))
+
+(define (extend-segmented-script segment segment-exprs script)
+  (append script (list (list segment (reverse segment-exprs)))))
+
+(define (add-segment-to-script expr segment segment-exprs script)
+  (make-segmented-script-state expr (extend-segmented-script segment
+                                                             segment-exprs
+                                                             script)))
+
+(define (flush-segmented-script state)
+  (match state
+    ((last-address segment segment-exprs script)
+     (if (null? segment-exprs)
+         script
+         (extend-segmented-script segment segment-exprs script)))))
+
+(define (make-segmented-script expr state)
+  (match state
+    ((last-address segment segment-exprs script)
+     (let ((expr-address (script-expression->register-address expr)))
+       (if (addr= last-address expr-address)
+           (add-expr-to-segment expr last-address segment segment-exprs script)
+           (add-segment-to-script expr segment segment-exprs script))))))
+
+(define (minimise-modify-script script)
+  (if (null? script)
+      script
+      (flush-segmented-script
+       ;; This needs to be stable to keep the order of changes in sub
+       ;; expressions.
+       (let ((sorted-script (stable-sort script script-address<)))
+         (fold make-segmented-script
+               (make-segmented-script-state (car sorted-script) '())
+               (cdr sorted-script))))))
+
+(define (merge-segment segment value)
+  (match segment
+    (((reg p r) ((is os vs items) ...))
+     (list p r (fold (lambda (i o v item last)
+                       ((item-set item) last (item-encode item v)))
+                     value
+                     is os vs items)))))
+
+(define (merge-minimised-script script lst)
+  (map merge-segment script lst))
+
+(define (values-for-minimised-script device script value)
+  (map (lambda (expr)
+         (match expr
+           (((reg p r) (e ...))
+            (device-value-address device value p r))))
+       script))
 
 (define (apply-modify-expr device value expr)
   (match expr
