@@ -16,8 +16,8 @@
             da-read
             da-write))
 
-(define (default-read c p r v)
-  (transmit c v))
+(define (default-read c p r)
+  (transmit c r))
 
 (define (default-write c p r v)
   (transmit c v))
