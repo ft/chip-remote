@@ -1,5 +1,10 @@
-(use-modules (termios)
+(use-modules (ice-9 match)
+             (ice-9 control)
+             (srfi srfi-1)
+             (termios)
              (termios system)
+             (data-structures loadable-fifo)
+             (data-structures sized-stack)
              (chip-remote bit-operations)
              (chip-remote codecs)
              (chip-remote combination)
@@ -12,6 +17,7 @@
              (chip-remote device access)
              (chip-remote device spi)
              (chip-remote device transmit)
+             (chip-remote frontend)
              (chip-remote interact)
              (chip-remote interpreter)
              (chip-remote io)
@@ -74,6 +80,7 @@
 ;; Set up a serial connection if CR_SERIAL_DEVICE is set in the execution
 ;; environment. ‘s’ will be the name of the device, ‘c’ is the associated
 ;; chip-remote connection object.
+
 (define s (getenv "CR_SERIAL_DEVICE"))
 (define c #f)
 
@@ -81,8 +88,13 @@
   (let ((tty (open-io-file s))
         (ts (make-termios-struct)))
     (cf-make-raw! ts)
-    (cf-set-speed! ts termios-B19200)
+    (cf-set-speed! ts termios-B921600)
     (tc-set-attr tty ts)
     (close-port tty))
   (set! c (make-cr-connection s))
   (io-open c))
+
+(define (ignore x) (if #f #t))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
