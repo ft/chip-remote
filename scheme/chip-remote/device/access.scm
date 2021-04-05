@@ -17,10 +17,14 @@
             da-write))
 
 (define (default-read c p r)
-  (transmit c r))
+  (if (not c)
+      0
+      (transmit c r)))
 
 (define (default-write c p r v)
-  (transmit c v))
+  (if (not c)
+      0
+      (transmit c v)))
 
 (define-record-type <device-access>
   (make-device-access* bus transmit read write)
