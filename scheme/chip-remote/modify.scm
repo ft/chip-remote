@@ -220,16 +220,9 @@ default value that can be derived for ‘target’."
                          (lambda (regs)
                            (iterate-to-index ri regs update)))))))
 
-(define (page+reg-address->index device lst)
-  (let* ((pm (device-page-map device))
-         (pi (page-address->index pm (car lst)))
-         (rm (cdr (list-ref (page-map-table pm) pi)))
-         (ri (register-map-address->index rm (cadr lst))))
-    (list pi ri)))
-
 (define (replace-register-value device device-value address value)
   (let ((replace (lambda (x) value)))
-    (match (page+reg-address->index device address)
+    (match (canonical-address->index device address)
       ((pi ri)
        (iterate-to-index pi device-value
                          (lambda (regs)

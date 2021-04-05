@@ -312,4 +312,6 @@
          (pi (page-address->index pm (car lst)))
          (rm (cdr (list-ref (page-map-table pm) pi)))
          (ri (register-map-address->index rm (cadr lst))))
-    (list pi ri (caddr lst))))
+    (if (< (length lst) 3)
+        (list pi ri)
+        (list pi ri (caddr lst)))))
