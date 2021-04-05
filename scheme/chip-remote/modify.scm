@@ -196,33 +196,28 @@ default value that can be derived for ‘target’."
         '()
         lst))
 
+(define (iterate-to-index idx data cb)
+  (let loop ((i 0) (rest data))
+    (cond ((null? rest) '())
+          ((= i idx) (cons (cb (car rest))
+                           (loop (1+ i) (cdr rest))))
+          ((< i idx) (cons (car rest) (loop (1+ i) (cdr rest))))
+          (else rest))))
+
+(define (update-item register-value item item-value)
+  (let ((set (item-set item)))
+    (set register-value
+         (if (validate-item-value item item-value)
+             (item-encode item item-value)
+             (throw 'invalid-value-for-item item-value item)))))
+
 (define (modify-value-by-index device-value index item item-value)
-  (match index
-    ((pi ri ii)
-     (let loop:page ((i 0) (rest:pages device-value))
-       (cond
-        ((null? rest:pages) '())
-        ((= i pi)
-         (cons (let loop:register ((j 0) (rest:registers (car rest:pages)))
-                 (cond
-                  ((null? rest:registers) '())
-                  ((= j ri)
-                   (cons ((item-set item)
-                          (car rest:registers)
-                          (if (validate-item-value item item-value)
-                              (item-encode item item-value)
-                              (throw 'invalid-value-for-item item-value item)))
-                         (loop:register (1+ j) (cdr rest:registers))))
-                  ((< j ri)
-                   (cons (car rest:registers)
-                         (loop:register (1+ j) (cdr rest:registers))))
-                  ((> j ri) rest:registers)))
-               (loop:page (1+ i) (cdr rest:pages))))
-        ((< i pi)
-         (cons (car rest:pages)
-               (loop:page (1+ i)
-                          (cdr rest:pages))))
-        ((> i pi) rest:pages))))))
+  (let ((update (lambda (v) (update-item v item item-value))))
+    (match index
+      ((pi ri ii)
+       (iterate-to-index pi device-value
+                         (lambda (regs)
+                           (iterate-to-index ri regs update)))))))
 
 (define (script-expression->register-address expr)
   (match expr
