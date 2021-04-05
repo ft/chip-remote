@@ -1,6 +1,7 @@
 (define-module (chip-remote device)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9 gnu)
+  #:use-module (ice-9 control)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 pretty-print)
@@ -15,6 +16,7 @@
   #:export (generate-device
             make-device
             device?
+            device-value-suitable?
             device-state
             new-device-state
             current-device-state
@@ -315,3 +317,22 @@
     (if (< (length lst) 3)
         (list pi ri)
         (list pi ri (caddr lst)))))
+
+(define (device-value-suitable? d v)
+  "Test whether ‘v’ is a suitable value for the device ‘d’."
+  (let* ((pm (device-page-map d))
+         (sizes (map (lambda (p)
+                       (match p ((addr . rm) (length (register-map-table rm)))))
+                     (page-map-table pm))))
+    (if (not (= (length sizes)
+                (length v)))
+        #f
+        (call/ec
+         (lambda (return)
+           (every identity
+                  (map (lambda (regvals size)
+                         (let ((n (length regvals)))
+                           (cond ((not (= n size)) (return #f))
+                                 ((not (every integer? regvals)) (return #f))
+                                 (else #t))))
+                       v sizes)))))))
