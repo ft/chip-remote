@@ -2,7 +2,9 @@
   #:use-module (ice-9 control)
   #:export (!!
             2e
+            addr=
             addr<
+            addr>
             cat
             flatten
             map/last
@@ -96,6 +98,13 @@
             ((< (car a) (car b)) #t)
             ((= (car a) (car b)) (addr< (cdr a) (cdr b)))
             (else #f))))
+
+(define (addr> a b)
+  (addr< b a))
+
+(define (addr= a b)
+  (and (not (addr< a b))
+       (not (addr> a b))))
 
 (define (string-ends-in-newline? s)
   (char=? #\newline (string-ref s (1- (string-length s)))))
