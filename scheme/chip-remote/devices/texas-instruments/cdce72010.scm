@@ -9,7 +9,9 @@
   #:use-module (chip-remote manufacturer texas-instruments)
   #:use-module (chip-remote protocol)
   #:use-module (chip-remote register)
-  #:export (cdce72010))
+  #:export (cdce72010
+            cdce72010-write-eeprom
+            cdce72010-lock-eeprom))
 
 ;; The lower four bits of a register represent the register's address.
 (define-register reg-x0
