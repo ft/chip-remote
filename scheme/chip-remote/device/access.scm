@@ -49,10 +49,17 @@
                              (write default-write))
   (make-device-access* bus transmit read write))
 
+(define (maybe-set c n k v)
+  (catch #t
+    (lambda () (set c n k v))
+    (lambda (excp . a)
+      (format #t "Failed to set ~a → ~a: ~a ~a~%"
+              k v excp a))))
+
 (define (access-bus->proc bus)
   (cond ((device-access-spi? bus)
          (lambda (conn port-idx)
-           (let ((set* (lambda (k v) (set conn port-idx k v))))
+           (let ((set* (lambda (k v) (maybe-set conn port-idx k v))))
              (set* 'frame-length (spi-frame-width bus))
              (set* 'bit-order (spi-bit-order bus))
              (set* 'rate (spi-bit-rate bus))
