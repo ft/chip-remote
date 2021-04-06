@@ -197,7 +197,7 @@
              (secondary-ref-clk-present #:offset 30 #:width 1)
              (reserved #:offset 31 #:width 1))
 
-(define (write-register c n v)
+(define (write-register c p n v)
   ;; The registers are setup in a way such that transmitting them in a 32-bit
   ;; word will write their value to RAM. So there is nothing fancy to do here.
   (transmit c v))
@@ -212,7 +212,7 @@
 (define *cdce72010-eeprom-write*   #b01)
 (define *cdce72010-eeprom-lock*    #b11)
 
-(define (read-register c n)
+(define (read-register c p n)
   ;; Reading is done in two transmissions, first you send a control word with
   ;; the data set to the register you want to read, then you transmit whatever
   ;; you like and in return get the register's value. Note that the cdce72010
