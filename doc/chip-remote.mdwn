@@ -5,12 +5,80 @@ author:
 - name: Frank Terbeck
   email: ft@bewatermyfriend.org
 section: 7
-date: Oct, 2018
+date: Apr, 2021
 ...
 
 # NAME
 
 `chip-remote` — A library device configuration manipulation
+
+# DESCRIPTION
+
+Chip-remote is a library that defines a framework that allows tight
+specification of a configurable chip's configuration memory, including its
+semantics, as well as the chip's interface to actually access and interact with
+that memory.
+
+In order to actually drive transmitting bits to electrical devices, the system
+defines a simple text-based protocol, that is implemented in an embedded system
+firmware, that is also part of the project. This is required, because normal
+desktop computers don't have user-facing interfaces like SPI or I²C.
+
+The initial goal for chip-remote was to facilitate rapid prototyping with new
+electrical components. In the meantime, it has grown many more features beyond
+that. It can decode values found in physical devices; interactively change some
+or all of the settings in such a device. It can be used to analyse protocol
+transcripts from logic analysers. It can be used to simulate a physical device
+to exercise a device driver, including error-case behaviour that would be hard
+to produce with actual hardware. Since everything regarding a device
+specification is accessible in a programmatic way, by using the library's API,
+the possibilities are far reaching. The “holy grail” — so to speak — of the
+library would be to be able to generate a device-driver for arbitrary
+programming languages and system interfaces, that offer a high-level API. At
+the time of writing, the system still allows for too many degrees of freedom in
+the specification, which makes a general solution to a large subset of all
+available devices unachievable for now. Of course, this doesn't impede the
+utility of the existing features of the library.
+
+
+# CORE PRINCIPLES
+
+At its core, most of chip-remote's functionality revolves around the
+specification of a configurable device's configuration memory. This
+specification is a hierarchy of data types.
+
+The smallest, indivisible entity of a device specification is an **item**. An
+item in terms of chip-remote is a string of one or more bits, that have a fixed
+width (the number of bits in the string) as well as an offset, with an
+associated specification of the semantics of that string of bits. They may
+represent some sort of integer value, or be keys to a table lookup, or have
+another non-trivial relationship to a set of values suitable to humans.
+
+Building from items are **registers**: They combine one or more items.
+Registers are the entity that is most commonly used in actual electrical
+transfer into and out of the device.
+
+While there are devices, that have only the one register that serves as its
+configuration container, more often than not a device uses multiple registers.
+To be able to talk about multiple registers, they are assigned addresses. A
+mapping from address to register is called a **register-map** and with the
+majority of chips they are the top-level concept for organising chip data.
+
+Some chips, however, have more than one register-map. To talk about them, they
+also get addresses. The resulting table, mapping addresses to register-maps is
+called a **page-map**.
+
+On top of all this sits a **device**, that has a slot for one such page-map. It
+also carries meta-information about the chip (like its manufacturer, the URL
+for its data sheet etc.), as well as a specification of its electrical
+interface and possibly a specification of meta-items (called **combinations**)
+that are made up of simple items, that can live in different part of the
+device's page-map.
+
+The rest of the library, described herein, is basically a framework for working
+with information found in such device specifications, as well as a repository
+of instances of such specifications.
+
 
 # MODULE REFERENCE
 
