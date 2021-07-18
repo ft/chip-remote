@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -14,9 +12,9 @@
    viewBox="0 0 40.936909 29.109068"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
    sodipodi:docname="chip-remote.svg"
-   inkscape:export-filename="/home/ft/src/prj/chip-remote/chip-remote.png"
+   inkscape:export-filename="/home/ft/src/prj/chip-remote/doc/logo/chip-remote.png"
    inkscape:export-xdpi="599.65179"
    inkscape:export-ydpi="599.65179">
   <defs
@@ -26,11 +24,11 @@
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0.0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.959798"
-     inkscape:cx="51.347807"
-     inkscape:cy="43.263327"
+     inkscape:zoom="3.0279747"
+     inkscape:cx="0.25499126"
+     inkscape:cy="48.3787"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -42,7 +40,8 @@
      inkscape:window-height="1394"
      inkscape:window-x="0"
      inkscape:window-y="23"
-     inkscape:window-maximized="0">
+     inkscape:window-maximized="0"
+     inkscape:document-rotation="0">
     <inkscape:grid
        type="xygrid"
        id="grid3715"
