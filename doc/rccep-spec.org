@@ -19,12 +19,12 @@
 This document specifies a text protocol for communication between a client
 (commonly a personal computer) and a remote controller, for the purpose of
 interfacing configurable electronic parts such as analog digital converters or
-clock distribution blocks with slave interface protocols such as ~SPI~ or ~I2C~
-via more common personal computer interfaces (in particular the universal
-serial bus or ~TCP/IP~ links). The goal is to specify an interface on top of
-which systems can be built that enable tasks like experimentation, rapid
-prototyping, automated testing, revisioning and trouble-shooting with hardware
-projects.
+clock distribution blocks with slave interface protocols such as ~UART~, ~SPI~
+or ~I2C~ via more common personal computer interfaces (in particular the
+universal serial bus — ~USB~ or ~TCP/IP~ links). The goal is to specify an
+interface on top of which systems can be built that enable tasks such as, but
+not limited to, experimentation, rapid prototyping, test automation,
+revisioning as well trouble-shooting with hardware projects.
 
 #+END_abstract
 
