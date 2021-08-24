@@ -204,14 +204,6 @@ significant digit being placed at the left.
 In boolean contexts, the symbol ~TRUE~ represents a true value; and the symbol
 ~FALSE~ represents a false value.
 
-*** Protocol States
-
-The protocol operates in the following set of basic states:
-
-- Idle State
-- Active State
-- Multiline State
-
 *** Extensions
 
 **** Implementation Defined Purposes
@@ -274,9 +266,7 @@ These are the generic replies of the protocol:
 Other replies are request-dependent. Their format is documented with the
 specific request.
 
-** Idle State
-
-Idle State is the state the remote controller is in directly after boot.
+** Request Specification
 
 *** HI Request
 
@@ -284,26 +274,10 @@ Synopsis:\hspace{0.5cm} ~HI~
 
 \vspace{0.3cm}\noindent This request takes no argument.
 
-The ~HI~ request puts the remote controller into /Active State/. The reply to
-this request shall be:
+This request can be used to test the connection to the remote controller. The
+reply to this request shall be:
 
 - "~Hi there, stranger.~"
-
-** Active State
-
-The /Active State/ is the remote controller's most basic state during
-operation. All controlling requests will be processed in this state.
-
-*** ADDRESS Request
-
-Synopsis:\hspace{0.5cm} ~ADDRESS <address:integer>~
-
-\vspace{0.3cm}\noindent The ~ADDRESS~ request takes one non-optional argument.
-The request is used to handle slave addressing with protocols, that employ
-explicit addressing schemes. The actual effect of the request is dependent of
-the mode the given port is set to. Modes that use in-band addressing may choose
-to ignore ~ADDRESS~ requests altogether. See section [[sec:port-modes]] for
-details.
 
 *** BYE Request
 
@@ -311,10 +285,21 @@ Synopsis:\hspace{0.5cm} ~BYE~
 
 \vspace{0.3cm}\noindent This request takes no argument.
 
-This reply puts the remote controller back into /Idle State/. The remote
-controller's reply to this request shall be:
+This request can be used to test the connection to the remote controller. The
+remote controller's reply to this request shall be:
 
 - "~Have a nice day.~"
+
+*** ADDRESS Request
+
+Synopsis:\hspace{0.5cm} ~address <address:integer>~
+
+\vspace{0.3cm}\noindent The ~ADDRESS~ request takes one non-optional argument.
+The request is used to handle slave addressing with protocols, that employ
+explicit addressing schemes. The actual effect of the request is dependent of
+the mode the given port is set to. Modes that use in-band addressing may choose
+to ignore ~ADDRESS~ requests altogether. See section [[sec:port-modes]] for
+details.
 
 *** FEATURES Request
 
@@ -488,23 +473,6 @@ Where the three integers describe major, minor and micro version of the
 implemented protocol in the order specified (see section [[sec:version-number]] for
 details).
 
-** Multiline State
-
-Whenever a request specifies to return a multiline reply, this mode is entered.
-The format of the actual lines is specific to the request and is specified
-alongside it. The request's initial reply will be the first line of the
-multiline reply. Subsequent replies must be requested using the ~MORE~ request.
-
-*** MORE Request
-
-Synopsis:\hspace{0.5cm} ~MORE~
-
-This request takes no argument.
-
-This request causes the next line of a multiline reply to be returned. When
-there are no more replies left in a multiline reply, the request will return a
-~DONE~ reply and the remote controller will return to its previous state.
-
 * Port Modes <<sec:port-modes>>
 
 ** SPI
@@ -585,13 +553,13 @@ be queried by the ~HASHED~ request.
 
 - Current status of the specification: *Draft*
 
-This document specifies version 2.0.0 of the protocol. The ~VERSION~ request
-would therefore cause a "~VERSION 2 0 0~" reply with remote controllers, that
+This document specifies version 3.0.0 of the protocol. The ~VERSION~ request
+would therefore cause a "~VERSION 3 0 0~" reply with remote controllers, that
 implement this version of the protocol. In detail that means:
 
 |---------------+-----|
 | <l>           | <c> |
-| Major Version | *2* |
+| Major Version | *3* |
 | Minor Version | *0* |
 | Micro Version | *0* |
 |---------------+-----|
@@ -620,9 +588,12 @@ version number.
 
 ** Version History
 
-There is no version history at this point.
+*** Version 2.0.0 → 3.0.0
 
-** Major Version Numer One
+- Remove protocol states. All requests and replies are exactly one line of
+  ASCII text, delimited by line-feed characters.
+
+*** Previous Versions
 
 The protocol's major version number starts at version "~2~" in this
 specification. The reason for that is that version "~1~" was a previous
