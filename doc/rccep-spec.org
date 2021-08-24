@@ -58,12 +58,14 @@ the allowed type of data for the element (example: "~[foo:integer]~" specifies
 an optional element named ~foo~, that has to be an integer). When a data type
 is specified, the name may be omitted if the specification is able to reference
 the element uniquely without a name (example: "~PORTS <integer>~"). Valid type
-tags are ~string~, ~integer~ and ~boolean~.
+tags are ~symbol~, ~integer~ and ~boolean~, as well as combined types such as
+~role-spec~, where the syntax of the type is specified elsewhere in this
+specification.
 
 Mandatory and optional elements may also enumerate different possible names and
 types by joining them by vertical bars (~|~). Example: The string
-"~<name:string|id:integer|INVALID>~" specifies a mandatory element, that may
-either be referenced by ~name~ (in which case it has to be a string) or ~id~
+"~<name:symbol|id:integer|INVALID>~" specifies a mandatory element, that may
+either be referenced by ~name~ (in which case it has to be a symbol) or ~id~
 (in which case it has to be an integer) or ~INVALID~. The latter case doesn't
 specify a data type; the specification has to clarify how this version of the
 element would be used (example: ~INVALID~ could be a literal symbol that may be
@@ -134,13 +136,13 @@ assigned a /Role/ to implement a /Mode/.
 *** Roles <<sec:rccep-roles>>
 
 /Roles/ are specific to /Modes/. A /Role/ specifies which part of a /Mode/ a
-given /Line/ implements. Its syntax is a string in the sense of the protocol in
+given /Line/ implements. Its syntax is a symbol in the sense of the protocol in
 which the colon character (hex: ~0x3a~) is disallowed.
 
 If a /Role/ is made up of multiple /Lines/, then they are indexed in the
 following format:
 
-- ~<role:string>:<integer>~: ~role~ is the name specifing the base role a line
+- ~<role:symbol>:<integer>~: ~role~ is the name specifing the base role a line
   is assigned. ~<integer>~ is the role index of the specific line. Indexing
   starts at zero. Examples would be ~DATA:0~, ~DATA:1~ etc.
 
@@ -162,8 +164,7 @@ communication channel is the line-feed character (see section
 The ~RCCEP~ protocol itself is of line-based design. Any message between the
 subscribers of an ~RCCEP~ communication is a string of characters of its
 character set, that end in an ASCII line-feed (hex: ~0x0a~). The line-feed
-itself is not part of the message. The maximum length of any such message is
-limited to 127 bytes.
+itself is not part of the message.
 
 Messages of the protocol (/Requests/ and /Replies/; see section
 [[sec:basic-structure]] for details) consist of multiple tokens. A line is split
@@ -171,12 +172,15 @@ into tokens if one or more consecutive ~ASCII~ space bytes (hex: ~0x20~) are
 encountered. Other ~ASCII~ whitespace bytes are *not* considered for
 tokenisation.
 
+The maximum length of request messages is limited to 127 bytes. Replies may be
+of arbitrary length.
+
 *** Message Exchange
 
 The remote controller of the system never engages communication with the
 client. Every transmission in one direction must be met with a reply in the
 opposite direction. In case a request does not trigger a meaningful response
-value, the string ~OK~ shall be used to acknowledge that the request was
+value, the symbol ~OK~ shall be used to acknowledge that the request was
 processed.
 
 A requests that triggers a multiline reply shall only transmit the first line
@@ -188,18 +192,16 @@ more lines in a multiline response, the final response shall be ~DONE~.
 
 The protocol uses these data types:
 
-- strings
+- symbols
 - integers
 - booleans
 
-Strings are used as literal requests, responses and symbolic values. They are
+Symbols are used as literal requests, responses and symbolic values. They are
 *case-sensitive*, which means that "~foo~" and "~Foo~" are different values.
 
 Integers represent numeric values within the protocol. They are transmitted in
 strings of hexadecimal digits. The ~a-f~ range of a hexadecimal digit may be
-represented in upper or lower case and may also be mixed. The byte-order used
-in the hexadecimal strings representing integers is /big-endian/, with the most
-significant digit being placed at the left.
+represented in upper or lower case and may also be mixed.
 
 In boolean contexts, the symbol ~TRUE~ represents a true value; and the symbol
 ~FALSE~ represents a false value.
@@ -333,7 +335,7 @@ index if the port to query information about.
 This request returns a multiline reply. Each line shows to which role the line
 of a given index assigned to:
 
-- "~<index:integer> <role:string> [FIXED]~"
+- "~<index:integer> <role:symbol> [FIXED]~"
 
 Roles are specific to modes (see section [[sec:port-modes]]). The default role
 assignment of a port is implementation defined. If ~FIXED~ is specified, the
@@ -341,14 +343,14 @@ role assignment of that line cannot be changed.
 
 *** LINE Request
 
-Synopsis:\hspace{0.5cm} ~LINE <port:integer> <line:integer> <role:string>~
+Synopsis:\hspace{0.5cm} ~LINE <port:integer> <line:integer> <role:role-spec>~
 
 \vspace{0.3cm}\noindent The ~LINE~ request takes three non-optional arguments.
 
 ~port~ specifies the index of the port to configure. ~line~ specifies the index
 of the line within the port to configure. ~<role>~ describes the role within
 the active mode the line is to be set to. Roles are specific to modes (see
-section [[sec:port-modes]]). The general syntax of a role string is specified in
+section [[sec:port-modes]]). The general syntax of a role-spec is specified in
 section [[sec:rccep-roles]].
 
 *** MODES Request
@@ -372,7 +374,7 @@ following:
   available on the remote controller.
 
 - "~FOCUS <integer|NONE>~": Where ~<integer>~ indicates the currently focused
-  port. If no port is currently focused, the string ~NONE~ is returned.
+  port. If no port is currently focused, the symbol ~NONE~ is returned.
 
 *** PORT Request
 
@@ -388,7 +390,7 @@ be returned:
 - "~LINES <integer> [FIXED]~": ~<integer>~ defines the number of lines the port
   has access to.
 
-- "~MODE <mode:string> [FIXED]~": Indicates the ~mode~ the port is currently
+- "~MODE <mode:symbol> [FIXED]~": Indicates the ~mode~ the port is currently
   running in.
 
 - "~RATE <integer> [FIXED]~": Indicates the symbol-rate with which the port
@@ -403,7 +405,7 @@ read-only values. This is true for generic as well as mode-specific properties.
 
 *** SET Request
 
-Synopsis:\hspace{0.5cm} ~SET <port:integer> <key:string> <value>~
+Synopsis:\hspace{0.5cm} ~SET <port:integer> <key:symbol> <value>~
 
 \vspace{0.3cm}\noindent The ~SET~ request takes three non-optional arguments.
 
