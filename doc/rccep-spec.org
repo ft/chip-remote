@@ -239,7 +239,12 @@ specific request.
 
 ** Request Specification
 
-*** ~hi~ Request
+*** Fixed Reply Requests
+
+These request cause the /remote controller/ to return a know reply. These are
+useful to test connections once they are established.
+
+**** ~hi~ Request
 
 Synopsis:\hspace{0.5cm} ~hi~
 
@@ -250,7 +255,7 @@ reply to this request shall be:
 
 - "~Hi there, stranger.~"
 
-*** ~bye~ Request
+**** ~bye~ Request
 
 Synopsis:\hspace{0.5cm} ~bye~
 
@@ -261,37 +266,8 @@ remote controller's reply to this request shall be:
 
 - "~Have a nice day.~"
 
-*** ~address~ Request
-
-Synopsis:\hspace{0.5cm} ~address <address:integer>~
-
-\vspace{0.3cm}\noindent The ~address~ request takes one non-optional argument.
-The request is used to handle device addressing with protocols, that employ
-explicit addressing schemes. The actual effect of the request is dependent of
-the mode the given port is set to. Modes that use in-band addressing may choose
-to ignore ~address~ requests altogether. See section [[sec:port-modes]] for
-details.
-
-*** ~focus~ Request
-
-Synopsis:\hspace{0.5cm} ~focus <port-index:integer>~
-
-\vspace{0.3cm}\noindent The ~focus~ request takes one non-optional argument:
-The index of the port to focus. Focussing a port means that subsequent data
-transmissions are carried out by using the specified port.
-
-Default focus is implementation defined.
-
-*** ~init~ Request
-
-Synopsis:\hspace{0.5cm} ~init <port-index:integer>~
-
-\vspace{0.3cm}\noindent The ~init~ request takes one non-optional argument: The
-index of the port to initialise. If a port has even a single configurable
-property, this request is required initially before any other operation with
-that port and then again after any set of changes with the port's properties.
-
-*** ~lines~ Request
+*** Querying Requests
+**** ~lines~ Request
 
 Synopsis:\hspace{0.5cm} ~lines <port-index:integer>~
 
@@ -307,19 +283,7 @@ Roles are specific to modes (see section [[sec:port-modes]]). The default role
 assignment of a port is implementation defined. If ~fixed~ is specified, the
 role assignment of that line cannot be changed.
 
-*** ~line~ Request
-
-Synopsis:\hspace{0.5cm} ~line <port:integer> <line:integer> <role:role-spec>~
-
-\vspace{0.3cm}\noindent The ~line~ request takes three non-optional arguments.
-
-~port~ specifies the index of the port to configure. ~line~ specifies the index
-of the line within the port to configure. ~<role>~ describes the role within
-the active mode the line is to be set to. Roles are specific to modes (see
-section [[sec:port-modes]]). The general syntax of a role-spec is specified in
-section [[sec:rccep-roles]].
-
-*** ~modes~ Request
+**** ~modes~ Request
 
 Synopsis:\hspace{0.5cm} ~modes~
 
@@ -327,7 +291,7 @@ Synopsis:\hspace{0.5cm} ~modes~
 returns a multiline reply. Each line names one mode the remote controller
 implements. Possible modes are documented in section [[sec:port-modes]].
 
-*** ~ports~ Request
+**** ~ports~ Request
 
 Synopsis:\hspace{0.5cm} ~ports~
 
@@ -341,8 +305,67 @@ following:
 
 - "~focus <integer|none>~": Where ~<integer>~ indicates the currently focused
   port. If no port is currently focused, the symbol ~none~ is returned.
+**** ~version~ Request
 
-*** ~port~ Request
+Synopsis:\hspace{0.5cm} ~version~
+
+\vspace{0.3cm}\noindent This request takes no argument.
+
+This request returns the protocol version the remote controller implements. The
+reply shall be formatted like this:
+
+- "~VERSION <integer> <integer> <integer>~"
+
+Where the three integers describe major, minor and micro version of the
+implemented protocol in the order specified (see section [[sec:version-number]] for
+details). For backward compatibility, this request may be given in upper case
+as ~VERSION~ as well. The upper case ~VERSION~ prefix in the reply is for
+backward compatibility as well.
+
+*** Configuration Requests
+**** ~address~ Request
+
+Synopsis:\hspace{0.5cm} ~address <address:integer>~
+
+\vspace{0.3cm}\noindent The ~address~ request takes one non-optional argument.
+The request is used to handle device addressing with protocols, that employ
+explicit addressing schemes. The actual effect of the request is dependent of
+the mode the given port is set to. Modes that use in-band addressing may choose
+to ignore ~address~ requests altogether. See section [[sec:port-modes]] for
+details.
+
+**** ~focus~ Request
+
+Synopsis:\hspace{0.5cm} ~focus <port-index:integer>~
+
+\vspace{0.3cm}\noindent The ~focus~ request takes one non-optional argument:
+The index of the port to focus. Focussing a port means that subsequent data
+transmissions are carried out by using the specified port.
+
+Default focus is implementation defined.
+
+**** ~init~ Request
+
+Synopsis:\hspace{0.5cm} ~init <port-index:integer>~
+
+\vspace{0.3cm}\noindent The ~init~ request takes one non-optional argument: The
+index of the port to initialise. If a port has even a single configurable
+property, this request is required initially before any other operation with
+that port and then again after any set of changes with the port's properties.
+
+**** ~line~ Request
+
+Synopsis:\hspace{0.5cm} ~line <port:integer> <line:integer> <role:role-spec>~
+
+\vspace{0.3cm}\noindent The ~line~ request takes three non-optional arguments.
+
+~port~ specifies the index of the port to configure. ~line~ specifies the index
+of the line within the port to configure. ~<role>~ describes the role within
+the active mode the line is to be set to. Roles are specific to modes (see
+section [[sec:port-modes]]). The general syntax of a role-spec is specified in
+section [[sec:rccep-roles]].
+
+**** ~port~ Request
 
 Synopsis:\hspace{0.5cm} ~port <port-index:integer>~
 
@@ -369,7 +392,7 @@ The request may return other mode-specific properties (see section
 All properties that return a ~fixed~ as their third and final token are
 read-only values. This is true for generic as well as mode-specific properties.
 
-*** ~set~ Request
+**** ~set~ Request
 
 Synopsis:\hspace{0.5cm} ~set <port:integer> <key:symbol> <value>~
 
@@ -385,7 +408,8 @@ marked as ~fixed~):
 - ~lines~: Defines the number of lines a port has access to.
 - ~rate~: Defines the symbol rate a port operates at.
 
-*** ~transmit~ Request
+*** Transmission Requests
+**** ~transmit~ Request
 
 Synopsis:\hspace{0.5cm} ~transmit <data:integer>~
 
@@ -398,23 +422,6 @@ smaller, the value is padded with zeros towards the most-significant bit.
 The request returns an integer, which contains a possible reply from the
 attached device. If no meaningful reply is received, the return value shall be
 set to ~0~.
-
-*** ~version~ Request
-
-Synopsis:\hspace{0.5cm} ~version~
-
-\vspace{0.3cm}\noindent This request takes no argument.
-
-This request returns the protocol version the remote controller implements. The
-reply shall be formatted like this:
-
-- "~VERSION <integer> <integer> <integer>~"
-
-Where the three integers describe major, minor and micro version of the
-implemented protocol in the order specified (see section [[sec:version-number]] for
-details). For backward compatibility, this request may be given in upper case
-as ~VERSION~ as well. The upper case ~VERSION~ prefix in the reply is for
-backward compatibility as well.
 
 * Port Modes <<sec:port-modes>>
 
