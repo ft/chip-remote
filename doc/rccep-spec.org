@@ -19,7 +19,7 @@
 This document specifies a text protocol for communication between a client
 (commonly a personal computer) and a remote controller, for the purpose of
 interfacing configurable electronic parts such as analog digital converters or
-clock distribution blocks with slave interface protocols such as ~UART~, ~SPI~
+clock distribution blocks with simple interface protocols such as ~UART~, ~SPI~
 or ~I2C~ via more common personal computer interfaces (in particular the
 universal serial bus — ~USB~ or ~TCP/IP~ links). The goal is to specify an
 interface on top of which systems can be built that enable tasks such as, but
@@ -50,30 +50,30 @@ Elements of the protocol are either /literal/, /mandatory/ or /optional/.
 
 Mandatory elements are enclosed by angle brackets (~<...>~), optional ones are
 enclosed by square brackets (~[...]~) and all other elements are literal. Thus
-a string like "~FOO <bar> [baz]~" specifies that the first element has to be
-the literal symbol ~FOO~, followed by a mandatory element (named “bar” for
+a string like "~foo <bar> [baz]~" specifies that the first element has to be
+the literal symbol ~foo~, followed by a mandatory element (named “bar” for
 later reference), followed by an optional element (named “baz” for later
 reference). Mandatory and optional elements may also contain tags to hint at
 the allowed type of data for the element (example: "~[foo:integer]~" specifies
 an optional element named ~foo~, that has to be an integer). When a data type
 is specified, the name may be omitted if the specification is able to reference
-the element uniquely without a name (example: "~PORTS <integer>~"). Valid type
+the element uniquely without a name (example: "~ports <integer>~"). Valid type
 tags are ~symbol~, ~integer~ and ~boolean~, as well as combined types such as
 ~role-spec~, where the syntax of the type is specified elsewhere in this
 specification.
 
 Mandatory and optional elements may also enumerate different possible names and
 types by joining them by vertical bars (~|~). Example: The string
-"~<name:symbol|id:integer|INVALID>~" specifies a mandatory element, that may
+"~<name:symbol|id:integer|invalid>~" specifies a mandatory element, that may
 either be referenced by ~name~ (in which case it has to be a symbol) or ~id~
-(in which case it has to be an integer) or ~INVALID~. The latter case doesn't
+(in which case it has to be an integer) or ~invalid~. The latter case doesn't
 specify a data type; the specification has to clarify how this version of the
-element would be used (example: ~INVALID~ could be a literal symbol that may be
+element would be used (example: ~invalid~ could be a literal symbol that may be
 used by the protocol in the given position of the specified message).
 
 An element does not necessarily refer to a single token in the sense of the
 protocol. If it does refer to multiple tokens, the element's entry shall end in
-three dots (example: "~MALFORMED-REQUEST [reason...]~").
+three dots (example: "~malformed-request [reason...]~").
 
 #+LATEX: \newpage
 
@@ -82,8 +82,8 @@ three dots (example: "~MALFORMED-REQUEST [reason...]~").
 ** Basic Structure <<sec:basic-structure>>
 
 An ~RCCEP~ system consists of a /controlling client/ and a /remote controller/
-that possesses one or more /Ports/ through which /Slave Devices/ are attached
-to it. The client talks to the controller using the protocol described herein.
+that possesses one or more /Ports/ through which /Devices/ are attached to it.
+The client talks to the controller using the protocol described herein.
 
 *** Controlling Client
 
@@ -98,34 +98,33 @@ It is a logic the /Controlling Client/ can connect to. It receives /Requests/
 and emits /Replies/.
 
 It is equipped with a number of /Ports/ it uses to turn client requests into
-electronic signaling to control electronic parts attached to the port as a
-slave.
+electronic signaling to control electronic parts attached to the port.
 
-*** Slave Device
+*** Device
 
-A /Slave Device/ is an electronic part with a configuration interface, that is
+A /Device/ is an electronic part with a configuration interface, that is
 connected to a port of the /Remote Controller/.
 
-*** Requests
+*** Request
 
 A /Request/ is a message from the /Controlling Client/ to the /Remote
 Controller/.
 
-*** Replies
+*** Reply
 
 A /Reply/ is a message from the /Remote Controller/ to the /Controlling
 Client/.
 
 *** Ports
 
-A /Port/ is an interface between the /Remote Controller/ and a /Slave Device/.
+A /Port/ is an interface between the /Remote Controller/ and a /Device/.
 /Ports/ consist of one or more /Lines/ and are set to a /Mode/ that specifies
 its operation.
 
 *** Modes
 
-/Modes/ specify how a /Port/ communicates with a /Slave Device/. Possible
-/Modes/ are documented in section [[sec:port-modes]].
+/Modes/ specify how a /Port/ communicates with a /Device/. Possible /Modes/ are
+documented in section [[sec:port-modes]].
 
 *** Lines
 
@@ -144,10 +143,7 @@ following format:
 
 - ~<role:symbol>:<integer>~: ~role~ is the name specifing the base role a line
   is assigned. ~<integer>~ is the role index of the specific line. Indexing
-  starts at zero. Examples would be ~DATA:0~, ~DATA:1~ etc.
-
-If the index of a role is omitted, ~0~ is assumed (~DATA~ and ~DATA:0~ are
-equivalent).
+  starts at zero. Examples would be ~data:0~, ~data:1~ etc.
 
 ** Protocol Basics <<sec:proto-basics>>
 
@@ -180,13 +176,8 @@ of arbitrary length.
 The remote controller of the system never engages communication with the
 client. Every transmission in one direction must be met with a reply in the
 opposite direction. In case a request does not trigger a meaningful response
-value, the symbol ~OK~ shall be used to acknowledge that the request was
+value, the symbol ~ok~ shall be used to acknowledge that the request was
 processed.
-
-A requests that triggers a multiline reply shall only transmit the first line
-of its potentially longer reply and *only* transmit its subsequent lines when
-they are requested one by one using the ~MORE~ request. In case there are no
-more lines in a multiline response, the final response shall be ~DONE~.
 
 *** Encoding of Data Types
 
@@ -203,8 +194,8 @@ Integers represent numeric values within the protocol. They are transmitted in
 strings of hexadecimal digits. The ~a-f~ range of a hexadecimal digit may be
 represented in upper or lower case and may also be mixed.
 
-In boolean contexts, the symbol ~TRUE~ represents a true value; and the symbol
-~FALSE~ represents a false value.
+In boolean contexts, the symbol ~true~ represents a true value; and the symbol
+~false~ represents a false value.
 
 *** Extensions
 
@@ -219,54 +210,38 @@ The very basics of the protocol are specified in section [[sec:proto-basics]]. T
 /always/ apply. This section specifies all requests and replies the protocol
 can exchange.
 
-** Mandatory Requests
-
-The protocol defines the following requests as mandatory for every controller
-implementation to implement:
-
-- ~HI~
-- ~BYE~
-- ~VERSION~
-- ~FEATURES~
-- ~TRANSMIT~
-
-All other requests are optional. A list of optional features a remote
-controller implements can be queried using the ~FEATURES~ request.
-
 ** Types of Replies
 
 These are the generic replies of the protocol:
 
-- "~OK~": This reply is used whenever a request does not prompt another more
+- "~ok~": This reply is used whenever a request does not prompt another more
   meaningful reply.
 
-- "~WTF [reason...]~": Used if a request could not be carried out. The reason
+- "~wtf [reason...]~": Used if a request could not be carried out. The reason
   the request was rejected may be returned as the remaining tokens of the
   reply's line. Returning a reason is optional.
 
-- "~MALFORMED-REQUEST [reason...]~": Used in case the last request could not be
+- "~malformed-request [reason...]~": Used in case the last request could not be
   processed. The reply may provide a reason as to why processing failed as the
   rest of the reply's tokens. Returning a reason is optional.
 
-- "~BROKEN-VALUE [value]~": Used if an unexpected value was encountered. The
+- "~broken-value [value]~": Used if an unexpected value was encountered. The
   broken value may be retured as the second token of the reply's line.
   Returning the offending value is optional.
 
-- "~VALUE-OUT-OF-RANGE [value]~": Used if a numeric value was encountered, but
+- "~value-out-of-range [value]~": Used if a numeric value was encountered, but
   its value does not fall into the valid range for the request in question. The
   invalid value may be retured as the second token of the reply's line.
   Returning the offending value is optional.
-
-- "~DONE~": Used as the final reply at the end of a multiline reply.
 
 Other replies are request-dependent. Their format is documented with the
 specific request.
 
 ** Request Specification
 
-*** HI Request
+*** ~hi~ Request
 
-Synopsis:\hspace{0.5cm} ~HI~
+Synopsis:\hspace{0.5cm} ~hi~
 
 \vspace{0.3cm}\noindent This request takes no argument.
 
@@ -275,9 +250,9 @@ reply to this request shall be:
 
 - "~Hi there, stranger.~"
 
-*** BYE Request
+*** ~bye~ Request
 
-Synopsis:\hspace{0.5cm} ~BYE~
+Synopsis:\hspace{0.5cm} ~bye~
 
 \vspace{0.3cm}\noindent This request takes no argument.
 
@@ -286,66 +261,57 @@ remote controller's reply to this request shall be:
 
 - "~Have a nice day.~"
 
-*** ADDRESS Request
+*** ~address~ Request
 
 Synopsis:\hspace{0.5cm} ~address <address:integer>~
 
-\vspace{0.3cm}\noindent The ~ADDRESS~ request takes one non-optional argument.
-The request is used to handle slave addressing with protocols, that employ
+\vspace{0.3cm}\noindent The ~address~ request takes one non-optional argument.
+The request is used to handle device addressing with protocols, that employ
 explicit addressing schemes. The actual effect of the request is dependent of
 the mode the given port is set to. Modes that use in-band addressing may choose
-to ignore ~ADDRESS~ requests altogether. See section [[sec:port-modes]] for
+to ignore ~address~ requests altogether. See section [[sec:port-modes]] for
 details.
 
-*** FEATURES Request
+*** ~focus~ Request
 
-Synopsis:\hspace{0.5cm} ~FEATURES~
+Synopsis:\hspace{0.5cm} ~focus <port-index:integer>~
 
-\vspace{0.3cm}\noindent This request takes no argument.
-
-The ~FEATURES~ request returns a multiline reply. Each line names one optional
-protocol feature the remote controller implements.
-
-*** FOCUS Request
-
-Synopsis:\hspace{0.5cm} ~FOCUS <port-index:integer>~
-
-\vspace{0.3cm}\noindent The ~FOCUS~ request takes one non-optional argument:
+\vspace{0.3cm}\noindent The ~focus~ request takes one non-optional argument:
 The index of the port to focus. Focussing a port means that subsequent data
 transmissions are carried out by using the specified port.
 
 Default focus is implementation defined.
 
-*** INIT Request
+*** ~init~ Request
 
-Synopsis:\hspace{0.5cm} ~INIT <port-index:integer>~
+Synopsis:\hspace{0.5cm} ~init <port-index:integer>~
 
-\vspace{0.3cm}\noindent The ~INIT~ request takes one non-optional argument: The
+\vspace{0.3cm}\noindent The ~init~ request takes one non-optional argument: The
 index of the port to initialise. If a port has even a single configurable
 property, this request is required initially before any other operation with
 that port and then again after any set of changes with the port's properties.
 
-*** LINES Request
+*** ~lines~ Request
 
-Synopsis:\hspace{0.5cm} ~LINES <port-index:integer>~
+Synopsis:\hspace{0.5cm} ~lines <port-index:integer>~
 
-\vspace{0.3cm}\noindent The ~LINES~ request takes one non-optional argument: In
+\vspace{0.3cm}\noindent The ~lines~ request takes one non-optional argument: In
 index if the port to query information about.
 
 This request returns a multiline reply. Each line shows to which role the line
 of a given index assigned to:
 
-- "~<index:integer> <role:symbol> [FIXED]~"
+- "~<index:integer> <role:symbol> [fixed]~"
 
 Roles are specific to modes (see section [[sec:port-modes]]). The default role
-assignment of a port is implementation defined. If ~FIXED~ is specified, the
+assignment of a port is implementation defined. If ~fixed~ is specified, the
 role assignment of that line cannot be changed.
 
-*** LINE Request
+*** ~line~ Request
 
-Synopsis:\hspace{0.5cm} ~LINE <port:integer> <line:integer> <role:role-spec>~
+Synopsis:\hspace{0.5cm} ~line <port:integer> <line:integer> <role:role-spec>~
 
-\vspace{0.3cm}\noindent The ~LINE~ request takes three non-optional arguments.
+\vspace{0.3cm}\noindent The ~line~ request takes three non-optional arguments.
 
 ~port~ specifies the index of the port to configure. ~line~ specifies the index
 of the line within the port to configure. ~<role>~ describes the role within
@@ -353,89 +319,89 @@ the active mode the line is to be set to. Roles are specific to modes (see
 section [[sec:port-modes]]). The general syntax of a role-spec is specified in
 section [[sec:rccep-roles]].
 
-*** MODES Request
+*** ~modes~ Request
 
-Synopsis:\hspace{0.5cm} ~MODES~
+Synopsis:\hspace{0.5cm} ~modes~
 
-\vspace{0.3cm}\noindent This request takes no argument. The ~MODES~ request
+\vspace{0.3cm}\noindent This request takes no argument. The ~modes~ request
 returns a multiline reply. Each line names one mode the remote controller
 implements. Possible modes are documented in section [[sec:port-modes]].
 
-*** PORTS Request
+*** ~ports~ Request
 
-Synopsis:\hspace{0.5cm} ~PORTS~
+Synopsis:\hspace{0.5cm} ~ports~
 
 \vspace{0.3cm}\noindent This request takes no argument.
 
-The ~PORTS~ request returns a multiline reply. The lines shall contain the
+The ~ports~ request returns a multiline reply. The lines shall contain the
 following:
 
-- "~PORTS <integer>~": Where ~<integer>~ indicates the number of ports
+- "~ports <integer>~": Where ~<integer>~ indicates the number of ports
   available on the remote controller.
 
-- "~FOCUS <integer|NONE>~": Where ~<integer>~ indicates the currently focused
-  port. If no port is currently focused, the symbol ~NONE~ is returned.
+- "~focus <integer|none>~": Where ~<integer>~ indicates the currently focused
+  port. If no port is currently focused, the symbol ~none~ is returned.
 
-*** PORT Request
+*** ~port~ Request
 
-Synopsis:\hspace{0.5cm} ~PORT <port-index:integer>~
+Synopsis:\hspace{0.5cm} ~port <port-index:integer>~
 
-\vspace{0.3cm}\noindent The ~PORT~ request takes one non-optional argument: The
+\vspace{0.3cm}\noindent The ~port~ request takes one non-optional argument: The
 index of the port to query information about.
 
 This request returns a multiline reply. The lines contain key-value pairs of
 properties for the port in question. These are the generic properties that may
 be returned:
 
-- "~LINES <integer> [FIXED]~": ~<integer>~ defines the number of lines the port
+- "~lines <integer> [fixed]~": ~<integer>~ defines the number of lines the port
   has access to.
 
-- "~MODE <mode:symbol> [FIXED]~": Indicates the ~mode~ the port is currently
+- "~mode <mode:symbol> [fixed]~": Indicates the ~mode~ the port is currently
   running in.
 
-- "~RATE <integer> [FIXED]~": Indicates the symbol-rate with which the port
+- "~rate <integer> [fixed]~": Indicates the symbol-rate with which the port
   operates. A value of zero indicates an implementation-defined default
   symbol-rate.
 
 The request may return other mode-specific properties (see section
-sec:port-modes]]).
+[[sec:port-modes]]).
 
-All properties that return a ~FIXED~ as their third and final token are
+All properties that return a ~fixed~ as their third and final token are
 read-only values. This is true for generic as well as mode-specific properties.
 
-*** SET Request
+*** ~set~ Request
 
-Synopsis:\hspace{0.5cm} ~SET <port:integer> <key:symbol> <value>~
+Synopsis:\hspace{0.5cm} ~set <port:integer> <key:symbol> <value>~
 
-\vspace{0.3cm}\noindent The ~SET~ request takes three non-optional arguments.
+\vspace{0.3cm}\noindent The ~set~ request takes three non-optional arguments.
 
 ~port~ is the index of the port to configure. ~key~ is the property's name to
 set. ~value~ is the new value for the property.
 
-Non-mode-specific parameters that the ~SET~ request is able to modify (unless
-marked as ~FIXED~):
+Non-mode-specific parameters that the ~set~ request is able to modify (unless
+marked as ~fixed~):
 
-- ~MODE~: Sets the port's mode of operation to ~value~.
-- ~LINES~: Defines the number of lines a port has access to.
-- ~RATE~: Defines the symbol rate a port operates at.
+- ~mode~: Sets the port's mode of operation to ~value~.
+- ~lines~: Defines the number of lines a port has access to.
+- ~rate~: Defines the symbol rate a port operates at.
 
-*** TRANSMIT Request
+*** ~transmit~ Request
 
-Synopsis:\hspace{0.5cm} ~TRANSMIT <data:integer>~
+Synopsis:\hspace{0.5cm} ~transmit <data:integer>~
 
-\vspace{0.3cm}\noindent The ~TRANSMIT~ request takes one non-optional argument:
+\vspace{0.3cm}\noindent The ~transmit~ request takes one non-optional argument:
 The value to transmit to the currently focused port. The value has to be an
 integer. In case the given integer is larger than the frame-length configured
 for the port's current mode, it is truncated to that size. In case it is
 smaller, the value is padded with zeros towards the most-significant bit.
 
 The request returns an integer, which contains a possible reply from the
-attached slave device. If no meaningful reply is received, the return value
-shall be set to ~0~.
+attached device. If no meaningful reply is received, the return value shall be
+set to ~0~.
 
-*** VERSION Request
+*** ~version~ Request
 
-Synopsis:\hspace{0.5cm} ~VERSION~
+Synopsis:\hspace{0.5cm} ~version~
 
 \vspace{0.3cm}\noindent This request takes no argument.
 
@@ -446,7 +412,9 @@ reply shall be formatted like this:
 
 Where the three integers describe major, minor and micro version of the
 implemented protocol in the order specified (see section [[sec:version-number]] for
-details).
+details). For backward compatibility, this request may be given in upper case
+as ~VERSION~ as well. The upper case ~VERSION~ prefix in the reply is for
+backward compatibility as well.
 
 * Port Modes <<sec:port-modes>>
 
@@ -454,49 +422,49 @@ details).
 
 *** SPI Specific Properties
 
-What follows is a list of properties the ~PORT~ request may return with ports
+What follows is a list of properties the ~port~ request may return with ports
 configured for ~SPI~ mode.
 
-- ~FRAME-LENGTH <integer>~: Indicates the number of bits that are used per
+- ~frame-length <integer>~: Indicates the number of bits that are used per
   transmission.
 
-- ~CS-LINES <integer>~: Indicates the number of chip-select lines the port
+- ~cs-lines <integer>~: Indicates the number of chip-select lines the port
   offers.
 
-- ~CS-POLARITY <ACTIVE-HIGH|ACTIVE-LOW>~: Use of either of the listed symbols
-  indicates whether the chip-select lines operate as ~ACTIVE-HIGH~ or
-  ~ACTIVE-LOW~ pins.
+- ~cs-polarity <active-high|active-low>~: Use of either of the listed symbols
+  indicates whether the chip-select lines operate as ~active-high~ or
+  ~active-low~ pins.
 
-- ~CLK-POLARITY <RISING-EDGE|FALLING-EDGE>~: Indicates whether the clock line
-  triggers data transfer on its rising (~RISING-EDGE~) or its falling edge
-  (~FALLING-EDGE~).
+- ~clk-polarity <rising-edge|falling-edge>~: Indicates whether the clock line
+  triggers data transfer on its rising (~rising-edge~) or its falling edge
+  (~falling-edge~).
 
-- ~CLK-PHASE-DELAY <boolean>~: A true value indicates that phase delay is used
+- ~clk-phase-delay <boolean>~: A true value indicates that phase delay is used
   on the clock line. Otherwise a false value indicates that it is not used.
 
-- ~BIT-ORDER <MSB-FIRST|LSB-FIRST>~: Indicates whether serial data transmission
-  is done starting at the most-significant bit (~MSB-FIRST~) or at the
-  least-significant bit (~LSB-FIRST~).
+- ~bit-order <msb-first|lsb-first>~: Indicates whether serial data transmission
+  is done starting at the most-significant bit (~msb-first~) or at the
+  least-significant bit (~lsb-first~).
 
 *** SPI Line Roles
 
-- ~CLK~: Clock signal of the ~SPI~ bus
+- ~clk~: Clock signal of the ~SPI~ bus
 
-- ~CS~: Chip-Select; this may be a multi-line role.
+- ~cs~: Chip-Select; this may be a multi-line role.
 
-- ~MOSI~: Master-Out-Slave-In, the unidirectional ~SPI~ data line from master
-  to slave.
+- ~mosi~: Master-Out-Slave-In, the unidirectional ~SPI~ data line from master
+  to device.
 
-- ~MISO~: Master-In-Slave-Out, the unidirectional ~SPI~ data line from slave to
-  master.
+- ~miso~: Master-In-Slave-Out, the unidirectional ~SPI~ data line from device
+  to master.
 
 *** SPI Addressing
 
-The ~ADDRESS~ request with the ~SPI~ protocol controls the state of an ~SPI~
+The ~address~ request with the ~SPI~ protocol controls the state of an ~SPI~
 port's chip-select lines for the following data transmissions. The request's
 argument is interpreted as a bit-mask representing the intended values of all
 chip-select lines. The lines are mapped to the bit-mask in order of their index
-with ~CS:0~ being mapped to the least significant bit of the address.
+with ~cs:0~ being mapped to the least significant bit of the address.
 
 Default ~SPI~ chip-select addressing is implementation defined.
 
@@ -504,7 +472,7 @@ Default ~SPI~ chip-select addressing is implementation defined.
 
 - Current status of the specification: *Draft*
 
-This document specifies version 3.0.0 of the protocol. The ~VERSION~ request
+This document specifies version 3.0.0 of the protocol. The ~version~ request
 would therefore cause a "~VERSION 3 0 0~" reply with remote controllers, that
 implement this version of the protocol. In detail that means:
 
@@ -541,8 +509,12 @@ version number.
 
 *** Version 2.0.0 → 3.0.0
 
-- Remove protocol states. All requests and replies are exactly one line of
-  ASCII text, delimited by line-feed characters.
+- Version 3 removes protocol states. All requests and replies are exactly one
+  line of ASCII text, delimited by line-feed characters.
+
+- Version 3 uses lower case ASCII protocol symbols, unlike version 2 which used
+  upper case symbols. Only version detection still uses upper case symbols and
+  uses an upper case symbol in its reply.
 
 *** Previous Versions
 
