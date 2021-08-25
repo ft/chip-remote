@@ -78,7 +78,6 @@ three dots (example: "~malformed-request [reason...]~").
 #+LATEX: \newpage
 
 * RCCEP Model
-
 ** Basic Structure <<sec:basic-structure>>
 
 An ~RCCEP~ system consists of a /controlling client/ and a /remote controller/
@@ -146,7 +145,6 @@ following format:
   starts at zero. Examples would be ~data:0~, ~data:1~ etc.
 
 ** Protocol Basics <<sec:proto-basics>>
-
 *** Protocol Character Set
 
 Communication is done in seven bit ~ASCII~ strings and only its /printable
@@ -199,8 +197,6 @@ In boolean contexts, the symbol ~true~ represents a true value; and the symbol
 
 *** Extensions
 
-**** Implementation Defined Purposes
-
 The protocol reserves the namespace of requests starting with an ~ASCII~ plus
 sign (hex: ~0x2b~) for implementation defined purposes.
 
@@ -238,7 +234,6 @@ Other replies are request-dependent. Their format is documented with the
 specific request.
 
 ** Request Specification
-
 *** Fixed Reply Requests
 
 These request cause the /remote controller/ to return a know reply. These are
@@ -424,9 +419,7 @@ attached device. If no meaningful reply is received, the return value shall be
 set to ~0~.
 
 * Port Modes <<sec:port-modes>>
-
 ** SPI
-
 *** SPI Specific Properties
 
 What follows is a list of properties the ~port~ request may return with ports
