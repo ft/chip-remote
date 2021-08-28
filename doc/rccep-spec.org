@@ -161,13 +161,23 @@ character set, that end in an ASCII line-feed (hex: ~0x0a~). The line-feed
 itself is not part of the message.
 
 Messages of the protocol (/Requests/ and /Replies/; see section
-[[sec:basic-structure]] for details) consist of multiple tokens. A line is split
-into tokens if one or more consecutive ~ASCII~ space bytes (hex: ~0x20~) are
-encountered. Other ~ASCII~ whitespace bytes are *not* considered for
-tokenisation.
+[[sec:basic-structure]] for details) consist of multiple tokens.
+
+A message is split into tokens upon encountering these conditions:
+
+- When one or more consecutive ~ASCII~ space bytes (hex: ~0x20~) are
+  encountered. This produces a list of scalar tokens.
+
+- In replies, when a single ~ASCII~ semicolon (hex: ~0x3b~) is encountered.
+  This produces a list of lists. The semicolon is not allowed in requests.
+
+- Requests may define private parsing rules of string arguments.
+
+Note that other ~ASCII~ whitespace bytes are *not* considered for tokenisation.
 
 The maximum length of request messages is limited to 127 bytes. Replies may be
-of arbitrary length.
+of arbitrary length. The semicolon list-of-list replies are used to replace the
+multiline mode from previous versions of the protocol.
 
 *** Message Exchange
 
@@ -422,17 +432,39 @@ marked as ~fixed~):
 *** Transmission Requests
 **** ~transmit~ Request
 
-Synopsis:\hspace{0.5cm} ~transmit <data:integer>~
+Synopsis:\hspace{0.5cm} ~transmit <data:data-spec>[;<data:data-spec>…]~
 
-\vspace{0.3cm}\noindent The ~transmit~ request takes one non-optional argument:
-The value to transmit to the currently focused port. The value has to be an
-integer. In case the given integer is larger than the frame-length configured
-for the port's current mode, it is truncated to that size. In case it is
-smaller, the value is padded with zeros towards the most-significant bit.
+\vspace{0.3cm}\noindent The ~transmit~ request takes one or more optional
+arguments. These specify the data that is to be transmitted to the currently
+focused port.
 
-The request returns an integer, which contains a possible reply from the
-attached device. If no meaningful reply is received, the return value shall be
-set to ~0~.
+The ~data-spec~ type can take the following forms:
+
+- ~<data:integer>~: An integer argument presents the raw data used for a single
+  transmission. On ~SPI~ ports each integer represents a complete frame. In
+  case the given integer is larger than the frame-length configured for the
+  port's current mode, it is truncated to that size. In case it is smaller, the
+  value is padded with zeros towards the most-significant bit.
+
+- ~r:<length:integer>~ This specification defines read access of the length
+  defined by the integer portion to the focused port. The semantics are port
+  mode dependent. On ~I2C~ ports, it defines the number of octets to read from
+  the device.
+
+- ~w:<data:integer>[,data:integer[,…]]~ This specification defines the data to
+  use in a write access to the focused port. The details depend on port mode.
+  On ~I2C~ ports, it defines the octets (range: ~0…255~) to write to the
+  focused device. The length of the write access are specified implicitly by
+  the length of the list of octets.
+
+The request returns a port mode dependent value:
+
+- On ~SPI~ ports, it contains reply from the attached device. If more than one
+  argument was given, a list of integers, one for each input argument, is
+  returned.
+
+- On ~I2C~ ports, the return value is a list of lists of octets, corresponding
+  to the specified read accesses.
 
 * Port Modes <<sec:port-modes>>
 ** SPI
