@@ -32,11 +32,23 @@ basic_failure(enum cr_proto_result code)
 }
 
 static char reply_buffer[BUFFER_SIZE];
+static size_t rbi = 0u;
+
+static void
+mem_sink_init(void)
+{
+    reply_buffer[0] = '\0';
+    rbi = 0u;
+}
 
 static void
 mem_sink(const char *buf)
 {
-    strlcpy(reply_buffer, buf, BUFFER_SIZE);
+    if (rbi >= BUFFER_SIZE)
+        return;
+
+    strlcpy(reply_buffer + rbi, buf, BUFFER_SIZE - rbi);
+    rbi += strlen(buf);
 }
 
 static void
@@ -45,7 +57,7 @@ test_trivial_command(const char *name, const enum cr_proto_command id)
     struct cr_proto_parse result;
     enum cr_proto_result code;
 
-    strlcpy(reply_buffer, "", sizeof(reply_buffer));
+    mem_sink_init();
     strlcpy(test_buffer, name, sizeof(test_buffer));
 
     code = cr_parse_string(mem_sink, test_buffer, &result);
@@ -68,7 +80,7 @@ test_command_transmit(void)
     struct cr_proto_parse result;
     enum cr_proto_result code;
 
-    strlcpy(reply_buffer, "", sizeof(test_buffer));
+    mem_sink_init();
     strlcpy(test_buffer, "transmit 12345678", sizeof(test_buffer));
 
     code = cr_parse_string(mem_sink, test_buffer, &result);
