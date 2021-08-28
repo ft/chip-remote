@@ -18,7 +18,7 @@
 
 #define CR_PROTO_MAX_ARGS 4u
 
-#define CR_PROTOCOL_VERSION_MAJOR      2u
+#define CR_PROTOCOL_VERSION_MAJOR      3u
 #define CR_PROTOCOL_VERSION_MINOR      0u
 #define CR_PROTOCOL_VERSION_PATCHLEVEL 0u
 
@@ -52,6 +52,7 @@ enum cr_proto_command {
     CR_PROTO_CMD_PORT,
     CR_PROTO_CMD_SET,
     CR_PROTO_CMD_TRANSMIT,
+    CR_PROTO_CMD_UVERSION,
     CR_PROTO_CMD_VERSION,
     /**
      * CR_PROTO_CMD_FW_* are commands in the private namespace "+*". For

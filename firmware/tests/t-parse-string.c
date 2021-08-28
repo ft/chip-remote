@@ -46,17 +46,17 @@ test_command_hi(void)
     enum cr_proto_result code;
 
     strlcpy(reply_buffer, "", sizeof(test_buffer));
-    strlcpy(test_buffer, "HI", sizeof(test_buffer));
+    strlcpy(test_buffer, "hi", sizeof(test_buffer));
 
     code = cr_parse_string(mem_sink, test_buffer, &result);
     bool success = code == CR_PROTO_RESULT_OK;
-    ok(success, "HI parses ok");
+    ok(success, "hi parses ok");
 
     if (success == false) {
         basic_failure(code);
     } else {
-        ok(result.cmd->id == CR_PROTO_CMD_HI, "HI result has correct id");
-        ok(result.argn == 0, "HI takes no arguments");
+        ok(result.cmd->id == CR_PROTO_CMD_HI, "hi result has correct id");
+        ok(result.argn == 0, "hi takes no arguments");
     }
 }
 
@@ -67,7 +67,7 @@ test_command_transmit(void)
     enum cr_proto_result code;
 
     strlcpy(reply_buffer, "", sizeof(test_buffer));
-    strlcpy(test_buffer, "TRANSMIT 12345678", sizeof(test_buffer));
+    strlcpy(test_buffer, "transmit 12345678", sizeof(test_buffer));
 
     code = cr_parse_string(mem_sink, test_buffer, &result);
     bool success = code == CR_PROTO_RESULT_OK;
@@ -77,7 +77,7 @@ test_command_transmit(void)
         basic_failure(code);
     } else {
         ok(result.cmd->id == CR_PROTO_CMD_TRANSMIT,
-           "TRANSMIT result has correct id");
+           "transmit result has correct id");
         ok(result.argn == 1, "One rgument parsed");
         ok(result.args[0].type == CR_PROTO_ARG_TYPE_INTEGER,
            "Argument type: Integer");
