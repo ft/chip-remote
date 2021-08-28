@@ -60,10 +60,37 @@ test_command_hi(void)
     }
 }
 
+static void
+test_command_transmit(void)
+{
+    struct cr_proto_parse result;
+    enum cr_proto_result code;
+
+    strlcpy(reply_buffer, "", sizeof(test_buffer));
+    strlcpy(test_buffer, "TRANSMIT 12345678", sizeof(test_buffer));
+
+    code = cr_parse_string(mem_sink, test_buffer, &result);
+    bool success = code == CR_PROTO_RESULT_OK;
+    ok(success, "'%s' parses ok", test_buffer);
+
+    if (success == false) {
+        basic_failure(code);
+    } else {
+        ok(result.cmd->id == CR_PROTO_CMD_TRANSMIT,
+           "TRANSMIT result has correct id");
+        ok(result.argn == 1, "One rgument parsed");
+        ok(result.args[0].type == CR_PROTO_ARG_TYPE_INTEGER,
+           "Argument type: Integer");
+        ok(result.args[0].data.u32 == 0x12345678,
+           "Argument value: 0x12345678");
+    }
+}
+
 int
 main(UNUSED int argc, UNUSED char *argv[])
 {
-    plan(3);
-    test_command_hi(); /* Tests: 3 */
+    plan(3u + 5u);
+    test_command_hi();            /* Tests: 3 */
+    test_command_transmit();      /* Tests: 5 */
     return EXIT_SUCCESS;
 }
