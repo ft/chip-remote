@@ -262,6 +262,22 @@ remote controller's reply to this request shall be:
 - "~Have a nice day.~"
 
 *** Querying Requests
+**** ~capabilities~ Request
+
+Synopsis:\hspace{0.5cm} ~capabilities~
+
+\vspace{0.3cm}\noindent This request takes no argument.
+
+This request returns a semicolon separated list of replies. Single symbol
+entries of the form ~"+foobar"~ list extension requests, implemented by the
+firmware. List entries of the form ~"key value"~ reflect implementation defined
+capabilities of the firmware. Mandatory capabilities are:
+
+- ~rx-buffer-size <value:integer>~ The size of the firmware's receive buffer in
+  octets.
+- ~maximum-arguments <value:integer>~ Maximum number of arguments to a request
+  supported by the firmware.
+
 **** ~lines~ Request
 
 Synopsis:\hspace{0.5cm} ~lines <port-index:integer>~
