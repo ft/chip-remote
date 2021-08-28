@@ -40,25 +40,27 @@ mem_sink(const char *buf)
 }
 
 static void
-test_command_hi(void)
+test_trivial_command(const char *name, const enum cr_proto_command id)
 {
     struct cr_proto_parse result;
     enum cr_proto_result code;
 
-    strlcpy(reply_buffer, "", sizeof(test_buffer));
-    strlcpy(test_buffer, "hi", sizeof(test_buffer));
+    strlcpy(reply_buffer, "", sizeof(reply_buffer));
+    strlcpy(test_buffer, name, sizeof(test_buffer));
 
     code = cr_parse_string(mem_sink, test_buffer, &result);
     bool success = code == CR_PROTO_RESULT_OK;
-    ok(success, "hi parses ok");
+    ok(success, "%s parses ok", name);
 
     if (success == false) {
         basic_failure(code);
     } else {
-        ok(result.cmd->id == CR_PROTO_CMD_HI, "hi result has correct id");
-        ok(result.argn == 0, "hi takes no arguments");
+        ok(result.cmd->id == id, "%s result has correct id", name);
+        ok(result.argn == 0, "%s takes no arguments", name);
     }
 }
+
+#define ttc(n,id) test_trivial_command(n, CR_PROTO_CMD_ ## id)
 
 static void
 test_command_transmit(void)
@@ -71,7 +73,7 @@ test_command_transmit(void)
 
     code = cr_parse_string(mem_sink, test_buffer, &result);
     bool success = code == CR_PROTO_RESULT_OK;
-    ok(success, "'%s' parses ok", test_buffer);
+    ok(success, "%s parses ok", test_buffer);
 
     if (success == false) {
         basic_failure(code);
@@ -89,8 +91,15 @@ test_command_transmit(void)
 int
 main(UNUSED int argc, UNUSED char *argv[])
 {
-    plan(3u + 5u);
-    test_command_hi();            /* Tests: 3 */
+    plan(7u * 3u
+         + 5u);
+    ttc("hi", HI);                /* Tests: 3 */
+    ttc("bye", BYE);              /* Tests: 3 */
+    ttc("features", FEATURES);    /* Tests: 3 */
+    ttc("ports", PORTS);          /* Tests: 3 */
+    ttc("version", VERSION);      /* Tests: 3 */
+    ttc("VERSION", UVERSION);     /* Tests: 3 */
+    ttc("+version", FW_VERSION);  /* Tests: 3 */
     test_command_transmit();      /* Tests: 5 */
     return EXIT_SUCCESS;
 }
