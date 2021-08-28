@@ -19,10 +19,10 @@
 #include <cr-utilities.h>
 
 struct cr_argument set_arguments[] = {
-    { .optional = false, .type = CR_PROTO_ARG_TYPE_INTEGER },
-    { .optional = false, .type = CR_PROTO_ARG_TYPE_STRING },
-    { .optional = false, .type = CR_PROTO_ARG_TYPE_STRING },
-    { .optional = false, .type = CR_PROTO_ARG_TYPE_VOID }
+    CMD_MANDATORY_ARG(INTEGER),
+    CMD_MANDATORY_ARG(STRING),
+    CMD_MANDATORY_ARG(STRING),
+    CMD_END_OF_ARGS
 };
 
 void

@@ -25,6 +25,18 @@ extern struct cr_command cr_commands[];
     extern struct cr_argument prefix ## name ## _arguments[];  \
     xDECLARE_COMMAND(prefix, name)
 
+#define CMD_MANDATORY_ARG(t)                                            \
+    { .optional = false, .repeats = false, .type = CR_PROTO_ARG_TYPE_ ## t }
+
+#define CMD_OPTIONAL_ARG(t)                                             \
+    { .optional = true,  .repeats = false, .type =  CR_PROTO_ARG_TYPE_ ##t }
+
+#define CMD_REST_ARG(t)                                                 \
+    { .optional = true,  .repeats = true,  .type =  CR_PROTO_ARG_TYPE_ ## t }
+
+#define CMD_END_OF_ARGS                                                 \
+    { .optional = true, .repeats = true, .type = CR_PROTO_ARG_TYPE_VOID }
+
 #define DECLARE_COMMAND(name) xDECLARE_COMMAND(/*none*/, name)
 #define DECLARE_ARGS_COMMAND(name) xDECLARE_ARGS_COMMAND(/*none*/, name)
 #define FW_DECLARE_COMMAND(name) xDECLARE_COMMAND(fw_, name)

@@ -16,8 +16,8 @@
 #include <cr-utilities.h>
 
 struct cr_argument address_arguments[] = {
-    { .optional = false, .type = CR_PROTO_ARG_TYPE_INTEGER },
-    { .optional = false, .type = CR_PROTO_ARG_TYPE_VOID }
+    CMD_MANDATORY_ARG(INTEGER),
+    CMD_END_OF_ARGS
 };
 
 void

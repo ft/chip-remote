@@ -111,6 +111,7 @@ typedef void(*cr_command_callback)(const struct cr_protocol*,
  */
 struct cr_argument {
     bool optional;
+    bool repeats;
     enum cr_argument_type type;
 };
 
