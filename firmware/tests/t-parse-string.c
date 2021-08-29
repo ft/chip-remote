@@ -20,6 +20,12 @@
 #include <c/compat/strings.h>
 #include <common/compiler.h>
 
+struct resultandcode {
+    struct cr_proto_parse result;
+    enum cr_proto_result code;
+    bool success;
+};
+
 #define BUFFER_SIZE 1024u
 char test_buffer[BUFFER_SIZE];
 
@@ -51,25 +57,35 @@ mem_sink(const char *buf)
     rbi += strlen(buf);
 }
 
+static struct resultandcode
+test_parse(const char *str, const enum cr_proto_command id)
+{
+    struct resultandcode rv;
+    mem_sink_init();
+    strlcpy(test_buffer, str, sizeof(test_buffer));
+
+    rv.code = cr_parse_string(mem_sink, test_buffer, &rv.result);
+    rv.success = rv.code == CR_PROTO_RESULT_OK;
+    ok(rv.success, "'%s' parses ok", str);
+
+    if (rv.success == false) {
+        basic_failure(rv.code);
+    } else {
+        unless (ok(rv.result.cmd->id == id, "'%s' result has correct id", str))
+            rv.success = false;
+    }
+
+    return rv;
+}
+
 static void
 test_trivial_command(const char *name, const enum cr_proto_command id)
 {
-    struct cr_proto_parse result;
-    enum cr_proto_result code;
+    struct resultandcode pr = test_parse(name, id);
+    if (pr.success == false)
+        return;
 
-    mem_sink_init();
-    strlcpy(test_buffer, name, sizeof(test_buffer));
-
-    code = cr_parse_string(mem_sink, test_buffer, &result);
-    bool success = code == CR_PROTO_RESULT_OK;
-    ok(success, "%s parses ok", name);
-
-    if (success == false) {
-        basic_failure(code);
-    } else {
-        ok(result.cmd->id == id, "%s result has correct id", name);
-        ok(result.argn == 0, "%s takes no arguments", name);
-    }
+    ok(pr.result.argn == 0, "%s takes no arguments", name);
 }
 
 #define ttc(n,id) test_trivial_command(n, CR_PROTO_CMD_ ## id)
@@ -77,27 +93,15 @@ test_trivial_command(const char *name, const enum cr_proto_command id)
 static void
 test_command_transmit(void)
 {
-    struct cr_proto_parse result;
-    enum cr_proto_result code;
+    struct resultandcode pr = test_parse("transmit 12345678",
+                                         CR_PROTO_CMD_TRANSMIT);
+    if (pr.success == false)
+        return;
 
-    mem_sink_init();
-    strlcpy(test_buffer, "transmit 12345678", sizeof(test_buffer));
-
-    code = cr_parse_string(mem_sink, test_buffer, &result);
-    bool success = code == CR_PROTO_RESULT_OK;
-    ok(success, "%s parses ok", test_buffer);
-
-    if (success == false) {
-        basic_failure(code);
-    } else {
-        ok(result.cmd->id == CR_PROTO_CMD_TRANSMIT,
-           "transmit result has correct id");
-        ok(result.argn == 1, "One rgument parsed");
-        ok(result.args[0].type == CR_PROTO_ARG_TYPE_INTEGER,
-           "Argument type: Integer");
-        ok(result.args[0].data.u32 == 0x12345678,
-           "Argument value: 0x12345678");
-    }
+    const struct cr_value *arg = pr.result.args;
+    ok(pr.result.argn == 1, "One argument parsed");
+    ok(arg->type == CR_PROTO_ARG_TYPE_INTEGER, "Argument type: Integer");
+    ok(arg->data.u32 == 0x12345678, "Argument value: 0x12345678");
 }
 
 int
