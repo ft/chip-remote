@@ -55,7 +55,7 @@ enum cr_proto_command {
     CR_PROTO_CMD_VERSION,
     /**
      * CR_PROTO_CMD_FW_* are commands in the private namespace "+*". For
-     * instance, the CMD_PROTO_CMD_FW_VERSION command refers to the "+VERSION"
+     * instance, the CMD_PROTO_CMD_FW_VERSION command refers to the "+version"
      * keyword.
      */
     CR_PROTO_CMD_FW_VERSION,

@@ -29,7 +29,7 @@ run_command(struct cr_protocol *proto)
     if (cb == NULL) {
         printf("cr: Got NULL callback in command processing.\n");
         printf("cr: This should never happend and is likely a bug.\n");
-        proto->reply("WTF NULL Callback. This is a bug!\n");
+        proto->reply("wtf NULL Callback. This is a bug!\n");
         return;
     }
 
@@ -81,7 +81,7 @@ cr_toplevel(struct cr_protocol *proto, const char ch)
     case CR_PROCESS_INPUT_TOO_LONG:
         printf("cr: Input too long (max: %zu); line ignored.\n",
                proto->in.size);
-        proto->reply("WTF Input too long\n");
+        proto->reply("wtf Input too long\n");
         break;
     }
 }

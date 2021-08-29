@@ -98,7 +98,7 @@ parse_argument(string_sink reply, const struct cr_argument *spec, char *input)
         } else if (string_bool_false(input)) {
             result.data.boolean = false;
         } else {
-            reply("BROKEN-VALUE Not a boolean: ");
+            reply("broken-value Not a boolean: ");
             reply(input);
             reply("\n");
             result.type = CR_PROTO_ARG_TYPE_VOID;
@@ -108,7 +108,7 @@ parse_argument(string_sink reply, const struct cr_argument *spec, char *input)
         int error = 0;
         result.data.u32 = cr_parse_u32(input, &error);
         if (error != 0) {
-            reply("BROKEN-VALUE Not an integer: ");
+            reply("broken-value Not an integer: ");
             reply(input);
             reply("\n");
             result.type = CR_PROTO_ARG_TYPE_VOID;
@@ -135,7 +135,7 @@ cr_parse_string(string_sink reply,
     struct cr_command *cmd = cr_lookup_command(current.start);
 
     if (cmd->id == CR_PROTO_CMD_UNKNOWN) {
-        reply("WTF Unknown command: ");
+        reply("wtf Unknown command: ");
         reply(current.start);
         reply("\n");
         return CR_PROTO_RESULT_WTF;
@@ -146,7 +146,7 @@ cr_parse_string(string_sink reply,
     while (current.end < end_of_input) {
         /* Make sure we're not overflowing argument list */
         if (argn >= CR_PROTO_MAX_ARGS) {
-            reply("MALFORMED-REQUEST Broken command definition. This is a bug!");
+            reply("malformed-request Broken command definition. This is a bug!");
             reply("\n");
             return CR_PROTO_RESULT_MALFORMED;
         }
@@ -154,7 +154,7 @@ cr_parse_string(string_sink reply,
         struct cr_argument *spec = cmd->args + argn;
         /* Check if we're exceeding the command's argument spec */
         if (spec->type == CR_PROTO_ARG_TYPE_VOID) {
-            reply("MALFORMED-REQUEST Too many arguments");
+            reply("malformed-request Too many arguments");
             reply("\n");
             return CR_PROTO_RESULT_MALFORMED;
         }
@@ -168,7 +168,7 @@ cr_parse_string(string_sink reply,
     }
 
     if (spec_missing_arg(cmd, argn)) {
-        reply("MALFORMED-REQUEST Not enough arguments");
+        reply("malformed-request Not enough arguments");
         reply("\n");
         return CR_PROTO_RESULT_MALFORMED;
     }

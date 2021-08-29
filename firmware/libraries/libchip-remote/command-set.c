@@ -35,38 +35,38 @@ cr_handle_set(const struct cr_protocol *proto,
     struct cr_port *p = proto->ports.table[idx];
 
     if (p->api->set == NULL) {
-        proto->reply("WTF Port does not support configuration!\n");
+        proto->reply("wtf Port does not support configuration!\n");
         return;
     }
 
     switch (p->api->set(p, key, value)) {
     case 0:
-        proto->reply("OK\n");
+        proto->reply("ok\n");
         break;
     case 1:
-        proto->reply("WTF Port does not support mode changes\n");
+        proto->reply("wtf Port does not support mode changes\n");
         break;
     case -1:
-        proto->reply("VALUE-OUT-OF-RANGE ");
+        proto->reply("value-out-of-range ");
         proto->reply(key);
         proto->reply(": ");
         proto->reply(value);
         cr_proto_put_newline(proto);
         break;
     case -2:
-        proto->reply("MALFORMED-REQUEST Invalid parameter: ");
+        proto->reply("malformed-request Invalid parameter: ");
         proto->reply(key);
         cr_proto_put_newline(proto);
         break;
     case -3:
-        proto->reply("BROKEN-VALUE Invalid argument for ");
+        proto->reply("broken-value Invalid argument for ");
         proto->reply(key);
         proto->reply(": ");
         proto->reply(value);
         cr_proto_put_newline(proto);
         break;
     default:
-        proto->reply("WTF Unknown configuration error.\n");
+        proto->reply("wtf Unknown configuration error.\n");
         break;
     }
 }

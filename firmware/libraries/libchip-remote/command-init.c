@@ -28,7 +28,7 @@ cr_handle_init(const struct cr_protocol *proto,
 {
     uint32_t idx = cmd->args[0].data.u32;
     if (idx >= proto->ports.tablesize) {
-        proto->reply("VALUE-OUT-OF-RANGE ");
+        proto->reply("value-out-of-range ");
         cr_proto_put_u32(proto, idx);
         proto->reply(" > ");
         cr_proto_put_u32(proto, proto->ports.tablesize - 1);
@@ -37,8 +37,8 @@ cr_handle_init(const struct cr_protocol *proto,
         struct cr_port *p = proto->ports.table[proto->ports.current];
         int rv = p->api->init(p);
         if (rv == 0)
-            proto->reply("OK\n");
+            proto->reply("ok\n");
         else
-            proto->reply("WTF Port initialisation failed!\n");
+            proto->reply("wtf Port initialisation failed!\n");
     }
 }

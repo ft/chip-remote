@@ -19,13 +19,13 @@ void
 cr_handle_ports(const struct cr_protocol *proto,
                 UNUSED const struct cr_proto_parse *cmd)
 {
-    proto->reply("PORTS ");
+    proto->reply("ports ");
     cr_proto_put_u32(proto, proto->ports.tablesize);
-    proto->reply(";FOCUS ");
+    proto->reply(";focus ");
     if (proto->ports.focused) {
         cr_proto_put_u32(proto, proto->ports.current);
     } else {
-        proto->reply("NONE");
+        proto->reply("none");
     }
     cr_proto_put_newline(proto);
 }

@@ -60,7 +60,7 @@ cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
 {
     int err;
 
-    if (strcmp(key, "RATE") == 0) {
+    if (strcmp(key, "rate") == 0) {
         (void)cr_parse_u32(value, &err);
         if (err > 0) {
             return -3;
@@ -68,7 +68,7 @@ cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
         /* Accept any and all rates; this bit-bang implementation will use its
          * native rate in any case. */
         port->cfg.spi.clk.rate = 0;
-    } else if (strcmp(key, "CLK-PHASE-DELAY") == 0) {
+    } else if (strcmp(key, "clk-phase-delay") == 0) {
         if (string_bool_true(value)) {
             port->cfg.spi.clk.phase_delay = true;
         } else if (string_bool_false(value)) {
@@ -76,7 +76,7 @@ cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
         } else {
             return -3;
         }
-    } else if (strcmp(key, "FRAME-LENGTH") == 0) {
+    } else if (strcmp(key, "frame-length") == 0) {
         const uint32_t n = cr_parse_u32(value, &err);
         if (err > 0) {
             return -3;
@@ -85,31 +85,31 @@ cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
             return -1;
         }
         port->cfg.spi.frame_length = n;
-    } else if (strcmp(key, "BIT-ORDER") == 0) {
-        if (strcmp(value, "LSB-FIRST") == 0) {
+    } else if (strcmp(key, "bit-order") == 0) {
+        if (strcmp(value, "lsb-first") == 0) {
             port->cfg.spi.bit_order = CR_BIT_LSB_FIRST;
-        } else if (strcmp(value, "MSB-FIRST") == 0) {
+        } else if (strcmp(value, "msb-first") == 0) {
             port->cfg.spi.bit_order = CR_BIT_MSB_FIRST;
         } else {
             return -3;
         }
-    } else if (strcmp(key, "CS-POLARITY") == 0) {
-        if (strcmp(value, "ACTIVE-HIGH") == 0) {
+    } else if (strcmp(key, "cs-polarity") == 0) {
+        if (strcmp(value, "active-high") == 0) {
             port->cfg.spi.cs.polarity = CR_LOGIC_DIRECT;
-        } else if (strcmp(value, "ACTIVE-LOW") == 0) {
+        } else if (strcmp(value, "active-low") == 0) {
             port->cfg.spi.cs.polarity = CR_LOGIC_INVERTED;
         } else {
             return -3;
         }
-    } else if (strcmp(key, "CLK-POLARITY") == 0) {
-        if (strcmp(value, "RISING-EDGE") == 0) {
+    } else if (strcmp(key, "clk-polarity") == 0) {
+        if (strcmp(value, "rising-edge") == 0) {
             port->cfg.spi.clk.edge = CR_EDGE_RISING;
-        } else if (strcmp(value, "FALLING-EDGE") == 0) {
+        } else if (strcmp(value, "falling-edge") == 0) {
             port->cfg.spi.clk.edge = CR_EDGE_FALLING;
         } else {
             return -3;
         }
-    } else if (strcmp(key, "MODE") == 0) {
+    } else if (strcmp(key, "mode") == 0) {
         return 1;
     } else {
         return -2;

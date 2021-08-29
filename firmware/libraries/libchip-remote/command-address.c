@@ -26,15 +26,15 @@ cr_handle_address(const struct cr_protocol *proto,
 {
     struct cr_port *p = proto->ports.table[proto->ports.current];
     if (p->api->address == NULL) {
-        proto->reply("WTF Focused port does not support ADDRESS!\n");
+        proto->reply("wtf Focused port does not support address!\n");
         return;
     }
 
     int rv = p->api->address(p, cmd->args[0].data.u32);
 
     if (rv == 0) {
-        proto->reply("OK\n");
+        proto->reply("ok\n");
     } else {
-        proto->reply("WTF Could not ADDRESS desired device!\n");
+        proto->reply("wtf Could not address desired device!\n");
     }
 }

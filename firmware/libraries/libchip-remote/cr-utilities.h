@@ -15,13 +15,13 @@ uint32_t cr_parse_u32(const char*, int*);
 static inline bool
 string_bool_true(const char *input)
 {
-    return (strcmp(input, "TRUE") == 0);
+    return (strcmp(input, "true") == 0);
 }
 
 static inline bool
 string_bool_false(const char *input)
 {
-    return (strcmp(input, "FALSE") == 0);
+    return (strcmp(input, "false") == 0);
 }
 
 #endif /* INC_CR_UTILITIES_H */
