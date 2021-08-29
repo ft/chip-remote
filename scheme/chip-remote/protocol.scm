@@ -8,9 +8,11 @@
   #:export (address
             bye
             capabilities
+            chip-remote-open!
             client-version
             focus
             firmware-version
+            has-extension?
             hi
             init
             line
@@ -22,6 +24,25 @@
             set
             transmit
             update-capabilities))
+
+(define (has-extension? c e)
+  (let ((es (assq-ref (cr-capabilities c) 'extensions)))
+    (and es (memq e es))))
+
+(define* (chip-remote-open! #:key uri connection)
+  (when (and uri connection)
+    (throw 'invalid-arguments 'uri-and-connection-provided))
+  (unless (or uri connection)
+    (throw 'invalid-arguments 'neither-uri-nor-connection-provided))
+  (let ((conn (if uri
+                  (make-cr-connection uri)
+                  connection)))
+    (io-open conn)
+    (protocol-version conn)
+    (capabilities conn)
+    (when (has-extension? conn '+version)
+      (firmware-version conn))
+    conn))
 
 ;; Protocol version of this implementation
 (define client-version '((major . 3)
