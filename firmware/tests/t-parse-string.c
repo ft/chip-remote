@@ -91,6 +91,19 @@ test_trivial_command(const char *name, const enum cr_proto_command id)
 #define ttc(n,id) test_trivial_command(n, CR_PROTO_CMD_ ## id)
 
 static void
+test_command_address(void)
+{
+    struct resultandcode pr = test_parse("address 23", CR_PROTO_CMD_ADDRESS);
+    if (pr.success == false)
+        return;
+
+    const struct cr_value *arg = pr.result.args;
+    ok(pr.result.argn == 1, "One argument parsed");
+    ok(arg->type == CR_PROTO_ARG_TYPE_INTEGER, "Argument type: Integer");
+    ok(arg->data.u32 == 0x23u, "Argument value: 0x23");
+}
+
+static void
 test_command_set(void)
 {
     char *tests[] = {
@@ -128,6 +141,7 @@ int
 main(UNUSED int argc, UNUSED char *argv[])
 {
     plan(  7u * 3u
+         + 5u
          + 2u * 6u
          + 5u);
     ttc("hi", HI);                /* Tests: 3 */
@@ -137,6 +151,7 @@ main(UNUSED int argc, UNUSED char *argv[])
     ttc("version", VERSION);      /* Tests: 3 */
     ttc("VERSION", UVERSION);     /* Tests: 3 */
     ttc("+version", FW_VERSION);  /* Tests: 3 */
+    test_command_address();       /* Tests: 5 */
     test_command_set();           /* Tests: 6 */
     test_command_transmit();      /* Tests: 5 */
     return EXIT_SUCCESS;
