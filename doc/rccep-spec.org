@@ -84,65 +84,47 @@ An ~RCCEP~ system consists of a /controlling client/ and a /remote controller/
 that possesses one or more /Ports/ through which /Devices/ are attached to it.
 The client talks to the controller using the protocol described herein.
 
-*** Controlling Client
+- /Controlling Client/ :: The /Controlling Client/ is one of the subscribers of
+  an ~RCCEP~ communication. It is a logic connected to the /Remote Controller/,
+  that sends requests and processes replies.
 
-The /Controlling Client/ is one of the subscribers of an ~RCCEP~ communication.
-It is a logic connected to the /Remote Controller/, that sends requests and
-processes replies.
+- /Remote Controller/ :: The /Remote Controller/ is the second subscriber of an
+  ~RCCEP~ communication. It is a logic the /Controlling Client/ can connect to.
+  It receives /Requests/ and emits /Replies/.
 
-*** Remote Controller
+  It is equipped with a number of /Ports/ it uses to turn client requests into
+  electronic signaling to control electronic parts attached to the port.
 
-The /Remote Controller/ is the second subscriber of an ~RCCEP~ communication.
-It is a logic the /Controlling Client/ can connect to. It receives /Requests/
-and emits /Replies/.
+- /Device/ :: A /Device/ is an electronic part with a configuration interface,
+  that is connected to a port of the /Remote Controller/.
 
-It is equipped with a number of /Ports/ it uses to turn client requests into
-electronic signaling to control electronic parts attached to the port.
+- /Request/ :: A /Request/ is a message from the /Controlling Client/ to the
+  /Remote Controller/.
 
-*** Device
+- /Reply/ :: A /Reply/ is a message from the /Remote Controller/ to the
+  /Controlling Client/.
 
-A /Device/ is an electronic part with a configuration interface, that is
-connected to a port of the /Remote Controller/.
+- /Ports/ :: A /Port/ is an interface between the /Remote Controller/ and a
+  /Device/. /Ports/ consist of one or more /Lines/ and are set to a /Mode/ that
+  specifies its operation.
 
-*** Request
+- /Modes/ :: /Modes/ specify how a /Port/ communicates with a /Device/.
+  Possible /Modes/ are documented in section [[sec:port-modes]].
 
-A /Request/ is a message from the /Controlling Client/ to the /Remote
-Controller/.
+- /Lines/ :: A /Line/ is a single electronic signaling device, that represents
+  a logical value. In microcontroller terms a line is often called a “pin”. A
+  /Line/ can be assigned a /Role/ to implement a /Mode/.
 
-*** Reply
+- /Roles/ :: /Roles/ are specific to /Modes/. A /Role/ specifies which part of
+  a /Mode/ a given /Line/ implements. Its syntax is a symbol in the sense of
+  the protocol in which the colon character (hex: ~0x3a~) is disallowed.
 
-A /Reply/ is a message from the /Remote Controller/ to the /Controlling
-Client/.
+  If a /Role/ is made up of multiple /Lines/, then they are indexed in the
+  following format:
 
-*** Ports
-
-A /Port/ is an interface between the /Remote Controller/ and a /Device/.
-/Ports/ consist of one or more /Lines/ and are set to a /Mode/ that specifies
-its operation.
-
-*** Modes
-
-/Modes/ specify how a /Port/ communicates with a /Device/. Possible /Modes/ are
-documented in section [[sec:port-modes]].
-
-*** Lines
-
-A /Line/ is a single electronic signaling device, that represents a logical
-value. In microcontroller terms a line is often called a “pin”. A /Line/ can be
-assigned a /Role/ to implement a /Mode/.
-
-*** Roles <<sec:rccep-roles>>
-
-/Roles/ are specific to /Modes/. A /Role/ specifies which part of a /Mode/ a
-given /Line/ implements. Its syntax is a symbol in the sense of the protocol in
-which the colon character (hex: ~0x3a~) is disallowed.
-
-If a /Role/ is made up of multiple /Lines/, then they are indexed in the
-following format:
-
-- ~<role:symbol>:<integer>~: ~role~ is the name specifing the base role a line
-  is assigned. ~<integer>~ is the role index of the specific line. Indexing
-  starts at zero. Examples would be ~data:0~, ~data:1~ etc.
+  - ~<role:symbol>:<integer>~: ~role~ is the name specifing the base role a
+    line is assigned. ~<integer>~ is the role index of the specific line.
+    Indexing starts at zero. Examples would be ~data:0~, ~data:1~ etc.
 
 ** Protocol Basics <<sec:proto-basics>>
 *** Protocol Character Set
@@ -383,8 +365,7 @@ Synopsis:\hspace{0.5cm} ~line <port:integer> <line:integer> <role:role-spec>~
 ~port~ specifies the index of the port to configure. ~line~ specifies the index
 of the line within the port to configure. ~<role>~ describes the role within
 the active mode the line is to be set to. Roles are specific to modes (see
-section [[sec:port-modes]]). The general syntax of a role-spec is specified in
-section [[sec:rccep-roles]].
+section [[sec:port-modes]]).
 
 **** ~port~ Request
 
