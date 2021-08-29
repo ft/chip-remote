@@ -10,6 +10,7 @@
             capabilities
             client-version
             focus
+            firmware-version
             hi
             init
             line
@@ -239,9 +240,31 @@ this:
      (micro . 666))"
   (io-write conn "version")
   (push-capability-and-return
-   conn 'version (zip2 '(major minor micro)
-                       (cdr (with-read-raw-string (conn reply)
-                             (expect-read reply '("VERSION" int int int)))))))
+   conn 'protocol-version
+   (zip2 '(major minor micro)
+         (cdr (with-read-raw-string (conn reply)
+                (expect-read reply '("VERSION" int int int)))))))
+
+(define (firmware-version conn)
+  "Issue the ‘+version’ request via ‘conn’ and return an alist, that looks like
+this:
+
+    ((major . 23)
+     (minor . 42)
+     (micro . 666))
+
+Note that all requests prefixed by a ‘+’ are extensions to the RCCEP protocol.
+The ‘+version’ is an extension that returns the firmware's version in terms of
+the semantic versioning scheme (https://semver.org/).
+
+The reply should contain three tokens, all integer, reflecting the firmware's
+version."
+  (io-write conn "+version")
+  (push-capability-and-return
+   conn 'firmware-version
+   (zip2 '(major minor micro)
+         (with-read-raw-string (conn reply)
+           (expect-read reply '(int int int))))))
 
 (define (request->list-of-symbols conn request)
   "Apply ‘string->symbol’ to a list of strings and return a list of the
