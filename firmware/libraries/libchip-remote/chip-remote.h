@@ -47,7 +47,6 @@ enum cr_proto_command {
     CR_PROTO_CMD_LINES,
     CR_PROTO_CMD_LINE,
     CR_PROTO_CMD_MODES,
-    CR_PROTO_CMD_MORE,
     CR_PROTO_CMD_PORTS,
     CR_PROTO_CMD_PORT,
     CR_PROTO_CMD_SET,
