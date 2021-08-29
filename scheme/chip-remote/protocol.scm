@@ -7,6 +7,7 @@
   #:use-module (srfi srfi-1)
   #:export (address
             bye
+            capabilities
             client-version
             focus
             hi
@@ -73,7 +74,7 @@ pairs instead of a list of lists with two elements in them.
   (char-set-union
    (char-set-diff+intersection char-set:ascii
                                char-set:letter+digit)
-   (char-set #\- #\:)))
+   (char-set #\+ #\- #\:)))
 
 (define (hexstring->int str)
   "Turn a hexadecimal string ‘str’ into an integer. Returns ‘#f’ in case of an
@@ -201,6 +202,32 @@ protocol specification, the function throws ‘protocol-bye-failed’. Otherwise
     (unless (string=? reply "Have a nice day.")
       (throw 'protocol-bye-failed reply))
     #t))
+
+(define (capabilities-parse tokens)
+  (define keys '(rx-buffer-size maximum-arguments))
+  (let ((fst (string->symbol (car tokens))))
+    (if (memq fst keys)
+        (cons fst (map hexstring->int (cdr tokens)))
+        fst)))
+
+(define (capability-categories lst)
+  (let loop ((rest lst) (kv '()) (ext '()))
+    (if (null? rest)
+        (cons (cons 'extensions (sort ext (lambda (a b)
+                                            (string< (symbol->string a)
+                                                     (symbol->string b)))))
+              (sort kv (lambda (a b)
+                         (string< (symbol->string (car a))
+                                  (symbol->string (car b))))))
+        (let  ((entry (car rest)))
+          (if (list? entry)
+              (loop (cdr rest) (cons entry kv) ext)
+              (loop (cdr rest) kv (cons entry ext)))))))
+
+(define (capabilities conn)
+  (io-write conn "capabilities")
+  (capability-categories (map (compose capabilities-parse protocol-tokenize)
+                              (multi-tokenize (protocol-read conn)))))
 
 ;; Query protocol version from the board.
 (define (protocol-version conn)

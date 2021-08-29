@@ -52,21 +52,22 @@ struct cr_argument no_arguments[] = {
 #define END_OF_COMMAND_TABLE CRaCOMMAND(UNKNOWN, unknown, NULL, NULL)
 
 struct cr_command cr_commands[] = {
-    CRaCOMMAND(ADDRESS,  address,  cr_handle_address,  address_arguments),
-    CRsCOMMAND(BYE,      bye,      cr_handle_bye),
+    CRaCOMMAND(ADDRESS,      address,      cr_handle_address,      address_arguments),
+    CRsCOMMAND(BYE,          bye,          cr_handle_bye),
+    CRsCOMMAND(CAPABILITIES, capabilities, cr_handle_capabilities),
     MISSING_COMMAND(FOCUS),
-    CRsCOMMAND(HI,       hi,       cr_handle_hi),
-    CRaCOMMAND(INIT,     init,     cr_handle_init,     init_arguments),
+    CRsCOMMAND(HI,           hi,           cr_handle_hi),
+    CRaCOMMAND(INIT,         init,         cr_handle_init,         init_arguments),
     MISSING_COMMAND(LINES),
     MISSING_COMMAND(LINE),
     MISSING_COMMAND(MODES),
-    CRsCOMMAND(PORTS,    ports,    cr_handle_ports),
+    CRsCOMMAND(PORTS,        ports,        cr_handle_ports),
     MISSING_COMMAND(PORT),
-    CRaCOMMAND(SET,      set,      cr_handle_set,      set_arguments),
-    CRaCOMMAND(TRANSMIT, transmit, cr_handle_transmit, transmit_arguments),
-    CRsCOMMAND(VERSION,  version,  cr_handle_version),
-    CRsCOMMAND(UVERSION, VERSION,  cr_handle_version), /* Backward compat. */
-    FWsCOMMAND(VERSION,  version,  cr_handle_fw_version),
+    CRaCOMMAND(SET,          set,          cr_handle_set,          set_arguments),
+    CRaCOMMAND(TRANSMIT,     transmit,     cr_handle_transmit,     transmit_arguments),
+    CRsCOMMAND(VERSION,      version,      cr_handle_version),
+    CRsCOMMAND(UVERSION,     VERSION,      cr_handle_version),     /* Backward comp. */
+    FWsCOMMAND(VERSION,      version,      cr_handle_fw_version),
     END_OF_COMMAND_TABLE
 };
 

@@ -44,6 +44,7 @@ extern struct cr_command cr_commands[];
 
 DECLARE_ARGS_COMMAND(address);
 DECLARE_COMMAND(bye);
+DECLARE_COMMAND(capabilities);
 DECLARE_COMMAND(hi);
 DECLARE_ARGS_COMMAND(init);
 DECLARE_COMMAND(ports);
