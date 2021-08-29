@@ -91,6 +91,26 @@ test_trivial_command(const char *name, const enum cr_proto_command id)
 #define ttc(n,id) test_trivial_command(n, CR_PROTO_CMD_ ## id)
 
 static void
+test_command_set(void)
+{
+    char *tests[] = {
+        "set 0 mode spi",
+        "set 2 rate 115200",
+        NULL
+    };
+    for (size_t i = 0u; tests[i] != NULL; ++i) {
+        struct resultandcode pr = test_parse(tests[i], CR_PROTO_CMD_SET);
+        const struct cr_value *idx = pr.result.args;
+        const struct cr_value *key = pr.result.args + 1;
+        const struct cr_value *val = pr.result.args + 2;
+        ok(pr.result.argn == 3, "One argument parsed");
+        ok(idx->type == CR_PROTO_ARG_TYPE_INTEGER, "index arg: integer");
+        ok(key->type == CR_PROTO_ARG_TYPE_STRING, "key arg: string");
+        ok(val->type == CR_PROTO_ARG_TYPE_STRING, "value arg: string");
+    }
+}
+
+static void
 test_command_transmit(void)
 {
     struct resultandcode pr = test_parse("transmit 12345678",
@@ -107,7 +127,8 @@ test_command_transmit(void)
 int
 main(UNUSED int argc, UNUSED char *argv[])
 {
-    plan(7u * 3u
+    plan(  7u * 3u
+         + 2u * 6u
          + 5u);
     ttc("hi", HI);                /* Tests: 3 */
     ttc("bye", BYE);              /* Tests: 3 */
@@ -116,6 +137,7 @@ main(UNUSED int argc, UNUSED char *argv[])
     ttc("version", VERSION);      /* Tests: 3 */
     ttc("VERSION", UVERSION);     /* Tests: 3 */
     ttc("+version", FW_VERSION);  /* Tests: 3 */
+    test_command_set();           /* Tests: 6 */
     test_command_transmit();      /* Tests: 5 */
     return EXIT_SUCCESS;
 }
