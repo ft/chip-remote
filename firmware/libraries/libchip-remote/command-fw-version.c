@@ -6,7 +6,7 @@
 
 /**
  * @file command-features.c
- * @brief Implemenation of FEATURES command
+ * @brief Implemenation of extended firmware VERSION command
  */
 
 #include <common/compiler.h>

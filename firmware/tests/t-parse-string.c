@@ -140,13 +140,12 @@ test_command_transmit(void)
 int
 main(UNUSED int argc, UNUSED char *argv[])
 {
-    plan(  7u * 3u
+    plan(  6u * 3u
          + 5u
          + 2u * 6u
          + 5u);
     ttc("hi", HI);                /* Tests: 3 */
     ttc("bye", BYE);              /* Tests: 3 */
-    ttc("features", FEATURES);    /* Tests: 3 */
     ttc("ports", PORTS);          /* Tests: 3 */
     ttc("version", VERSION);      /* Tests: 3 */
     ttc("VERSION", UVERSION);     /* Tests: 3 */

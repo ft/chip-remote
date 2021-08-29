@@ -39,7 +39,6 @@ enum cr_proto_result {
 enum cr_proto_command {
     CR_PROTO_CMD_ADDRESS = 0,
     CR_PROTO_CMD_BYE,
-    CR_PROTO_CMD_FEATURES,
     CR_PROTO_CMD_FOCUS,
     CR_PROTO_CMD_HASHED,
     CR_PROTO_CMD_HI,
