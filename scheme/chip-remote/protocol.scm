@@ -367,14 +367,6 @@ consists of ‘request’ and ‘index’. The controller is expected to reply \
 ‘index’."
   (request-with-index-to-ok conn "init" index))
 
-(define (update-capabilities conn)
-  "Gather as much information from a remote controller, connected to via
-‘conn’."
-  (protocol-version conn)
-  (modes conn)
-  (ports conn)
-  #t)
-
 (define (zip-apply lf ld)
   "Like ‘zip’, but instead of constructing a resulting list, use elements from
 ‘lf’ as functions and apply them to the corresponding element in ‘ld’. Return a
