@@ -8,9 +8,7 @@
   #:export (address
             bye
             client-version
-            features
             focus
-            has-feature?
             hi
             init
             line
@@ -40,10 +38,10 @@
 
 This function throws exceptions for the common failure the protocol specifies."
   (let ((reply (io-read conn)))
-    (if (or (string-prefix? "WTF" reply)
-            (string-prefix? "MALFORMED-COMMAND" reply)
-            (string-prefix? "BROKEN-VALUE" reply)
-            (string-prefix? "VALUE-OUT-OF-RANGE" reply))
+    (if (or (string-prefix? "wtf" reply)
+            (string-prefix? "malformed-command" reply)
+            (string-prefix? "broken-value" reply)
+            (string-prefix? "value-out-of-range" reply))
         (let* ((tokens (protocol-tokenize reply))
                (cause (car tokens))
                (len (+ 1 (string-length cause)))
@@ -51,7 +49,7 @@ This function throws exceptions for the common failure the protocol specifies."
                          (substring reply len)
                          ""))
                (excp (symbol-append 'protocol-
-                                    (reply->symbol (car tokens)))))
+                                    (string->symbol (car tokens)))))
           (throw excp reply rest tokens)))
     reply))
 
@@ -139,11 +137,11 @@ contain either two or three tokens. The first has to be the string \"LINES\",
 the second has to be a string of hexadecimal digits and the third (if it
 exists) has to be the string \"FIXED\". So:
 
-    (expect-read \"LINES c\" '(\"LINES\" int opt \"FIXED\"))
-    => (\"LINES\" 12)
+    (expect-read \"lines c\" '(\"lines\" int opt \"fixed\"))
+    => (\"lines\" 12)
 
-    (expect-read \"LINES c FIXED\" '(\"LINES\" int opt \"FIXED\"))
-    => (\"LINES\" 12 \"FIXED\")
+    (expect-read \"lines c fixed\" '(\"lines\" int opt \"fixed\"))
+    => (\"lines\" 12 \"fixed\")
 
 The function throws exceptions in the following cases:
 
@@ -175,10 +173,6 @@ connection ‘conn’."
   (set-cr-capability! conn key value)
   value)
 
-(define (has-feature? conn feature)
-  "Check if ‘feature’ is in the ‘features’ cache of the connection ‘conn’."
-  (memq feature (get-cr-capability conn 'features)))
-
 ;; Read from the device, save the reply and run code in case the read was
 ;; successful. Return ‘#f’ otherwise.
 (define-syntax with-read-raw-string
@@ -192,7 +186,7 @@ connection ‘conn’."
   "Initiate an `RCCEP` conversation on ‘conn’. In case the reply doesn't match
 the protocol specification, the function throws ‘protocol-hi-failed’.
 Otherwise, #t is returned."
-  (io-write conn "HI")
+  (io-write conn "hi")
   (with-read-raw-string (conn reply)
     (unless (string=? reply "Hi there, stranger.")
       (throw 'protocol-hi-failed reply))
@@ -202,7 +196,7 @@ Otherwise, #t is returned."
   "End an `RCCEP` conversation on ‘conn’. In case the reply doesn't match the
 protocol specification, the function throws ‘protocol-bye-failed’. Otherwise,
 #t is returned."
-  (io-write conn "BYE")
+  (io-write conn "bye")
   (with-read-raw-string (conn reply)
     (unless (string=? reply "Have a nice day.")
       (throw 'protocol-bye-failed reply))
@@ -216,47 +210,37 @@ this:
     ((major . 23)
      (minor . 42)
      (micro . 666))"
-  (io-write conn "VERSION")
+  (io-write conn "version")
   (push-capability-and-return
    conn 'version (zip2 '(major minor micro)
                        (cdr (with-read-raw-string (conn reply)
                              (expect-read reply '("VERSION" int int int)))))))
 
-(define (reply->symbol s)
-  "Turns a string into a lower-cased symbol: \"FOO\" => foo"
-  (string->symbol (string-downcase s)))
-
 (define (request->list-of-symbols conn request)
-  "Apply ‘reply->symbol’ to a list of strings and return a list of the
+  "Apply ‘string->symbol’ to a list of strings and return a list of the
 resulting symbols."
   (io-write conn request)
-  (map reply->symbol (multi-tokenize (protocol-read conn))))
-
-(define (features conn)
-  "Via ‘conn’, query the remote controller for a list of optional `RCCEP`
-features it implements."
-  (push-capability-and-return conn 'features
-                              (request->list-of-symbols conn "FEATURES")))
+  (map string->symbol (multi-tokenize (protocol-read conn))))
 
 (define (string+int->pair s)
   "Take a string (‘s’)with two tokens (a string and an integer represented as a
 string of hexadecimal digits) and turn it into a pair of a lower-cased symbol
-and an integer: (string+int->pair \"FOO e\") => (foo . 14)"
+and an integer: (string+int->pair \"foo e\") => (foo . 14)"
   (let ((l (expect-read s '(string int))))
     (cond ((not (list? l)) l)
-          (else (cons (reply->symbol (car l))
+          (else (cons (string->symbol (car l))
                       (cadr l))))))
 
 (define (ports conn)
   "Via ‘conn’, query the remote controller for a list of ports it contains."
-  (io-write conn "PORTS")
+  (io-write conn "ports")
   (push-capability-and-return
    conn 'ports (map string+int->pair (multi-tokenize (protocol-read conn)))))
 
 (define (modes conn)
   "Via ‘conn’, query the remote controller for a list of modes it implements."
   (push-capability-and-return conn 'modes
-                              (request->list-of-symbols conn "MODES")))
+                              (request->list-of-symbols conn "modes")))
 
 (define (transmit conn data)
   "Instruct the remote controller (connected to via ‘conn’) to transmit the
@@ -268,7 +252,7 @@ function returns the received data. If nothing is reveived, 0 is returned."
 (define (protocol-transmit conn string)
   "Like ‘transmit’, only that ‘string’ is a string representation of the data to
 be transmitted (encoded as an string of hexadecimal digits)."
-  (io-write conn (string-concatenate (list "TRANSMIT " string)))
+  (io-write conn (string-concatenate (list "transmit " string)))
   (with-read-raw-string (conn reply)
     (car (expect-read reply '(int)))))
 
@@ -276,10 +260,10 @@ be transmitted (encoded as an string of hexadecimal digits)."
   "Send a request to a controller via ‘conn’.
 
 Throw ‘protocol-expected-ok’ in case the reply from the controller was not the
-fixed string \"OK\". Otherwise, return #t."
+fixed string \"ok\". Otherwise, return #t."
   (io-write conn request)
   (let ((reply (io-read conn)))
-    (unless (string=? reply "OK")
+    (unless (string=? reply "ok")
       (throw 'protocol-expected-ok request reply))
     #t))
 
@@ -290,34 +274,31 @@ represented integer ‘index’ separated by an `ASCII` space."
 
 (define (request-with-index-to-ok conn request index)
   "Place a request to a remote controller connected to via ‘conn’, that
-consists of ‘request’ and ‘index’. The controller is expected to reply \"OK\"."
+consists of ‘request’ and ‘index’. The controller is expected to reply \"ok\"."
   (request-expects-ok conn (request-with-index request index)))
 
 (define request-with-integer request-with-index)
 (define request-with-integer-to-ok request-with-index-to-ok)
 
 (define (address conn addr)
-  (request-with-integer-to-ok conn "ADDRESS" addr))
+  (request-with-integer-to-ok conn "address" addr))
 
 (define (focus conn index)
   "Instruct (via ‘conn’) a remote controller to focus the port indexed by
 ‘index’."
-  (request-with-index-to-ok conn "FOCUS" index))
+  (request-with-index-to-ok conn "focus" index))
 
 (define (init conn index)
   "Instruct (via ‘conn’) a remote controller to initialise the port indexed by
 ‘index’."
-  (request-with-index-to-ok conn "INIT" index))
+  (request-with-index-to-ok conn "init" index))
 
 (define (update-capabilities conn)
   "Gather as much information from a remote controller, connected to via
 ‘conn’."
-  ;; VERSION and FEATURES are mandatory...
   (protocol-version conn)
-  (features conn)
-  ;; ...the rest is optional, so test before issuing:
-  (and (has-feature? conn 'modes) (modes conn))
-  (and (has-feature? conn 'ports) (ports conn))
+  (modes conn)
+  (ports conn)
   #t)
 
 (define (zip-apply lf ld)
@@ -342,13 +323,13 @@ list of return values from those function applications.
 (define (parse-line-symbol str)
   "Take a line-role token and turn it into a pair:
 
-    (parse-line-symbol \"FOO\") => (foo . 0)
-    (parse-line-symbol \"FOO:0\") => (foo . 0)
-    (parse-line-symbol \"FOO:3\") => (foo . 3)"
+    (parse-line-symbol \"foo\") => (foo . 0)
+    (parse-line-symbol \"foo:0\") => (foo . 0)
+    (parse-line-symbol \"foo:3\") => (foo . 3)"
   (let* ((data (string-split str #\:))
          (len (length data)))
-    (cond ((= len 1) (cons (reply->symbol (car data)) 0))
-          ((= len 2) (cons (reply->symbol (car data))
+    (cond ((= len 1) (cons (string->symbol (car data)) 0))
+          ((= len 2) (cons (string->symbol (car data))
                            (let ((int (hexstring->int (cadr data))))
                              (if int int
                                  (throw 'protocol-line-index-not-integer
@@ -358,28 +339,26 @@ list of return values from those function applications.
 (define (parse-lines reply)
   "Take a reply to the ‘lines’ request and turn it into scheme data:
 
-    (parse-lines (list \"0 CLK FIXED\"))
+    (parse-lines (list \"0 clk fixed\"))
     => (0 (clk . 0) fixed)
 
-    (parse-lines (list \"1 CS\"))
+    (parse-lines (list \"1 cs\"))
     => (0 (clk . 0))
 
-    (parse-lines (list \"2 CS:1\"))
+    (parse-lines (list \"2 cs:1\"))
     => (0 (clk . 1))"
-  (zip-apply (list #f parse-line-symbol reply->symbol)
-             (expect-read reply '(int string opt "FIXED"))))
+  (zip-apply (list #f parse-line-symbol string->symbol)
+             (expect-read reply '(int string opt "fixed"))))
 
 (define (lines conn index)
   "Query the line setup of the port indexed by ‘index’ from a remote controller
-connected to via ‘conn’.
-
-TODO: Needs caching to capabilities structure."
-  (io-write conn (request-with-index "LINES" index))
+connected to via ‘conn’."
+  (io-write conn (request-with-index "lines" index))
   (map parse-lines (multi-tokenize (protocol-read conn))))
 
 (define (fixed->symbol string)
-  "Turn ‘string’ into a symbol and make sure it is the ‘FIXED’ symbol."
-  (let ((sym (reply->symbol string)))
+  "Turn ‘string’ into a symbol and make sure it is the ‘fixed’ symbol."
+  (let ((sym (string->symbol string)))
     (unless (eq? sym 'fixed)
       (throw 'protocol-unallowed-keyword string sym 'fixed))
     sym))
@@ -387,30 +366,30 @@ TODO: Needs caching to capabilities structure."
 (define (return-allowed-symbol ls str)
   "Turn the string ‘str’ into a symbol and make sure it is a member of the list
 of allowed symbols supplied as ‘ls’."
-  (let ((sym (reply->symbol str)))
+  (let ((sym (string->symbol str)))
     (if (memq sym ls)
         sym
         (throw 'protocol-unallowed-keyword str sym ls))))
 
 (define (port-bit-order str)
-  "Make sure that ‘str’ is an allowed setting for the `BIT-ORDER` setting."
+  "Make sure that ‘str’ is an allowed setting for the `bit-order` setting."
   (return-allowed-symbol '(msb-first lsb-first) str))
 
 (define (port-clk-polarity str)
-  "Make sure that ‘str’ is an allowed setting for the `CLK-POLARITY` setting."
+  "Make sure that ‘str’ is an allowed setting for the `clk-polarity` setting."
   (return-allowed-symbol '(rising-edge falling-edge) str))
 
 (define (port-cs-polarity str)
-  "Make sure that ‘str’ is an allowed setting for the `CS-POLARITY` setting."
+  "Make sure that ‘str’ is an allowed setting for the `cs-polarity` setting."
   (return-allowed-symbol '(active-high active-low) str))
 
 (define (port-mode str)
-  "Make sure that ‘str’ is an allowed setting for the `MODE` setting."
+  "Make sure that ‘str’ is an allowed setting for the `mode` setting."
   (return-allowed-symbol '(spi) str))
 
 (define (reply->boolean str)
   "Make sure that ‘str’ is a boolean."
-  (let ((reply (reply->symbol str)))
+  (let ((reply (string->symbol str)))
     (case reply
       ((true on) #t)
       ((false off) #f)
@@ -428,9 +407,9 @@ of allowed symbols supplied as ‘ls’."
     (rate . ,hexstring->int)))
 
 (define (parse-port reply)
-  "Turn a reply to the `PARSE` request to scheme data."
+  "Turn a reply to the `port` request to scheme data."
   (let* ((orig (protocol-tokenize reply))
-         (data (cons (reply->symbol (car orig)) (cdr orig))))
+         (data (cons (string->symbol (car orig)) (cdr orig))))
     (zip-apply (list #f
                      (assq-ref parse-port-table (car data))
                      fixed->symbol)
@@ -438,34 +417,26 @@ of allowed symbols supplied as ‘ls’."
 
 (define (port conn index)
   "Query the port setup of the port indexed by ‘index’ from a remote controller
-connected to via ‘conn’.
-
-TODO: Needs caching to capabilities structure."
-  (io-write conn (request-with-index "PORT" index))
+connected to via ‘conn’."
+  (io-write conn (request-with-index "port" index))
   (map parse-port (multi-tokenize (protocol-read conn))))
 
 (define (boolean->protocol-string bool)
-  (if bool "TRUE" "FALSE"))
-
-(define (symbol->protocol-string sym)
-  "Turn a symbol used by the client library into a string used by `RCCEP`.
-
-    (symbol->protocol-string 'foo) => \"FOO\""
-  (string-upcase (symbol->string sym)))
+  (if bool "true" "false"))
 
 (define (set conn pidx key value)
-  "Issue a `SET` request to a remote controller connected to via ‘conn’.
+  "Issue a `set` request to a remote controller connected to via ‘conn’.
 
 ‘pidx’ is the index of the port the setting named by ‘key’ should be changed
 in. The value for ‘key’ will be set to ‘value’."
-  (let ((key-str (symbol->protocol-string key))
+  (let ((key-str (symbol->string key))
         (idx-str (int->hexstring pidx))
-        (val (cond ((symbol? value) (symbol->protocol-string value))
+        (val (cond ((symbol? value) (symbol->string value))
                    ((boolean? value) (boolean->protocol-string value))
                    ((integer? value) (int->hexstring value))
                    ((string? value) value)
                    (else (throw 'protocol-set-unknown-value-type value)))))
-    (request-expects-ok conn (string-join (list "SET" idx-str key-str val)
+    (request-expects-ok conn (string-join (list "set" idx-str key-str val)
                                           " "))))
 
 (define (line conn pidx lidx role)
@@ -474,10 +445,10 @@ in. The value for ‘key’ will be set to ‘value’."
 ‘pidx’ is the index of the port that contains the line to be changed. ‘lidx’ is
 the index of the line within port ‘pidx’. ‘role’ is the role the line will be
 assigned in the next port initialisation."
-  (let ((role-str (symbol->protocol-string role))
+  (let ((role-str (symbol->string role))
         (pidx-str (int->hexstring pidx))
         (lidx-str (int->hexstring lidx)))
-    (request-expects-ok conn (string-join (list "LINE"
+    (request-expects-ok conn (string-join (list "line"
                                                 pidx-str
                                                 lidx-str
                                                 role-str)
