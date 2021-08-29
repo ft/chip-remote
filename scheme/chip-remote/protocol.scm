@@ -227,8 +227,11 @@ protocol specification, the function throws ‘protocol-bye-failed’. Otherwise
 
 (define (capabilities conn)
   (io-write conn "capabilities")
-  (capability-categories (map (compose capabilities-parse protocol-tokenize)
-                              (multi-tokenize (protocol-read conn)))))
+  (for-each (lambda (x) (set-cr-capability! conn (car x) (cdr x)))
+            (capability-categories
+             (map (compose capabilities-parse protocol-tokenize)
+                  (multi-tokenize (protocol-read conn)))))
+  (cr-capabilities conn))
 
 ;; Query protocol version from the board.
 (define (protocol-version conn)
