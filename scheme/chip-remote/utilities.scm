@@ -1,5 +1,7 @@
 (define-module (chip-remote utilities)
+  #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 control)
+  #:use-module (srfi srfi-11)
   #:export (!!
             2e
             addr=
@@ -18,7 +20,12 @@
             list-of-integers?
             list-of-list-of-integers?
             string-ends-in-newline?
-            string-strip-newlines))
+            string-strip-newlines
+            timeout->select
+            whitespace?
+            has-data?
+            drain-whitespace
+            xread))
 
 (define-syntax-rule (cat str ...)
   (string-concatenate (list str ...)))
@@ -114,3 +121,50 @@
         ((string-ends-in-newline? s)
          (string-strip-newlines (substring s 0 (1- (string-length s)))))
         (else s)))
+
+(define (timeout->select to)
+  (let ((s (inexact->exact (truncate to))))
+    (values s (inexact->exact (round (* 1e6 (- to s)))))))
+
+(define (whitespace? x)
+  (or (= x #x09)
+      (= x #x0a)
+      (= x #x0d)
+      (= x #x20)))
+
+(define (get-octet port)
+  (let ((octet (get-bytevector-n port 1)))
+    (if (eof-object? octet)
+        octet
+        (array-ref octet  0))))
+
+(define (has-data? port)
+  (let ((rv (select (list port) '() '() 0 0)))
+    (not (null? (car rv)))))
+
+(define (drain-whitespace port)
+  (let loop ()
+    (if (not (has-data? port))
+        #f
+        (let ((octet (get-octet port)))
+          (cond ((eof-object? octet) eof-object)
+                ((not (whitespace? octet))
+                 (unget-bytevector port (list->u8vector (list octet))))
+                (else (loop)))))))
+
+(define* (xread port #:key (no-block? #t) return handle-timeout timeout)
+  (define (do-read port)
+    (let ((rv (read port)))
+      (drain-whitespace port)
+      rv))
+  (drain-whitespace port)
+  (cond (timeout (let-values (((s us) (timeout->select timeout)))
+                   (let ((rv (select (list port) '() '() s us)))
+                     (if (null? (car rv))
+                         (if handle-timeout
+                             (handle-timeout rv)
+                             (throw 'xread-timeout rv))
+                         (do-read port)))))
+        ((and no-block? (has-data? port)) (do-read port))
+        ((and no-block? return) (return))
+        (else (do-read port))))
