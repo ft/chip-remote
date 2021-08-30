@@ -2,6 +2,10 @@
 #include <kernel.h>
 
 #include <drivers/uart.h>
+#include <drivers/console/native_posix_console.h>
+
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <string.h>
 #include <c/compat.h>
@@ -60,6 +64,9 @@ main(void)
     char board[MAX_BOARD_NAME_LENGTH];
     strlcpy(board, CONFIG_BOARD, sizeof(board));
     printk("ChipRemoteFirmware running on %s\n", board);
+    printk("(activated!)\n");
+    printk("(firmware-pid %u)\n", getpid());
+    posix_flush_stdout();
 
     char ch = 0;
     for (;;) {
