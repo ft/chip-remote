@@ -26,6 +26,7 @@ core
 core.*
 build/
 build-*/
+native-fw/
 firmware/build/
 firmware/build-*/
 doc/*.pdf
