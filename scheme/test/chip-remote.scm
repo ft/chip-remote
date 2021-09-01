@@ -5,6 +5,7 @@
 (define-module (test chip-remote)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
+  #:use-module (ice-9 popen)
   #:use-module (ice-9 rdelim)
   #:use-module (srfi srfi-9)
   #:use-module (chip-remote io)
@@ -13,10 +14,13 @@
   #:export (init-connection
             close-connection
             test-with-tag
+            native-firmware-built?
             make-test-io
             tio-unknown!
             tio-connection
             set-tio-connection!
+            tio-fw-port
+            set-tio-fw-port!
             tio-pid
             set-tio-pid!
             tio-terminal
@@ -63,14 +67,15 @@
     (quit 1)))
 
 (define-record-type <test-io>
-  (make-test-io* terminal connection pid)
+  (make-test-io* fw-port terminal connection pid)
   test-io?
+  (fw-port tio-fw-port set-tio-fw-port!)
   (terminal tio-terminal set-tio-terminal!)
   (connection tio-connection set-tio-connection!)
   (pid tio-pid set-tio-pid!))
 
 (define* (make-test-io #:optional terminal)
-  (make-test-io* terminal #f #f))
+  (make-test-io* #f terminal #f #f))
 
 (define (connect-test-io! io)
   (set-tio-connection! io (chip-remote-open! #:uri (tio-terminal io))))
@@ -85,7 +90,7 @@
   (quit 1))
 
 (define (handle-stdin! tio)
-  (match (xread (current-input-port)
+  (match (xread (tio-fw-port tio)
                 #:timeout 5
                 #:handle-timeout (lambda (x)
                                    (handle-xread-timeout tio x)))
@@ -107,18 +112,25 @@
 (define ($ tio)
   (tio-connection tio))
 
+(define (native-fw)
+  (string-append (getcwd) "/native-fw/zephyr/zephyr.exe"))
+
+(define (native-firmware-built?)
+  (file-exists? (native-fw)))
+
 (define *s-exp-boot-tag* "(activated!)")
 (define *cr-terminal* "UART_0")
 
 (define (boot-fw! tio)
-  (let loop ((line (read-line (current-input-port) 'trim)))
+  (format #t "# Booting native firmware: ~a~%" (native-fw))
+  (set-tio-fw-port! tio (open-pipe* OPEN_READ (native-fw)))
+  (let loop ((line (read-line (tio-fw-port tio) 'trim)))
     (unless (string= line *s-exp-boot-tag*)
       (let ((lst (string-split line #\space)))
         (when (and (not (null? lst))
                    (string= (car lst) *cr-terminal*))
           (set-tio-terminal! tio (car (reverse lst)))))
-      (loop (read-line (current-input-port) 'trim))))
-
+      (loop (read-line (tio-fw-port tio) 'trim))))
 
   (if tio
       (begin

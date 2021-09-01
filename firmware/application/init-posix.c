@@ -67,6 +67,8 @@ main(void)
     printk("(activated!)\n");
     printk("(firmware-pid %u)\n", getpid());
     posix_flush_stdout();
+    /* Disable stderr output */
+    close(STDERR_FILENO);
 
     char ch = 0;
     for (;;) {
