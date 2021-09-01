@@ -52,8 +52,7 @@ native-fw:
 	(cd $(NATIVE_DIR) && $(NATIVE_COMPILE))
 	(cd $(NATIVE_DIR) && ninja && ninja test)
 
-happiness: native-fw compile doc
-	$(make test)
+happiness: native-fw compile doc test
 
 clean:
 	find . -name "*.go" -exec rm -f '{}' +
