@@ -5,6 +5,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
+             (test setup)
              (chip-remote codecs)
              (chip-remote interpreter)
              (chip-remote item)
@@ -20,7 +21,7 @@
              (chip-remote validate)
              (chip-remote modify))
 
-(primitive-load "tests/test-tap-cfg.scm")
+(init-test-tap!)
 
 (define r:ltc (device-register ltc6603))
 (define rm:ltc (device-address ltc6603 #f))

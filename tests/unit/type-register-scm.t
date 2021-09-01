@@ -5,10 +5,11 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
+             (test setup)
              (chip-remote item)
              (chip-remote register))
 
-(primitive-load "tests/test-tap-cfg.scm")
+(init-test-tap!)
 
 (define (address default)
   (generate-item #:name 'address #:offset 14 #:width 2

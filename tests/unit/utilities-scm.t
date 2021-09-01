@@ -5,9 +5,10 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
+             (test setup)
              (chip-remote utilities))
 
-(primitive-load "tests/test-tap-cfg.scm")
+(init-test-tap!)
 
 (define-syntax-rule (test-addr< a b r)
   (define-test (format #f "addr< ~a ~a → ~a" a b r)

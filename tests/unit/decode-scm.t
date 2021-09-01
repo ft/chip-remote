@@ -5,6 +5,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
+             (test setup)
              (srfi srfi-1)
              (chip-remote decode)
              (chip-remote device)
@@ -15,7 +16,7 @@
              (chip-remote register-map)
              (chip-remote semantics))
 
-(primitive-load "tests/test-tap-cfg.scm")
+(init-test-tap!)
 
 (with-fs-test-bundle
  (plan 7)

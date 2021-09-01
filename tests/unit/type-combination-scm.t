@@ -6,6 +6,7 @@
 
 (use-modules (srfi srfi-1)
              (test tap)
+             (test setup)
              (chip-remote codecs)
              (chip-remote device)
              (chip-remote item)
@@ -14,7 +15,7 @@
              (chip-remote register-map)
              (chip-remote combination))
 
-(primitive-load "tests/test-tap-cfg.scm")
+(init-test-tap!)
 
 (define-device thingy
   #:register-map (#:table (#x0 (#:contents (thing-mid 0 8 #:default #b10110001)

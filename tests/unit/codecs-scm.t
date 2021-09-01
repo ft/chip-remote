@@ -7,10 +7,11 @@
 (use-modules (ice-9 format)
              (ice-9 match)
              (test tap)
+	     (test setup)
              (chip-remote codecs)
              (chip-remote semantics))
 
-(primitive-load "tests/test-tap-cfg.scm")
+(init-test-tap!)
 
 (with-fs-test-bundle
     (no-plan)

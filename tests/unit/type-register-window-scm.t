@@ -5,11 +5,12 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
+             (test setup)
              (chip-remote item)
              (chip-remote register)
              (chip-remote register-window))
 
-(primitive-load "tests/test-tap-cfg.scm")
+(init-test-tap!)
 
 (with-fs-test-bundle
  (plan 15)

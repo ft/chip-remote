@@ -4,8 +4,10 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
-(use-modules (test tap))
-(primitive-load "tests/test-tap-cfg.scm")
+(use-modules (test tap)
+             ( test setup))
+
+(init-test-tap!)
 
 (define er (@@ (chip-remote protocol) expect-read))
 

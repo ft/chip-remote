@@ -5,9 +5,10 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
+             (test setup)
              (chip-remote units))
 
-(primitive-load "tests/test-tap-cfg.scm")
+(init-test-tap!)
 
 (define-unit minute
   #:symbol 'min

@@ -5,9 +5,10 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (use-modules (test tap)
+             (test setup)
              (chip-remote validate))
 
-(primitive-load "tests/test-tap-cfg.scm")
+(init-test-tap!)
 (define-validator foobar ∈ foo bar)
 
 (with-fs-test-bundle
@@ -35,8 +36,7 @@
    (define-test "Inclusive range works #4"
      (pass-if-false (inclusive 99)))
    (define-test "Inclusive range works #5"
-     (pass-if-false (inclusive 201)))
-   )
+     (pass-if-false (inclusive 201))))
 
  (let* ((v (generate-validator ∉ foo bar))
         (p (validator-predicate v)))
