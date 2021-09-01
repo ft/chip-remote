@@ -52,7 +52,7 @@ native-fw:
 	(cd $(NATIVE_DIR) && $(NATIVE_COMPILE))
 	(cd $(NATIVE_DIR) && ninja && ninja test)
 
-happiness: native-fw compile
+happiness: native-fw compile doc
 	$(make test)
 
 clean:
