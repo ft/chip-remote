@@ -52,6 +52,9 @@ native-fw:
 	(cd $(NATIVE_DIR) && $(NATIVE_COMPILE))
 	(cd $(NATIVE_DIR) && ninja && ninja test)
 
+happiness: native-fw compile
+	$(make test)
+
 clean:
 	find . -name "*.go" -exec rm -f '{}' +
 	find . -name "*~" -exec rm -f '{}' +
@@ -73,4 +76,4 @@ test-verbose:
 test-debug:
 	$(RUNTESTS) -verbose -dispatch-verbose -debug
 
-.PHONY: all compile clean doc install native-fw test test-debug test-verbose
+.PHONY: all compile clean doc happiness install native-fw test test-debug test-verbose
