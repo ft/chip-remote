@@ -107,12 +107,15 @@
 (define ($ tio)
   (tio-connection tio))
 
+(define *s-exp-boot-tag* "(activated!)")
+(define *cr-terminal* "UART_0")
+
 (define (boot-fw! tio)
   (let loop ((line (read-line (current-input-port) 'trim)))
-    (unless (string= line "(activated!)")
+    (unless (string= line *s-exp-boot-tag*)
       (let ((lst (string-split line #\space)))
         (when (and (not (null? lst))
-                   (string= (car lst) "UART_0"))
+                   (string= (car lst) *cr-terminal*))
           (set-tio-terminal! tio (car (reverse lst)))))
       (loop (read-line (current-input-port) 'trim))))
 
