@@ -21,6 +21,9 @@ else()
 endif()
 
 target_link_libraries(app PRIVATE ufw chip-remote-protocol)
+if (${BOARD} MATCHES "^native")
+  target_link_libraries(app PRIVATE sx-parser)
+endif()
 
 if (${BOARD} MATCHES "^native")
   gitint_install(
