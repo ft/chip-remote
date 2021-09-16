@@ -14,5 +14,6 @@ struct sx_parse_result sx_parse_token(const char*, size_t, size_t);
 void sx_destroy(struct sx_node**);
 
 struct sx_node *sx_cxr(struct sx_node*, const char*);
+struct sx_node *sx_pop(struct sx_node**);
 
 #endif /* INC_SX_PARSER_H */

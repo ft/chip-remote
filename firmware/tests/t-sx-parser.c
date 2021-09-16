@@ -309,6 +309,114 @@ cleanup:
 }
 
 static void
+t_pop(void)
+{
+    /* Make a tree by parsing this expression, then traverse it using sx_pop,
+     * inspecting all that is revealed. sx_pop makes sure you only have to
+     * destroy the elements that have been returned to you. Thus, running this
+     * test-suite in a memory tester like valgrind should still show that no
+     * memory was leaked. */
+    const char *expr = "((1 (a b c) 3) (q w e) r t (5) 6)";
+    /*                  0123456789012345678901234567890123
+     *                  0000000000111111111122222222223333 */
+    struct sx_parse_result p = sx_parse_string(expr);
+    struct sx_node *n;
+
+    unless(ok(p.status == SXS_SUCCESS, "%s signals success", expr)) {
+        pru16(p.status, SXS_SUCCESS);
+    }
+
+    /* lst1 is (1 (a b c) 3) */
+    struct sx_node *lst1 = sx_pop(&p.node);
+    ok(lst1->type == SXT_PAIR, "pop reveals a pair");
+    n = sx_pop(&lst1);
+    ok(n->type == SXT_INTEGER, "pop reveals an integer");
+    ok(n->data.u64 == 1, "pop reveals the integer 1");
+    sx_destroy(&n);
+
+    /* lst2 is (a b c) */
+    struct sx_node *lst2 = sx_pop(&lst1);
+    ok(lst2->type == SXT_PAIR, "pop reveals a pair");
+    n = sx_pop(&lst2);
+    ok(n->type == SXT_SYMBOL, "pop reveals an integer");
+    ok(strcmp(n->data.symbol, "a") == 0, "pop reveals a", expr);
+    sx_destroy(&n);
+    n = sx_pop(&lst2);
+    ok(n->type == SXT_SYMBOL, "pop reveals an integer");
+    ok(strcmp(n->data.symbol, "b") == 0, "pop reveals b", expr);
+    sx_destroy(&n);
+    n = sx_pop(&lst2);
+    ok(n->type == SXT_SYMBOL, "pop reveals an integer");
+    ok(strcmp(n->data.symbol, "c") == 0, "pop reveals c", expr);
+    sx_destroy(&n);
+    ok(lst2->type == SXT_EMPTY_LIST, "pop made lst2 into the empty list");
+    n = sx_pop(&lst2);
+    ok(n->type == SXT_EMPTY_LIST, "pop reveals the empty list");
+    sx_destroy(&n);
+
+    n = sx_pop(&lst1);
+    ok(n->type == SXT_INTEGER, "pop reveals an integer");
+    ok(n->data.u64 == 3, "pop reveals the integer 3");
+    sx_destroy(&n);
+    ok(lst1->type == SXT_EMPTY_LIST, "pop made lst1 into the empty list");
+    n = sx_pop(&lst1);
+    ok(n->type == SXT_EMPTY_LIST, "pop reveals the empty list");
+    sx_destroy(&n);
+
+    /* lst3 is (q w e) */
+    struct sx_node *lst3 = sx_pop(&p.node);
+    ok(lst3->type == SXT_PAIR, "pop reveals a pair");
+    n = sx_pop(&lst3);
+    ok(n->type == SXT_SYMBOL, "pop reveals a symbol");
+    ok(strcmp(n->data.symbol, "q") == 0, "pop reveals q", expr);
+    sx_destroy(&n);
+    n = sx_pop(&lst3);
+    ok(n->type == SXT_SYMBOL, "pop reveals a symbol");
+    ok(strcmp(n->data.symbol, "w") == 0, "pop reveals w", expr);
+    sx_destroy(&n);
+    n = sx_pop(&lst3);
+    ok(n->type == SXT_SYMBOL, "pop reveals a symbol");
+    ok(strcmp(n->data.symbol, "e") == 0, "pop reveals e", expr);
+    sx_destroy(&n);
+    ok(lst3->type == SXT_EMPTY_LIST, "pop made lst3 into the empty list");
+    n = sx_pop(&lst3);
+    ok(n->type == SXT_EMPTY_LIST, "pop reveals the empty list");
+    sx_destroy(&n);
+
+    /* Now on to r and t from p.node */
+    n = sx_pop(&p.node);
+    ok(n->type == SXT_SYMBOL, "pop reveals a symbol");
+    ok(strcmp(n->data.symbol, "r") == 0, "pop reveals r", expr);
+    sx_destroy(&n);
+    n = sx_pop(&p.node);
+    ok(n->type == SXT_SYMBOL, "pop reveals a symbol");
+    ok(strcmp(n->data.symbol, "t") == 0, "pop reveals t", expr);
+    sx_destroy(&n);
+
+    /* lst4 is (5) */
+    struct sx_node *lst4 = sx_pop(&p.node);
+    ok(lst4->type == SXT_PAIR, "pop reveals a pair");
+    n = sx_pop(&lst4);
+    ok(n->type == SXT_INTEGER, "pop reveals an integer");
+    ok(n->data.u64 == 5, "pop reveals the integer 5");
+    sx_destroy(&n);
+    ok(lst4->type == SXT_EMPTY_LIST, "pop made lst4 into the empty list");
+    n = sx_pop(&lst4);
+    ok(n->type == SXT_EMPTY_LIST, "pop reveals the empty list");
+    sx_destroy(&n);
+
+    /* p.node is now (6) */
+    n = sx_pop(&p.node);
+    ok(n->type == SXT_INTEGER, "pop reveals an integer");
+    ok(n->data.u64 == 6, "pop reveals the integer 6");
+    sx_destroy(&n);
+    ok(p.node->type == SXT_EMPTY_LIST, "pop made lst4 into the empty list");
+    n = sx_pop(&p.node);
+    ok(n->type == SXT_EMPTY_LIST, "pop reveals the empty list");
+    sx_destroy(&n);
+}
+
+static void
 t_sx_parse_token(void)
 {
     t_sx_parse_token_empty();
@@ -333,13 +441,14 @@ t_sx_parse(void)
 int
 main(UNUSED int argc, UNUSED char *argv[])
 {
-    plan(82);
+    plan(121);
 
     t_sx_util_api();
     t_sx_parse_token();
     t_sx_parse();
 
     t_cxr();
+    t_pop();
 
     return EXIT_SUCCESS;
 }

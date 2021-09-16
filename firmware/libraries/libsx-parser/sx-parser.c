@@ -211,3 +211,23 @@ sx_cxr(struct sx_node *root, const char *addr)
 
     return ptr;
 }
+
+struct sx_node *
+sx_pop(struct sx_node **root)
+{
+    struct sx_node *node = *root;
+
+    if (node == NULL)
+        return NULL;
+
+    if (node->type != SXT_PAIR) {
+        return node;
+    }
+
+    *root = node->data.pair->cdr;
+    struct sx_node *car = node->data.pair->car;
+    free(node->data.pair);
+    free(node);
+
+    return car;
+}
