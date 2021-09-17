@@ -12,6 +12,7 @@
 #include "sx-types.h"
 #include <inttypes.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -416,6 +417,47 @@ t_pop(void)
     sx_destroy(&n);
 }
 
+struct fnc_t_data {
+    uint64_t cnt;
+    uint64_t errors;
+    uint64_t expect;
+};
+
+static struct sx_node *
+fnc_t_append(struct sx_node *node, void *arg)
+{
+    struct fnc_t_data *data = arg;
+    data->cnt++;
+    unless (ok(node->type == SXT_INTEGER, "...node is an integer")) {
+        data->errors++;
+        return node;
+    }
+    unless (ok(node->data.u64 == data->expect,
+               "...node has expected value (%"PRIu64" == %"PRIu64")",
+               node->data.u64, data->expect))
+    {
+        data->errors++;
+    }
+    data->expect++;
+    return node;
+}
+
+static void
+t_append(void)
+{
+    struct fnc_t_data data = { .cnt = 0, .errors = 0, .expect = 1 };
+    struct sx_parse_result pa = sx_parse_string("(1 2 3)");
+    struct sx_parse_result pb = sx_parse_string("(4 5 6)");
+    ok(pa.status == SXS_SUCCESS, "parsing (1 2 3) returned successfully");
+    ok(pb.status == SXS_SUCCESS, "parsing (4 5 6) returned successfully");
+    struct sx_node *lst = sx_append(pa.node, pb.node);
+    ok(lst != NULL, "appending lists returned a non-NULL value");
+    sx_foreach(lst, fnc_t_append, &data);
+    ok(data.cnt == 6, "appended list has six elements");
+    ok(data.errors == 0, "elements of appended list look the way they should");
+    sx_destroy(&lst);
+}
+
 static void
 t_sx_parse_token(void)
 {
@@ -441,7 +483,7 @@ t_sx_parse(void)
 int
 main(UNUSED int argc, UNUSED char *argv[])
 {
-    plan(121);
+    plan(138);
 
     t_sx_util_api();
     t_sx_parse_token();
@@ -449,6 +491,7 @@ main(UNUSED int argc, UNUSED char *argv[])
 
     t_cxr();
     t_pop();
+    t_append();
 
     return EXIT_SUCCESS;
 }

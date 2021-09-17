@@ -231,3 +231,40 @@ sx_pop(struct sx_node **root)
 
     return car;
 }
+
+struct sx_node *
+sx_append(struct sx_node *a, struct sx_node *b)
+{
+    if (a == NULL || b == NULL)
+        return NULL;
+
+    if (a->type != SXT_PAIR || b->type != SXT_PAIR)
+        return NULL;
+
+    struct sx_pair *ptr = a->data.pair;
+    while (ptr->cdr->type == SXT_PAIR) {
+        ptr = ptr->cdr->data.pair;
+    }
+
+    if (ptr->cdr->type != SXT_EMPTY_LIST)
+        return NULL;
+
+    sx_destroy(&ptr->cdr);
+    ptr->cdr = b;
+
+    return a;
+}
+
+void
+sx_foreach(struct sx_node *node, sx_nodefnc f, void *arg)
+{
+    struct sx_node *ptr = node;
+
+    if (ptr->type != SXT_PAIR)
+        return;
+
+    while (ptr->type == SXT_PAIR) {
+        f(ptr->data.pair->car, arg);
+        ptr = ptr->data.pair->cdr;
+    }
+}

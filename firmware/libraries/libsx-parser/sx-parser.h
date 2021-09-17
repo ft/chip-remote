@@ -15,5 +15,7 @@ void sx_destroy(struct sx_node**);
 
 struct sx_node *sx_cxr(struct sx_node*, const char*);
 struct sx_node *sx_pop(struct sx_node**);
+struct sx_node *sx_append(struct sx_node*, struct sx_node*);
+void sx_foreach(struct sx_node*, sx_nodefnc, void*);
 
 #endif /* INC_SX_PARSER_H */

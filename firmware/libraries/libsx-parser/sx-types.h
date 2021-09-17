@@ -47,4 +47,6 @@ struct sx_parse_result {
         .status = SXS_SUCCESS,          \
         .node = NULL }
 
+typedef struct sx_node *(*sx_nodefnc)(struct sx_node*, void*);
+
 #endif /* INC_SX_NODE_H */
