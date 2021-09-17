@@ -76,10 +76,7 @@ t_sx_parse_token_symbol(void)
     unless (ok(p.node != NULL, "foobar parses to non-NULL")) {
         goto cleanup;
     }
-    unless (ok(p.node->type == SXT_SYMBOL, "foobar parses to SXT_SYMBOL")) {
-        goto cleanup;
-    }
-    ok(strcmp(p.node->data.symbol, "foobar") == 0, "foobar parses to symbol");
+    ok(sx_is_the_symbol(p.node, "foobar"), "foobar parses to SXT_SYMBOL");
     ok(p.status == SXS_SUCCESS, "foobar does not indicate error");
 
 cleanup:
@@ -93,12 +90,7 @@ t_sx_parse_token_int_dec(void)
     unless (ok(p.node != NULL, "12345 parses to non-NULL")) {
         goto cleanup;
     }
-    unless (ok(p.node->type == SXT_INTEGER, "12345 parses to SXT_INTEGER")) {
-        goto cleanup;
-    }
-    unless(ok(p.node->data.u64 == 12345, "12345 parses to integer 12345")) {
-        pru64(p.node->data.u64, 0x400);
-    }
+    ok(sx_is_the_integer(p.node, 12345u), "12345 parses to SXT_INTEGER");
     ok(p.status == SXS_SUCCESS, "12345 does not indicate error");
 
 cleanup:
@@ -112,12 +104,7 @@ t_sx_parse_token_int_hex(void)
     unless (ok(p.node != NULL, "#x400 parses to non-NULL")) {
         goto cleanup;
     }
-    unless (ok(p.node->type == SXT_INTEGER, "#x400 parses to SXT_INTEGER")) {
-        goto cleanup;
-    }
-    unless(ok(p.node->data.u64 == 0x400, "#x400 parses to integer 0x400")) {
-        pru64(p.node->data.u64, 0x400);
-    }
+    ok(sx_is_the_integer(p.node, 0x400u), "#x400 parses to SXT_INTEGER");
     ok(p.status == SXS_SUCCESS, "#x400 does not indicate error");
 
 cleanup:
@@ -160,7 +147,7 @@ t_sx_parse_empty_list(void)
     unless (ok(p.node != NULL, "() parses to non-NULL")) {
         goto cleanup;
     }
-    ok(p.node->type == SXT_EMPTY_LIST, "() parses to SXT_EMPTY_LIST");
+    ok(sx_is_null(p.node), "() parses to SXT_EMPTY_LIST");
     ok(p.status == SXS_SUCCESS, "() does not indicate an error");
 
 cleanup:
@@ -174,16 +161,13 @@ t_sx_parse_empty_one_elem_list(void)
     unless (ok(p.node != NULL, "(1) parses to non-NULL")) {
         goto cleanup;
     }
-    unless (ok(p.node->type == SXT_PAIR, "(1) parses to pair")) {
+    unless (ok(sx_is_pair(p.node), "(1) parses to pair")) {
         pru16(p.node->type, SXT_PAIR);
         goto cleanup;
     }
-    ok(p.node->data.pair->car->type == SXT_INTEGER, "car of (1) is an INTEGER");
-    ok(p.node->data.pair->car->data.u64 == 1, "car of (1) is 1");
-    unless (ok(p.node->data.pair->cdr->type == SXT_EMPTY_LIST,
-               "cdr of (1) is the empty list"))
-    {
-        pru16(p.node->data.pair->cdr->type, SXT_EMPTY_LIST);
+    ok(sx_is_the_integer(sx_car(p.node), 1), "car of (1) is the integer 1");
+    unless (ok(sx_is_null(sx_cdr(p.node)), "cdr of (1) is the empty list")) {
+        pru16(sx_cdr(p.node)->type, SXT_EMPTY_LIST);
     }
     ok(p.status == SXS_SUCCESS, "(1) indicates an success");
 
@@ -195,33 +179,22 @@ static void
 t_sx_parse_empty_two_elem_list(void)
 {
     struct sx_parse_result p = sx_parse("(1 2)", 5, 0);
+    ok(p.status == SXS_SUCCESS, "(1 2) does not indicate an error");
     unless (ok(p.node != NULL, "(1 2) parses to non-NULL")) {
         goto cleanup;
     }
-
     unless (ok(p.node->type == SXT_PAIR, "(1 2) parses to pair")) {
         pru16(p.node->type, SXT_PAIR);
         goto cleanup;
     }
-    ok(p.node->data.pair->car->type == SXT_INTEGER,
-       "car of (1 2) is an INTEGER");
-    ok(p.node->data.pair->car->data.u64 == 1, "car of (1 2) is 1");
-
-    unless (ok(p.node->data.pair->cdr->type == SXT_PAIR,
-               "cdr of (1 2) parses to pair"))
-    {
+    ok(sx_is_the_integer(sx_car(p.node), 1), "car of (1 2) is the integer 1");
+    unless (ok(sx_is_pair(sx_cdr(p.node)), "cdr of (1 2) parses to pair")) {
         pru16(p.node->data.pair->cdr->type, SXT_PAIR);
         goto cleanup;
     }
-
-    ok(p.node->data.pair->cdr->data.pair->car->type == SXT_INTEGER,
-       "cadr of (1 2) is an INTEGER");
-    ok(p.node->data.pair->cdr->data.pair->car->data.u64 == 2,
-       "cadr of (1 2) is 2");
-    ok(p.node->data.pair->cdr->data.pair->cdr->type == SXT_EMPTY_LIST,
-       "cddr of (1 2) is the empty list");
-
-    ok(p.status == SXS_SUCCESS, "(1 2) does not indicate an error");
+    ok(sx_is_the_integer(sx_car(sx_cdr(p.node)), 2),
+       "cadr of (1 2) is the integer 2");
+    ok(sx_is_null(sx_cdr(sx_cdr(p.node))), "cddr of (1 2) is the empty list");
 
 cleanup:
     sx_destroy(&p.node);
@@ -261,49 +234,43 @@ t_cxr(void)
     unless (ok(n != NULL, "caar of %s does not return NULL", expr)) {
         goto cleanup;
     }
-    ok(n->type == SXT_INTEGER, "caar of %s is an integer", expr);
-    ok(n->data.u64 == 1, "caar of %s is 1", expr);
+    ok(sx_is_the_integer(n, 1), "caar of %s is the integer 1", expr);
 
     n = sx_cxr(p.node, "adada");
     unless (ok(n != NULL, "cadadar of %s does not return NULL", expr)) {
         goto cleanup;
     }
-    ok(n->type == SXT_SYMBOL, "cadadar of %s is a symbol", expr);
-    ok(strcmp(n->data.symbol, "b") == 0, "cadadar of %s is b", expr);
+    ok(sx_is_the_symbol(n, "b"), "cadadar of %s is the symbol b", expr);
 
     n = sx_cxr(p.node, "aad");
     unless (ok(n != NULL, "caadr of %s does not return NULL", expr)) {
         goto cleanup;
     }
-    ok(n->type == SXT_SYMBOL, "caadr of %s is a symbol", expr);
-    ok(strcmp(n->data.symbol, "q") == 0, "caadr of %s is q", expr);
+    ok(sx_is_the_symbol(n, "q"), "caadr of %s is the symbol q", expr);
 
     n = sx_cxr(p.node, "addd");
     unless (ok(n != NULL, "cadddr of %s does not return NULL", expr)) {
         goto cleanup;
     }
-    ok(n->type == SXT_SYMBOL, "cadddr of %s is a symbol", expr);
-    ok(strcmp(n->data.symbol, "t") == 0, "cadddr of %s is t", expr);
+    ok(sx_is_the_symbol(n, "t"), "cadddr of %s is the symbol t", expr);
 
     n = sx_cxr(p.node, "aadddd");
     unless (ok(n != NULL, "caaddddr of %s does not return NULL", expr)) {
         goto cleanup;
     }
-    ok(n->type == SXT_INTEGER, "caaddddr of %s is an integer", expr);
-    ok(n->data.u64 == 5, "caaddddr of %s is 5", expr);
+    ok(sx_is_the_integer(n, 5), "caaddddr of %s is the integer 5", expr);
 
     n = sx_cxr(p.node, "addddd");
     unless (ok(n != NULL, "cadddddr of %s does not return NULL", expr)) {
         goto cleanup;
     }
-    ok(n->type == SXT_INTEGER, "cadddddr of %s is an integer", expr);
-    ok(n->data.u64 == 6, "cadddddr of %s is 6", expr);
+    ok(sx_is_the_integer(n, 6), "cadddddr of %s is the integer 6", expr);
 
     n = sx_cxr(p.node, "dddddd");
     unless (ok(n != NULL, "cddddddr of %s does not return NULL", expr)) {
         goto cleanup;
     }
-    ok(n->type == SXT_EMPTY_LIST, "cddddddr of %s is the empty list", expr);
+    ok(sx_is_null(n), "cddddddr of %s is the empty list", expr);
 
 cleanup:
     sx_destroy(&p.node);
@@ -329,91 +296,79 @@ t_pop(void)
 
     /* lst1 is (1 (a b c) 3) */
     struct sx_node *lst1 = sx_pop(&p.node);
-    ok(lst1->type == SXT_PAIR, "pop reveals a pair");
+    ok(sx_is_list(lst1), "pop reveals a list");
     n = sx_pop(&lst1);
-    ok(n->type == SXT_INTEGER, "pop reveals an integer");
-    ok(n->data.u64 == 1, "pop reveals the integer 1");
+    ok(sx_is_the_integer(n, 1), "pop reveals the integer 1");
     sx_destroy(&n);
 
     /* lst2 is (a b c) */
     struct sx_node *lst2 = sx_pop(&lst1);
-    ok(lst2->type == SXT_PAIR, "pop reveals a pair");
+    ok(sx_is_list(lst2), "pop reveals a list");
     n = sx_pop(&lst2);
-    ok(n->type == SXT_SYMBOL, "pop reveals an integer");
-    ok(strcmp(n->data.symbol, "a") == 0, "pop reveals a", expr);
+    ok(sx_is_the_symbol(n, "a"), "pop reveals the symbol a");
     sx_destroy(&n);
     n = sx_pop(&lst2);
-    ok(n->type == SXT_SYMBOL, "pop reveals an integer");
-    ok(strcmp(n->data.symbol, "b") == 0, "pop reveals b", expr);
+    ok(sx_is_the_symbol(n, "b"), "pop reveals the symbol b");
     sx_destroy(&n);
     n = sx_pop(&lst2);
-    ok(n->type == SXT_SYMBOL, "pop reveals an integer");
-    ok(strcmp(n->data.symbol, "c") == 0, "pop reveals c", expr);
+    ok(sx_is_the_symbol(n, "c"), "pop reveals the symbol c");
     sx_destroy(&n);
-    ok(lst2->type == SXT_EMPTY_LIST, "pop made lst2 into the empty list");
+    ok(sx_is_null(lst2), "pop made lst2 into the empty list");
     n = sx_pop(&lst2);
-    ok(n->type == SXT_EMPTY_LIST, "pop reveals the empty list");
+    ok(sx_is_null(n), "pop reveals the empty list");
     sx_destroy(&n);
 
     n = sx_pop(&lst1);
-    ok(n->type == SXT_INTEGER, "pop reveals an integer");
-    ok(n->data.u64 == 3, "pop reveals the integer 3");
+    ok(sx_is_the_integer(n, 3), "pop reveals the integer 1");
     sx_destroy(&n);
-    ok(lst1->type == SXT_EMPTY_LIST, "pop made lst1 into the empty list");
+    ok(sx_is_null(lst1), "pop made lst1 into the empty list");
     n = sx_pop(&lst1);
-    ok(n->type == SXT_EMPTY_LIST, "pop reveals the empty list");
+    ok(sx_is_null(n), "pop reveals the empty list");
     sx_destroy(&n);
 
     /* lst3 is (q w e) */
     struct sx_node *lst3 = sx_pop(&p.node);
-    ok(lst3->type == SXT_PAIR, "pop reveals a pair");
+    ok(sx_is_list(lst3), "pop reveals a list");
     n = sx_pop(&lst3);
-    ok(n->type == SXT_SYMBOL, "pop reveals a symbol");
-    ok(strcmp(n->data.symbol, "q") == 0, "pop reveals q", expr);
+    ok(sx_is_the_symbol(n, "q"), "pop reveals the symbol q");
     sx_destroy(&n);
     n = sx_pop(&lst3);
-    ok(n->type == SXT_SYMBOL, "pop reveals a symbol");
-    ok(strcmp(n->data.symbol, "w") == 0, "pop reveals w", expr);
+    ok(sx_is_the_symbol(n, "w"), "pop reveals the symbol w");
     sx_destroy(&n);
     n = sx_pop(&lst3);
-    ok(n->type == SXT_SYMBOL, "pop reveals a symbol");
-    ok(strcmp(n->data.symbol, "e") == 0, "pop reveals e", expr);
+    ok(sx_is_the_symbol(n, "e"), "pop reveals the symbol e");
     sx_destroy(&n);
-    ok(lst3->type == SXT_EMPTY_LIST, "pop made lst3 into the empty list");
+    ok(sx_is_null(lst3), "pop made lst3 into the empty list");
     n = sx_pop(&lst3);
-    ok(n->type == SXT_EMPTY_LIST, "pop reveals the empty list");
+    ok(sx_is_null(n), "pop reveals the empty list");
     sx_destroy(&n);
 
     /* Now on to r and t from p.node */
     n = sx_pop(&p.node);
-    ok(n->type == SXT_SYMBOL, "pop reveals a symbol");
-    ok(strcmp(n->data.symbol, "r") == 0, "pop reveals r", expr);
+    ok(sx_is_the_symbol(n, "r"), "pop reveals the symbol r");
     sx_destroy(&n);
     n = sx_pop(&p.node);
-    ok(n->type == SXT_SYMBOL, "pop reveals a symbol");
-    ok(strcmp(n->data.symbol, "t") == 0, "pop reveals t", expr);
+    ok(sx_is_the_symbol(n, "t"), "pop reveals the symbol t");
     sx_destroy(&n);
 
     /* lst4 is (5) */
     struct sx_node *lst4 = sx_pop(&p.node);
-    ok(lst4->type == SXT_PAIR, "pop reveals a pair");
+    ok(sx_is_list(lst4), "pop reveals a list");
     n = sx_pop(&lst4);
-    ok(n->type == SXT_INTEGER, "pop reveals an integer");
-    ok(n->data.u64 == 5, "pop reveals the integer 5");
+    ok(sx_is_the_integer(n, 5), "pop reveals the integer 5");
     sx_destroy(&n);
-    ok(lst4->type == SXT_EMPTY_LIST, "pop made lst4 into the empty list");
+    ok(sx_is_null(lst4), "pop made lst4 into the empty list");
     n = sx_pop(&lst4);
-    ok(n->type == SXT_EMPTY_LIST, "pop reveals the empty list");
+    ok(sx_is_null(n), "pop reveals the empty list");
     sx_destroy(&n);
 
     /* p.node is now (6) */
     n = sx_pop(&p.node);
-    ok(n->type == SXT_INTEGER, "pop reveals an integer");
-    ok(n->data.u64 == 6, "pop reveals the integer 6");
+    ok(sx_is_the_integer(n, 6), "pop reveals the integer 6");
     sx_destroy(&n);
-    ok(p.node->type == SXT_EMPTY_LIST, "pop made lst4 into the empty list");
+    ok(sx_is_null(p.node), "pop made lst4 into the empty list");
     n = sx_pop(&p.node);
-    ok(n->type == SXT_EMPTY_LIST, "pop reveals the empty list");
+    ok(sx_is_null(n), "pop reveals the empty list");
     sx_destroy(&n);
 }
 
@@ -428,7 +383,7 @@ fnc_t_append(struct sx_node *node, void *arg)
 {
     struct fnc_t_data *data = arg;
     data->cnt++;
-    unless (ok(node->type == SXT_INTEGER, "...node is an integer")) {
+    unless (ok(sx_is_integer(node), "...node is an integer")) {
         data->errors++;
         return node;
     }
@@ -449,12 +404,20 @@ t_append(void)
     struct sx_parse_result pa = sx_parse_string("(1 2 3)");
     struct sx_parse_result pb = sx_parse_string("(4 5 6)");
     ok(pa.status == SXS_SUCCESS, "parsing (1 2 3) returned successfully");
+    ok(sx_is_pair(pa.node), "parsing (1 2 3) returns a pair");
+    ok(sx_is_list(pa.node), "parsing (1 2 3) returns a list too");
     ok(pb.status == SXS_SUCCESS, "parsing (4 5 6) returned successfully");
+    ok(sx_is_pair(pb.node), "parsing (4 5 6) returns a pair");
+    ok(sx_is_list(pb.node), "parsing (4 5 6) returns a list too");
     struct sx_node *lst = sx_append(pa.node, pb.node);
-    ok(lst != NULL, "appending lists returned a non-NULL value");
+    unless (ok(lst != NULL, "appending lists returned a non-NULL value")) {
+        goto cleanup;
+    }
     sx_foreach(lst, fnc_t_append, &data);
     ok(data.cnt == 6, "appended list has six elements");
     ok(data.errors == 0, "elements of appended list look the way they should");
+
+cleanup:
     sx_destroy(&lst);
 }
 
@@ -483,7 +446,7 @@ t_sx_parse(void)
 int
 main(UNUSED int argc, UNUSED char *argv[])
 {
-    plan(138);
+    plan(118);
 
     t_sx_util_api();
     t_sx_parse_token();

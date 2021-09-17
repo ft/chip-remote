@@ -191,15 +191,15 @@ sx_cxr(struct sx_node *root, const char *addr)
 
     --i;
     for (;;) {
-        if (ptr->type != SXT_PAIR) {
+        if (sx_is_pair(ptr) == false) {
             return NULL;
         }
         switch (addr[i]) {
         case 'a':
-            ptr = ptr->data.pair->car;
+            ptr = sx_car_unsafe(ptr);
             break;
         case 'd':
-            ptr = ptr->data.pair->cdr;
+            ptr = sx_cdr_unsafe(ptr);
             break;
         default:
             return NULL;
@@ -220,16 +220,30 @@ sx_pop(struct sx_node **root)
     if (node == NULL)
         return NULL;
 
-    if (node->type != SXT_PAIR) {
+    if (sx_is_pair(node) == false) {
         return node;
     }
 
-    *root = node->data.pair->cdr;
-    struct sx_node *car = node->data.pair->car;
+    *root = sx_cdr_unsafe(node);
+    struct sx_node *car = sx_car_unsafe(node);
     free(node->data.pair);
     free(node);
 
     return car;
+}
+
+bool
+sx_is_list(struct sx_node *n)
+{
+    struct sx_node *ptr = n;
+    for (;;) {
+        if (sx_is_null(ptr))
+            return true;
+        if (sx_is_pair(ptr) == false)
+            break;
+        ptr = sx_cdr_unsafe(ptr);
+    }
+    return false;
 }
 
 struct sx_node *
@@ -238,16 +252,13 @@ sx_append(struct sx_node *a, struct sx_node *b)
     if (a == NULL || b == NULL)
         return NULL;
 
-    if (a->type != SXT_PAIR || b->type != SXT_PAIR)
+    if ((sx_is_pair(a) && sx_is_pair(b)) == false)
         return NULL;
 
     struct sx_pair *ptr = a->data.pair;
-    while (ptr->cdr->type == SXT_PAIR) {
+    while (sx_is_pair(ptr->cdr)) {
         ptr = ptr->cdr->data.pair;
     }
-
-    if (ptr->cdr->type != SXT_EMPTY_LIST)
-        return NULL;
 
     sx_destroy(&ptr->cdr);
     ptr->cdr = b;
@@ -260,11 +271,11 @@ sx_foreach(struct sx_node *node, sx_nodefnc f, void *arg)
 {
     struct sx_node *ptr = node;
 
-    if (ptr->type != SXT_PAIR)
+    if (sx_is_pair(ptr) == false)
         return;
 
-    while (ptr->type == SXT_PAIR) {
+    while (sx_is_pair(ptr)) {
         f(ptr->data.pair->car, arg);
-        ptr = ptr->data.pair->cdr;
+        ptr = sx_cdr_unsafe(ptr);
     }
 }
