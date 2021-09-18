@@ -59,6 +59,9 @@ struct sx_parse_result sx_parse(const char*, size_t, size_t);
 struct sx_parse_result sx_parse_token(const char*, size_t, size_t);
 void sx_destroy(struct sx_node**);
 
+struct sx_node *sx_make_integer(uint64_t);
+struct sx_node *sx_make_symbol(const char*);
+struct sx_node *sx_make_empty_list(void);
 struct sx_node *sx_cons(struct sx_node*, struct sx_node*);
 
 struct sx_node *sx_cxr(struct sx_node*, const char*);

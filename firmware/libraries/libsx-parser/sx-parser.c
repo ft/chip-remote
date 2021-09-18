@@ -92,6 +92,37 @@ make_node(void)
     return node;
 }
 
+struct sx_node *
+sx_make_integer(uint64_t n)
+{
+    struct sx_node *node = make_node();
+    node->type = SXT_INTEGER;
+    node->data.u64 = n;
+    return node;
+}
+
+struct sx_node *
+sx_make_empty_list(void)
+{
+    struct sx_node *node = make_node();
+    node->type = SXT_EMPTY_LIST;
+    return node;
+}
+
+struct sx_node *
+sx_make_symbol(const char *s)
+{
+    const size_t n = strlen(s) + 1;
+    struct sx_node *node = make_node();
+    node->type = SXT_SYMBOL;
+    node->data.symbol = calloc(sizeof(char), n);
+    if (node->data.symbol == NULL) {
+        sxoom(__FILE__, __LINE__);
+    }
+    strcpy(node->data.symbol, s);
+    return node;
+}
+
 static bool
 nextisdelimiter(const char c)
 {

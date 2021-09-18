@@ -391,6 +391,25 @@ cleanup:
 }
 
 static void
+t_make_things(void)
+{
+    struct sx_node *t_int = sx_make_integer(1234567890);
+    struct sx_node *t_sym = sx_make_symbol("foobarbaz");
+    struct sx_node *t_eol = sx_make_empty_list();
+    struct sx_node *t_lst = sx_cons(t_int, sx_cons(t_sym, t_eol));
+    ok(sx_is_the_integer(t_int, 1234567890), "t_int is 1234567890");
+    ok(sx_is_the_symbol(t_sym, "foobarbaz"), "t_sym is 'foobarbaz'");
+    ok(sx_is_null(t_eol), "t_eol is the empty list");
+    ok(sx_is_list(t_lst), "t_lst is a list");
+    ok(sx_is_the_integer(sx_car(t_lst), 1234567890),
+       "(car t_lst) is 1234567890");
+    ok(sx_is_the_symbol(sx_car(sx_cdr(t_lst)), "foobarbaz"),
+       "(car (cdr t_lst)) is 'foobarbaz'");
+    ok(sx_is_null(sx_cxr(t_lst, "dd")), "(cdr (cdr t_lst)) is the empty list");
+    sx_destroy(&t_lst);
+}
+
+static void
 t_sx_parse_token(void)
 {
     t_sx_parse_token_empty();
@@ -415,7 +434,7 @@ t_sx_parse(void)
 int
 main(UNUSED int argc, UNUSED char *argv[])
 {
-    plan(106);
+    plan(113);
 
     t_sx_parse_token();
     t_sx_parse();
@@ -423,6 +442,8 @@ main(UNUSED int argc, UNUSED char *argv[])
     t_cxr();
     t_pop();
     t_append();
+
+    t_make_things();
 
     return EXIT_SUCCESS;
 }
