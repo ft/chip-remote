@@ -171,10 +171,8 @@ make_hinteger(const char *s, const size_t n, size_t *i)
 }
 
 struct sx_node *
-make_pair(UNUSED const char *s, UNUSED const size_t n, size_t *i)
+make_pair(void)
 {
-    *i += 1;
-
     struct sx_node *rv = calloc(sizeof *rv, 1u);
     if (rv == NULL) {
         sxoom(__FILE__, __LINE__);

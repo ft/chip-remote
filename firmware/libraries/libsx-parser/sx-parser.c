@@ -132,10 +132,10 @@ sx_parse_list(const char *s, const size_t n, const size_t i)
         return carres;
     }
 
-    struct sx_node *cons = make_pair(s, n, &carres.position);
+    struct sx_node *cons = make_pair();
     cons->data.pair->car = carres.node;
 
-    struct sx_parse_result cdrres = sx_parse_list(s, n, carres.position - 1);
+    struct sx_parse_result cdrres = sx_parse_list(s, n, carres.position);
     cons->data.pair->cdr = cdrres.node;
 
     carres.node = cons;
