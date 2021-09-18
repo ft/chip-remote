@@ -21,6 +21,7 @@ enum sx_what looking_at(const char*, size_t, size_t);
 struct sx_node *make_symbol(const char*, size_t, size_t*);
 struct sx_node *make_integer(const char*, size_t, size_t*);
 struct sx_node *make_hinteger(const char*, size_t, size_t*);
+struct sx_node *make_node(void);
 struct sx_node *make_pair(void);
 struct sx_node *make_end_of_list(const char*, size_t, size_t*);
 

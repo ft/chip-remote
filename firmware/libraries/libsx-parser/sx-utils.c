@@ -54,6 +54,17 @@ sxoom(const char *f, const int n)
     exit(1);
 }
 
+struct sx_node *
+make_node(void)
+{
+    struct sx_node *node = malloc(sizeof *node);
+    if (node == NULL) {
+        sxoom(__FILE__, __LINE__);
+    }
+
+    return node;
+}
+
 static bool
 nextisdelimiter(const char c)
 {
@@ -77,10 +88,7 @@ make_symbol(const char *s, const size_t n, size_t *i)
     }
 
     size_t len = j - *i;
-    struct sx_node *rv = malloc(sizeof *rv);
-    if (rv == NULL) {
-        sxoom(__FILE__, __LINE__);
-    }
+    struct sx_node *rv = make_node();
     rv->data.symbol = calloc(sizeof(char), len + 1);
     if (rv == NULL) {
         sxoom(__FILE__, __LINE__);
@@ -108,11 +116,7 @@ make_integer(const char *s, const size_t n, size_t *i)
         return NULL;
     }
 
-    struct sx_node *rv = malloc(sizeof *rv);
-    if (rv == NULL) {
-        sxoom(__FILE__, __LINE__);
-    }
-
+    struct sx_node *rv = make_node();
     rv->type = SXT_INTEGER;
     rv->data.u64 = 0;
 
@@ -147,11 +151,7 @@ make_hinteger(const char *s, const size_t n, size_t *i)
         return NULL;
     }
 
-    struct sx_node *rv = malloc(sizeof *rv);
-    if (rv == NULL) {
-        sxoom(__FILE__, __LINE__);
-    }
-
+    struct sx_node *rv = make_node();
     rv->type = SXT_INTEGER;
     rv->data.u64 = 0;
 
@@ -173,10 +173,7 @@ make_hinteger(const char *s, const size_t n, size_t *i)
 struct sx_node *
 make_pair(void)
 {
-    struct sx_node *rv = calloc(sizeof *rv, 1u);
-    if (rv == NULL) {
-        sxoom(__FILE__, __LINE__);
-    }
+    struct sx_node *rv = make_node();
 
     rv->data.pair = calloc(sizeof *rv->data.pair, 1u);
     if (rv->data.pair == NULL) {
@@ -191,12 +188,7 @@ struct sx_node *
 make_end_of_list(UNUSED const char *s, UNUSED const size_t n, size_t *i)
 {
     *i += 1;
-
-    struct sx_node *rv = malloc(sizeof *rv);
-    if (rv == NULL) {
-        sxoom(__FILE__, __LINE__);
-    }
-
+    struct sx_node *rv = make_node();
     rv->type = SXT_EMPTY_LIST;
     return rv;
 }
