@@ -138,12 +138,12 @@ t_sx_parse_token_error_symbol(void)
     ok(p.position == 3, "...error at position 3 == %" PRIu64, p.position);
 }
 
-/* sx_parse() test cases */
+/* sx_parse_string() test cases */
 
 static void
 t_sx_parse_empty_list(void)
 {
-    struct sx_parse_result p = sx_parse("()", 2, 0);
+    struct sx_parse_result p = sx_parse_string("()");
     unless (ok(p.node != NULL, "() parses to non-NULL")) {
         goto cleanup;
     }
@@ -157,7 +157,7 @@ cleanup:
 static void
 t_sx_parse_empty_one_elem_list(void)
 {
-    struct sx_parse_result p = sx_parse("(1)", 3, 0);
+    struct sx_parse_result p = sx_parse_string("(1)");
     unless (ok(p.node != NULL, "(1) parses to non-NULL")) {
         goto cleanup;
     }
@@ -178,7 +178,7 @@ cleanup:
 static void
 t_sx_parse_empty_two_elem_list(void)
 {
-    struct sx_parse_result p = sx_parse("(1 2)", 5, 0);
+    struct sx_parse_result p = sx_parse_string("(1 2)");
     ok(p.status == SXS_SUCCESS, "(1 2) does not indicate an error");
     unless (ok(p.node != NULL, "(1 2) parses to non-NULL")) {
         goto cleanup;
@@ -203,7 +203,7 @@ cleanup:
 static void
 t_sx_parse_incomplete_list(void)
 {
-    struct sx_parse_result p = sx_parse("(", 1, 0);
+    struct sx_parse_result p = sx_parse_string("(");
     ok(p.status == SXS_UNEXPECTED_END, "( signals unexpected end");
     ok(p.node == NULL, "( returns NULL");
 
@@ -212,8 +212,8 @@ t_sx_parse_incomplete_list(void)
     ok(p.node == NULL, "(1 2 returns NULL");
 
     p = sx_parse_string("(foobar (stuff) (1 2)");
-    /*            0123456789012345678901
-     *            0000000000111111111122 */
+    /*                   0123456789012345678901
+     *                   0000000000111111111122 */
     ok(p.status == SXS_UNEXPECTED_END, "(foobar (stuff) (1 2) signals unexpected end");
     ok(p.node == NULL, "(foobar (stuff) (1 2) returns NULL");
 }
