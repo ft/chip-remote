@@ -279,3 +279,12 @@ sx_foreach(struct sx_node *node, sx_nodefnc f, void *arg)
         ptr = sx_cdr_unsafe(ptr);
     }
 }
+
+struct sx_node *
+sx_cons(struct sx_node *car, struct sx_node *cdr)
+{
+    struct sx_node *cons = make_pair();
+    cons->data.pair->car = car;
+    cons->data.pair->cdr = cdr;
+    return cons;
+}
