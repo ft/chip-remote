@@ -9,47 +9,16 @@
  * @brief Unit tests for s-expression parser module
  */
 
-#include "sx-types.h"
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <sx-parser.h>
-#include <sx-utils.h>
-
 #include <test/tap.h>
 #include <common/compiler.h>
 
-static void
-t_sx_util_api(void)
-{
-    /* Low level */
-    ok(issymch('1'), "1 is a symbol character");
-    ok(issyminitch('1') == false, "1 is a NOT symbol init character");
-    ok(issyminitch('+'), "+ is a symbol init character");
-
-    /* High level */
-    ok(looking_at("#x1", 3u, 0u) == LOOKING_AT_INT_HEX,
-       "#x1 could start a hex literal");
-    ok(looking_at("#xa", 3u, 0u) == LOOKING_AT_INT_HEX,
-       "#xa could start a hex literal");
-    ok(looking_at("#xF", 3u, 0u) == LOOKING_AT_INT_HEX,
-       "#xF could start a hex literal");
-    ok(looking_at("#xg", 3u, 0u) != LOOKING_AT_INT_HEX,
-       "#xg cannot start a hex literal");
-    ok(looking_at("#xg", 3u, 0u) == LOOKING_AT_UNKNOWN,
-       "#xg can't be anything reasonable");
-    ok(looking_at("(", 1u, 0u) == LOOKING_AT_PAREN_OPEN,
-       "( could start another level of list");
-    ok(looking_at(")", 1u, 0u) == LOOKING_AT_PAREN_CLOSE,
-       ") could start another level of list");
-    ok(looking_at("1", 1u, 0u) == LOOKING_AT_INT_DEC,
-       "1 could start a decimal integer literal");
-    ok(looking_at("+", 1u, 0u) == LOOKING_AT_SYMBOL,
-       "+ could start a symbol");
-}
+#include <sx-parser.h>
 
 /* sx_parse_token() test cases */
 
@@ -446,9 +415,8 @@ t_sx_parse(void)
 int
 main(UNUSED int argc, UNUSED char *argv[])
 {
-    plan(118);
+    plan(106);
 
-    t_sx_util_api();
     t_sx_parse_token();
     t_sx_parse();
 

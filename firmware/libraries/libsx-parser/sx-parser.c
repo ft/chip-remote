@@ -25,9 +25,222 @@
 
 #include <stdio.h>
 
+#include <common/compiler.h>
+
 #include "sx-parser.h"
-#include "sx-types.h"
-#include "sx-utils.h"
+
+enum sx_what {
+    LOOKING_AT_UNKNOWN,
+    LOOKING_AT_SYMBOL,
+    LOOKING_AT_INT_DEC,
+    LOOKING_AT_INT_HEX,
+    LOOKING_AT_PAREN_OPEN,
+    LOOKING_AT_PAREN_CLOSE
+};
+
+static char *digits = "0123456789abcdef";
+
+static inline uint64_t
+minu64(const uint64_t a, const uint64_t b)
+{
+    return a < b ? a : b;
+}
+
+static inline uint64_t
+digit2int(const char c)
+{
+    uint64_t rv = 0u;
+    while (rv < 16) {
+        if (digits[rv] == c)
+            return rv;
+        rv++;
+    }
+    return 0;
+}
+
+static const char *syminitchtab =
+    "abcdefghijklmnopqrstuvwxyz"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "+%|/_:;.!?$&=*<>~";
+
+static bool
+issyminitch(const char c)
+{
+    return strchr(syminitchtab, c) != NULL;
+}
+
+static bool
+issymch(const char c)
+{
+    return issyminitch(c) || isdigit(c);
+}
+
+static void NORETURN
+sxoom(const char *f, const int n)
+{
+    fprintf(stderr, "%s:%d: Could not allocate memory!\n", f, n);
+    exit(1);
+}
+
+static struct sx_node *
+make_node(void)
+{
+    struct sx_node *node = malloc(sizeof *node);
+    if (node == NULL) {
+        sxoom(__FILE__, __LINE__);
+    }
+    return node;
+}
+
+static bool
+nextisdelimiter(const char c)
+{
+    return c == '(' || c == ')' || isspace(c);
+}
+
+static struct sx_node *
+parse_symbol(const char *s, const size_t n, size_t *i)
+{
+    size_t j = *i;
+
+    while (j < n) {
+        if (issymch(s[j]) == false)
+            break;
+        j++;
+    }
+
+    if ((j < n) && (nextisdelimiter(s[j]) == false)) {
+        *i = j;
+        return NULL;
+    }
+
+    size_t len = j - *i;
+    struct sx_node *rv = make_node();
+    rv->data.symbol = calloc(sizeof(char), len + 1);
+    if (rv == NULL) {
+        sxoom(__FILE__, __LINE__);
+    }
+    rv->type = SXT_SYMBOL;
+    strncpy(rv->data.symbol, s + *i, len);
+    *i = minu64(j, n);
+
+    return rv;
+}
+
+static struct sx_node *
+parse_integer(const char *s, const size_t n, size_t *i)
+{
+    size_t j = *i;
+
+    while (j < n) {
+        if (isdigit(s[j]) == false)
+            break;
+        j++;
+    }
+
+    if ((j < n) && (nextisdelimiter(s[j]) == false)) {
+        *i = j;
+        return NULL;
+    }
+
+    struct sx_node *rv = make_node();
+    rv->type = SXT_INTEGER;
+    rv->data.u64 = 0;
+
+    size_t mult = 1u;
+    size_t save = j;
+    j--;
+    while (j >= *i) {
+        rv->data.u64 += mult * digit2int(s[j]);
+        mult *= 10u;
+        if (j == 0u)
+            break;
+        j--;
+    }
+    *i = minu64(save, n);
+
+    return rv;
+}
+
+static struct sx_node *
+parse_hinteger(const char *s, const size_t n, size_t *i)
+{
+    size_t j = *i + 2u;
+
+    while (j < n) {
+        if (isxdigit(s[j]) == false)
+            break;
+        j++;
+    }
+
+    if ((j < n) && (nextisdelimiter(s[j+1]) == false)) {
+        *i = j;
+        return NULL;
+    }
+
+    struct sx_node *rv = make_node();
+    rv->type = SXT_INTEGER;
+    rv->data.u64 = 0;
+
+    size_t mult = 1u;
+    size_t save = j;
+    j--;
+    while (j >= *i) {
+        rv->data.u64 += mult * digit2int(tolower(s[j]));
+        mult *= 16u;
+        if (j == 0u)
+            break;
+        j--;
+    }
+    *i = minu64(save, n);
+
+    return rv;
+}
+
+static struct sx_node *
+make_pair(void)
+{
+    struct sx_node *rv = make_node();
+
+    rv->data.pair = calloc(sizeof *rv->data.pair, 1u);
+    if (rv->data.pair == NULL) {
+        sxoom(__FILE__, __LINE__);
+    }
+
+    rv->type = SXT_PAIR;
+    return rv;
+}
+
+static struct sx_node *
+parse_end_of_list(UNUSED const char *s, UNUSED const size_t n, size_t *i)
+{
+    *i += 1;
+    struct sx_node *rv = make_node();
+    rv->type = SXT_EMPTY_LIST;
+    return rv;
+}
+
+static enum sx_what
+looking_at(const char *s, const size_t n, const size_t i)
+{
+    if ((n > i + 1) && s[i] == '#' && s[i+1] == 'x' && isxdigit(s[i+2])) {
+        return LOOKING_AT_INT_HEX;
+    }
+    if (s[i] == '(') {
+        return LOOKING_AT_PAREN_OPEN;
+    }
+    if (s[i] == ')') {
+        return LOOKING_AT_PAREN_CLOSE;
+    }
+    if (isdigit(s[i])) {
+        return LOOKING_AT_INT_DEC;
+    }
+    if (issyminitch(s[i])) {
+        return LOOKING_AT_SYMBOL;
+    }
+
+    return LOOKING_AT_UNKNOWN;
+}
 
 void
 sx_destroy(struct sx_node **n)
@@ -72,17 +285,17 @@ sx_parse_token(const char *s, const size_t n, const size_t i)
 
     switch (looking_at(s, n, j)) {
     case LOOKING_AT_INT_DEC:
-        rv.node = make_integer(s, n, &j);
+        rv.node = parse_integer(s, n, &j);
         if (rv.node == NULL)
             rv.status = SXS_BROKEN_INTEGER;
         break;
     case LOOKING_AT_INT_HEX:
-        rv.node = make_hinteger(s, n, &j);
+        rv.node = parse_hinteger(s, n, &j);
         if (rv.node == NULL)
             rv.status = SXS_BROKEN_INTEGER;
         break;
     case LOOKING_AT_SYMBOL:
-        rv.node = make_symbol(s, n, &j);
+        rv.node = parse_symbol(s, n, &j);
         if (rv.node == NULL)
             rv.status = SXS_BROKEN_SYMBOL;
         break;
@@ -91,7 +304,7 @@ sx_parse_token(const char *s, const size_t n, const size_t i)
         j++;
         break;
     case LOOKING_AT_PAREN_CLOSE:
-        rv.node = make_end_of_list(s, n, &j);
+        rv.node = parse_end_of_list(s, n, &j);
         break;
     case LOOKING_AT_UNKNOWN:
         /* FALLTHROUGH */
