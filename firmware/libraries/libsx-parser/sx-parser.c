@@ -109,18 +109,24 @@ sx_make_empty_list(void)
     return node;
 }
 
-struct sx_node *
-sx_make_symbol(const char *s)
+static struct sx_node *
+sx_make_symboln(const char *s, size_t len)
 {
-    const size_t n = strlen(s) + 1;
+    const size_t n = len + 1;
     struct sx_node *node = make_node();
     node->type = SXT_SYMBOL;
     node->data.symbol = calloc(sizeof(char), n);
     if (node->data.symbol == NULL) {
         sxoom(__FILE__, __LINE__);
     }
-    strcpy(node->data.symbol, s);
+    strncpy(node->data.symbol, s, len);
     return node;
+}
+
+struct sx_node *
+sx_make_symbol(const char *s)
+{
+    return sx_make_symboln(s, strlen(s));
 }
 
 static bool
@@ -145,14 +151,7 @@ parse_symbol(const char *s, const size_t n, size_t *i)
         return NULL;
     }
 
-    size_t len = j - *i;
-    struct sx_node *rv = make_node();
-    rv->data.symbol = calloc(sizeof(char), len + 1);
-    if (rv == NULL) {
-        sxoom(__FILE__, __LINE__);
-    }
-    rv->type = SXT_SYMBOL;
-    strncpy(rv->data.symbol, s + *i, len);
+    struct sx_node *rv = sx_make_symboln(s + *i, j - *i);
     *i = minu64(j, n);
 
     return rv;
@@ -174,15 +173,12 @@ parse_integer(const char *s, const size_t n, size_t *i)
         return NULL;
     }
 
-    struct sx_node *rv = make_node();
-    rv->type = SXT_INTEGER;
-    rv->data.u64 = 0;
-
+    uint64_t newi = 0u;
     size_t mult = 1u;
     size_t save = j;
     j--;
     while (j >= *i) {
-        rv->data.u64 += mult * digit2int(s[j]);
+        newi += mult * digit2int(s[j]);
         mult *= 10u;
         if (j == 0u)
             break;
@@ -190,7 +186,7 @@ parse_integer(const char *s, const size_t n, size_t *i)
     }
     *i = minu64(save, n);
 
-    return rv;
+    return sx_make_integer(newi);
 }
 
 static struct sx_node *
@@ -209,15 +205,12 @@ parse_hinteger(const char *s, const size_t n, size_t *i)
         return NULL;
     }
 
-    struct sx_node *rv = make_node();
-    rv->type = SXT_INTEGER;
-    rv->data.u64 = 0;
-
+    uint64_t newi = 0u;
     size_t mult = 1u;
     size_t save = j;
     j--;
     while (j >= *i) {
-        rv->data.u64 += mult * digit2int(tolower(s[j]));
+        newi += mult * digit2int(tolower(s[j]));
         mult *= 16u;
         if (j == 0u)
             break;
@@ -225,7 +218,7 @@ parse_hinteger(const char *s, const size_t n, size_t *i)
     }
     *i = minu64(save, n);
 
-    return rv;
+    return sx_make_integer(newi);
 }
 
 static struct sx_node *
@@ -239,15 +232,6 @@ make_pair(void)
     }
 
     rv->type = SXT_PAIR;
-    return rv;
-}
-
-static struct sx_node *
-parse_end_of_list(UNUSED const char *s, UNUSED const size_t n, size_t *i)
-{
-    *i += 1;
-    struct sx_node *rv = make_node();
-    rv->type = SXT_EMPTY_LIST;
     return rv;
 }
 
@@ -335,7 +319,8 @@ sx_parse_token(const char *s, const size_t n, const size_t i)
         j++;
         break;
     case LOOKING_AT_PAREN_CLOSE:
-        rv.node = parse_end_of_list(s, n, &j);
+        rv.node = sx_make_empty_list();
+        j++;
         break;
     case LOOKING_AT_UNKNOWN:
         /* FALLTHROUGH */
@@ -376,11 +361,8 @@ sx_parse_list(const char *s, const size_t n, const size_t i)
         return carres;
     }
 
-    struct sx_node *cons = make_pair();
-    cons->data.pair->car = carres.node;
-
     struct sx_parse_result cdrres = sx_parse_list(s, n, carres.position);
-    cons->data.pair->cdr = cdrres.node;
+    struct sx_node *cons = sx_cons(carres.node, cdrres.node);
 
     carres.node = cons;
     carres.position = cdrres.position;
