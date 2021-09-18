@@ -158,12 +158,13 @@ parse_symbol(const char *s, const size_t n, size_t *i)
 }
 
 static struct sx_node *
-parse_integer(const char *s, const size_t n, size_t *i)
+parse_integer_(const char *s, const size_t n, size_t *i, size_t offset,
+               int(*digitpredicate)(int), uint64_t base)
 {
-    size_t j = *i;
+    size_t j = *i + offset;
 
     while (j < n) {
-        if (isdigit(s[j]) == false)
+        if (digitpredicate(s[j]) == false)
             break;
         j++;
     }
@@ -179,7 +180,7 @@ parse_integer(const char *s, const size_t n, size_t *i)
     j--;
     while (j >= *i) {
         newi += mult * digit2int(s[j]);
-        mult *= 10u;
+        mult *= base;
         if (j == 0u)
             break;
         j--;
@@ -189,36 +190,16 @@ parse_integer(const char *s, const size_t n, size_t *i)
     return sx_make_integer(newi);
 }
 
-static struct sx_node *
+static inline struct sx_node *
+parse_integer(const char *s, const size_t n, size_t *i)
+{
+    return parse_integer_(s, n, i, 0u, isdigit, 10u);
+}
+
+static inline struct sx_node *
 parse_hinteger(const char *s, const size_t n, size_t *i)
 {
-    size_t j = *i + 2u;
-
-    while (j < n) {
-        if (isxdigit(s[j]) == false)
-            break;
-        j++;
-    }
-
-    if ((j < n) && (nextisdelimiter(s[j+1]) == false)) {
-        *i = j;
-        return NULL;
-    }
-
-    uint64_t newi = 0u;
-    size_t mult = 1u;
-    size_t save = j;
-    j--;
-    while (j >= *i) {
-        newi += mult * digit2int(tolower(s[j]));
-        mult *= 16u;
-        if (j == 0u)
-            break;
-        j--;
-    }
-    *i = minu64(save, n);
-
-    return sx_make_integer(newi);
+    return parse_integer_(s, n, i, 2u, isxdigit, 16u);
 }
 
 static struct sx_node *
