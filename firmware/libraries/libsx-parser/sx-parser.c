@@ -72,7 +72,7 @@ issyminitch(const char c)
 static bool
 issymch(const char c)
 {
-    return issyminitch(c) || isdigit(c);
+    return issyminitch(c) || isdigit(c) || c == '-';
 }
 
 static void NORETURN
