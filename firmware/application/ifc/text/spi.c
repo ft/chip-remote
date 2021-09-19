@@ -12,8 +12,21 @@
 #include <common/compiler.h>
 
 #include <cr-port.h>
+#include <sx-parser.h>
 
 #include "spi.h"
+
+struct sx_node *rxring = NULL;
+
+void
+cr_spi_text_load(struct sx_node *node)
+{
+    if (rxring == NULL) {
+        rxring = node;
+    } else {
+        rxring = sx_append(rxring, node);
+    }
+}
 
 int
 cr_spi_text_init(struct cr_port *port)
@@ -26,11 +39,25 @@ int
 cr_spi_text_xfer(struct cr_port *port, uint32_t tx, uint32_t *rx)
 {
     uint32_t *state = port->data;
+    bool fromstate = true;
 
-    *rx = *state;
-    printf("cr>> 0x%08x\n", tx);
-    printf("cr<< 0x%08x\n", *state);
-    (*state)++;
+    if (rxring != NULL && sx_is_list(rxring)) {
+        struct sx_node *n = sx_pop(&rxring);
+        if (sx_is_integer(n)) {
+            fromstate = false;
+            *rx = n->data.u64;
+        }
+        sx_destroy(&n);
+    }
+
+    if (fromstate)
+        *rx = *state;
+
+    printf("(spi-tx #x%08x)\n", tx);
+    printf("(spi-rx #x%08x)\n", *rx);
+
+    if (fromstate)
+        (*state)++;
 
     return 0;
 }
