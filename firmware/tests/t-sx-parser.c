@@ -385,6 +385,24 @@ t_append(void)
     sx_foreach(lst, fnc_t_append, &data);
     ok(data.cnt == 6, "appended list has six elements");
     ok(data.errors == 0, "elements of appended list look the way they should");
+    sx_destroy(&lst);
+
+    lst = sx_append(sx_make_empty_list(),
+                    sx_cons(sx_make_integer(1),
+                            sx_cons(sx_make_integer(2), sx_make_empty_list())));
+    ok(sx_is_list(lst), "(append '() '(....)) is a list");
+    ok(sx_is_the_integer(sx_cxr(lst, "a"), 1), "(car lst) → 1");
+    ok(sx_is_the_integer(sx_cxr(lst, "ad"), 2), "(cadr lst) → 2");
+    ok(sx_is_null(sx_cxr(lst, "dd")), "(cddr lst) → '()");
+    sx_destroy(&lst);
+
+    lst = sx_append(sx_cons(sx_make_integer(1),
+                            sx_cons(sx_make_integer(2), sx_make_empty_list())),
+                    sx_make_empty_list());
+    ok(sx_is_list(lst), "(append '(....) '()) is a list");
+    ok(sx_is_the_integer(sx_cxr(lst, "a"), 1), "(car lst) → 1");
+    ok(sx_is_the_integer(sx_cxr(lst, "ad"), 2), "(cadr lst) → 2");
+    ok(sx_is_null(sx_cxr(lst, "dd")), "(cddr lst) → '()");
 
 cleanup:
     sx_destroy(&lst);
@@ -434,7 +452,7 @@ t_sx_parse(void)
 int
 main(UNUSED int argc, UNUSED char *argv[])
 {
-    plan(113);
+    plan(121);
 
     t_sx_parse_token();
     t_sx_parse();

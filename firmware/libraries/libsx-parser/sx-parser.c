@@ -459,6 +459,16 @@ sx_append(struct sx_node *a, struct sx_node *b)
     if (a == NULL || b == NULL)
         return NULL;
 
+    if (sx_is_null(a)) {
+        sx_destroy(&a);
+        return b;
+    }
+
+    if (sx_is_null(b)) {
+        sx_destroy(&b);
+        return a;
+    }
+
     if ((sx_is_pair(a) && sx_is_pair(b)) == false)
         return NULL;
 
