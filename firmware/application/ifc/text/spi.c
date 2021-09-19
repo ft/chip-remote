@@ -46,8 +46,6 @@ cr_spi_text_xfer(struct cr_port *port, uint32_t tx, uint32_t *rx)
         if (sx_is_integer(n)) {
             fromstate = false;
             *rx = n->data.u64;
-        } else if (sx_is_null(n)) {
-            rxring = NULL;
         }
         sx_destroy(&n);
     }

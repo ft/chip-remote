@@ -428,6 +428,7 @@ sx_pop(struct sx_node **root)
         return NULL;
 
     if (sx_is_pair(node) == false) {
+        *root = NULL;
         return node;
     }
 
