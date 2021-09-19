@@ -8,6 +8,7 @@
   #:use-module (ice-9 popen)
   #:use-module (ice-9 rdelim)
   #:use-module (srfi srfi-9)
+  #:use-module (test tap)
   #:use-module (chip-remote io)
   #:use-module (chip-remote protocol)
   #:use-module (chip-remote utilities)
@@ -33,7 +34,8 @@
             kill-fw!
             boot-fw!
             $
-            instrument!))
+            instrument!
+            fw-expect))
 
 (define* (init-connection #:key (device (getenv "CR_BOARD_DEVICE")))
   (let ((c (make-cr-connection device)))
@@ -167,3 +169,11 @@
   (match (xread (tio-fw-port tio) #:timeout 2)
     (('instrumentation rest ...) #t)
     (_ (throw 'expected-instrumentation-reply))))
+
+(define (fw-expect tio . lst)
+  (let loop ((rest lst))
+    (unless (null? rest)
+      (define-test (format #f "firmware expect: ~a" (car rest))
+        (pass-if-equal? (car rest)
+                        (xread (tio-fw-port tio) #:timeout 2)))
+      (loop (cdr rest)))))
