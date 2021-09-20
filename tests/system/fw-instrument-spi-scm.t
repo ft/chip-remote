@@ -19,7 +19,7 @@
 (define (spi-test tio tx rx)
   (define-test (format #f "spi transmission test: ~a → ~a" tx rx)
     (pass-if-= (transmit ($ tio) tx) rx))
-  (fw-expect tio `(spi-tx ,tx) `(spi-rx ,rx)))
+  (fw-expect! tio `(spi-tx ,tx) `(spi-rx ,rx)))
 
 (with-test-bundle (chip-remote firmware hi/bye)
   (require (native-firmware-built?))

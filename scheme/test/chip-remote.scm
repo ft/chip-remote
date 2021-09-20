@@ -21,6 +21,8 @@
             tio-connection
             tio-iconnection
             tio-instrumentation
+            tio-parameters
+            tio-timeout
             set-tio-connection!
             tio-fw-port
             set-tio-fw-port!
@@ -29,13 +31,16 @@
             tio-terminal
             set-tio-terminal!
             set-tio-instrumentation!
+            set-tio-parameters!
+            set-tio-timeout!
             connect-test-io!
             handle-stdin!
             kill-fw!
             boot-fw!
+            debug-fw!
             $
             instrument!
-            fw-expect))
+            fw-expect!))
 
 (define* (init-connection #:key (device (getenv "CR_BOARD_DEVICE")))
   (let ((c (make-cr-connection device)))
@@ -73,17 +78,23 @@
     (quit 1)))
 
 (define-record-type <test-io>
-  (make-test-io* fw-port terminal instrumentation connection iconnection pid)
+  (make-test-io* fw-port terminal instrumentation connection iconnection pid
+                 timeout parameters)
   test-io?
   (fw-port tio-fw-port set-tio-fw-port!)
   (terminal tio-terminal set-tio-terminal!)
   (instrumentation tio-instrumentation set-tio-instrumentation!)
   (connection tio-connection set-tio-connection!)
   (iconnection tio-iconnection set-tio-iconnection!)
-  (pid tio-pid set-tio-pid!))
+  (pid tio-pid set-tio-pid!)
+  (timeout tio-timeout set-tio-timeout!)
+  (parameters tio-parameters set-tio-parameters!))
 
-(define* (make-test-io #:optional terminal instrumentation)
-  (make-test-io* #f terminal instrumentation #f #f #f))
+(define* (make-test-io #:key terminal instrumentation (timeout 2))
+  (make-test-io* #f terminal instrumentation #f #f #f timeout '()))
+
+(define (tio-push-parm! tio p)
+  (set-tio-parameters! tio (cons p (tio-parameters tio))))
 
 (define (connect-test-io! io)
   (set-tio-connection! io (chip-remote-open! #:uri (tio-terminal io)))
@@ -100,7 +111,7 @@
 
 (define (handle-stdin! tio)
   (match (xread (tio-fw-port tio)
-                #:timeout 5
+                #:timeout (tio-timeout tio)
                 #:handle-timeout (lambda (x)
                                    (handle-xread-timeout tio x)))
     (('firmware-pid pid)
@@ -113,8 +124,9 @@
 
 (define (kill-fw! tio)
   (let ((pid (tio-pid tio)))
-    (if pid
-        (begin
+    (if (member 'dont-kill (tio-parameters tio))
+        (format #t "# Not terminating firmware (PID: ~a), as requested.~%" pid)
+        (when pid
           (format #t "# Terminating firmware PID as indicated by itself: ~a~%" pid)
           (kill pid SIGINT)))))
 
@@ -131,7 +143,13 @@
 (define *cr-terminal* "UART_0")
 (define *cr-instrumentation* "UART_1")
 
-(define (boot-fw! tio)
+(define (debug-fw! tio)
+  (format #t "# Debug Mode (PID: ~a): Press ENTER to continue!"
+          (tio-pid tio))
+  (force-output (current-output-port))
+  (read-line))
+
+(define* (boot-fw! tio #:key (suspend-execution? #t))
   (format #t "# Booting native firmware: ~a~%" (native-fw))
   (set-tio-fw-port! tio (open-pipe* OPEN_READ (native-fw)))
   (let loop ((line (read-line (tio-fw-port tio) 'trim)))
@@ -155,25 +173,31 @@
       (tio-unknown!))
 
   ;; The firmware should indicate its PID first thing in s-exp mode.
-  (handle-stdin! tio))
+  (handle-stdin! tio)
+  (when (and (> (length (command-line)) 1)
+             (string= "--debug" (cadr (command-line))))
+    (set-tio-timeout! tio #f)
+    (io-opt/set 'serial-timeout #f)
+    (tio-push-parm! tio 'dont-kill)
+    (when suspend-execution? (debug-fw! tio))))
 
 (define (instrument! tio exp)
   (format (tio-iconnection tio) "~a~%" exp)
   ;; The instrumentation request needs to return an ‘ok’ on the instrumentation
   ;; port. This is done after all processing of the request.
-  (match (xread (tio-iconnection tio) #:timeout 2)
+  (match (xread (tio-iconnection tio) #:timeout (tio-timeout tio))
     ('ok #t)
     (reply (throw 'expected-ok-from-instrumentation reply)))
   ;; The firmware echos the instrumentation request on its output port again.
   ;; This is mainly for debuggability, but we can certainly test for it.
-  (match (xread (tio-fw-port tio) #:timeout 2)
+  (match (xread (tio-fw-port tio) #:timeout (tio-timeout tio))
     (('instrumentation rest ...) #t)
     (_ (throw 'expected-instrumentation-reply))))
 
-(define (fw-expect tio . lst)
+(define (fw-expect! tio . lst)
   (let loop ((rest lst))
     (unless (null? rest)
       (define-test (format #f "firmware expect: ~a" (car rest))
         (pass-if-equal? (car rest)
-                        (xread (tio-fw-port tio) #:timeout 2)))
+                        (xread (tio-fw-port tio) #:timeout (tio-timeout tio))))
       (loop (cdr rest)))))
