@@ -25,7 +25,8 @@
             whitespace?
             has-data?
             drain-whitespace
-            xread))
+            xread
+            xselect))
 
 (define-syntax-rule (cat str ...)
   (string-concatenate (list str ...)))
@@ -123,8 +124,10 @@
         (else s)))
 
 (define (timeout->select to)
-  (let ((s (inexact->exact (truncate to))))
-    (values s (inexact->exact (round (* 1e6 (- to s)))))))
+  (if to
+      (let ((s (inexact->exact (truncate to))))
+        (values s (inexact->exact (round (* 1e6 (- to s))))))
+      (values #f #f)))
 
 (define (whitespace? x)
   (or (= x #x09)
@@ -152,19 +155,24 @@
                  (unget-bytevector port (list->u8vector (list octet))))
                 (else (loop)))))))
 
+(define (xselect r w e t)
+  (let-values (((s us) (timeout->select t)))
+    (if s
+        (select r w e s us)
+        (select r w e #f))))
+
 (define* (xread port #:key (no-block? #t) return handle-timeout timeout)
   (define (do-read port)
     (let ((rv (read port)))
       (drain-whitespace port)
       rv))
   (drain-whitespace port)
-  (cond (timeout (let-values (((s us) (timeout->select timeout)))
-                   (let ((rv (select (list port) '() '() s us)))
-                     (if (null? (car rv))
-                         (if handle-timeout
-                             (handle-timeout rv)
-                             (throw 'xread-timeout rv))
-                         (do-read port)))))
+  (cond (timeout (let ((rv (xselect (list port) '() '() timeout)))
+                   (if (null? (car rv))
+                       (if handle-timeout
+                           (handle-timeout rv)
+                           (throw 'xread-timeout rv))
+                       (do-read port))))
         ((and no-block? (has-data? port)) (do-read port))
         ((and no-block? return) (return))
         (else (do-read port))))
