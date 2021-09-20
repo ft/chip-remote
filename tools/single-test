@@ -16,4 +16,4 @@ for i in SOURCE_DIR \
     export "$i"
 done
 
-exec dispatch-test "$1"
+exec dispatch-test "$@"
