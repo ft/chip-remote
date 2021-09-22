@@ -98,6 +98,7 @@ rb_init(struct resizeable_buffer *rb)
 {
     rb->index = 0u;
     rb->size = 0u;
+    rb->buffer = NULL;
     rb_enlarge(rb);
 }
 
