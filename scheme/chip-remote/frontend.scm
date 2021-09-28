@@ -86,7 +86,7 @@
 Returns a new device that reflects this change."
   (unless (device-value-suitable? d v)
     (throw 'value-not-suitable-for-device (device-name d) v))
-  (push-device-state d 'reset v))
+  (push-device-state d 'load v))
 
 (define (cr:set d . kv)
   "Set elements to values specified by KV in device D.
