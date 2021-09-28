@@ -24,91 +24,58 @@ one of the oldest programming languages available) a host of very powerful
 features. Guile scheme is a free software implementation of the language, with a
 lot of extensions, that is readily available on many platforms.
 
-The remote-board firmware implementation has been done in C. It implements all
-features of the protocol specification. A prototype board featuring an
-MSP430f1481 micro controller from Texas Instruments has been built and
-successfully tested.
+The remote-board firmware implementation has been done in C and is based upon
+the Zephyr Open Source RTOS.
 
 
 Current contents:
 
   Directories:
 
+  - doc/
+
+    Here you will find the system's documentation, including the protocol
+    specification as well as the client library manual.
+
   - examples/
 
-    Contains example scripts that use the client library.
+    Contains example scripts that use the client library. Most of these are
+    outdated at the moment.
 
-  - perl/
+  - firmware/
 
-    This is a module path specific to any Perl scripts in the distribution.
-
-  - remote-fw/
-
-    Here you can find an example implementation of a remote firmware for
-    microcontrollers that talks the chip-remote protocol.
+    This directory contains an implementation of a remote firmware for
+    microcontrollers based on the Zephyr Open Source Real Time Operating
+    System.
 
   - scheme/
 
     This directory holds the reference implementation of the client library
     written in GNU Guile scheme.
 
-  - scripts/
-
-    Here, you can find some helper scripts, that may be useful when hacking on
-    chip-remote source code.
-
-  - simulator/
-
-    The ‘simulator’ sub-directory contains a Perl script that opens a pseudo
-    terminal and responds to bytes send to it like a remote board with a
-    firmware that talks the chip-remote protocol would.
-
-    It is used to implement interaction tests for the client library.
-
   - tests/
 
     Shockingly, this directory contains the project's test-suite.
 
+  - tools/
+
+    Here, you can find some helper scripts, that may be useful when hacking on
+    chip-remote source code.
+
 
   Files:
 
-  - Makefile: In chip-remote, the top-level Makefile is only used run the
-    test-suite.
+  - Makefile: The top-level Makefile takes care of byte-compiling the scheme
+    client library, generating documentation, running the system's test suite
+    etc. If you have all required dependencies at your disposal and updated all
+    submodules correctly, you can do ‘make happiness’ to generate most of the
+    system in one go.
+
+  - common.mk: This is a make file snippet defining all source files of the
+    scheme client library for chip-remote. It is used by Makefiles.
 
   - LICENCE: The file contains the licence used with all software of the
     project. Note that “rccep-spec.org” uses a different licence that is
     contained at the bottom of the file.
 
   - README: This file...
-
-  - client-library.org: This is a text-file, that describes the organisation of
-    the client library in a little detail, so that one has an idea of how to
-    approach the code.
-
-  - compile: A helper script to byte-compile the client library, that is
-    written in GNU Guile Scheme. "make byte-compile" uses this file.
-
-  - cr-valgrind: This is a wrapper around ‘valgrind’ with a set of options
-    suitable for chip-remote's ‘remote-fw’ example firmware, to find possible
-    memory leaks.
-
-  - dev-env: Use this to set some environment variables, so that you can work
-    with the scheme code directly from the source-tree instead of having to
-    install everything to the system first. Very useful during development.
-
-  - guile-in-here: Starts a guile instance, that points its load-path to the
-    code in the source tree via the use of ‘dev-env’.
-
-  - install: This installs the project to the system. "make install" uses this.
-
-  - install-scheme: This script installs the client library to the system's
-    module path.
-
-  - org-export: This script uses emacs with org-mode to turn org-mode markup
-    into html, plain-text and pdf files.
-
-  - single-test: Using this wrapper, you can run single “.t” files from the
-    test-suite.
-
-  - spec.org: This is the actual specification RCCEP protocol in org-mode
-    markup for easy export to many popular formats.
