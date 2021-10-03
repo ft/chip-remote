@@ -76,9 +76,11 @@
 ;;; Public API below                                                         ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (cr:reset d)
+(define* (cr:reset d #:optional v)
   "Load the device's default value."
-  (push-device-state d 'reset (device-default d)))
+  (when (and v(not (device-value-suitable? d v)))
+    (throw 'value-not-suitable-for-device (device-name d) v))
+  (push-device-state d 'reset (or v (device-default d))))
 
 (define (cr:load d v)
   "Load V as the current device value for D.
