@@ -11,6 +11,7 @@
   #:use-module (chip-remote device)
   #:use-module (chip-remote device access)
   #:use-module (chip-remote device transmit)
+  #:use-module (chip-remote frontend)
   #:use-module (chip-remote page-map)
   #:use-module (chip-remote io)
   #:use-module (chip-remote modify)
@@ -18,16 +19,21 @@
   #:export (make-commander))
 
 (define-record-type <cmdr-state>
-  (make-cmdr-state dev con port address default data decode open-hook)
+  (make-cmdr-state device connection port address default decode open-hook)
   cmdr-state?
-  (dev get-device)
-  (con get-connection)
+  (device get-device update-device!)
+  (connection get-connection)
   (port get-port)
   (address get-address)
   (default get-default)
-  (data get-data set-data!)
-  (decode show)
+  (decode get-decoder set-decoder!)
   (open-hook get-open-hook))
+
+(define (show cmdr spec value)
+  (let ((run-decoder (get-decoder cmdr)))
+    (run-decoder spec value)))
+
+(define *void* (if #f #f))
 
 (define (must-be-connected state)
   (let* ((conn (get-connection state))
@@ -36,50 +42,40 @@
                  (port? io-port)
                  (not (port-closed? io-port)))
       (throw 'connection-not-opened conn)))
-  #t)
-
-(define (setup-port c idx bus)
-  ((access-bus->proc bus) c idx))
+  *void*)
 
 (define (cmdr-command cmd state)
   (case cmd
     ((close!)
      (must-be-connected state)
-     (let ((c (get-connection state)))
-       (bye c)
-       (io-close c)))
+     (io-close (get-connection state)))
     ((data)
-     (get-data state))
+     (current-device-state (get-device state)))
     ((decode)
-     ((show state) (get-device state) (get-data state)))
+     (let ((device (get-device state)))
+       (show state device (current-device-state device))))
     ((device)
      (get-device state))
     ((focus!)
      (must-be-connected state)
-     (let ((c (get-connection state)))
-       (setup-port c (get-port state)
-                   ((compose da-bus device-access get-device) state))
-       (focus c (get-port state))
-       (address c (get-address state))))
+     (let ((c (get-connection state))
+           (port (get-port state))
+           (addr (get-address state)))
+       (cr:setup-port! c port (get-device state))
+       ;;(focus c port)
+       (when addr (address c addr))))
     ((open!)
      (let ((c (get-connection state)))
        (io-open c)
-       (hi c)
        ((get-open-hook state) (get-connection state) (get-port state))))
     ((reset!)
-     (set-data! state (get-default state)))
+     (cr:reset (get-device state) (get-default state)))
     ((trace!)
      (assq 'trace (io-opt/set 'trace (not (io-opt/get 'trace)))))
-    ((transmit!)
+    ((push!)
      (must-be-connected state)
-     (let* ((dev (get-device state))
-            (acc (device-access dev))
-            (transmit (da-transmit acc))
-            (transform (transmit-transform transmit))
-            (write-data (da-write acc)))
-       (for-each
-        (lambda (addr) (cmdr-w/rest 'transmit! (list addr) state))
-        (transform (address-map->addresses (device-address-map dev))))))
+     (update-device! state (cr:push! (get-connection state) (get-device state)))
+     *void*)
 
     ;; Unknown commands error out.
     (else (throw 'unknown-simple-command cmd))))
@@ -91,51 +87,37 @@
         (write-data (da-write (device-access dev))))
     (transmit c (write-data (first addr) (second addr) value))))
 
-(define (touched-registers dev lst)
-  (let loop ((rest lst) (acc '()))
-    (if (null? rest)
-        acc
-        (let ((this (car rest)))
-          (loop (cdr rest) (if (member this acc) acc (cons this acc)))))))
-
 (define (cmdr-w/rest cmd args state)
   (case cmd
     ((decode)
-     (let ((extr (device-extract (get-device state) (get-data state) args)))
-       ((show state) (assq-ref extr 'part) (assq-ref extr 'item))))
+     (let* ((device (get-device state))
+            (extr (device-extract device (current-device-state device) args)))
+       (show state (assq-ref extr 'part) (assq-ref extr 'item))))
     ((change!)
      (must-be-connected state)
-     (cmdr-w/rest 'set! args state)
-     (let ((dev (get-device state)))
-       (for-each
-        (lambda (addr)
-          (cmdr-w/rest 'transmit! (list addr) state))
-        (touched-registers dev
-                           (map (compose (lambda (addr)
-                                           (take addr 2))
-                                         (lambda (addr)
-                                           (find-canonical-address dev addr))
-                                         car)
-                                args)))))
+     (update-device! state (apply cr:change! (cons* (get-connection state)
+                                                    (get-device state)
+                                                    args)))
+     *void*)
     ((load!)
-     (set-data! state (car args)))
+     (update-device! state (cr:load (get-device state) (car args)))
+     *void*)
     ((set!)
-     (set-data! state (apply chain-modify
-                             (cons (get-device state)
-                                   (cons (get-data state) args)))))
+     (update-device! state (apply cr:load (cons (get-device state) args)))
+     *void*)
     ((transmit!)
      (must-be-connected state)
-     (let ((c (get-connection state))
-           (extr (device-extract (get-device state) (get-data state) args)))
+     (let* ((device (get-device state))
+            (c (get-connection state))
+            (extr (device-extract device (current-device-state device) args)))
        (transmit-data c (get-device state) extr)))
 
     ;; Unknown commands error out here as well.
     (else (throw 'unknown-complex-command cmd args))))
 
 (define* (make-commander #:key
-                         device connection data decode
-                         (port 0) (address 0)
-                         open-hook)
+                         device connection default (decode cr:decode)
+                         (port 0) address (open-hook (lambda (c n) #t)))
   "Return a device commander object
 
 The chip-remote library provides a powerful framework to express configuration
@@ -182,7 +164,7 @@ connected device. Example:
     (define pll (make-commander #:device adf4169
                                 #:connection my-connection))
     (pll)
-    (pll 'transmit!)
+    (pll 'push!)
     (pll 'set! '(ramp-enabled #t))
 
 As these examples suggest, the object can be called with zero or more
@@ -203,7 +185,7 @@ Commands without further arguments are called *\"simple commands\"*. They are:
 
 - ‘trace!’ → Toggles tracing in the ‘(chip-remote io)’ module.
 
-- ‘transmit!’ → Transmits the entire register memory into the device via RCCEP.
+- ‘push!’ → Transmits the entire register memory into the device via RCCEP.
   This order transformations contained in a device description into account in
   order to transfer the all registers in a manner suitable for the connected
   device.
@@ -259,23 +241,21 @@ Examples:
     ;; Transmit the local register memory into the device, while
     ;; respecting the proper order in which the registers need to
     ;; be transferred as specified in the ADF4169's description.
-    (pll 'transmit!)
+    (pll 'push!)
 
 Note that these objects, unlike most of the rest of the library perform lots of
 mutations: On connected device of course, and also on their local register
 memory copy."
-(unless (device? device)
+  (unless (device? device)
     (throw 'cr-missing-data 'device device))
   (unless (cr-connection? connection)
     (throw 'cr-missing-data 'connection connection))
-  (let* ((default (or data (device-default device)))
-         (state (make-cmdr-state device connection port
-                                 address default default
-                                 (or decode cr:decode)
-                                 (or open-hook (lambda (c n) #t)))))
+  (let ((state (make-cmdr-state device connection port address
+                                default decode open-hook)))
     (case-lambda
       (()
-       ((show state) (get-device state) (get-data state)))
+       (let ((device (get-device state)))
+         (show state device (current-device-state device))))
       ((cmd)
        (cmdr-command cmd state))
       ((cmd . rest)
