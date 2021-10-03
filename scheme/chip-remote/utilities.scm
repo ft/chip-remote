@@ -2,6 +2,7 @@
   #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 control)
   #:use-module (srfi srfi-11)
+  #:use-module (srfi srfi-9 gnu)
   #:export (!!
             2e
             addr=
@@ -19,6 +20,10 @@
             all
             list-of-integers?
             list-of-list-of-integers?
+            structurally-equal?
+            diff*
+            diff
+            make-diff
             string-ends-in-newline?
             string-strip-newlines
             timeout->select
@@ -94,6 +99,31 @@
 (define (list-of-integers? v)
   (and (list? v)
        (all integer? v)))
+
+(define (structurally-equal? a b)
+  (cond ((and (not (pair? a)) (not (pair? b))) #t)
+        ((and (pair? a) (pair? b))
+         (and (structurally-equal? (car a) (car b))
+              (structurally-equal? (cdr a) (cdr b))))
+        (else #f)))
+
+(define-immutable-record-type <diff>
+  (make-diff old new)
+  diff?
+  (old old-part)
+  (new new-part))
+
+(define (diff* a b)
+  (unless (structurally-equal? a b)
+    (throw 'diff:unsupported-arguments a b))
+  (cond ((pair? a) (cons (diff* (car a) (car b))
+                         (diff* (cdr a) (cdr b))))
+        ((equal? a b) a)
+        (else (make-diff a b))))
+
+(define (diff a b)
+  (values (not (equal? a b))
+          (diff* a b)))
 
 (define (addr< a b)
   (if (or (null? a)
