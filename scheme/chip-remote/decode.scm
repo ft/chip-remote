@@ -6,6 +6,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 optargs)
+  #:use-module (ice-9 match)
   #:use-module (chip-remote codecs)
   #:use-module (chip-remote combination)
   #:use-module (chip-remote decode types)
@@ -17,8 +18,10 @@
   #:use-module (chip-remote register)
   #:use-module (chip-remote item)
   #:use-module (chip-remote semantics)
+  #:use-module (chip-remote utilities)
   #:export (decode
             decode*
+            decode-register-diff
             make-processor
             make-processor-state
             ps-address
@@ -300,3 +303,15 @@
   (let ((value* (or value (current-device-state description))))
     (process (make-processor) (make-processor-state #:debug? debug?)
              (decode* description value*))))
+
+(define (decode-register-diff lst)
+  (concatenate
+   (map (lambda (x)
+          (match x
+            ((item old new)
+             (let* ((d-old (decode item old))
+                    (d-new (decode item new))
+                    (name (car d-old)))
+               (list (list name (make-diff (cons old (cdr d-old))
+                                           (cons new (cdr d-new)))))))))
+        lst)))

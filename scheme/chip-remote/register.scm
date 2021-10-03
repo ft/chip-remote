@@ -26,6 +26,7 @@
             register-ref/address
             register-set
             register-fold
+            register-diff
             register->alist
             rename-register
             prefix-register
@@ -234,3 +235,14 @@
 
 (define (rename-register reg fnc)
   (replace-register-items reg (map fnc (register-items reg))))
+
+(define (register-diff r a b)
+  (fold (lambda (x acc)
+          (let* ((getter (item-get x))
+                 (va (getter a))
+                 (vb (getter b)))
+            (if (= va vb)
+                acc
+                (cons (list x va vb) acc))))
+        '()
+        (sorted-items r)))
