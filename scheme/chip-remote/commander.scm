@@ -56,6 +56,16 @@
 
 (define *void* (if #f #f))
 
+(define (make-args c? s args)
+  (if c?
+      (cons* (get-connection s) (get-device s) args)
+      (cons (get-device s) args)))
+
+(define (update! c? s f args)
+  (when c? (must-be-connected s))
+  (update-device! s (apply f (make-args c? s args)))
+  *void*)
+
 (define (cmdr-command cmd state)
   (match cmd
     ('open! (let ((c (get-connection state)))
@@ -66,8 +76,6 @@
                (must-be-connected state)
                (io-close (get-connection state))))
 
-    ('trace! (assq 'trace (io-opt/set 'trace (not (io-opt/get 'trace)))))
-
     ('focus! (begin
                (must-be-connected state)
                (let ((c (get-connection state))
@@ -77,44 +85,21 @@
                  ;;(focus c port)
                  (when addr (address c addr)))))
 
-    ('reset! (cr:reset (get-device state) (get-default state)))
-
-    ('push! (begin
-              (must-be-connected state)
-              (update-device! state (cr:push! (get-connection state)
-                                              (get-device state)))
-              *void*))
-
-    ('decode (commander:decode-all state))
-
+    ('trace!     (assq 'trace (io-opt/set 'trace (not (io-opt/get 'trace)))))
+    ('push!      (update! #t state cr:push! '()))
+    ('reset!     (update! #f state cr:reset (list (get-default state))))
+    ('decode     (commander:decode-all state))
     ('connection (get-connection state))
-
-    ('data (current-device-state (get-device state)))
-
-    ('device (get-device state))
+    ('data       (current-device-state (get-device state)))
+    ('device     (get-device state))
 
     (_ (throw 'unknown-simple-command cmd))))
 
 (define (cmdr-w/rest cmd args state)
   (match (cons cmd args)
-    (('load! datum) (begin
-                      (update-device! state (cr:load (get-device state) datum))
-                      *void*))
-
-    (('set! kv ...) (begin
-                      (update-device! state
-                                      (apply cr:set
-                                             (cons (get-device state) kv)))
-                      *void*))
-
-    (('change! kv ...) (begin
-                         (must-be-connected state)
-                         (update-device! state
-                                         (apply cr:change!
-                                                (cons* (get-connection state)
-                                                       (get-device state)
-                                                       kv)))
-                         *void*))
+    (('load! datum)    (update! #t state cr:load '()))
+    (('set! kv ...)    (update! #f state cr:set kv))
+    (('change! kv ...) (update! #t state cr:change! kv))
 
     (('transmit! addr) (begin
                          (must-be-connected state)
@@ -263,10 +248,13 @@ Examples:
 Note that these objects, unlike most of the rest of the library perform lots of
 mutations: On connected device of course, and also on their local register
 memory copy."
+
   (unless (device? device)
     (throw 'cr-missing-data 'device device))
+
   (unless (cr-connection? connection)
     (throw 'cr-missing-data 'connection connection))
+
   (let ((state (make-cmdr-state device connection port address
                                 default decode open-hook)))
     (case-lambda
