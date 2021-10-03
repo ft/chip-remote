@@ -4,6 +4,7 @@
 
 (define-module (chip-remote commander)
   #:use-module (ice-9 optargs)
+  #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module ((chip-remote decode) #:prefix cr:)
@@ -33,7 +34,9 @@
   (let ((run-decoder (get-decoder cmdr)))
     (run-decoder spec value)))
 
-(define *void* (if #f #f))
+(define (commander:decode-all state)
+  (let ((device (get-device state)))
+    (show state device (current-device-state device))))
 
 (define (must-be-connected state)
   (let* ((conn (get-connection state))
@@ -44,42 +47,6 @@
       (throw 'connection-not-opened conn)))
   *void*)
 
-(define (cmdr-command cmd state)
-  (case cmd
-    ((close!)
-     (must-be-connected state)
-     (io-close (get-connection state)))
-    ((data)
-     (current-device-state (get-device state)))
-    ((decode)
-     (let ((device (get-device state)))
-       (show state device (current-device-state device))))
-    ((device)
-     (get-device state))
-    ((focus!)
-     (must-be-connected state)
-     (let ((c (get-connection state))
-           (port (get-port state))
-           (addr (get-address state)))
-       (cr:setup-port! c port (get-device state))
-       ;;(focus c port)
-       (when addr (address c addr))))
-    ((open!)
-     (let ((c (get-connection state)))
-       (io-open c)
-       ((get-open-hook state) (get-connection state) (get-port state))))
-    ((reset!)
-     (cr:reset (get-device state) (get-default state)))
-    ((trace!)
-     (assq 'trace (io-opt/set 'trace (not (io-opt/get 'trace)))))
-    ((push!)
-     (must-be-connected state)
-     (update-device! state (cr:push! (get-connection state) (get-device state)))
-     *void*)
-
-    ;; Unknown commands error out.
-    (else (throw 'unknown-simple-command cmd))))
-
 (define (transmit-data c dev data)
   (let ((addr (assq-ref data 'address))
         (part (assq-ref data 'part))
@@ -87,33 +54,83 @@
         (write-data (da-write (device-access dev))))
     (transmit c (write-data (first addr) (second addr) value))))
 
-(define (cmdr-w/rest cmd args state)
-  (case cmd
-    ((decode)
-     (let* ((device (get-device state))
-            (extr (device-extract device (current-device-state device) args)))
-       (show state (assq-ref extr 'part) (assq-ref extr 'item))))
-    ((change!)
-     (must-be-connected state)
-     (update-device! state (apply cr:change! (cons* (get-connection state)
-                                                    (get-device state)
-                                                    args)))
-     *void*)
-    ((load!)
-     (update-device! state (cr:load (get-device state) (car args)))
-     *void*)
-    ((set!)
-     (update-device! state (apply cr:load (cons (get-device state) args)))
-     *void*)
-    ((transmit!)
-     (must-be-connected state)
-     (let* ((device (get-device state))
-            (c (get-connection state))
-            (extr (device-extract device (current-device-state device) args)))
-       (transmit-data c (get-device state) extr)))
+(define *void* (if #f #f))
 
-    ;; Unknown commands error out here as well.
-    (else (throw 'unknown-complex-command cmd args))))
+(define (cmdr-command cmd state)
+  (match cmd
+    ('open! (let ((c (get-connection state)))
+              (io-open c)
+              ((get-open-hook state) (get-connection state) (get-port state))))
+
+    ('close! (begin
+               (must-be-connected state)
+               (io-close (get-connection state))))
+
+    ('trace! (assq 'trace (io-opt/set 'trace (not (io-opt/get 'trace)))))
+
+    ('focus! (begin
+               (must-be-connected state)
+               (let ((c (get-connection state))
+                     (port (get-port state))
+                     (addr (get-address state)))
+                 (cr:setup-port! c port (get-device state))
+                 ;;(focus c port)
+                 (when addr (address c addr)))))
+
+    ('reset! (cr:reset (get-device state) (get-default state)))
+
+    ('push! (begin
+              (must-be-connected state)
+              (update-device! state (cr:push! (get-connection state)
+                                              (get-device state)))
+              *void*))
+
+    ('decode (commander:decode-all state))
+
+    ('connection (get-connection state))
+
+    ('data (current-device-state (get-device state)))
+
+    ('device (get-device state))
+
+    (_ (throw 'unknown-simple-command cmd))))
+
+(define (cmdr-w/rest cmd args state)
+  (match (cons cmd args)
+    (('load! datum) (begin
+                      (update-device! state (cr:load (get-device state) datum))
+                      *void*))
+
+    (('set! kv ...) (begin
+                      (update-device! state
+                                      (apply cr:set
+                                             (cons (get-device state) kv)))
+                      *void*))
+
+    (('change! kv ...) (begin
+                         (must-be-connected state)
+                         (update-device! state
+                                         (apply cr:change!
+                                                (cons* (get-connection state)
+                                                       (get-device state)
+                                                       kv)))
+                         *void*))
+
+    (('transmit! addr) (begin
+                         (must-be-connected state)
+                         (let* ((device (get-device state))
+                                (c (get-connection state))
+                                (extr (device-extract device
+                                                      (current-device-state device)
+                                                      addr)))
+                           (transmit-data c (get-device state) extr))))
+
+    (('decode addr) (let* ((device (get-device state))
+                           (data (current-device-state device))
+                           (extr (device-extract device data addr)))
+                      (show state (assq-ref extr 'part) (assq-ref extr 'item))))
+
+    (_ (throw 'unknown-complex-command cmd args))))
 
 (define* (make-commander #:key
                          device connection default (decode cr:decode)
@@ -253,10 +270,6 @@ memory copy."
   (let ((state (make-cmdr-state device connection port address
                                 default decode open-hook)))
     (case-lambda
-      (()
-       (let ((device (get-device state)))
-         (show state device (current-device-state device))))
-      ((cmd)
-       (cmdr-command cmd state))
-      ((cmd . rest)
-       (cmdr-w/rest cmd rest state)))))
+      (()           (commander:decode-all state))
+      ((cmd)        (cmdr-command cmd state))
+      ((cmd . rest) (cmdr-w/rest cmd rest state)))))
