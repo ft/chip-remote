@@ -252,9 +252,6 @@ memory copy."
   (unless (device? device)
     (throw 'cr-missing-data 'device device))
 
-  (unless (cr-connection? connection)
-    (throw 'cr-missing-data 'connection connection))
-
   (let ((state (make-cmdr-state device connection port address
                                 default decode open-hook)))
     (case-lambda
