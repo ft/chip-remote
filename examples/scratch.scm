@@ -1,5 +1,6 @@
 (use-modules (ice-9 match)
              (ice-9 control)
+             (ice-9 pretty-print)
              (srfi srfi-1)
              (termios)
              (termios system)
@@ -95,6 +96,7 @@
   (io-open c))
 
 (define (ignore x) (if #f #t))
+(define (pp obj) (pretty-print obj #:width 80 #:max-expr-width 100))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
