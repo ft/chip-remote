@@ -1,10 +1,12 @@
 (define-module (chip-remote device)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9 gnu)
+  #:use-module (srfi srfi-11)
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 pretty-print)
+  #:use-module (chip-remote decode)
   #:use-module (chip-remote device access)
   #:use-module (chip-remote device transmit)
   #:use-module (chip-remote device spi)
@@ -12,6 +14,7 @@
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote page-map)
+  #:use-module (chip-remote utilities)
   #:use-module (data-structures sized-stack)
   #:export (generate-device
             make-device
@@ -41,7 +44,8 @@
             define-device
             find-canonical-address
             canonical-address->index
-            device-extract))
+            device-extract
+            device-history))
 
 (define-immutable-record-type <device>
   (make-device* meta page-map combinations access state)
@@ -336,3 +340,50 @@
                                  ((not (every integer? regvals)) (return #f))
                                  (else #t))))
                        v sizes)))))))
+
+(define (fe0 lst)
+  (filter (compose not null?) lst))
+
+(define (fe1 lst)
+  (filter (lambda (x) (> (length x) 1)) lst))
+
+(define (minimise-diff/item item)
+  (match item
+    ((name . value) (if (diff? value)
+                        item
+                        '()))))
+
+(define (minimise-diff/register reg)
+  (match reg
+    ((addr items ...) (cons addr (fe0 (map minimise-diff/item items))))))
+
+(define (minimise-diff/page page)
+  (match page
+    (('combinations kv ...) (cons 'combinations
+                                  (fe0 (map minimise-diff/item kv))))
+    ((addr kv ...) (cons addr
+                         (fe1 (map minimise-diff/register kv))))))
+
+(define (minimise-diff/device device)
+  (fe1 (map minimise-diff/page device)))
+
+(define (minimise-diff data)
+  (match data
+    ((mark . rest) (cons mark (minimise-diff/device rest)))))
+
+(define (xdiff a b)
+  (let ((ra (cdr a))
+        (rb (cdr b)))
+    (cons (car b)
+          (let-values (((diff? v) (diff ra rb)))
+            v))))
+
+(define* (device-history dev #:optional count)
+  (let* ((dec (lambda (x) (cons (car x) (decode dev (cdr x)))))
+         (st (device-state dev))
+         (count* (and count (min (1+ count) (sized-stack-used st))))
+         (memory (sized-stack-memory st))
+         (data (reverse (if count* (take memory count*) memory))))
+    (if (null? data)
+        '()
+        (map minimise-diff (pair-combine xdiff (map dec data))))))
