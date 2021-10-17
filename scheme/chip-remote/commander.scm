@@ -247,6 +247,8 @@ memory copy."
                                         addr)))
              (transmit-data c (get-device state) extr))))
 
+        (('history)     (device-history (get-device state)))
+        (('history n)   (device-history (get-device state) n))
         (('decode)      (commander:decode-all state))
         (('decode addr)
          (let* ((device (get-device state))
