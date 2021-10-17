@@ -24,6 +24,7 @@
             diff*
             diff
             make-diff
+            diff?
             string-ends-in-newline?
             string-strip-newlines
             timeout->select
