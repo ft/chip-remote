@@ -1,6 +1,7 @@
 (define-module (chip-remote utilities)
   #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 control)
+  #:use-module (ice-9 match)
   #:use-module (srfi srfi-11)
   #:use-module (srfi srfi-9 gnu)
   #:export (!!
@@ -10,6 +11,7 @@
             addr>
             cat
             flatten
+            pair-combine
             map/last
             kwa-ref
             log2
@@ -43,6 +45,23 @@
         ((not (pair? lst)) (list lst))
         (else (append (flatten (car lst))
                       (flatten (cdr lst))))))
+
+(define (pair-combine f l)
+  "Call f for pairs of values from l, returning a list of results.
+
+Given a list (a b c d e), it calls f like this:
+
+  (f a b)
+  (f b c)
+  (f c d)
+  (f d e)
+
+The function returns a list comprised of the return values of these function
+calls. It returns the empty list for empty and singleton lists."
+  (match l
+    (() '())
+    ((_) '())
+    ((a b . rest) (cons (f a b) (pair-combine f (cons b rest))))))
 
 (define (2e n)
   (ash 1 n))
