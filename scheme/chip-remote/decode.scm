@@ -238,18 +238,14 @@
         ((register? desc)
          (make-register/decoder
           value
-          (map (lambda (x)
-                 (let ((getter (item-get x)))
-                   (decode* x (getter value))))
+          (map (lambda (x) (decode* x (item-get x value)))
                (register-items desc))
           desc))
         ((register-window? desc)
          (let ((new-value (ash value (window-offset desc))))
            (make-register-window/decoder
             new-value
-            (map (lambda (x)
-                   (let ((getter (item-get x)))
-                     (decode* x (getter new-value))))
+            (map (lambda (x) (decode* x (item-get x new-value)))
                  (window-items desc))
             desc)))
         ((register-map? desc)

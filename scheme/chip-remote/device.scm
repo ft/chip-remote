@@ -11,41 +11,37 @@
   #:use-module (chip-remote device transmit)
   #:use-module (chip-remote device spi)
   #:use-module (chip-remote item)
+  #:use-module (chip-remote modify)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote page-map)
   #:use-module (chip-remote utilities)
   #:use-module (data-structures sized-stack)
-  #:export (generate-device
+  #:export (generate-device          ;; Device creation
             make-device
-            device?
+            define-device
+            device?                  ;; Device type API
             device-value-suitable?
-            device-state
-            new-device-state
-            current-device-state
-            push-device-state
-            reset-device-state
             device-meta
             device-page-map
-            device-register
-            device-ref
-            device-ref->address
-            device-access
-            device-address
-            device-canonical-address
-            device-address-map
-            address-map->addresses
-            device-value-address
-            device-registers
             device-combinations
-            device-item-names
-            device-name
+            device-access
+            device-state
+            new-device-state
+            current-device-state     ;; Device utilities
+            push-device-state
+            reset-device-state
             device-default
-            define-device
-            find-canonical-address
-            canonical-address->index
-            device-extract
-            device-history))
+            device-history
+            device-name
+            device-registers
+            device-item-names
+            device-canonical
+            device-ref
+            device-address
+            device-address:register
+            device-address-map
+            device-extract))
 
 (define-immutable-record-type <device>
   (make-device* meta page-map combinations access state)
@@ -193,104 +189,6 @@
                           (map cdr
                                (page-map-table (device-page-map dev)))))))
 
-(define (device-register dev)
-  (let ((pm (page-map-table (device-page-map dev))))
-    ;; Only one page-map entry and no address on the page means there is no
-    ;; real page-map in the chip, so it just has a single register-map.
-    (if (and (= (length pm) 1)
-             (eq? (caar pm) #f))
-        (register-map-register (cdar pm))
-        (throw 'more-than-single-register-map dev))))
-
-(define (device-ref->address device name)
-  (page-map-ref->address (device-page-map device) name))
-
-(define (device-ref device name)
-  (page-map-ref (device-page-map device) name))
-
-(define device-address
-  (case-lambda
-    ((device page-addr)
-     (page-map-address (device-page-map device) page-addr))
-    ((device page-addr reg-addr)
-     (if (eq? page-addr 'combinations)
-         (assq-ref (device-combinations device) reg-addr)
-         (register-map-address (page-map-address (device-page-map device)
-                                                 page-addr)
-                               reg-addr)))
-    ((device page-addr reg-addr item-addr)
-     (register-map-address (page-map-address (device-page-map device)
-                                             page-addr)
-                           reg-addr item-addr))
-    ((device page-addr reg-addr name cnt)
-     (register-map-address (page-map-address (device-page-map device)
-                                             page-addr)
-                           reg-addr name cnt))))
-
-(define (device-canonical-address device addr-lst)
-  (apply device-address (cons device addr-lst)))
-
-(define device-value-address
-  (case-lambda
-    ((device value page-addr)
-     (list-ref value (or (page-address->index (device-page-map device)
-                                              page-addr)
-                         0)))
-    ((device value page-addr reg-addr)
-     (list-ref (device-value-address device value page-addr)
-               (or (register-address->index (device-address device page-addr)
-                                            reg-addr)
-                   0)))
-    ((device value page-addr reg-addr _)
-     (device-value-address device value page-addr reg-addr))
-    ((device value page-addr reg-addr _ __)
-     (device-value-address device value page-addr reg-addr))))
-
-(define (false? x)
-  (not x))
-
-(define (find-canonical-address dev addr)
-  (define (maybe-address? a)
-    (or (not a) (integer? a)))
-  (match addr
-    ;; Just a symbol
-    ((? symbol? addr)
-     (let ((c (device-address dev 'combinations addr)))
-       (if c
-           (list 'combinations addr)
-           (device-ref->address dev addr))))
-    ;; Just an integer, assume register address
-    ((? integer? ra)
-     (list #f ra))
-    ;; (#f n) => address register n in page #f
-    (((? false? pa) (? integer? ra))
-     (list pa ra))
-    ;; (combinations name) => address combination name
-    (('combinations (? symbol? name))
-     (list 'combinations name))
-    ;; (n m) => Address specific item in page #f
-    (((? integer? ra) (? integer? io))
-     (list #f ra io))
-    ;; This is a fully qualified address already
-    (((? maybe-address? pa) (? maybe-address? ra) (? integer? io))
-     (list pa ra io))))
-
-(define (device-extract dev value addr)
-  (let* ((faddr (apply find-canonical-address (cons dev (if (symbol? addr)
-                                                            (list addr)
-                                                            addr))))
-         (part (apply device-address (cons dev faddr)))
-         (pv (apply device-value-address (cons* dev value faddr))))
-    `((address . ,faddr)
-      (part . ,part)
-      (value . ,pv)
-      (item . ,(if (item? part) ((item-get part) pv) pv)))))
-
-(define (addr< a b)
-  (and (integer? a)
-       (integer? b)
-       (< a b)))
-
 (define (device-address-map dev)
   (sort (page-map-fold
          (lambda (page-addr page acc)
@@ -299,47 +197,27 @@
                               (lambda (reg-addr reg acc)
                                 (cons reg-addr acc))
                               '() page)
-                             addr<))
+                             index<))
                  acc))
          '() (device-page-map dev))
         (lambda (a b)
-          (addr< (car a) (car b)))))
+          (index< (car a) (car b)))))
 
-(define (address-map->addresses lst)
-  (apply append
-         (map (lambda (a)
-                (map (lambda (b)
-                       (list (car a) b))
-                     (cdr a)))
-              lst)))
+(define (device-canonical d . item-address)
+  (apply page-map-canonical (cons (device-page-map d) item-address)))
 
-(define (canonical-address->index device lst)
-  (let* ((pm (device-page-map device))
-         (pi (page-address->index pm (car lst)))
-         (rm (cdr (list-ref (page-map-table pm) pi)))
-         (ri (register-map-address->index rm (cadr lst))))
-    (if (< (length lst) 3)
-        (list pi ri)
-        (list pi ri (caddr lst)))))
+(define (device-address d . item-address)
+  (apply page-map-address (cons (device-page-map d) item-address)))
+
+(define (device-address:register d . item-address)
+  (apply page-map-address:register (cons (device-page-map d) item-address)))
+
+(define (device-ref d . args)
+  (apply page-map-ref (cons (device-page-map d) args)))
 
 (define (device-value-suitable? d v)
   "Test whether ‘v’ is a suitable value for the device ‘d’."
-  (let* ((pm (device-page-map d))
-         (sizes (map (lambda (p)
-                       (match p ((addr . rm) (length (register-map-table rm)))))
-                     (page-map-table pm))))
-    (if (not (= (length sizes)
-                (length v)))
-        #f
-        (call/ec
-         (lambda (return)
-           (every identity
-                  (map (lambda (regvals size)
-                         (let ((n (length regvals)))
-                           (cond ((not (= n size)) (return #f))
-                                 ((not (every integer? regvals)) (return #f))
-                                 (else #t))))
-                       v sizes)))))))
+  (structurally-equal? v (device-default d)))
 
 (define (fe0 lst)
   (filter (compose not null?) lst))
@@ -387,3 +265,13 @@
     (if (null? data)
         '()
         (map minimise-diff (pair-combine xdiff (map dec data))))))
+
+(define (device-extract dev value addr)
+  (let* ((faddr (apply device-canonical
+                       (cons dev (if (list? addr) addr (list addr)))))
+         (part (apply device-ref (cons dev faddr)))
+         (pv (apply value-at-address (cons value faddr))))
+    `((address . ,faddr)
+      (part . ,part)
+      (value . ,pv)
+      (item . ,(if (item? part) (item-get part pv) pv)))))

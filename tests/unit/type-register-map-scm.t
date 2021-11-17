@@ -37,22 +37,22 @@
                                   #:table*
                                   (1 *register-one*)
                                   (2 *register-two*))))
-   (define-test "register-map-address reg1 works"
-     (pass-if-equal? (register-map-address rm 1)
+   (define-test "register-map-ref reg1 works"
+     (pass-if-equal? (register-map-ref rm 1)
                      *register-one*))
 
    (define-test "register-map-address item by name works"
      (pass-if-eq? (item-name (register-map-address rm 1 'bar))
                   'bar))
-   (define-test "register-map-address item by index works"
-     (pass-if-eq? (item-name (register-map-address rm 1 0))
+   (define-test "register-map-ref item by index works"
+     (pass-if-eq? (item-name (register-map-ref rm 1 0))
                   'foo))
    (define-test "register-map-address item by name and index works"
      (pass-if-eq? (item-name (register-map-address rm 1 'foo 0))
                   'foo))
-   (define-test "register-map-ref works"
-     (pass-if-eq? (item-name (register-map-ref rm 'boz))
+   (define-test "register-map-address by name works"
+     (pass-if-eq? (item-name (register-map-address rm 'boz))
                   'boz))
    (define-test "register-map-default works"
      (pass-if-equal? (register-map-default rm)
-                     '(0 0 6)))))
+                     '((0 . 0) (1 . 0) (2 . 6))))))

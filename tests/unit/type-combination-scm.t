@@ -51,12 +51,12 @@
                           thingy '(concatenate thing-high thing-mid thing-low)))
                   #b10101100011001))
 
-  (let* ((sl-addr (find-canonical-address thingy 'stuff-low))
-         (sh-addr (find-canonical-address thingy 'stuff-high))
-         (sl-item (apply device-address (cons thingy sl-addr)))
-         (sh-item (apply device-address (cons thingy sh-addr)))
-         (sl-reg (apply device-address (cons thingy (take sl-addr 2))))
-         (sh-reg (apply device-address (cons thingy (take sh-addr 2)))))
+  (let* ((sl-addr (device-canonical thingy 'stuff-low))
+         (sh-addr (device-canonical thingy 'stuff-high))
+         (sl-item (device-address thingy 'stuff-low))
+         (sh-item (device-address thingy 'stuff-high))
+         (sl-reg (device-address:register thingy 'stuff-low))
+         (sh-reg (device-address:register thingy 'stuff-high)))
     (define-test "Combination 'stuff' partitions correctly"
       (pass-if-equal? (combination-partition thingy
                                              '(concatenate stuff-high stuff-low)
@@ -68,14 +68,14 @@
                          ((,(caddr sl-addr) 0
                            #b010011 ,sl-item)))))))
 
-  (let* ((tl-addr (find-canonical-address thingy 'thing-low))
-         (th-addr (find-canonical-address thingy 'thing-high))
-         (tm-addr (find-canonical-address thingy 'thing-mid))
-         (tl-item (apply device-address (cons thingy tl-addr)))
-         (th-item (apply device-address (cons thingy th-addr)))
-         (tm-item (apply device-address (cons thingy tm-addr)))
-         (tlh-reg (apply device-address (cons thingy (take tl-addr 2))))
-         (tm-reg (apply device-address (cons thingy (take tm-addr 2)))))
+  (let* ((tl-addr (device-canonical thingy 'thing-low))
+         (th-addr (device-canonical thingy 'thing-high))
+         (tm-addr (device-canonical thingy 'thing-mid))
+         (tl-item (device-address thingy 'thing-low))
+         (th-item (device-address thingy 'thing-high))
+         (tm-item (device-address thingy 'thing-mid))
+         (tlh-reg (device-address:register thingy 'thing-low))
+         (tm-reg (device-address:register thingy 'thing-mid)))
     (define-test "Combination 'thing' partitions correctly"
       (pass-if-equal? (combination-partition thingy
                                              '(concatenate thing-high

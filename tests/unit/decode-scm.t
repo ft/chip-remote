@@ -21,7 +21,7 @@
 (with-fs-test-bundle
  (plan 7)
 
- (let* ((reg (device-register ltc6603))
+ (let* ((reg (device-ref ltc6603 #f #f))
         (items (register-items reg)))
    (define-test "Device's register has the right number of items"
      (pass-if-= (length items) 5))

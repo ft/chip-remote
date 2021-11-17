@@ -11,29 +11,29 @@
   #:use-module (chip-remote item)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote utilities)
-  #:export (generate-register
+  #:export (generate-register              ;; Register creation
             make-register
-            register?
+            define-register
+            register?                      ;; Register type API
             register-meta
             register-items
+            register-items:sorted          ;; Register utilities
             register-default
             register-width
             register-item-names
+            register-named-items-count
             register-contains?
+            register-canonical
+            register-canonical-index
             register-address
             register-ref
-            register-ref->address
-            register-ref/address
-            register-set
             register-fold
             register-diff
-            register->alist
             rename-register
             prefix-register
             derive-register-from
             replace-register-items
-            sorted-items
-            define-register))
+            register->alist))
 
 (define-immutable-record-type <register>
   (make-register meta items)
@@ -79,7 +79,7 @@
     (if default
         (cdr default)
         (fold (lambda (x acc)
-                ((item-set x) acc (item-default x)))
+                (item-set x acc (item-default x)))
               0
               (register-items reg)))))
 
@@ -99,64 +99,61 @@
                          (if changed? o biggest-offset)
                          (if changed? (item-width this) width-of-that)))))))))
 
+(define* (register-find-item reg name idx #:key (default (const #f)))
+  (list-iterate (lambda (x a n k)
+                  (if (eq? name x)
+                      (if (= a idx)
+                          (k n)
+                          (1+ a))
+                      a))
+                0 default
+                (map item-name (register-items:sorted reg))))
+
+(define (register-canonical register . item-address)
+  (let ((v (apply register-canonical-index (cons register item-address))))
+    (and v (list v))))
+
+(define (register-canonical-index register . item-address)
+  (match item-address
+    (((? number? index))
+     (if (or (negative? index)
+             (>= index (length (register-items register))))
+         #f
+         index))
+    (((? symbol? name))
+     (register-find-item register name 0))
+    (((? symbol? name) (? number? index))
+     (register-find-item register name index))
+    (_ (throw 'invalid-item-address item-address))))
+
+(define (register-address register . item-address)
+  (let ((ca (apply register-canonical (cons register item-address))))
+    (and ca (apply register-ref (cons register ca)))))
+
 (define (register-item-names reg)
   (map item-name (register-items reg)))
+
+(define (register-named-items-count reg name)
+  (register-fold (lambda (item a)
+                   (if (item-named? item name)
+                       (1+ a)
+                       a))
+                 0 reg))
 
 (define (register-contains? reg item)
   (!! (memq item (register-item-names reg))))
 
-(define-syntax-rule (reg-iter init return reg fnc)
-  (call/ec (lambda (return) (register-fold fnc init reg))))
-
-(define (register-ref->address reg name)
-  (let ((idx (reg-iter 0 return reg
-                       (lambda (item iacc)
-                         (if (eq? (item-name item) name)
-                             (return iacc)
-                             (+ iacc 1))))))
-    (if (>= idx (length (register-items reg)))
-        #f
-        (list idx))))
-
-(define (register-ref reg name)
-  (reg-iter #f return reg
-            (lambda (item iacc)
-              (if (eq? (item-name item) name)
-                  (return item)
-                  #f))))
-
-(define (register-set reg regval item itemval)
-  (let ((item (register-ref reg item)))
-    (unless item
-      (throw 'unknown-register-item item reg))
-    ((item-set item) regval itemval)))
+(define (register-ref reg n)
+  (list-ref (register-items:sorted reg) n))
 
 (define (register-fold fnc init reg)
-  (fold fnc init (sorted-items reg)))
+  (fold fnc init (register-items:sorted reg)))
 
-(define (sorted-items reg)
+(define (register-items:sorted reg)
   (sort (register-items reg)
         (lambda (a b)
           (< (item-offset a)
              (item-offset b)))))
-
-(define register-address
-  (case-lambda
-    ((reg n) (list-ref (sorted-items reg) n))
-    ((reg name n)
-     (call/ec (lambda (return)
-                (let loop ((rest (sorted-items reg)) (cnt 0))
-                  (cond ((null? rest) #f)
-                        ((eq? name (item-name (car rest)))
-                         (if (= cnt n)
-                             (return (car rest))
-                             (loop (cdr rest) (+ cnt 1))))
-                        (else (loop (cdr rest) cnt)))))))))
-
-(define (register-ref/address reg thing)
-  (cond ((symbol? thing) (register-ref reg thing))
-        ((integer? thing) (register-address reg thing))
-        (else (throw 'invalid-item-address thing))))
 
 (define (assq-or-zero lst key)
   (or (assq-ref lst key) 0))
@@ -238,11 +235,10 @@
 
 (define (register-diff r a b)
   (fold (lambda (x acc)
-          (let* ((getter (item-get x))
-                 (va (getter a))
-                 (vb (getter b)))
+          (let ((va (item-get x a))
+                (vb (item-get x b)))
             (if (= va vb)
                 acc
                 (cons (list x va vb) acc))))
         '()
-        (sorted-items r)))
+        (register-items:sorted r)))

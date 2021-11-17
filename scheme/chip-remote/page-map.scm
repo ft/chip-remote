@@ -2,25 +2,30 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 control)
+  #:use-module (ice-9 match)
   #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote process-plist)
   #:use-module (chip-remote item)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote utilities)
-  #:export (generate-page-map
+  #:export (generate-page-map          ;; PageMap creation
             make-page-map
-            page-map?
+            define-page-map
+            page-map?                  ;; PageMap type API
             page-map-table
+            page-map-table:sorted      ;; PageMap utilities
             page-map-register-maps
             page-map-default
             page-map-item-names
             page-map-merge
             page-map-fold
             page-map-ref
-            page-map-ref->address
             page-map-address
-            page-address->index
-            define-page-map))
+            page-map-address:register
+            page-map-find-item
+            page-map-canonical
+            ;; Missing API
+            page-map-registers))
 
 ;; How to share some registers between the register maps of all or even only
 ;; some pages of a device? This needs to be encoded in (chip-remote device).
@@ -35,6 +40,10 @@
 
 (define (page-map-register-maps pm)
   (map cdr (page-map-table pm)))
+
+(define (page-map-table:sorted rm)
+  (sort (page-map-table rm)
+        (lambda (a b) (index< (car a) (car b)))))
 
 (define-syntax generate-page-map
   (lambda (x)
@@ -53,7 +62,7 @@
        #'(make-page-map (list (cons addr exp) ...))))))
 
 (define (page-map-default rm)
-  (map (lambda (x) (register-map-default (cdr x)))
+  (map (lambda (x) (cons (car x) (register-map-default (cdr x))))
        (page-map-table rm)))
 
 (define (page-map-item-names rm)
@@ -72,45 +81,44 @@
         init
         (page-map-table pm)))
 
-(define-syntax-rule (pm-iter init return pm fnc)
-  (call/ec (lambda (return) (page-map-fold fnc init pm))))
+(define (page-map-ref pm . args)
+  (match args
+    (((? index? address))
+     (let ((entry (assv address (page-map-table pm))))
+       (if entry
+           (cdr entry)
+           (throw 'unknown-page-map-address address))))
+    (((? index? pa) (? index? ra))
+     (register-map-ref (page-map-ref pm pa) ra))
+    (((? index? pa) (? index? ra) (? non-negative-integer? idx))
+     (register-map-ref (page-map-ref pm pa) ra idx))
+    (_ (throw 'invalid-page-map-reference args))))
 
-(define (page-map-ref->address pm name)
-  (pm-iter #f return pm
-           (lambda (pa rm pacc)
-             (let ((ra (register-map-ref->address rm name)))
-               (if ra
-                   (return (cons pa ra))
-                   #f)))))
+(define* (page-map-find-item pm name idx #:optional (default (const #f)))
+  (list-iterate (lambda (x a n k)
+                  (let* ((pa (car x))
+                         (rm (cdr x))
+                         (m (register-map-find-item rm name (- idx a))))
+                    (if (list? m)
+                        (k (cons pa m))
+                        (or m a))))
+                0 default
+                (page-map-table:sorted pm)))
 
-(define (page-map-ref pm name)
-  (pm-iter #f return pm
-           (lambda (pa rm pacc)
-             (let ((item (register-map-ref rm name)))
-               (if (item? item)
-                   (return item)
-                   #f)))))
+(define (page-map-canonical pm . item-address)
+  (match item-address
+    (((? symbol? name))
+     (page-map-find-item pm name 0))
+    (((? symbol? name) (? non-negative-integer? n))
+     (page-map-find-item pm name n))
+    (((? index? pa) . rest)
+     (cons pa (apply register-map-canonical (cons (page-map-ref pm pa) rest))))
+    (_ (throw 'invalid-item-address item-address))))
 
-(define page-map-address
-  (case-lambda
-    ((pm page-addr)
-     (pm-iter #f return pm
-              (lambda (pa rm pacc)
-                (if (eqv? pa page-addr)
-                    (return rm)
-                    #f))))
-    ((pm page-addr reg-addr)
-     (register-map-address (page-map-address pm page-addr) reg-addr))
-    ((pm page-addr reg-addr item-addr)
-     (register-map-address (page-map-address pm page-addr)
-                           reg-addr item-addr))
-    ((pm page-addr reg-addr name cnt)
-     (register-map-address (page-map-address pm page-addr)
-                           reg-addr name cnt))))
+(define (page-map-address pm . item-address)
+  (let ((ca (apply page-map-canonical (cons pm item-address))))
+    (and ca (apply page-map-ref (cons pm ca)))))
 
-(define (page-address->index pm addr)
-  (pm-iter 0 return pm
-           (lambda (pa rm idx)
-             (if (eqv? pa addr)
-                 (return idx)
-                 (+ idx 1)))))
+(define (page-map-address:register pm . item-address)
+  (let ((ca (apply page-map-canonical (cons pm item-address))))
+    (and ca (apply page-map-ref (cons pm (drop-right ca 1))))))

@@ -21,6 +21,15 @@
             modify*
             chain-modify
             chain-modify*
+            xcanonical
+            xdefault
+            xref
+            xmodify
+            xmodify*
+            xchain-modify
+            xchain-modify*
+            apply-at-address
+            value-at-address
             chain-modify-script
             minimise-modify-script
             merge-minimised-script
@@ -30,6 +39,34 @@
             register-matches?
             regmap-matches?
             make-item-mod-expr))
+
+(define (apply-at-address* f v addr)
+  (match addr
+    ((a)     (assoc-apply eqv? f v a))
+    ((a . r) (assoc-apply eqv? (lambda (v) (apply-at-address* f v r)) v a))))
+
+(define (apply-at-address f v a)
+  "Apply the function f to the element in the value v addressed by a.
+
+The address ‘a’ has to be a canonical address as used by the -ref functions in
+the library's modules, applicable to the given value ‘v’. The function ’f’ is
+applied to the extracted value and the return value of ‘apply-at-address’ is
+the original value with the result of the function application at the addressed
+position."
+  (if (and (list? a) (> (length a) 1))
+      (catch 'unknown-key
+        (lambda () (apply-at-address* f v (drop-right a 1)))
+        (lambda (k . s) (throw 'invalid-address (car s) a)))
+      (throw 'invalid-address a)))
+
+(define (value-at-address v . addr)
+  (if (integer? v)
+      v
+      (match addr
+        (((? index? n)) (assv-ref v n))
+        (((? index? n) . rest)
+         (apply value-at-address (cons (value-at-address v n) rest)))
+        (_ (throw 'invalid-address addr)))))
 
 (define (not-integer? x)
   "Predicate for values that are anything **but** integers."
@@ -58,12 +95,11 @@ register level:
   "Modification backend for registers.
 
 See the modify function about parameters' semantics."
-  ;;(format #t "debug: ~a ~a ~a~%" init addr value)
   (let ((item (modify-ref reg addr)))
     (unless (item? item)
       (throw 'addressing-returned-non-item item addr))
     (if (validate-item-value item value)
-        ((item-set item) init (item-encode item value))
+        (item-set item init (item-encode item value))
         (throw 'invalid-value-for-item value item))))
 
 (define (register-matches? reg addr)
@@ -127,7 +163,7 @@ value used with the item's semantics to produce the desired result."
          (else (throw 'invalid-target target init address value)))
    target init address value))
 
-(define (default-by-target target)
+(define (xdefault target)
   "Returns the default value of a target."
   ((cond ((register? target) register-default)
          ((register-map? target) register-map-default)
@@ -136,10 +172,47 @@ value used with the item's semantics to produce the desired result."
          (else (throw 'invalid-target target)))
    target))
 
+(define (xcanonical target . args)
+  (apply (cond ((register? target) register-canonical)
+               ((register-map? target) register-map-canonical)
+               ((page-map? target) page-map-canonical)
+               ((device? target) device-canonical)
+               (else (throw 'invalid-target target)))
+         (cons target args)))
+
+(define (xref target . args)
+  (apply (cond ((register? target) register-ref)
+               ((register-map? target) register-map-ref)
+               ((page-map? target) page-map-ref)
+               ((device? target) device-ref)
+               (else (throw 'invalid-target target)))
+         (cons target args)))
+
+(define (xmodify target init address value)
+  (let* ((args ((if (list? address) cons list) target address))
+         (ca (apply xcanonical args))
+         (item (apply xref (cons target ca)))
+         (f (lambda (v)
+              (item-set item v (item-encode item value)))))
+    (cond ((register? target)
+           (update-item init (apply register-ref (cons target ca)) value))
+          (else (apply-at-address f init ca)))))
+
+(define (xmodify* target address value)
+  (xmodify target (xdefault target) address value))
+
+(define (xchain-modify target init . lst)
+  (fold (lambda (e acc)
+          (xmodify target acc (car e) (cadr e)))
+        init lst))
+
+(define (xchain-modify* target . lst)
+  (apply xchain-modify (cons* target (xdefault target) lst)))
+
 (define (modify* target address value)
   "This is the same as ‘modify’ with its ‘init’ parameter set to the default
 value that can be derived for ‘target’."
-  (modify target (default-by-target target) address value))
+  (modify target (xdefault target) address value))
 
 (define (chain-modify target init . lst)
   "Apply multiple modifications to a target
@@ -176,24 +249,25 @@ device-address) to reference an item."
 (define (chain-modify* target . lst)
   "This is the same as ‘chain-modify’ with its ‘init’ parameter set to the
 default value that can be derived for ‘target’."
-  (apply chain-modify (cons target (cons (default-by-target target) lst))))
+  (apply chain-modify (cons target (cons (xdefault target) lst))))
 
 (define (make-item-mod-expr d addr v)
   (match addr
-    ((p r i) (let* ((reg (device-address d p r))
-                    (item (register-address reg i)))
+    ((p r i) (let ((reg (apply device-ref (cons d (drop-right addr 1))))
+                   (item (apply device-ref (cons d addr))))
                (list reg p r i v item)))))
 
 (define (chain-modify-script device . lst)
   (fold (lambda (av acc)
           (match av
             ((addr value)
-             (let* ((full-addr (find-canonical-address device addr))
-                    (description (device-canonical-address device full-addr)))
+             (let* ((full-addr (apply device-canonical ((if (list? addr) cons list) device addr)))
+                    (description (apply device-ref (cons device full-addr))))
                (match full-addr
                  (('combinations name)
                   (append acc (combination-partition device description value)))
-                 (else (append acc (list (make-item-mod-expr device full-addr value)))))))))
+                 (else
+                  (append acc (list (make-item-mod-expr device full-addr value)))))))))
         '()
         lst))
 
@@ -206,11 +280,10 @@ default value that can be derived for ‘target’."
           (else rest))))
 
 (define (update-item register-value item item-value)
-  (let ((set (item-set item)))
-    (set register-value
-         (if (validate-item-value item item-value)
-             (item-encode item item-value)
-             (throw 'invalid-value-for-item item-value item)))))
+  (item-set item register-value
+            (if (validate-item-value item item-value)
+                (item-encode item item-value)
+                (throw 'invalid-value-for-item item-value item))))
 
 (define (modify-value-by-index device-value index item item-value)
   (let ((update (lambda (v) (update-item v item item-value))))
@@ -221,12 +294,7 @@ default value that can be derived for ‘target’."
                            (iterate-to-index ri regs update)))))))
 
 (define (replace-register-value device device-value address value)
-  (let ((replace (lambda (x) value)))
-    (match (canonical-address->index device address)
-      ((pi ri)
-       (iterate-to-index pi device-value
-                         (lambda (regs)
-                           (iterate-to-index ri regs replace)))))))
+  (apply-at-address (const value) device-value address))
 
 (define (script-expression->register-address expr)
   (match expr
@@ -293,7 +361,7 @@ default value that can be derived for ‘target’."
   (match segment
     (((reg p r) ((is os vs items) ...))
      (list p r (fold (lambda (i o v item last)
-                       ((item-set item) last (item-encode item v)))
+                       (item-set item last (item-encode item v)))
                      value
                      is os vs items)))))
 
@@ -303,16 +371,13 @@ default value that can be derived for ‘target’."
 (define (values-for-minimised-script device script value)
   (map (lambda (expr)
          (match expr
-           (((reg p r) (e ...))
-            (device-value-address device value p r))))
+           (((reg p r) (e ...)) (value-at-address value (list p r)))))
        script))
 
 (define (apply-modify-expr device value expr)
   (match expr
     ((reg p r i v item) ;; Item modification expression
-     (modify-value-by-index value
-                            (canonical-address->index device (list p r i))
-                            item v))
+     (xmodify (device-page-map device) value (list p r i) v))
     (((reg p r) ((is os vs items) ...)) ;; Combination modification expression
      (fold (lambda (i v item acc)
              (apply-modify-expr device acc `(,reg ,p ,r ,i ,v ,item)))

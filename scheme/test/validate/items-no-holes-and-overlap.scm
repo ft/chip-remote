@@ -30,7 +30,7 @@
 
 (define (make-alignment-test fnc)
   (lambda (reg)
-    (let ((items (sorted-items reg)))
+    (let ((items (register-items:sorted reg)))
       (let loop ((rest items))
         (when (> (length rest) 1)
           (let ((focus (take rest 2)))

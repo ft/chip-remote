@@ -39,30 +39,32 @@
   #:use-module (chip-remote item access)
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote validate)
-  #:export (generate-item
+  #:export (generate-item           ;; Item creation
             make-item
             derive-item-from
-            item?
-            item-access
+            item?                   ;; Item type API
             item-name
-            new-item-access
             new-item-name
-            new-item-meta
-            move-item
             item-offset
+            new-item-offset
             item-width
-            item-meta
-            item-get
-            item-set
-            item-default
             item-semantics
             item-validator
+            item-access
+            new-item-access
+            item-meta
+            new-item-meta
+            item-default            ;; Item utilities
             item-decode
             item-encode
-            item->list))
+            item-get
+            item-set
+            item->list
+            item-named?
+            move-item))
 
 (define-immutable-record-type <item>
-  (make-item name offset width semantics validator access meta get set)
+  (make-item name offset width semantics validator access meta)
   item?
   (name item-name new-item-name)
   (offset item-offset new-item-offset)
@@ -70,16 +72,16 @@
   (semantics item-semantics)
   (validator item-validator)
   (access item-access new-item-access)
-  (meta item-meta new-item-meta)
-  (get item-get new-item-get)
-  (set item-set new-item-set))
+  (meta item-meta new-item-meta))
 
 (define (move-item item n)
-  (set-fields
-   item
-   ((item-offset) n)
-   ((item-get) (lambda (r) (bit-extract-width r n (item-width item))))
-   ((item-set) (lambda (r v) (set-bits r v (item-width item) n)))))
+  (set-fields item ((item-offset) n)))
+
+(define (item-get item register-value)
+  (bit-extract-width register-value (item-offset item) (item-width item)))
+
+(define (item-set item register-value item-value)
+  (set-bits register-value item-value (item-width item) (item-offset item)))
 
 (define access-group
   (group 'access
@@ -154,9 +156,7 @@
                         (deduce-semantics v:width v:semantics)
                         v:validator
                         v:access
-                        v:meta
-                        (lambda (r) (bit-extract-width r v:offset v:width))
-                        (lambda (r v) (set-bits r v v:width v:offset)))))))))
+                        v:meta)))))))
 
 (define-syntax generate-item
   (lambda (x)
@@ -225,3 +225,6 @@
   (set-fields item
               ((item-offset) (or offset (item-offset item)))
               ((item-access) (or access (item-access item)))))
+
+(define (item-named? item name)
+  (eq? (item-name item) name))

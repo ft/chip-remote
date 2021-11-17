@@ -37,8 +37,8 @@
   (transmit c (encode-ctrl #f n v)))
 
 (define (read-register c p n)
-  (let ((get-data (item-get (register-ref ctrl-frame 'data))))
-    (get-data (transmit c (encode-ctrl #t n 0)))))
+  (item-get (register-ref ctrl-frame 'data)
+            (transmit c (encode-ctrl #t n 0))))
 
 (define-device bme280
   #:manufacturer bosch

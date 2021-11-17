@@ -58,7 +58,7 @@
 ;; facility.
 
 (define (get-with-spec spec field frame)
-  ((item-get (register-ref spec field)) frame))
+  (item-get (register-ref spec field) frame))
 
 (define (cons-with-spec spec field frame)
   (cons field (get-with-spec spec field frame)))

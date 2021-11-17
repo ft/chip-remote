@@ -56,8 +56,8 @@
 (define (partition:concatenate state value items*)
   (let* ((device (c:device state))
          (items (map (lambda (i)
-                       (let* ((addr (find-canonical-address device i))
-                              (item (apply device-address (cons device addr))))
+                       (let* ((addr (device-canonical device i))
+                              (item (apply device-ref (cons device addr))))
                          (cons item addr)))
                      items*))
          (result (fold-right
@@ -86,7 +86,7 @@
                    (ia (cddr x))
                    (iia (caddr ia))
                    (ra (regaddr ia))
-                   (reg (apply device-address device ra)))
+                   (reg (apply device-ref device ra)))
               (if (null? acc)
                   (list (list (cons reg ra) (list (list iia offset v item))))
                   (match acc

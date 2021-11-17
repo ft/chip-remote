@@ -2,16 +2,24 @@
   #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
-  #:use-module (srfi srfi-11)
+  #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9 gnu)
+  #:use-module (srfi srfi-11)
   #:export (!!
             2e
+            non-negative-integer?
             addr=
             addr<
             addr>
+            index?
+            index=
+            index<
+            index>
             cat
             flatten
+            assoc-apply
             pair-combine
+            list-iterate
             map/last
             kwa-ref
             log2
@@ -46,6 +54,20 @@
         (else (append (flatten (car lst))
                       (flatten (cdr lst))))))
 
+(define (assoc-apply compare f v a)
+  "Apply a function to the value of a key in an associative array.
+
+The function returns the updated associative array.
+
+  (assoc-apply eq? 1+ '((a . 0) (b . 0) (c . 0)) 'b)
+    => ((a . 0) (b . 1) (c . 0))"
+  (if (null? v)
+      (throw 'unknown-key a)
+      (let ((key (caar v)))
+        (if (compare key a)
+            (cons (cons key (f (cdar v))) (cdr v))
+            (cons (car v) (assoc-apply compare f (cdr v) a))))))
+
 (define (pair-combine f l)
   "Call f for pairs of values from l, returning a list of results.
 
@@ -62,6 +84,19 @@ calls. It returns the empty list for empty and singleton lists."
     (() '())
     ((_) '())
     ((a b . rest) (cons (f a b) (pair-combine f (cons b rest))))))
+
+(define (list-iterate f init default lst)
+  (call/ec
+   (lambda (k)
+     (default (fold (lambda (x a)
+                      (let* ((i (car a))
+                             (next (f x (cdr a) i k)))
+                        (cons (1+ i) next)))
+                    (cons 0 init) lst)))))
+
+(define (non-negative-integer? obj)
+  (and (integer? obj)
+       (not (negative? obj))))
 
 (define (2e n)
   (ash 1 n))
@@ -163,6 +198,23 @@ calls. It returns the empty list for empty and singleton lists."
 (define (addr= a b)
   (and (not (addr< a b))
        (not (addr> a b))))
+
+(define (index? obj)
+  (or (not obj)
+      (non-negative-integer? obj)))
+
+(define (index= a b)
+  (eqv? a b))
+
+(define (index< a b)
+  (cond ((and (not a) (not b)) #f)
+        ((not b) #f)
+        ((not a) #t)
+        (else (< a b))))
+
+(define (index> a b)
+  (not (or (index= a b)
+           (index< a b))))
 
 (define (string-ends-in-newline? s)
   (char=? #\newline (string-ref s (1- (string-length s)))))

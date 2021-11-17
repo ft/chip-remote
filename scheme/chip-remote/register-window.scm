@@ -44,7 +44,7 @@
 
 (define (make-register-window register offset width)
   (let ((meta (register-meta register))
-        (items (sorted-items register)))
+        (items (register-items:sorted register)))
     (let loop ((rest items) (acc '()))
       (if (null? rest)
           (let ((data (reverse acc)))

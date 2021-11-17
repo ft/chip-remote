@@ -30,14 +30,14 @@
                                  (0 (#:contents (thing* 0 4) (fish* 4 4)))
                                  (1 (#:contents (more* 0 4) (stuff* 4 4)))
                                  (2 (#:contents (stuff 0 8 #:default 111)))))))
-   (define-test "page-map-address by page-address works #1"
-     (pass-if-= (length (register-map-table (page-map-address pm 0)))
+   (define-test "page-map-ref by page-address works #1"
+     (pass-if-= (length (register-map-table (page-map-ref pm 0)))
                 2))
-   (define-test "page-map-address by page-address works #2"
-     (pass-if-= (length (register-map-table (page-map-address pm 1)))
+   (define-test "page-map-ref by page-address works #2"
+     (pass-if-= (length (register-map-table (page-map-ref pm 1)))
                 3))
-   (define-test "page-map-address by page- and register address works"
-     (pass-if-= (length (register-items (page-map-address pm 1 1)))
+   (define-test "page-map-ref by page- and register address works"
+     (pass-if-= (length (register-items (page-map-ref pm 1 1)))
                 2))
    (define-test "page-map-address by page-, reg-, and item address (name) works"
      (pass-if-eq? (item-name (page-map-address pm 1 2 'stuff))
@@ -50,4 +50,8 @@
                   'more*))
    (define-test "page-map-default works"
      (pass-if-equal? (page-map-default pm)
-                     '((128 0) (0 0 111))))))
+                     '((0 . ((0 . 128)
+                             (1 .   0)))
+                       (1 . ((0 .   0)
+                             (1 .   0)
+                             (2 . 111))))))))

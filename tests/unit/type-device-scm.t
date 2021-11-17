@@ -15,7 +15,7 @@
 (init-test-tap!)
 
 (with-fs-test-bundle
-    (plan 18)
+    (plan 12)
 
   (define-test "generate-page-map, call structure works"
     (pass-if-true
@@ -48,14 +48,14 @@
                    (200  (#:contents (is 0 4) (lots 4 4)))
                    (1025 (#:contents (more-things 0 8 #:default 101))))))
          (dev-default (device-default dev)))
-    (define-test "device-address by page-address works #1"
-      (pass-if-= (length (register-map-table (device-address dev 0)))
+    (define-test "device-ref by page-address works #1"
+      (pass-if-= (length (register-map-table (device-ref dev 0)))
                  2))
-    (define-test "device-address by page-address works #2"
-      (pass-if-= (length (register-map-table (device-address dev 1)))
+    (define-test "device-ref by page-address works #2"
+      (pass-if-= (length (register-map-table (device-ref dev 1)))
                  3))
-    (define-test "device-address by page- and register address works"
-      (pass-if-= (length (register-items (device-address dev 1 1)))
+    (define-test "device-ref by page- and register address works"
+      (pass-if-= (length (register-items (device-ref dev 1 1)))
                  2))
     (define-test "device-address by page-, reg-, and item address (name) works"
       (pass-if-eq? (item-name (device-address dev 1 2 'stuff))
@@ -67,23 +67,18 @@
       (pass-if-eq? (item-name (device-address dev 1 1 'more* 0))
                    'more*))
     (define-test "device-default works"
-      (pass-if-equal? dev-default '((128 0) (0 0 111) (0 0 101))))
-    (define-test "Extract value by page-address"
-      (pass-if-equal? (device-value-address dev dev-default 1) '(0 0 111)))
-    (define-test "Extract value by page-address with holes"
-      (pass-if-equal? (device-value-address dev dev-default 10) '(0 0 101)))
-    (define-test "Extract value by page-address and register-address"
-      (pass-if-equal? (device-value-address dev dev-default 1 2) 111))
-    (define-test "Extract value by page-address and register-address with holes"
-      (pass-if-equal? (device-value-address dev dev-default 10 1025) 101))
-    (define-test "Extract value by page-address and register-address and item-address"
-      (pass-if-equal? (device-value-address dev dev-default 10 1025 2) 101))
-    (define-test "Extract value by page-address and register-address and name+index"
-      (pass-if-equal? (device-value-address dev dev-default 10 1025 'is 1) 101))
-    (define-test "device-ref->address works"
-      (pass-if-equal? (map (lambda (name) (device-ref->address dev name))
-                           '(thing fish stuff* lots more-things))
-                      '((0 0 0) (0 0 1) (1 1 1) (10 200 1) (10 1025 0)))))
+      (pass-if-equal? dev-default '((0  . ((   0 . 128)
+                                           (   1 .   0)))
+                                    (1  . ((   0 .   0)
+                                           (   1 .   0)
+                                           (   2 . 111)))
+                                    (10 . ((   8 .   0)
+                                           ( 200 .   0)
+                                           (1025 . 101))))))
+    (define-test "device-canonical works"
+      (pass-if-equal? (map (lambda (name) (device-canonical dev name))
+                           '(thing* fish stuff* lots more-things))
+                      '((1 0 0) (0 0 1) (1 1 1) (10 200 1) (10 1025 0)))))
   (define-test "Single combination parses correctly"
     (pass-if-equal?
      (device-combinations (generate-device #:combinations '(a 1 2)))
