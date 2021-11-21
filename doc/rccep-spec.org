@@ -411,12 +411,8 @@ Synopsis:\hspace{0.5cm} ~set <port:integer> <key:symbol> <value>~
 \vspace{0.3cm}\noindent The ~set~ request takes three non-optional arguments.
 
 ~port~ is the index of the port to configure. ~key~ is the property's name to
-set. ~value~ is the new value for the property.
-
-Non-mode-specific parameters that the ~set~ request is able to modify (unless
-marked as ~fixed~):
-
-- ~rate~: Defines the symbol rate a port operates at.
+set. ~value~ is the new value for the property. All properties to the set
+request are mode specific. See section [[sec:port-modes]] for details.
 
 *** Transmission Requests
 **** ~transmit~ Request
