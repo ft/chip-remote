@@ -407,7 +407,6 @@ Non-mode-specific parameters that the ~set~ request is able to modify (unless
 marked as ~fixed~):
 
 - ~mode~: Sets the port's mode of operation to ~value~.
-- ~lines~: Defines the number of lines a port has access to.
 - ~rate~: Defines the symbol rate a port operates at.
 
 *** Transmission Requests
