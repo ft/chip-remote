@@ -326,17 +326,6 @@ as ~VERSION~ as well. The upper case ~VERSION~ prefix in the reply is for
 backward compatibility as well.
 
 *** Configuration Requests
-**** ~address~ Request
-
-Synopsis:\hspace{0.5cm} ~address <address:integer>~
-
-\vspace{0.3cm}\noindent The ~address~ request takes one non-optional argument.
-The request is used to handle device addressing with protocols, that employ
-explicit addressing schemes. The actual effect of the request is dependent of
-the mode the given port is set to. Modes that use in-band addressing may choose
-to ignore ~address~ requests altogether. See section [[sec:port-modes]] for
-details.
-
 **** ~focus~ Request
 
 Synopsis:\hspace{0.5cm} ~focus <port-index:integer>~

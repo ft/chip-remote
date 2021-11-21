@@ -18,13 +18,6 @@
 #include <commands-private.h>
 #include <cr-utilities.h>
 
-struct cr_argument set_arguments[] = {
-    CMD_MANDATORY_ARG(INTEGER),
-    CMD_MANDATORY_ARG(STRING),
-    CMD_MANDATORY_ARG(STRING),
-    CMD_END_OF_ARGS
-};
-
 void
 cr_handle_set(const struct cr_protocol *proto,
               const struct cr_proto_parse *cmd)

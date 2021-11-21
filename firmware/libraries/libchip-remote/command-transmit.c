@@ -16,9 +16,16 @@
 #include <cr-port.h>
 #include <cr-utilities.h>
 
-struct cr_argument transmit_arguments[] = {
-    CMD_MANDATORY_ARG(INTEGER),
-    CMD_END_OF_ARGS
+#define CR_DATA_MAX 8u
+
+struct cr_buf64 {
+    uint64_t data[CR_DATA_MAX];
+    size_t n;
+};
+
+struct cr_transmission {
+    struct cr_buf64 tx;
+    struct cr_buf64 rx;
 };
 
 static inline struct cr_port*

@@ -37,8 +37,7 @@ enum cr_proto_result {
  * Encoding of commands (requests) of the protocol
  */
 enum cr_proto_command {
-    CR_PROTO_CMD_ADDRESS = 0,
-    CR_PROTO_CMD_BYE,
+    CR_PROTO_CMD_BYE = 0,
     CR_PROTO_CMD_CAPABILITIES,
     CR_PROTO_CMD_FOCUS,
     CR_PROTO_CMD_HASHED,
@@ -47,6 +46,7 @@ enum cr_proto_command {
     CR_PROTO_CMD_LINES,
     CR_PROTO_CMD_LINE,
     CR_PROTO_CMD_MODES,
+    CR_PROTO_CMD_MODE,
     CR_PROTO_CMD_PORTS,
     CR_PROTO_CMD_PORT,
     CR_PROTO_CMD_SET,
