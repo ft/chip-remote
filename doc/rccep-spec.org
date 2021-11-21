@@ -367,6 +367,16 @@ of the line within the port to configure. ~<role>~ describes the role within
 the active mode the line is to be set to. Roles are specific to modes (see
 section [[sec:port-modes]]).
 
+**** ~mode~ Request
+
+Synopsis:\hspace{0.5cm} ~mode <port:integer> <mode:symbol>~
+
+\vspace{0.3cm}\noindent The ~mode~ request takes two non-optional arguments.
+
+~port~ specifies the index of the port to configure, while the ~mode~ parameter
+specifies the desired mode of the port to configure (see section
+[[sec:port-modes]]).
+
 **** ~port~ Request
 
 Synopsis:\hspace{0.5cm} ~port <port-index:integer>~
@@ -406,7 +416,6 @@ set. ~value~ is the new value for the property.
 Non-mode-specific parameters that the ~set~ request is able to modify (unless
 marked as ~fixed~):
 
-- ~mode~: Sets the port's mode of operation to ~value~.
 - ~rate~: Defines the symbol rate a port operates at.
 
 *** Transmission Requests
