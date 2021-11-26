@@ -38,13 +38,13 @@ void
 cr_handle_transmit(const struct cr_protocol *proto,
                    const struct cr_proto_parse *cmd)
 {
-    uint32_t rx;
+    cr_number rx;
     struct cr_port *p = current_port(proto);
     if (p->initialised == false) {
         proto->reply("wtf Focused port is not initialised!\n");
         return;
     }
-    cr_transmit(p, cmd->args[0].data.u32, &rx);
-    cr_proto_put_u32(proto, rx);
+    cr_transmit(p, cmd->args[0].data.number, &rx);
+    cr_proto_put_u64(proto, rx);
     cr_proto_put_newline(proto);
 }

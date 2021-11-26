@@ -12,6 +12,7 @@
 #ifndef INC_CHIP_REMOTE_H
 #define INC_CHIP_REMOTE_H
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -21,6 +22,14 @@
 #define CR_PROTOCOL_VERSION_MAJOR      3u
 #define CR_PROTOCOL_VERSION_MINOR      0u
 #define CR_PROTOCOL_VERSION_PATCHLEVEL 0u
+
+/** chip-remote number type */
+typedef uint64_t cr_number;
+
+#define PRIuCRN PRIu64
+#define PRIoCRN PRIo64
+#define PRIxCRN PRIx64
+#define PRIXCRN PRIX64
 
 /**
  * Flags that encode possible outcomes of requests within the protocol
@@ -77,7 +86,16 @@ enum cr_argument_type {
     CR_PROTO_ARG_TYPE_VOID = 0,
     CR_PROTO_ARG_TYPE_BOOLEAN,
     CR_PROTO_ARG_TYPE_INTEGER,
-    CR_PROTO_ARG_TYPE_STRING
+    CR_PROTO_ARG_TYPE_SYMBOL,
+    CR_PROTO_ARG_TYPE_KEYVALUE
+};
+
+/**
+ * Key value pair, symbol to number
+ */
+struct cr_keyvalue {
+    char *key;
+    cr_number value;
 };
 
 /**
@@ -88,8 +106,9 @@ enum cr_argument_type {
 struct cr_value {
     enum cr_argument_type type;
     union {
-        uint32_t u32;
-        char *string;
+        struct cr_keyvalue kv;
+        cr_number number;
+        char *symbol;
         bool boolean;
     } data;
 };

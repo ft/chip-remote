@@ -36,9 +36,9 @@ cr_spi_text_init(struct cr_port *port)
 }
 
 int
-cr_spi_text_xfer(struct cr_port *port, uint32_t tx, uint32_t *rx)
+cr_spi_text_xfer(struct cr_port *port, cr_number tx, cr_number *rx)
 {
-    uint32_t *state = port->data;
+    cr_number *state = port->data;
     bool fromstate = true;
 
     if (rxring != NULL && sx_is_list(rxring)) {
@@ -53,8 +53,8 @@ cr_spi_text_xfer(struct cr_port *port, uint32_t tx, uint32_t *rx)
     if (fromstate)
         *rx = *state;
 
-    printf("(spi-tx #x%08x)\n", tx);
-    printf("(spi-rx #x%08x)\n", *rx);
+    printf("(spi-tx #x%016"PRIxCRN")\n", tx);
+    printf("(spi-rx #x%016"PRIxCRN")\n", *rx);
 
     if (fromstate)
         (*state)++;

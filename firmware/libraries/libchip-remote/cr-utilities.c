@@ -20,14 +20,14 @@ static char chtable[] = {
     'a', 'b', 'c', 'd', 'e', 'f' };
 
 static void
-stringify_u32(uint32_t num, char *buf)
+stringify_u64(uint64_t num, char *buf)
 {
     /* buf needs to be able to hold 8+1 characters. */
     int i, max, step;
 
-    for (i = 7; i >= 0; --i) {
+    for (i = 15; i >= 0; --i) {
         step = 4 * i;
-        if (num & (uint32_t)(0xful << step)) {
+        if (num & (uint64_t)(0xful << step)) {
             max = i;
             break;
         }
@@ -42,24 +42,24 @@ stringify_u32(uint32_t num, char *buf)
     buf[i+1] = '\0';
     for (i = max; i >= 0; --i) {
         step = 4 * i;
-        buf[max-i] = chtable[(num & (uint32_t)(0xful << step)) >> step];
+        buf[max-i] = chtable[(num & (uint64_t)(0xful << step)) >> step];
     }
     buf[8] = '\0';
 }
 
-uint32_t
-cr_parse_u32(const char *buf, int *err)
+uint64_t
+cr_parse_u64(const char *buf, int *err)
 {
     const size_t len = strlen(buf);
     char c;
     int idx, i;
-    uint32_t rc, tmp;
+    uint64_t rc, tmp;
 
     *err = 0;
     rc = 0;
     idx = len - 1;
 
-    if (idx > 7) {
+    if (idx > 15) {
         *err = 1;
         return 0u;
     }
@@ -83,9 +83,9 @@ cr_parse_u32(const char *buf, int *err)
 }
 
 void
-cr_proto_put_u32(const struct cr_protocol *proto, uint32_t value)
+cr_proto_put_u64(const struct cr_protocol *proto, uint64_t value)
 {
     char buf[9];
-    stringify_u32(value, buf);
+    stringify_u64(value, buf);
     proto->reply(buf);
 }

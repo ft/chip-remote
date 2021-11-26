@@ -15,6 +15,7 @@
 #include <cr-port.h>
 #include <cr-utilities.h>
 
+#include "chip-remote.h"
 #include "spi.h"
 
 static inline void
@@ -61,7 +62,7 @@ cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
     int err;
 
     if (strcmp(key, "rate") == 0) {
-        (void)cr_parse_u32(value, &err);
+        (void)cr_parse_u64(value, &err);
         if (err > 0) {
             return -3;
         }
@@ -77,11 +78,11 @@ cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
             return -3;
         }
     } else if (strcmp(key, "frame-length") == 0) {
-        const uint32_t n = cr_parse_u32(value, &err);
+        const cr_number n = cr_parse_u64(value, &err);
         if (err > 0) {
             return -3;
         }
-        if (n < 1 || n > 32) {
+        if (n < 1 || n > 64) {
             return -1;
         }
         port->cfg.spi.frame_length = n;
@@ -150,12 +151,12 @@ cr_spi_bb_init(struct cr_port *port)
     return rv;
 }
 
-inline static uint32_t
+inline static cr_number
 cr_spi_bb_xfer_bit(const struct cr_port *port,
                    const struct cr_port_spi_bb *spi,
                    const size_t bit,
-                   const uint32_t tx,
-                   uint32_t rx)
+                   const cr_number tx,
+                   cr_number rx)
 {
     cr_spi_line_set(spi->mosi, BITLL_GET(tx, 1u, bit));
 
@@ -177,10 +178,10 @@ cr_spi_bb_xfer_bit(const struct cr_port *port,
 }
 
 int
-cr_spi_bb_xfer(struct cr_port *port, uint32_t tx, uint32_t *rx)
+cr_spi_bb_xfer(struct cr_port *port, cr_number tx, cr_number *rx)
 {
     const struct cr_port_spi_bb *spi = port->data;
-    uint32_t rv = 0ull;
+    cr_number rv = 0ull;
     const size_t len = port->cfg.spi.frame_length;
 
     *rx = 0u;

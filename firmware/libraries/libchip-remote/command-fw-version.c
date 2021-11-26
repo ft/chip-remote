@@ -23,10 +23,10 @@ void
 cr_handle_fw_version(const struct cr_protocol *proto,
                      UNUSED const struct cr_proto_parse *cmd)
 {
-    cr_proto_put_u32(proto, FIRMWARE_VERSION_MAJOR);
+    cr_proto_put_u64(proto, FIRMWARE_VERSION_MAJOR);
     cr_proto_put_space(proto);
-    cr_proto_put_u32(proto, FIRMWARE_VERSION_MINOR);
+    cr_proto_put_u64(proto, FIRMWARE_VERSION_MINOR);
     cr_proto_put_space(proto);
-    cr_proto_put_u32(proto, FIRMWARE_VERSION_MICRO);
+    cr_proto_put_u64(proto, FIRMWARE_VERSION_MICRO);
     cr_proto_put_newline(proto);
 }

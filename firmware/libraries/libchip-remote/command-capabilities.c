@@ -20,9 +20,9 @@ cr_handle_capabilities(const struct cr_protocol *proto,
                        UNUSED const struct cr_proto_parse *cmd)
 {
     proto->reply("rx-buffer-size ");
-    cr_proto_put_u32(proto, proto->in.size);
+    cr_proto_put_u64(proto, proto->in.size);
     proto->reply(";maximum-arguments ");
-    cr_proto_put_u32(proto, CR_PROTO_MAX_ARGS);
+    cr_proto_put_u64(proto, CR_PROTO_MAX_ARGS);
     for (size_t i = 0u; cr_commands[i].id != CR_PROTO_CMD_UNKNOWN; ++i) {
         if (cr_commands[i].name != NULL && cr_commands[i].name[0] == '+') {
             proto->reply(";");

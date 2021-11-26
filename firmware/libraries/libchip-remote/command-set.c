@@ -22,9 +22,9 @@ void
 cr_handle_set(const struct cr_protocol *proto,
               const struct cr_proto_parse *cmd)
 {
-    const uint32_t idx = cmd->args[0].data.u32;
-    const char *key = cmd->args[1].data.string;
-    const char *value = cmd->args[2].data.string;
+    const cr_number idx = cmd->args[0].data.number;
+    const char *key = cmd->args[1].data.symbol;
+    const char *value = cmd->args[2].data.symbol;
     struct cr_port *p = proto->ports.table[idx];
 
     if (p->api->set == NULL) {

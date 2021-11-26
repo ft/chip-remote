@@ -24,7 +24,7 @@ struct cr_argument no_arguments[] = {
 };
 
 struct cr_argument forward_arguments[] = {
-    { .optional = false, .repeats = true, .type = CR_PROTO_ARG_TYPE_STRING },
+    { .optional = false, .repeats = true, .type = CR_PROTO_ARG_TYPE_SYMBOL },
     CMD_END_OF_ARGS
 };
 

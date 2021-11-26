@@ -14,6 +14,7 @@
 #include <cr-process.h>
 #include <sx-parser.h>
 
+#include "chip-remote.h"
 #include "init-common.h"
 #include "ifc/text/spi.h"
 #include "sys/time_units.h"
@@ -22,7 +23,7 @@ const struct device *uart1;
 
 #define MAX_BOARD_NAME_LENGTH 32u
 
-uint32_t port00_spi_state = 0u;
+cr_number port00_spi_state = 0u;
 
 struct cr_port port00_spi = {
     .name = "port00-spi",

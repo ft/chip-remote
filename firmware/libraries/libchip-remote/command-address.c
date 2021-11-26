@@ -30,7 +30,7 @@ cr_handle_address(const struct cr_protocol *proto,
         return;
     }
 
-    int rv = p->api->address(p, cmd->args[0].data.u32);
+    int rv = p->api->address(p, cmd->args[0].data.number);
 
     if (rv == 0) {
         proto->reply("ok\n");

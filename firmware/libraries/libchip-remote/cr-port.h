@@ -17,6 +17,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "chip-remote.h"
+
 enum cr_port_type {
     CR_PORT_TYPE_FLEX,
     CR_PORT_TYPE_UART,
@@ -56,7 +58,7 @@ struct cr_line {
 };
 
 struct cr_port_spi {
-    uint32_t address;
+    cr_number address;
     uint16_t frame_length;
     enum cr_bit_order bit_order;
     struct {
@@ -64,7 +66,7 @@ struct cr_port_spi {
         enum cr_logic polarity;
     } cs;
     struct {
-        uint32_t rate;
+        cr_number rate;
         enum cr_edge edge;
         bool phase_delay;
     } clk;
@@ -85,8 +87,8 @@ struct cr_port;
 
 struct cr_port_api {
     int (*init)(struct cr_port*);
-    int (*xfer)(struct cr_port*, uint32_t, uint32_t*);
-    int (*address)(struct cr_port*, uint32_t);
+    int (*xfer)(struct cr_port*, cr_number, cr_number*);
+    int (*address)(struct cr_port*, cr_number);
     int (*set)(struct cr_port*, const char*, const char*);
 };
 
@@ -108,6 +110,6 @@ struct cr_port {
     void *data;
 };
 
-int cr_transmit(struct cr_port*, uint32_t, uint32_t*);
+int cr_transmit(struct cr_port*, cr_number, cr_number*);
 
 #endif /* INC_CR_PORT_H */
