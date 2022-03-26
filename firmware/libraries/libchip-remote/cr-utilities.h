@@ -4,13 +4,13 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "cr-process.h"
+#include <chip-remote.h>
+#include <cr-process.h>
 
 void cr_proto_put_space(const struct cr_protocol*);
 void cr_proto_put_newline(const struct cr_protocol*);
-void cr_proto_put_u64(const struct cr_protocol*, uint64_t);
-uint64_t cr_parse_u64(const char*, int*);
-
+void cr_proto_put_number(const struct cr_protocol*, cr_number);
+cr_number cr_parse_number(const char*, unsigned int, char**, unsigned int*);
 
 static inline bool
 string_bool_true(const char *input)

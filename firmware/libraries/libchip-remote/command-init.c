@@ -29,9 +29,9 @@ cr_handle_init(const struct cr_protocol *proto,
     cr_number idx = cmd->args[0].data.number;
     if (idx >= proto->ports.tablesize) {
         proto->reply("value-out-of-range ");
-        cr_proto_put_u64(proto, idx);
+        cr_proto_put_number(proto, idx);
         proto->reply(" > ");
-        cr_proto_put_u64(proto, proto->ports.tablesize - 1);
+        cr_proto_put_number(proto, proto->ports.tablesize - 1);
         cr_proto_put_newline(proto);
     } else {
         struct cr_port *p = proto->ports.table[proto->ports.current];

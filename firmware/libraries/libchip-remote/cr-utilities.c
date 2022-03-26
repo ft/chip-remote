@@ -1,3 +1,6 @@
+#include <assert.h>
+#include <limits.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "cr-process.h"
@@ -20,14 +23,14 @@ static char chtable[] = {
     'a', 'b', 'c', 'd', 'e', 'f' };
 
 static void
-stringify_u64(uint64_t num, char *buf)
+stringify_number(cr_number num, char *buf)
 {
     /* buf needs to be able to hold 8+1 characters. */
     int i, max, step;
 
     for (i = 15; i >= 0; --i) {
         step = 4 * i;
-        if (num & (uint64_t)(0xful << step)) {
+        if (num & (cr_number)(0xful << step)) {
             max = i;
             break;
         }
@@ -42,50 +45,83 @@ stringify_u64(uint64_t num, char *buf)
     buf[i+1] = '\0';
     for (i = max; i >= 0; --i) {
         step = 4 * i;
-        buf[max-i] = chtable[(num & (uint64_t)(0xful << step)) >> step];
+        buf[max-i] = chtable[(num & (cr_number)(0xful << step)) >> step];
     }
     buf[8] = '\0';
 }
 
-uint64_t
-cr_parse_u64(const char *buf, int *err)
+static inline int
+value_of_digit(const char c, const unsigned int base)
 {
-    const size_t len = strlen(buf);
-    char c;
-    int idx, i;
-    uint64_t rc, tmp;
+    int rv;
 
-    *err = 0;
-    rc = 0;
-    idx = len - 1;
+    if (c >= '0' && c <= '9')
+        rv = c - '0';
+    else if (c >= 'a' && c <= 'z')
+        rv = c - 'a' + 10;
+    else if (c >= 'A' && c <= 'Z')
+        rv = c - 'A' + 10;
+    else
+        rv = -1;
 
-    if (idx > 15) {
-        *err = 1;
-        return 0u;
-    }
+    return (rv >= (int)base) ? -1 : rv;
+}
 
-    for (i = idx; i >= 0; --i) {
-        c = buf[i];
-        if (c >= '0' && c <= '9')
-            tmp = c - '0';
-        else if (c >= 'a' && c <= 'f')
-            tmp = c - 'a' + 10;
-        else if (c >= 'A' && c <= 'F')
-            tmp = c - 'A' + 10;
-        else {
-            *err = 2;
-            return 0u;
+static inline bool
+would_be_oob(const cr_number rv, const cr_number ls,
+             const cr_number digit, const cr_number li)
+{
+    return (rv > ls) || ((rv == ls) && (digit > li));
+}
+
+cr_number
+cr_parse_number(const char *buf, unsigned int base,
+                char **stop, unsigned int *flags)
+{
+    assert(base >= 2u && base <= 36u);
+    assert(buf != NULL);
+
+    cr_number rv = 0ull;
+    size_t len = strlen(buf);
+    bool oob = false;
+    *flags = 0u;
+
+    const cr_number lastsafe = CR_NUMBER_MAX / (cr_number)base;
+    const cr_number lastincr = CR_NUMBER_MAX % (cr_number)base;
+
+    for (size_t i = 0; i < len; ++i) {
+        int d = value_of_digit(buf[i], base);
+        if (d < 0) {
+            *flags = 1;
+            *stop = (char*)buf + i;
+            break;
         }
 
-        rc |= tmp << ((idx - i) * 4);
+        if (oob)
+            continue;
+
+        if (would_be_oob(rv, lastsafe, d, lastincr)) {
+            oob = true;
+            rv = CR_NUMBER_MAX;
+        } else {
+            rv = rv * base + d;
+        }
     }
-    return rc;
+
+    if (*flags == 0) {
+        *stop = (char*)buf + len;
+        if (oob) {
+            *flags = 2;
+        }
+    }
+
+    return rv;
 }
 
 void
-cr_proto_put_u64(const struct cr_protocol *proto, uint64_t value)
+cr_proto_put_number(const struct cr_protocol *proto, cr_number value)
 {
     char buf[9];
-    stringify_u64(value, buf);
+    stringify_number(value, buf);
     proto->reply(buf);
 }

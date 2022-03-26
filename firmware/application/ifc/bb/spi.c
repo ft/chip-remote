@@ -60,9 +60,10 @@ int
 cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
 {
     int err;
+    char *stop;
 
     if (strcmp(key, "rate") == 0) {
-        (void)cr_parse_u64(value, &err);
+        (void)cr_parse_number(value, 16u, &stop, &err);
         if (err > 0) {
             return -3;
         }
@@ -78,7 +79,7 @@ cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
             return -3;
         }
     } else if (strcmp(key, "frame-length") == 0) {
-        const cr_number n = cr_parse_u64(value, &err);
+        const cr_number n = cr_parse_number(value, 16u, &stop, &err);
         if (err > 0) {
             return -3;
         }

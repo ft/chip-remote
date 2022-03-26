@@ -20,10 +20,10 @@ cr_handle_version(const struct cr_protocol *proto,
                   UNUSED const struct cr_proto_parse *cmd)
 {
     proto->reply("VERSION ");
-    cr_proto_put_u64(proto, CR_PROTOCOL_VERSION_MAJOR);
+    cr_proto_put_number(proto, CR_PROTOCOL_VERSION_MAJOR);
     cr_proto_put_space(proto);
-    cr_proto_put_u64(proto, CR_PROTOCOL_VERSION_MINOR);
+    cr_proto_put_number(proto, CR_PROTOCOL_VERSION_MINOR);
     cr_proto_put_space(proto);
-    cr_proto_put_u64(proto, CR_PROTOCOL_VERSION_PATCHLEVEL);
+    cr_proto_put_number(proto, CR_PROTOCOL_VERSION_PATCHLEVEL);
     cr_proto_put_newline(proto);
 }

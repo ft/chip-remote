@@ -13,13 +13,14 @@
 
 #include <commands.h>
 #include <commands-private.h>
+#include <chip-remote.h>
 #include <cr-port.h>
 #include <cr-utilities.h>
 
 #define CR_DATA_MAX 8u
 
 struct cr_buf64 {
-    uint64_t data[CR_DATA_MAX];
+    cr_number data[CR_DATA_MAX];
     size_t n;
 };
 
@@ -45,6 +46,6 @@ cr_handle_transmit(const struct cr_protocol *proto,
         return;
     }
     cr_transmit(p, cmd->args[0].data.number, &rx);
-    cr_proto_put_u64(proto, rx);
+    cr_proto_put_number(proto, rx);
     cr_proto_put_newline(proto);
 }

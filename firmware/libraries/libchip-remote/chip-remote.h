@@ -26,6 +26,7 @@
 /** chip-remote number type */
 typedef uint64_t cr_number;
 
+#define CR_NUMBER_MAX UINT64_MAX
 #define PRIuCRN PRIu64
 #define PRIoCRN PRIo64
 #define PRIxCRN PRIx64

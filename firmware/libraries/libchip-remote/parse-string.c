@@ -105,8 +105,9 @@ parse_argument(string_sink reply, const struct cr_argument *spec, char *input)
         }
         break;
     case CR_PROTO_ARG_TYPE_INTEGER: {
-        int error = 0;
-        result.data.number = cr_parse_u64(input, &error);
+        unsigned int error = 0;
+        char *stop;
+        result.data.number = cr_parse_number(input, 16u, &stop, &error);
         if (error != 0) {
             reply("broken-value Not an integer: ");
             reply(input);
