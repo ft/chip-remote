@@ -39,13 +39,23 @@ void
 cr_handle_transmit(const struct cr_protocol *proto,
                    const struct cr_proto_parse *cmd)
 {
-    cr_number rx;
+    cr_number rx, n;
+    unsigned int error;
+    char *stop;
     struct cr_port *p = current_port(proto);
+
     if (p->initialised == false) {
         proto->reply("wtf Focused port is not initialised!\n");
         return;
     }
-    cr_transmit(p, cmd->args[0].data.number, &rx);
+    n = cr_parse_number(cmd->args[0].data.symbol,
+                        16u, &stop, &error);
+    if (error != 0u) {
+        proto->reply("wtf Broken datum to transmit!\n");
+        return;
+    }
+
+    cr_transmit(p, n, &rx);
     cr_proto_put_number(proto, rx);
     cr_proto_put_newline(proto);
 }
