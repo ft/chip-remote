@@ -158,4 +158,31 @@ struct cr_proto_parse {
     unsigned int argn;
 };
 
+enum cr_parser_result {
+    CR_PARSER_SUCCESS = 0,
+    CR_PARSER_GENERIC_FAILURE,
+    CR_PARSER_TOO_MANY_TOKENS,
+    CR_PARSER_VALUE_OUT_OF_RANGE,
+    CR_PARSER_INVALID_DIGIT_BIN,
+    CR_PARSER_INVALID_DIGIT_OCT,
+    CR_PARSER_INVALID_DIGIT_DEC,
+    CR_PARSER_INVALID_DIGIT_HEX
+};
+
+struct cr_parser_state {
+    char *input;
+    size_t length;
+    size_t position;
+};
+
+struct cr_tokens {
+    struct cr_value *token;
+    unsigned int size;
+    unsigned int used;
+};
+
+void cr_parser_init(struct cr_parser_state*, char *);
+void cr_tokens_init(struct cr_tokens*, struct cr_value*, size_t);
+enum cr_parser_result cr_parse(struct cr_parser_state*, struct cr_tokens*);
+
 #endif /* INC_CHIP_REMOTE_H */
