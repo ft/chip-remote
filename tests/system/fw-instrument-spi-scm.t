@@ -21,7 +21,7 @@
     (pass-if-= (transmit ($ tio) tx) rx))
   (fw-expect! tio `(spi-tx ,tx) `(spi-rx ,rx)))
 
-(with-test-bundle (chip-remote firmware hi/bye)
+(with-test-bundle (chip-remote firmware instrumentation spi)
   (require (native-firmware-built?))
   (plan 39)
   (boot-fw! tio)
