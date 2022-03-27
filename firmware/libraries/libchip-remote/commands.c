@@ -19,63 +19,43 @@
 #include <commands.h>
 #include <commands-private.h>
 
-struct cr_argument no_arguments[] = {
-    { .optional = false, .type = CR_PROTO_ARG_TYPE_VOID }
-};
+#define COMMAND(_id, _eprefix, _nprefix, _name, _callback)  \
+    [CR_PROTO_CMD_ ## _eprefix ## _id]  = {                 \
+        .id = CR_PROTO_CMD_ ## _eprefix ## _id,             \
+        .name = (#_nprefix #_name),                         \
+        .cb = _callback }
 
-struct cr_argument forward_arguments[] = {
-    { .optional = false, .repeats = true, .type = CR_PROTO_ARG_TYPE_SYMBOL },
-    CMD_END_OF_ARGS
-};
+#define CR_COMMAND(_id, _name, _callback)               \
+    COMMAND(_id, /*none*/, /*none*/, _name, _callback)
 
-#define COMMAND(_id, _eprefix, _nprefix, _name, _callback, _arguments)  \
-    [CR_PROTO_CMD_ ## _eprefix ## _id]  = {                             \
-        .id = CR_PROTO_CMD_ ## _eprefix ## _id,                         \
-        .name = (#_nprefix #_name),                                     \
-        .cb = _callback,                                                \
-        .args = _arguments }
-
-#define CRaCOMMAND(_id, _name, _callback, _arguments)                   \
-    COMMAND(_id, /*none*/, /*none*/, _name, _callback, _arguments)
-
-#define CRsCOMMAND(_id, _name, _callback)               \
-    CRaCOMMAND(_id, _name, _callback, no_arguments)
-
-#define CRfCOMMAND(_id, _name, _callback)               \
-    CRaCOMMAND(_id, _name, _callback, forward_arguments)
-
-#define FWaCOMMAND(_id, _name, _callback, _arguments)   \
-    COMMAND(_id, FW_, +, _name, _callback, _arguments)
-
-#define FWsCOMMAND(_id, _name, _callback)               \
-    FWaCOMMAND(_id, _name, _callback, no_arguments)
+#define FW_COMMAND(_id, _name, _callback)       \
+    COMMAND(_id, FW_, +, _name, _callback)
 
 #define MISSING_COMMAND(_id)                    \
     [CR_PROTO_CMD_ ## _id]  = {                 \
         .id = CR_PROTO_CMD_ ## _id,             \
         .name = NULL,                           \
-        .cb = NULL,                             \
-        .args = NULL }
+        .cb = NULL }
 
-#define END_OF_COMMAND_TABLE CRaCOMMAND(UNKNOWN, unknown, NULL, NULL)
+#define END_OF_COMMAND_TABLE CR_COMMAND(UNKNOWN, unknown, NULL)
 
 struct cr_command cr_commands[] = {
-    CRsCOMMAND(BYE,          bye,          cr_handle_bye),
-    CRsCOMMAND(CAPABILITIES, capabilities, cr_handle_capabilities),
+    CR_COMMAND(BYE,          bye,          cr_handle_bye),
+    CR_COMMAND(CAPABILITIES, capabilities, cr_handle_capabilities),
     MISSING_COMMAND(FOCUS),
-    CRsCOMMAND(HI,           hi,           cr_handle_hi),
-    CRaCOMMAND(INIT,         init,         cr_handle_init,         init_arguments),
+    CR_COMMAND(HI,           hi,           cr_handle_hi),
+    CR_COMMAND(INIT,         init,         cr_handle_init),
     MISSING_COMMAND(LINES),
     MISSING_COMMAND(LINE),
     MISSING_COMMAND(MODES),
     MISSING_COMMAND(MODE),
-    CRsCOMMAND(PORTS,        ports,        cr_handle_ports),
+    CR_COMMAND(PORTS,        ports,        cr_handle_ports),
     MISSING_COMMAND(PORT),
-    CRfCOMMAND(SET,          set,          cr_handle_set),
-    CRfCOMMAND(TRANSMIT,     transmit,     cr_handle_transmit),
-    CRsCOMMAND(VERSION,      version,      cr_handle_version),
-    CRsCOMMAND(UVERSION,     VERSION,      cr_handle_version),     /* Backward comp. */
-    FWsCOMMAND(VERSION,      version,      cr_handle_fw_version),
+    CR_COMMAND(SET,          set,          cr_handle_set),
+    CR_COMMAND(TRANSMIT,     transmit,     cr_handle_transmit),
+    CR_COMMAND(VERSION,      version,      cr_handle_version),
+    CR_COMMAND(UVERSION,     VERSION,      cr_handle_version),     /* Backward comp. */
+    FW_COMMAND(VERSION,      version,      cr_handle_fw_version),
     END_OF_COMMAND_TABLE
 };
 

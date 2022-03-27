@@ -105,7 +105,7 @@ error."
 
 (define (int->hexstring int)
   "Turn an integer ‘int’ into a string of hexadecimal digits."
-  (number->string int 16))
+  (string-concatenate (list "h#" (number->string int 16))))
 
 (define (verify-and-convert pair)
   "Take ‘pair’ that looks like this: `(VALUE . SPEC)`

@@ -20,14 +20,18 @@ struct cr_protocol {
         enum cr_input_state input;
     } state;
     struct {
+        struct cr_value token[CR_PROTOCOL_MAX_TOKENS];
+    } data;
+    struct {
         char *buffer;
         size_t size;
         size_t idx;
     } in;
     struct {
-        struct cr_proto_parse parsed;
-        enum cr_proto_result result;
-    } cmd;
+        struct cr_parser_state state;
+        struct cr_tokens tokens;
+        enum cr_parser_result result;
+    } parser;
     struct {
         struct cr_port **table;
         size_t tablesize;

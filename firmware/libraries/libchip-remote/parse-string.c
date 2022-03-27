@@ -94,7 +94,6 @@ static char* find_token_separator(char*);
 static char* find_token_start(char*);
 static struct word next_word(char*);
 static inline void split_input_at(char*);
-static inline bool spec_missing_arg(const struct cr_command*, unsigned int);
 
 static inline size_t
 word_length(const struct word *w)
@@ -148,107 +147,6 @@ next_word(char *input)
     };
     split_input_at(result.end);
     return result;
-}
-
-static inline bool
-spec_missing_arg(const struct cr_command *cmd, unsigned int argn)
-{
-    const struct cr_argument *arg = cmd->args + argn;
-    return ((arg->type != CR_PROTO_ARG_TYPE_VOID) && arg->optional == false);
-}
-
-static struct cr_value
-parse_argument(string_sink reply, const struct cr_argument *spec, char *input)
-{
-    struct cr_value result;
-    result.type = spec->type;
-    switch(spec->type) {
-    case CR_PROTO_ARG_TYPE_BOOLEAN:
-        if (string_bool_true(input)) {
-            result.data.boolean = true;
-        } else if (string_bool_false(input)) {
-            result.data.boolean = false;
-        } else {
-            reply("broken-value Not a boolean: ");
-            reply(input);
-            reply("\n");
-            result.type = CR_PROTO_ARG_TYPE_VOID;
-        }
-        break;
-    case CR_PROTO_ARG_TYPE_INTEGER: {
-        unsigned int error = 0;
-        char *stop;
-        result.data.number = cr_parse_number(input, 16u, &stop, &error);
-        if (error != 0) {
-            reply("broken-value Not an integer: ");
-            reply(input);
-            reply("\n");
-            result.type = CR_PROTO_ARG_TYPE_VOID;
-        }
-    } break;
-    case CR_PROTO_ARG_TYPE_SYMBOL:
-        result.data.symbol = input;
-        break;
-    default:
-        break;
-    }
-
-    return result;
-}
-
-enum cr_proto_result
-cr_parse_string(string_sink reply,
-                char *input,
-                struct cr_proto_parse *result)
-{
-    /* Find first word in input buffer and do a command lookup on it */
-    const char *end_of_input = input + strlen(input);
-    struct word current = next_word(input);
-    struct cr_command *cmd = cr_lookup_command(current.start);
-
-    if (cmd->id == CR_PROTO_CMD_UNKNOWN) {
-        reply("wtf Unknown command: ");
-        reply(current.start);
-        reply("\n");
-        return CR_PROTO_RESULT_WTF;
-    }
-
-    /* Iterate through arguments and parse them according to spec */
-    unsigned int argn = 0u;
-    while (current.end < end_of_input) {
-        /* Make sure we're not overflowing argument list */
-        if (argn >= CR_PROTO_MAX_ARGS) {
-            reply("malformed-request Broken command definition. This is a bug!");
-            reply("\n");
-            return CR_PROTO_RESULT_MALFORMED;
-        }
-
-        struct cr_argument *spec = cmd->args + argn;
-        /* Check if we're exceeding the command's argument spec */
-        if (spec->type == CR_PROTO_ARG_TYPE_VOID) {
-            reply("malformed-request Too many arguments");
-            reply("\n");
-            return CR_PROTO_RESULT_MALFORMED;
-        }
-
-        current = next_word(current.end + 1);
-        result->args[argn] = parse_argument(reply, spec, current.start);
-        if (result->args[argn].type == CR_PROTO_ARG_TYPE_VOID) {
-            return CR_PROTO_RESULT_BROKEN_VALUE;
-        }
-        argn++;
-    }
-
-    if (spec_missing_arg(cmd, argn)) {
-        reply("malformed-request Not enough arguments");
-        reply("\n");
-        return CR_PROTO_RESULT_MALFORMED;
-    }
-
-    /* All good; Before returning make sure all result data is correct. */
-    result->cmd = cmd;
-    result->argn = argn;
-    return CR_PROTO_RESULT_OK;
 }
 
 void

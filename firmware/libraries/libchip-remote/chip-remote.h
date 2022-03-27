@@ -17,11 +17,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define CR_PROTO_MAX_ARGS 4u
-
 #define CR_PROTOCOL_VERSION_MAJOR      3u
 #define CR_PROTOCOL_VERSION_MINOR      0u
 #define CR_PROTOCOL_VERSION_PATCHLEVEL 0u
+
+#define CR_PROTOCOL_MAX_TOKENS 32u
 
 /** chip-remote number type */
 typedef uint64_t cr_number;
@@ -120,20 +120,10 @@ struct cr_proto_parse;
 
 typedef void (*string_sink)(const char*);
 
-typedef void(*cr_command_callback)(const struct cr_protocol*,
-                                   const struct cr_proto_parse*);
-
-/**
- * Description of command argument specification
- *
- * This is used in struct cr_command to describe all the arguments, mandatory
- * or optional, a command takes.
- */
-struct cr_argument {
-    bool optional;
-    bool repeats;
-    enum cr_argument_type type;
-};
+typedef void(*cr_command_callback)(struct cr_protocol*,
+                                   struct cr_command *,
+                                   struct cr_value *,
+                                   unsigned int);
 
 /**
  * Represenation of a command within the protocol
@@ -141,21 +131,7 @@ struct cr_argument {
 struct cr_command {
     enum cr_proto_command id;
     const char *name;
-    struct cr_argument *args;
     cr_command_callback cb;
-};
-
-/**
- * Parser return type
- *
- * Since this module is made for use in embedded systems, this offers a way
- * to statically allocate enough memory to encode the most complex of parser
- * results.
- */
-struct cr_proto_parse {
-    struct cr_command *cmd;
-    struct cr_value args[CR_PROTO_MAX_ARGS];
-    unsigned int argn;
 };
 
 enum cr_parser_result {

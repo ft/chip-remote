@@ -16,8 +16,8 @@
 #include <cr-utilities.h>
 
 void
-cr_handle_version(const struct cr_protocol *proto,
-                  UNUSED const struct cr_proto_parse *cmd)
+cr_handle_version(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
+                  UNUSED struct cr_value *t, UNUSED unsigned int n)
 {
     proto->reply("VERSION ");
     cr_proto_put_number(proto, CR_PROTOCOL_VERSION_MAJOR);

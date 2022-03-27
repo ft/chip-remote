@@ -28,8 +28,8 @@
  * @sideeffects none
  */
 void
-cr_handle_bye(const struct cr_protocol *proto,
-              UNUSED const struct cr_proto_parse *cmd)
+cr_handle_bye(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
+              UNUSED struct cr_value *t, UNUSED unsigned int n)
 {
     proto->reply("Have a nice day.\n");
 }

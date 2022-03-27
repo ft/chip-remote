@@ -17,16 +17,11 @@
 #include <commands-private.h>
 #include <cr-utilities.h>
 
-struct cr_argument init_arguments[] = {
-    CMD_MANDATORY_ARG(INTEGER),
-    CMD_END_OF_ARGS
-};
-
 void
-cr_handle_init(const struct cr_protocol *proto,
-               const struct cr_proto_parse *cmd)
+cr_handle_init(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
+               struct cr_value *t, UNUSED unsigned int n)
 {
-    cr_number idx = cmd->args[0].data.number;
+    cr_number idx = t[1].data.number;
     if (idx >= proto->ports.tablesize) {
         proto->reply("value-out-of-range ");
         cr_proto_put_number(proto, idx);

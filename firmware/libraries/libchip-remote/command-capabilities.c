@@ -16,13 +16,13 @@
 #include <cr-utilities.h>
 
 void
-cr_handle_capabilities(const struct cr_protocol *proto,
-                       UNUSED const struct cr_proto_parse *cmd)
+cr_handle_capabilities(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
+                       UNUSED struct cr_value *t, UNUSED unsigned int n)
 {
     proto->reply("rx-buffer-size ");
     cr_proto_put_number(proto, proto->in.size);
     proto->reply(";maximum-arguments ");
-    cr_proto_put_number(proto, CR_PROTO_MAX_ARGS);
+    cr_proto_put_number(proto, CR_PROTOCOL_MAX_TOKENS);
     for (size_t i = 0u; cr_commands[i].id != CR_PROTO_CMD_UNKNOWN; ++i) {
         if (cr_commands[i].name != NULL && cr_commands[i].name[0] == '+') {
             proto->reply(";");

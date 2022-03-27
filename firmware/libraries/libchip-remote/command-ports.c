@@ -16,8 +16,8 @@
 #include <cr-utilities.h>
 
 void
-cr_handle_ports(const struct cr_protocol *proto,
-                UNUSED const struct cr_proto_parse *cmd)
+cr_handle_ports(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
+                UNUSED struct cr_value *t, UNUSED unsigned int n)
 {
     proto->reply("ports ");
     cr_proto_put_number(proto, proto->ports.tablesize);

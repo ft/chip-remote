@@ -36,26 +36,19 @@ current_port(const struct cr_protocol *proto)
 }
 
 void
-cr_handle_transmit(const struct cr_protocol *proto,
-                   const struct cr_proto_parse *cmd)
+cr_handle_transmit(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
+                   struct cr_value *t, UNUSED unsigned int n)
 {
-    cr_number rx, n;
-    unsigned int error;
-    char *stop;
+    cr_number rx;
+    cr_number tx = t[1].data.number;
     struct cr_port *p = current_port(proto);
 
     if (p->initialised == false) {
         proto->reply("wtf Focused port is not initialised!\n");
         return;
     }
-    n = cr_parse_number(cmd->args[0].data.symbol,
-                        16u, &stop, &error);
-    if (error != 0u) {
-        proto->reply("wtf Broken datum to transmit!\n");
-        return;
-    }
 
-    cr_transmit(p, n, &rx);
+    cr_transmit(p, tx, &rx);
     cr_proto_put_number(proto, rx);
     cr_proto_put_newline(proto);
 }

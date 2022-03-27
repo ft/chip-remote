@@ -16,44 +16,30 @@ extern struct cr_command cr_commands[];
 
 #define RETURN_TYPE void
 
-#define ARGUMENTS (const struct cr_protocol*, const struct cr_proto_parse*)
+#define ARGUMENTS (struct cr_protocol*,          \
+                   struct cr_command*,           \
+                   struct cr_value*,             \
+                   unsigned int)
 
 #define xDECLARE_COMMAND(prefix, name)                  \
     RETURN_TYPE cr_handle_ ## prefix ## name ARGUMENTS
 
-#define xDECLARE_ARGS_COMMAND(prefix, name)                     \
-    extern struct cr_argument prefix ## name ## _arguments[];  \
-    xDECLARE_COMMAND(prefix, name)
+#define DECLARE_COMMAND(name)    xDECLARE_COMMAND(/*none*/, name)
+#define DECLARE_FW_COMMAND(name) xDECLARE_COMMAND(fw_,      name)
 
-#define CMD_MANDATORY_ARG(t)                                            \
-    { .optional = false, .repeats = false, .type = CR_PROTO_ARG_TYPE_ ## t }
-
-#define CMD_OPTIONAL_ARG(t)                                             \
-    { .optional = true,  .repeats = false, .type =  CR_PROTO_ARG_TYPE_ ##t }
-
-#define CMD_REST_ARG(t)                                                 \
-    { .optional = true,  .repeats = true,  .type =  CR_PROTO_ARG_TYPE_ ## t }
-
-#define CMD_END_OF_ARGS                                                 \
-    { .optional = true, .repeats = true, .type = CR_PROTO_ARG_TYPE_VOID }
-
-#define DECLARE_COMMAND(name) xDECLARE_COMMAND(/*none*/, name)
-#define DECLARE_ARGS_COMMAND(name) xDECLARE_ARGS_COMMAND(/*none*/, name)
-#define FW_DECLARE_COMMAND(name) xDECLARE_COMMAND(fw_, name)
-#define FW_DECLARE_ARGS_COMMAND(name) xDECLARE_ARGS_COMMAND(fw_, name)
-
-DECLARE_ARGS_COMMAND(address);
+DECLARE_COMMAND(address);
 DECLARE_COMMAND(bye);
 DECLARE_COMMAND(capabilities);
 DECLARE_COMMAND(hi);
-DECLARE_ARGS_COMMAND(init);
+DECLARE_COMMAND(init);
 DECLARE_COMMAND(ports);
-DECLARE_ARGS_COMMAND(set);
-DECLARE_ARGS_COMMAND(transmit);
+DECLARE_COMMAND(set);
+DECLARE_COMMAND(transmit);
 DECLARE_COMMAND(version);
-FW_DECLARE_COMMAND(version);
+DECLARE_FW_COMMAND(version);
 
-#undef DECLARE_ARGS_COMMAND
+#undef DECLARE_FW_COMMAND
 #undef DECLARE_COMMAND
+#undef xDECLARE_COMMAND
 #undef ARGUMENTS
 #undef RETURN_TYPE

@@ -15,22 +15,30 @@
 #include <commands-private.h>
 #include <cr-utilities.h>
 
-struct cr_argument address_arguments[] = {
-    CMD_MANDATORY_ARG(INTEGER),
-    CMD_END_OF_ARGS
-};
+enum cr_argument_type address_args[] = { CR_PROTO_ARG_TYPE_INTEGER };
+
+static void
+address_help(string_sink reply)
+{
+    reply("wtf usage: address INDEX\n");
+}
 
 void
-cr_handle_address(const struct cr_protocol *proto,
-                  const struct cr_proto_parse *cmd)
+cr_handle_address(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
+                  struct cr_value *t, unsigned int n)
 {
+    if (n != 2u) {
+        address_help(proto->reply);
+        return;
+    }
+
     struct cr_port *p = proto->ports.table[proto->ports.current];
     if (p->api->address == NULL) {
         proto->reply("wtf Focused port does not support address!\n");
         return;
     }
 
-    int rv = p->api->address(p, cmd->args[0].data.number);
+    int rv = p->api->address(p, t[1].data.number);
 
     if (rv == 0) {
         proto->reply("ok\n");
