@@ -176,16 +176,29 @@ The protocol uses these data types:
 - symbols
 - integers
 - booleans
+- key-value-pairs
 
 Symbols are used as literal requests, responses and symbolic values. They are
 *case-sensitive*, which means that "~foo~" and "~Foo~" are different values.
+Symbols may contain alpha-numeric characters as well as characters from the set
+of ~[-_/+]~. Symbols may not begin with a decimal digit character.
 
 Integers represent numeric values within the protocol. They are transmitted in
-strings of hexadecimal digits. The ~a-f~ range of a hexadecimal digit may be
-represented in upper or lower case and may also be mixed.
+strings of decimal digits, unless prefixed by a base-specification. The
+following prefixes are available:
+
+- ~b#…~: Binary number
+- ~o#…~: Octal number
+- ~d#…~: Decimal number
+- ~h#…~: Hexadecimal number
+
+The ~a-f~ range of a hexadecimal digit may be represented in upper or lower
+case and may also be mixed.
 
 In boolean contexts, the symbol ~true~ represents a true value; and the symbol
 ~false~ represents a false value.
+
+Key-value-pairs are a symbol connected to a number by an ASCII colon (~:~).
 
 *** Extensions
 
@@ -308,6 +321,7 @@ following:
 
 - "~focus <integer|none>~": Where ~<integer>~ indicates the currently focused
   port. If no port is currently focused, the symbol ~none~ is returned.
+
 **** ~version~ Request
 
 Synopsis:\hspace{0.5cm} ~version~
