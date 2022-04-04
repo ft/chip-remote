@@ -129,6 +129,7 @@
         (let ((next (proc s (bytevector-u8-ref buffer (procbuf-index pb)))))
           (loop (slip-transition s next (with-sof? (slip-encoding state)))
                 (cond ((eq? next 'end) '())
+                      ((eq? next 'lost-end) (set-slip-output! state '()))
                       ((symbol? next) current)
                       (else (cons next current)))
                 (procbuf-advance pb)
