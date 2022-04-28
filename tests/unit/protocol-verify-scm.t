@@ -13,12 +13,12 @@
 (define v (@@ (chip-remote protocol) verify-and-convert))
 
 (define a '(("VERBOSE" . "VERBOSE")
-            ("ca" . int)
-            ("cat" . int)))
+            ("h#ca" . int)
+            ("h#cat" . int)))
 
 (define b '((#t . "VERBOSE")
             (#t . 202)
-            (#f . "cat")))
+            (#f . "h#cat")))
 
 (with-fs-test-bundle
  (plan (length a))

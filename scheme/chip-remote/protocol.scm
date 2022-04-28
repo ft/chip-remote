@@ -96,12 +96,17 @@ pairs instead of a list of lists with two elements in them.
   (char-set-union
    (char-set-diff+intersection char-set:ascii
                                char-set:letter+digit)
-   (char-set #\+ #\- #\:)))
+   (char-set #\+ #\- #\: #\#)))
 
-(define (hexstring->int str)
+(define (intstring->int str)
   "Turn a hexadecimal string ‘str’ into an integer. Returns ‘#f’ in case of an
 error."
-  (string->number str 16))
+  (let ((prefix? (lambda (x) (string-prefix? x str))))
+    (cond ((prefix? "h#") (string->number (substring str 2) 16))
+          ((prefix? "d#") (string->number (substring str 2) 10))
+          ((prefix? "o#") (string->number (substring str 2)  8))
+          ((prefix? "b#") (string->number (substring str 2)  2))
+          (else           (string->number str               10)))))
 
 (define (int->hexstring int)
   "Turn an integer ‘int’ into a string of hexadecimal digits."
@@ -126,7 +131,7 @@ integer)."
            (cons (string=? want got)
                  got))
           ((eq? want 'int)
-           (let* ((val (hexstring->int got))
+           (let* ((val (intstring->int got))
                   (success (integer? val)))
              (cons success
                    (if success val got))))
@@ -229,7 +234,7 @@ protocol specification, the function throws ‘protocol-bye-failed’. Otherwise
   (define keys '(rx-buffer-size maximum-arguments))
   (let ((fst (string->symbol (car tokens))))
     (if (memq fst keys)
-        (cons fst (map hexstring->int (cdr tokens)))
+        (cons fst (map intstring->int (cdr tokens)))
         fst)))
 
 (define (capability-categories lst)
@@ -396,7 +401,7 @@ list of return values from those function applications.
          (len (length data)))
     (cond ((= len 1) (cons (string->symbol (car data)) 0))
           ((= len 2) (cons (string->symbol (car data))
-                           (let ((int (hexstring->int (cadr data))))
+                           (let ((int (intstring->int (cadr data))))
                              (if int int
                                  (throw 'protocol-line-index-not-integer
                                         (cadr data))))))
@@ -465,12 +470,12 @@ of allowed symbols supplied as ‘ls’."
   `((bit-order . ,port-bit-order)
     (clk-phase-delay . ,reply->boolean)
     (clk-polarity . ,port-clk-polarity)
-    (cs-lines . ,hexstring->int)
+    (cs-lines . ,intstring->int)
     (cs-polarity . ,port-cs-polarity)
-    (frame-length . ,hexstring->int)
-    (lines . ,hexstring->int)
+    (frame-length . ,intstring->int)
+    (lines . ,intstring->int)
     (mode . ,port-mode)
-    (rate . ,hexstring->int)))
+    (rate . ,intstring->int)))
 
 (define (parse-port reply)
   "Turn a reply to the `port` request to scheme data."

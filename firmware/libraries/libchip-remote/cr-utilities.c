@@ -123,6 +123,7 @@ cr_proto_put_number(const struct cr_protocol *proto, cr_number value)
 {
     char buf[17];
     stringify_number(value, buf);
+    proto->reply("h#");
     proto->reply(buf);
 }
 

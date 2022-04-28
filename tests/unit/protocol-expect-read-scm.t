@@ -11,17 +11,17 @@
 
 (define er (@@ (chip-remote protocol) expect-read))
 
-(define working-expects '(("VERSION 2 7 ca"
+(define working-expects '(("VERSION h#2 h#7 h#ca"
                            ("VERSION" int int int)
                            ("VERSION" 2 7 202))
-                          ("LINES 17 FIXED"
+                          ("LINES h#17 FIXED"
                            ("LINES" int opt "FIXED")
                            ("LINES" 23 "FIXED"))
-                          ("LINES 17"
+                          ("LINES h#17"
                            ("LINES" int opt "FIXED")
                            ("LINES" 23))))
 
-(define failing-expects '(("VERSION 2 7z ca"
+(define failing-expects '(("VERSION h#2 h#7z h#ca"
                            protocol-unexpected-data
                            ("VERSION" int int int)
                            ;; This last entry is currently not used by the
@@ -29,11 +29,11 @@
                            ;; soon as scm-tap-test supports inspecting the
                            ;; arguments of an exception.
                            ("7z" . int))
-                          ("LINES 17 FOXED"
+                          ("LINES h#17 FOXED"
                            protocol-unexpected-data
                            ("LINES" int opt "FIXED")
                            ("FOXED" . "FIXED"))
-                          ("LINES 17 FIXED REALLY"
+                          ("LINES h#17 FIXED REALLY"
                            protocol-number-of-words-mismatch
                            ("LINES" int opt "FIXED")
                            ("REALLY" . too-much))
