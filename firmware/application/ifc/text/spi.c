@@ -11,7 +11,9 @@
 
 #include <common/compiler.h>
 
+#include <chip-remote.h>
 #include <cr-port.h>
+#include <cr-utilities.h>
 #include <sx-parser.h>
 
 #include "spi.h"
@@ -28,44 +30,57 @@ cr_spi_text_load(struct sx_node *node)
     }
 }
 
-int
-cr_spi_text_init(struct cr_port *port)
+static int
+cr_spi_text_init(UNUSED struct cr_protocol *proto, struct cr_port *port)
 {
     port->initialised = true;
     return 0;
 }
 
-int
-cr_spi_text_xfer(struct cr_port *port, cr_number tx, cr_number *rx)
+static int
+cr_spi_text_xfer(struct cr_protocol *proto, struct cr_port *port,
+                 unsigned int n, struct cr_value *args)
 {
     cr_number *state = port->data;
     bool fromstate = true;
+    cr_number tx, rx;
+
+    if (n != 1) {
+        return CR_PORTVAL_INVALID_NUMBER_OF_ARGS;
+    }
+
+    if (args[0].type != CR_PROTO_ARG_TYPE_INTEGER) {
+        return CR_PORTVAL_INVALID_TYPE_OF_ARG;
+    }
+
+    tx = args[0].data.number;
+    rx = 0;
 
     if (rxring != NULL && sx_is_list(rxring)) {
         struct sx_node *n = sx_pop(&rxring);
         if (sx_is_integer(n)) {
             fromstate = false;
-            *rx = n->data.u64;
+            rx = n->data.u64;
         }
         sx_destroy(&n);
     }
 
     if (fromstate)
-        *rx = *state;
+        rx = *state;
 
     printf("(spi-tx #x%016"PRIxCRN")\n", tx);
-    printf("(spi-rx #x%016"PRIxCRN")\n", *rx);
+    printf("(spi-rx #x%016"PRIxCRN")\n", rx);
+    cr_proto_put_number(proto, rx);
 
     if (fromstate)
         (*state)++;
 
-    return 0;
+    return CR_PORTVAL_REPLY_DONE;
 }
 
-int
-cr_spi_text_set(UNUSED struct cr_port *port,
-                UNUSED const char *key,
-                UNUSED const char *value)
+static int
+cr_spi_text_set(UNUSED struct cr_protocol *proto, UNUSED struct cr_port *port,
+                UNUSED unsigned int n, UNUSED struct cr_value *value)
 {
     return 0;
 }

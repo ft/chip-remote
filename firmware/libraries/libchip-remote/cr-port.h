@@ -19,6 +19,11 @@
 
 #include "chip-remote.h"
 
+#define CR_PORTVAL_REPLY_DONE              1
+#define CR_PORTVAL_OK                      0
+#define CR_PORTVAL_INVALID_NUMBER_OF_ARGS -1
+#define CR_PORTVAL_INVALID_TYPE_OF_ARG    -2
+
 enum cr_port_type {
     CR_PORT_TYPE_FLEX,
     CR_PORT_TYPE_UART,
@@ -86,10 +91,13 @@ struct cr_port_io {
 struct cr_port;
 
 struct cr_port_api {
-    int (*init)(struct cr_port*);
-    int (*xfer)(struct cr_port*, cr_number, cr_number*);
-    int (*address)(struct cr_port*, cr_number);
-    int (*set)(struct cr_port*, const char*, const char*);
+    int (*address)(struct cr_protocol*, struct cr_port*,
+                   unsigned int, struct cr_value*);
+    int (*init)(struct cr_protocol*, struct cr_port*);
+    int (*set)(struct cr_protocol*, struct cr_port*,
+               unsigned int, struct cr_value*);
+    int (*xfer)(struct cr_protocol*, struct cr_port*,
+                unsigned int, struct cr_value*);
 };
 
 struct cr_port {
@@ -110,6 +118,8 @@ struct cr_port {
     void *data;
 };
 
-int cr_transmit(struct cr_port*, cr_number, cr_number*);
+void cr_handle_port_value(struct cr_protocol*, int);
+struct cr_port *current_port(const struct cr_protocol*);
+struct cr_port *port_by_index(const struct cr_protocol*, unsigned int);
 
 #endif /* INC_CR_PORT_H */

@@ -25,7 +25,7 @@ static char chtable[] = {
 static void
 stringify_number(cr_number num, char *buf)
 {
-    /* buf needs to be able to hold 8+1 characters. */
+    /* buf needs to be able to hold 16+1 characters. */
     int i, max, step;
 
     for (i = 15; i >= 0; --i) {
@@ -47,7 +47,7 @@ stringify_number(cr_number num, char *buf)
         step = 4 * i;
         buf[max-i] = chtable[(num & (cr_number)(0xful << step)) >> step];
     }
-    buf[8] = '\0';
+    buf[16] = '\0';
 }
 
 static inline int
@@ -121,7 +121,64 @@ cr_parse_number(const char *buf, unsigned int base,
 void
 cr_proto_put_number(const struct cr_protocol *proto, cr_number value)
 {
-    char buf[9];
+    char buf[17];
     stringify_number(value, buf);
     proto->reply(buf);
+}
+
+bool
+cr_require_numofargs(struct cr_protocol *proto,
+                     cr_number actual, cr_number expected)
+{
+    if (actual != expected) {
+        proto->reply("malformed-request Invalid number of argument: ");
+        cr_proto_put_number(proto, actual);
+        proto->reply("!= ");
+        cr_proto_put_number(proto, expected);
+        cr_proto_put_newline(proto);
+        return false;
+    }
+
+    return true;
+}
+
+bool
+cr_require_arg_type(struct cr_protocol *proto, struct cr_value *token,
+                    unsigned int n, enum cr_argument_type type)
+{
+    if (token[n].type != type) {
+        proto->reply("malformed-request Invalid argument type\n");
+        return false;
+    }
+
+    return true;
+}
+
+bool
+cr_unknown_port(struct cr_protocol *proto, struct cr_port *port)
+{
+    if (port == NULL) {
+        proto->reply("wtf Port lookup failed. This should not happen!\n");
+        return true;
+    }
+
+    return false;
+}
+
+bool
+cr_value_max(struct cr_protocol *proto, struct cr_value *token,
+             unsigned int n, cr_number limit)
+{
+    assert(token[n].type == CR_PROTO_ARG_TYPE_INTEGER);
+
+    if (token[n].data.number > limit) {
+        proto->reply("value-out-of-range ");
+        cr_proto_put_number(proto, token[n].data.number);
+        proto->reply("> ");
+        cr_proto_put_number(proto, limit);
+        cr_proto_put_newline(proto);
+        return false;
+    }
+
+    return true;
 }

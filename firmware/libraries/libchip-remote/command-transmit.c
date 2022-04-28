@@ -17,30 +17,10 @@
 #include <cr-port.h>
 #include <cr-utilities.h>
 
-#define CR_DATA_MAX 8u
-
-struct cr_buf64 {
-    cr_number data[CR_DATA_MAX];
-    size_t n;
-};
-
-struct cr_transmission {
-    struct cr_buf64 tx;
-    struct cr_buf64 rx;
-};
-
-static inline struct cr_port*
-current_port(const struct cr_protocol *proto)
-{
-    return proto->ports.table[proto->ports.current];
-}
-
 void
 cr_handle_transmit(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
-                   struct cr_value *t, UNUSED unsigned int n)
+                   struct cr_value *t, unsigned int n)
 {
-    cr_number rx;
-    cr_number tx = t[1].data.number;
     struct cr_port *p = current_port(proto);
 
     if (p->initialised == false) {
@@ -48,7 +28,5 @@ cr_handle_transmit(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
         return;
     }
 
-    cr_transmit(p, tx, &rx);
-    cr_proto_put_number(proto, rx);
-    cr_proto_put_newline(proto);
+    cr_handle_port_value(proto, p->api->xfer(proto, p, n-1, t+1));
 }

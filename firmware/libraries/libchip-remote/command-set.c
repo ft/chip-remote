@@ -9,6 +9,7 @@
  * @brief Implemenation of SET command
  */
 
+#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -20,46 +21,29 @@
 
 void
 cr_handle_set(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
-              struct cr_value *t, UNUSED unsigned int n)
+              struct cr_value *t, unsigned int n)
 {
-    const cr_number idx = t[0].data.number;
-    const char *key = t[1].data.symbol;
-    const char *value = t[2].data.symbol;
-    struct cr_port *p = proto->ports.table[idx];
+    if (cr_require_numofargs(proto, n, 4) == false) {
+        return;
+    }
+
+    if (REQUIRE_ARG_TYPE(proto, t, 1, INTEGER) == false) {
+        return;
+    }
+    if (cr_value_max(proto, t, 1, proto->ports.tablesize - 1) == false) {
+        return;
+    }
+
+    const cr_number idx = t[1].data.number;
+    struct cr_port *p = port_by_index(proto, idx);
+    if (cr_unknown_port(proto, p)) {
+        return;
+    }
 
     if (p->api->set == NULL) {
         proto->reply("wtf Port does not support configuration!\n");
         return;
     }
 
-    switch (p->api->set(p, key, value)) {
-    case 0:
-        proto->reply("ok\n");
-        break;
-    case 1:
-        proto->reply("wtf Port does not support mode changes\n");
-        break;
-    case -1:
-        proto->reply("value-out-of-range ");
-        proto->reply(key);
-        proto->reply(": ");
-        proto->reply(value);
-        cr_proto_put_newline(proto);
-        break;
-    case -2:
-        proto->reply("malformed-request Invalid parameter: ");
-        proto->reply(key);
-        cr_proto_put_newline(proto);
-        break;
-    case -3:
-        proto->reply("broken-value Invalid argument for ");
-        proto->reply(key);
-        proto->reply(": ");
-        proto->reply(value);
-        cr_proto_put_newline(proto);
-        break;
-    default:
-        proto->reply("wtf Unknown configuration error.\n");
-        break;
-    }
+    cr_handle_port_value(proto, p->api->set(proto, p, n-2, t+2));
 }

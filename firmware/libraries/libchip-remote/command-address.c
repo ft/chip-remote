@@ -17,18 +17,12 @@
 
 enum cr_argument_type address_args[] = { CR_PROTO_ARG_TYPE_INTEGER };
 
-static void
-address_help(string_sink reply)
-{
-    reply("wtf usage: address INDEX\n");
-}
-
 void
 cr_handle_address(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
                   struct cr_value *t, unsigned int n)
 {
     if (n != 2u) {
-        address_help(proto->reply);
+        proto->reply("wtf usage: address INDEX\n");
         return;
     }
 
@@ -38,11 +32,5 @@ cr_handle_address(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
         return;
     }
 
-    int rv = p->api->address(p, t[1].data.number);
-
-    if (rv == 0) {
-        proto->reply("ok\n");
-    } else {
-        proto->reply("wtf Could not address desired device!\n");
-    }
+    cr_handle_port_value(proto, p->api->address(proto, p, n-1, t+1));
 }

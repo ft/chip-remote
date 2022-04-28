@@ -39,7 +39,6 @@ struct cr_protocol {
         bool focused;
     } ports;
     string_sink reply;
-    cr_command_callback multiline_cb;
 };
 
 void cr_process_init(struct cr_protocol*, char*, size_t, string_sink);
