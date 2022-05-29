@@ -1,0 +1,23 @@
+name: chip-remote
+
+common:
+  build-configs: [ release, debug ]
+  build-tool: ninja
+  zephyr-kernel: zephyr/kernel
+  zephyr-module-path: [ zephyr/modules ]
+
+zephyr:
+  - application: chip-remote
+    source: ${system}/application
+    build:
+      - toolchains:
+          - name: gnuarmemb
+            path: /usr
+        boards:
+          - nucleo_f767zi
+#          - stm32h747i_disco_m7
+        modules:
+          - arm-cmsis
+          - hal-stm32
+      - toolchains: [ host ]
+        boards: [ native_posix_64 ]
