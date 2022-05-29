@@ -57,12 +57,12 @@ cr_spi_text_xfer(struct cr_protocol *proto, struct cr_port *port,
     rx = 0;
 
     if (rxring != NULL && sx_is_list(rxring)) {
-        struct sx_node *n = sx_pop(&rxring);
-        if (sx_is_integer(n)) {
+        struct sx_node *node = sx_pop(&rxring);
+        if (sx_is_integer(node)) {
             fromstate = false;
-            rx = n->data.u64;
+            rx = node->data.u64;
         }
-        sx_destroy(&n);
+        sx_destroy(&node);
     }
 
     if (fromstate)
