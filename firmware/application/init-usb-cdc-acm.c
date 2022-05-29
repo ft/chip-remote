@@ -97,7 +97,7 @@ main(void)
         return;
     }
 
-    port00_spi.api->init(&port00_spi);
+    port00_spi.api->init(&proto, &port00_spi);
 
     int ret = gpio_pin_configure(led, PIN, GPIO_OUTPUT_ACTIVE);
     if (ret < 0) {
