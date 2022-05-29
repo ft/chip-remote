@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include <common/bit-operations.h>
+#include <common/compiler.h>
 #include <cr-port.h>
 #include <cr-utilities.h>
 
@@ -57,72 +58,84 @@ cr_spi_bb_input(struct cr_line *line)
 }
 
 int
-cr_spi_bb_set(struct cr_port *port, const char *key, const char *value)
+cr_spi_bb_set(struct cr_protocol *proto, struct cr_port *port,
+              UNUSED unsigned int n, struct cr_value *value)
 {
-    int err;
-    char *stop;
+    const char *key = value->data.symbol;
 
     if (strcmp(key, "rate") == 0) {
-        (void)cr_parse_number(value, 16u, &stop, &err);
-        if (err > 0) {
-            return -3;
-        }
         /* Accept any and all rates; this bit-bang implementation will use its
          * native rate in any case. */
         port->cfg.spi.clk.rate = 0;
     } else if (strcmp(key, "clk-phase-delay") == 0) {
-        if (string_bool_true(value)) {
-            port->cfg.spi.clk.phase_delay = true;
-        } else if (string_bool_false(value)) {
-            port->cfg.spi.clk.phase_delay = false;
-        } else {
-            return -3;
+        if (REQUIRE_ARG_TYPE(proto, value, 1, BOOLEAN) == false) {
+            return CR_PORTVAL_INVALID_TYPE_OF_ARG;
         }
+        port->cfg.spi.clk.phase_delay = value[1].data.boolean;
     } else if (strcmp(key, "frame-length") == 0) {
-        const cr_number n = cr_parse_number(value, 16u, &stop, &err);
-        if (err > 0) {
-            return -3;
-        }
-        if (n < 1 || n > 64) {
-            return -1;
+        if (cr_value_max(proto, value, 1, 64u) == false) {
+            return CR_PORTVAL_REPLY_DONE;
         }
         port->cfg.spi.frame_length = n;
     } else if (strcmp(key, "bit-order") == 0) {
-        if (strcmp(value, "lsb-first") == 0) {
+        if (REQUIRE_ARG_TYPE(proto, value, 1, SYMBOL) == false) {
+            return CR_PORTVAL_INVALID_TYPE_OF_ARG;
+        }
+        const char *sym = value[1].data.symbol;
+        if (strcmp(sym, "lsb-first") == 0) {
             port->cfg.spi.bit_order = CR_BIT_LSB_FIRST;
-        } else if (strcmp(value, "msb-first") == 0) {
+        } else if (strcmp(sym, "msb-first") == 0) {
             port->cfg.spi.bit_order = CR_BIT_MSB_FIRST;
         } else {
-            return -3;
+            proto->reply("Invalid symbol: ");
+            proto->reply(sym);
+            cr_proto_put_newline(proto);
+            return CR_PORTVAL_REPLY_DONE;
         }
     } else if (strcmp(key, "cs-polarity") == 0) {
-        if (strcmp(value, "active-high") == 0) {
+        if (REQUIRE_ARG_TYPE(proto, value, 1, SYMBOL) == false) {
+            return CR_PORTVAL_INVALID_TYPE_OF_ARG;
+        }
+        const char *sym = value[1].data.symbol;
+        if (strcmp(sym, "active-high") == 0) {
             port->cfg.spi.cs.polarity = CR_LOGIC_DIRECT;
-        } else if (strcmp(value, "active-low") == 0) {
+        } else if (strcmp(sym, "active-low") == 0) {
             port->cfg.spi.cs.polarity = CR_LOGIC_INVERTED;
         } else {
-            return -3;
+            proto->reply("Invalid symbol: ");
+            proto->reply(sym);
+            cr_proto_put_newline(proto);
+            return CR_PORTVAL_REPLY_DONE;
         }
     } else if (strcmp(key, "clk-polarity") == 0) {
-        if (strcmp(value, "rising-edge") == 0) {
+        if (REQUIRE_ARG_TYPE(proto, value, 1, SYMBOL) == false) {
+            return CR_PORTVAL_INVALID_TYPE_OF_ARG;
+        }
+        const char *sym = value[1].data.symbol;
+        if (strcmp(sym, "rising-edge") == 0) {
             port->cfg.spi.clk.edge = CR_EDGE_RISING;
-        } else if (strcmp(value, "falling-edge") == 0) {
+        } else if (strcmp(sym, "falling-edge") == 0) {
             port->cfg.spi.clk.edge = CR_EDGE_FALLING;
         } else {
-            return -3;
+            proto->reply("Invalid symbol: ");
+            proto->reply(sym);
+            cr_proto_put_newline(proto);
+            return CR_PORTVAL_REPLY_DONE;
         }
     } else if (strcmp(key, "mode") == 0) {
-        return 1;
     } else {
-        return -2;
+        proto->reply("Invalid setting: ");
+        proto->reply(key);
+        cr_proto_put_newline(proto);
+        return CR_PORTVAL_REPLY_DONE;
     }
 
     port->initialised = false;
-    return 0;
+    return CR_PORTVAL_OK;
 }
 
-int
-cr_spi_bb_init(struct cr_port *port)
+static int
+cr_spi_bb_init(UNUSED struct cr_protocol *proto, struct cr_port *port)
 {
     const struct cr_port_spi_bb *spi = port->data;
 
@@ -178,14 +191,25 @@ cr_spi_bb_xfer_bit(const struct cr_port *port,
     return rx;
 }
 
-int
-cr_spi_bb_xfer(struct cr_port *port, cr_number tx, cr_number *rx)
+static int
+cr_spi_bb_xfer(struct cr_protocol *proto, struct cr_port *port,
+               unsigned int n, struct cr_value *args)
 {
     const struct cr_port_spi_bb *spi = port->data;
-    cr_number rv = 0ull;
     const size_t len = port->cfg.spi.frame_length;
+    cr_number tx, rx;
 
-    *rx = 0u;
+    if (n != 1) {
+        return CR_PORTVAL_INVALID_NUMBER_OF_ARGS;
+    }
+
+    if (args[0].type != CR_PROTO_ARG_TYPE_INTEGER) {
+        return CR_PORTVAL_INVALID_TYPE_OF_ARG;
+    }
+
+    tx = args[0].data.number;
+    rx = 0;
+
     if (port->cfg.spi.cs.polarity == CR_LOGIC_DIRECT) {
         cr_spi_line_set(spi->cs, 1u);
     } else {
@@ -195,11 +219,11 @@ cr_spi_bb_xfer(struct cr_port *port, cr_number tx, cr_number *rx)
     if (port->cfg.spi.bit_order == CR_BIT_MSB_FIRST) {
         for (size_t i = 0ull; i < len; ++i) {
             const size_t idx = len - i - 1;
-            *rx = cr_spi_bb_xfer_bit(port, spi, idx, tx, *rx);
+            rx = cr_spi_bb_xfer_bit(port, spi, idx, tx, rx);
         }
     } else {
         for (size_t idx = 0ull; idx < len; ++idx) {
-            *rx = cr_spi_bb_xfer_bit(port, spi, idx, tx, *rx);
+            rx = cr_spi_bb_xfer_bit(port, spi, idx, tx, rx);
         }
     }
 
@@ -209,7 +233,9 @@ cr_spi_bb_xfer(struct cr_port *port, cr_number tx, cr_number *rx)
         cr_spi_line_set(spi->cs, 1u);
     }
 
-    return rv;
+    cr_proto_put_number(proto, rx);
+
+    return CR_PORTVAL_REPLY_DONE;
 }
 
 struct cr_port_api cr_port_impl_spi_bb = {

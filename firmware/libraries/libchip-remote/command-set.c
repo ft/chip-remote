@@ -33,6 +33,9 @@ cr_handle_set(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
     if (cr_value_max(proto, t, 1, proto->ports.tablesize - 1) == false) {
         return;
     }
+    if (REQUIRE_ARG_TYPE(proto, t, 2, SYMBOL) == false) {
+        return;
+    }
 
     const cr_number idx = t[1].data.number;
     struct cr_port *p = port_by_index(proto, idx);
