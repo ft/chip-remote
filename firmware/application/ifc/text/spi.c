@@ -71,6 +71,7 @@ cr_spi_text_xfer(struct cr_protocol *proto, struct cr_port *port,
     printf("(spi-tx #x%016"PRIxCRN")\n", tx);
     printf("(spi-rx #x%016"PRIxCRN")\n", rx);
     cr_proto_put_number(proto, rx);
+    cr_proto_put_newline(proto);
 
     if (fromstate)
         (*state)++;
