@@ -18,7 +18,6 @@ CFLAGS += -Wunbound-variable -Warity-mismatch -Wduplicate-case-datum
 CFLAGS += -Wbad-case-datum -Wformat -L$(LOAD_PATH)
 
 NATIVE_DIR = native-fw
-NATIVE_COMPILE = cmake -GNinja -DUFW_PICK_ZEPHYR=chip-remote-native ../firmware
 
 COMPILE = $(GUILD_BINARY) compile $(CFLAGS)
 
@@ -48,9 +47,7 @@ all:
 compile: $(OBJECTS)
 
 native-fw:
-	mkdir -p $(NATIVE_DIR)
-	(cd $(NATIVE_DIR) && $(NATIVE_COMPILE))
-	(cd $(NATIVE_DIR) && ninja && ninja test)
+	(cd firmware && mmh -d ../native-fw system -s build zephyr/native_posix_64/chip-remote/host/debug)
 
 happiness: native-fw compile doc test
 
