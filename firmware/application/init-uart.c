@@ -86,9 +86,9 @@ main(void)
         return;
     }
 
-    printk("Registering usb callback.\n");
+    printk("Registering uart callback.\n");
     uart_irq_callback_set(uart0, cr_handle_uart);
-    printk("Enabling usb rx interrupt.\n");
+    printk("Enabling uart rx interrupt.\n");
     uart_irq_rx_enable(uart0);
 
     const struct device *led = device_get_binding(LED0);
