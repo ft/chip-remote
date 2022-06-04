@@ -234,6 +234,7 @@ cr_spi_bb_xfer(struct cr_protocol *proto, struct cr_port *port,
     }
 
     cr_proto_put_number(proto, rx);
+    cr_proto_put_newline(proto);
 
     return CR_PORTVAL_REPLY_DONE;
 }
