@@ -16,13 +16,12 @@
 #include "sys/time_units.h"
 
 #define P_GPIOC DEVICE_DT_GET(DT_NODELABEL(gpioc))
-#define P_GPIOD DEVICE_DT_GET(DT_NODELABEL(gpiod))
 
 struct cr_line port00_lines[] = {
-    { .port = P_GPIOC, .pin = 10u, .mode = CR_LINE_OUTPUT_PUSHPULL },
-    { .port = P_GPIOC, .pin = 11u, .mode = CR_LINE_OUTPUT_PUSHPULL },
-    { .port = P_GPIOC, .pin = 12u, .mode = CR_LINE_OUTPUT_PUSHPULL },
-    { .port = P_GPIOD, .pin =  2u, .mode = CR_LINE_INPUT_PULLDOWN }
+    { .port = P_GPIOC, .pin = 5u, .mode = CR_LINE_OUTPUT_PUSHPULL },
+    { .port = P_GPIOC, .pin = 6u, .mode = CR_LINE_OUTPUT_PUSHPULL },
+    { .port = P_GPIOC, .pin = 8u, .mode = CR_LINE_OUTPUT_PUSHPULL },
+    { .port = P_GPIOC, .pin = 9u, .mode = CR_LINE_INPUT_PULLDOWN }
 };
 
 struct cr_port_spi_bb port00_spi_bb = {
