@@ -13,7 +13,11 @@ enable_language(CXX)
 enable_language(ASM)
 include(InitialiseToolchain)
 initialise_toolchain()
-ufw_subtree_build(PRELOAD common.cmake)
+
+setup_ufw(libraries/ufw)
+add_subdirectory(libraries/libchip-remote)
+
+ufw_subtree_build()
 message(STATUS "BOARD: ${BOARD}")
 if ("${BOARD}" MATCHES "^native")
   add_subdirectory(libraries/libsx-parser)
