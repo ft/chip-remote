@@ -15,7 +15,7 @@ zephyr:
             path: /usr
         boards:
           - nucleo_f767zi
-#          - stm32h747i_disco_m7
+          - nucleo_l476rg
         modules:
           - arm-cmsis
           - hal-stm32
