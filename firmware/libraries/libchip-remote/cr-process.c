@@ -1,9 +1,9 @@
-#include "cr-utilities.h"
 #include <stdio.h>
 
 #include <chip-remote.h>
 #include <commands.h>
 #include <cr-process.h>
+#include <cr-utilities.h>
 #include <parse-string.h>
 
 #include <common/compiler.h>
@@ -119,7 +119,7 @@ static enum cr_parser_result
 parse(struct cr_protocol *proto)
 {
     char *input = proto->in.buffer;
-    const unsigned int n = CR_PROTOCOL_MAX_TOKENS;
+    const unsigned int n = CONFIG_MAX_PROTOCOL_TOKENS;
 
     cr_parser_init(&proto->parser.state, input);
     cr_tokens_init(&proto->parser.tokens, proto->data.token, n);

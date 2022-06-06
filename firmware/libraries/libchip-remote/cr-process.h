@@ -20,7 +20,7 @@ struct cr_protocol {
         enum cr_input_state input;
     } state;
     struct {
-        struct cr_value token[CR_PROTOCOL_MAX_TOKENS];
+        struct cr_value token[CONFIG_MAX_PROTOCOL_TOKENS];
     } data;
     struct {
         char *buffer;

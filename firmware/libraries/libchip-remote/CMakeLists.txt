@@ -25,6 +25,9 @@ add_library(chip-remote-protocol STATIC
 target_include_directories(chip-remote-protocol
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
+target_compile_definitions(chip-remote-protocol PUBLIC
+  CONFIG_MAX_PROTOCOL_TOKENS=${CONFIG_MAX_PROTOCOL_TOKENS})
+
 target_link_libraries(chip-remote-protocol PUBLIC ufw)
 
 set_target_cpu(chip-remote-protocol)

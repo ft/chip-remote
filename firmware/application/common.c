@@ -3,7 +3,7 @@
 
 #include "init-common.h"
 
-char cr_input[CR_MAX_LINE_SIZE];
+char cr_input[CONFIG_INPUT_BUFFER_SIZE];
 const struct device *uart0;
 
 struct cr_protocol proto = {
@@ -32,7 +32,7 @@ struct cr_protocol proto = {
     },
     .state.input = CR_INPUT_PROCESS,
     .in.buffer = cr_input,
-    .in.size = CR_MAX_LINE_SIZE,
+    .in.size = CONFIG_INPUT_BUFFER_SIZE,
     .in.idx = 0,
     .reply = uart_sink
 };

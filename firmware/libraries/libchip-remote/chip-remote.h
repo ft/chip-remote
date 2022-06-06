@@ -21,8 +21,6 @@
 #define CR_PROTOCOL_VERSION_MINOR      0u
 #define CR_PROTOCOL_VERSION_PATCHLEVEL 0u
 
-#define CR_PROTOCOL_MAX_TOKENS 32u
-
 /** chip-remote number type */
 typedef uint64_t cr_number;
 
