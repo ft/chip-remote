@@ -13,6 +13,9 @@ extern struct cr_port port00_spi;
 #ifdef CONFIG_SPI
 extern struct cr_port port01_spi;
 #endif /* CONFIG_SPI */
+#ifdef CONFIG_I2C
+extern struct cr_port port02_i2c;
+#endif /* CONFIG_SPI */
 
 void uart_sink(const char*);
 

@@ -85,7 +85,7 @@ struct cr_port port01_spi = {
     .initialised = false
 };
 
-uint32_t i2c1data = 0u;
+struct cr_port_i2c_os i2c1data = { .bus = D_I2C1 };
 
 struct cr_port port02_i2c = {
     .name = "port02-i2c",
