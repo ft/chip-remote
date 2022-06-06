@@ -97,13 +97,12 @@ main(void)
         return;
     }
 
-    port00_spi.api->init(&proto, &port00_spi);
-
     int ret = gpio_pin_configure(led, PIN, GPIO_OUTPUT_ACTIVE);
     if (ret < 0) {
         return;
     }
 
+    cr_protocol_boot(&proto);
     printk("ChipRemote Command Processor online!\n");
 
     bool led_is_on = true;

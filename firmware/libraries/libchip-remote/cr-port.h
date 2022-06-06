@@ -23,6 +23,8 @@
 #define CR_PORTVAL_OK                      0
 #define CR_PORTVAL_INVALID_NUMBER_OF_ARGS -1
 #define CR_PORTVAL_INVALID_TYPE_OF_ARG    -2
+#define CR_PORTVAL_INTERNAL_ERROR         -3
+#define CR_PORTVAL_ERRNO                  -4
 
 enum cr_port_type {
     CR_PORT_TYPE_FLEX,
@@ -93,6 +95,7 @@ struct cr_port;
 struct cr_port_api {
     int (*address)(struct cr_protocol*, struct cr_port*,
                    unsigned int, struct cr_value*);
+    int (*boot)(struct cr_protocol*, struct cr_port*);
     int (*init)(struct cr_protocol*, struct cr_port*);
     int (*set)(struct cr_protocol*, struct cr_port*,
                unsigned int, struct cr_value*);

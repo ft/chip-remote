@@ -11,6 +11,8 @@ void cr_proto_put_space(const struct cr_protocol*);
 void cr_proto_put_newline(const struct cr_protocol*);
 void cr_proto_put_number(const struct cr_protocol*, cr_number);
 cr_number cr_parse_number(const char*, unsigned int, char**, unsigned int*);
+void cr_number_to_bytes(cr_number, uint8_t*);
+cr_number cr_number_from_bytes(uint8_t*);
 
 bool cr_require_arg_type(struct cr_protocol*, struct cr_value*,
                       unsigned int, enum cr_argument_type);

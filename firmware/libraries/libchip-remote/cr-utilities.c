@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <common/bit-operations.h>
+
 #include "cr-process.h"
 #include "cr-utilities.h"
 
@@ -182,4 +184,27 @@ cr_value_max(struct cr_protocol *proto, struct cr_value *token,
     }
 
     return true;
+}
+
+void
+cr_number_to_bytes(cr_number num, uint8_t *bytes)
+{
+    const size_t n = sizeof(cr_number);
+
+    for (size_t i = 0u; i < n; ++i) {
+        bytes[i] = BITLL_GET(num, 8u, i * 8u);
+    }
+}
+
+cr_number
+cr_number_from_bytes(uint8_t *bytes)
+{
+    const size_t n = sizeof(cr_number);
+    cr_number rv = 0u;
+
+    for (size_t i = 0u; i < n; ++i) {
+        rv |= ((bytes[i] & 0xffu) << (i * 8u));
+    }
+
+    return rv;
 }

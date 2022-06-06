@@ -13,9 +13,11 @@
 
 #include "init-common.h"
 #include "ifc/bb/spi.h"
+#include "ifc/os/spi.h"
 #include "sys/time_units.h"
 
 #define P_GPIOC DEVICE_DT_GET(DT_NODELABEL(gpioc))
+#define D_SPI1  DEVICE_DT_GET(DT_NODELABEL(spi1))
 
 struct cr_line port00_lines[] = {
     { .port = P_GPIOC, .pin = 5u, .mode = CR_LINE_OUTPUT_PUSHPULL },
@@ -52,6 +54,32 @@ struct cr_port port00_spi = {
     },
     .lines = sizeof(port00_lines)/sizeof(*port00_lines),
     .line = port00_lines,
+    .initialised = false
+};
+
+struct cr_port_spi_os spi1data = CR_PORT_SPI_OS_INIT(D_SPI1);
+
+struct cr_port port01_spi = {
+    .name = "port01-spi",
+    .type = CR_PORT_TYPE_SPI,
+    .api  = &cr_port_impl_spi_os,
+    .data = &spi1data,
+    .cfg.spi = {
+        .address = 0u,
+        .frame_length = 16u,
+        .bit_order = CR_BIT_MSB_FIRST,
+        .cs = {
+            .number = 1u,
+            .polarity = CR_LOGIC_INVERTED
+        },
+        .clk = {
+            .rate = 0u,
+            .edge = CR_EDGE_RISING,
+            .phase_delay = false
+        }
+    },
+    .lines = 0,
+    .line = NULL,
     .initialised = false
 };
 
@@ -96,13 +124,12 @@ main(void)
         return;
     }
 
-    port00_spi.api->init(&proto, &port00_spi);
-
     int ret = gpio_pin_configure(led, PIN, GPIO_OUTPUT_ACTIVE);
     if (ret < 0) {
         return;
     }
 
+    cr_protocol_boot(&proto);
     printk("ChipRemote Command Processor online!\n");
 
     bool led_is_on = true;

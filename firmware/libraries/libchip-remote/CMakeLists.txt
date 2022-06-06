@@ -16,6 +16,7 @@ add_library(chip-remote-protocol STATIC
   command-version.c
   command-fw-version.c
   cr-process.c
+  cr-protocol.c
   cr-port.c
   cr-utilities.c
   parse-string.c)

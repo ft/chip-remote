@@ -10,9 +10,17 @@ struct cr_protocol proto = {
     .ports = {
         .table = (struct cr_port*[]){
             [0] = &port00_spi
+#ifdef CONFIG_SPI
+            ,
+            [1] = &port01_spi
+#endif /* CONFIG_SPI */
         },
 
+#ifdef CONFIG_SPI
+        .tablesize = 2u,
+#else
         .tablesize = 1u,
+#endif /* CONFIG_SPI */
         .current = 0u,
         .focused = true
     },

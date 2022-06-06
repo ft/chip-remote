@@ -15,6 +15,10 @@ cr_handle_port_value(struct cr_protocol *proto, int value)
         proto->reply("wtf Invalid number of arguments.\n");
     } else if (value == CR_PORTVAL_INVALID_TYPE_OF_ARG) {
         proto->reply("wtf Invalid type of argument.\n");
+    } else if (value == CR_PORTVAL_INTERNAL_ERROR) {
+        proto->reply("wtf Internal error. Please report a bug!\n");
+    } else if (value == CR_PORTVAL_ERRNO) {
+        proto->reply("wtf OS Reported an error!\n");
     } else {
         proto->reply("wtf Unknown error.\n");
     }

@@ -149,8 +149,6 @@ ni_toplevel(struct resizeable_buffer *rb, const char ch)
 void
 main(void)
 {
-    port00_spi.api->init(&proto, &port00_spi);
-
     uart0 = device_get_binding(DT_LABEL(DT_NODELABEL(uart0)));
     if (uart0 == NULL) {
         printk("Could not access uart0. Giving up.\n");
@@ -168,6 +166,7 @@ main(void)
 
     char board[MAX_BOARD_NAME_LENGTH];
     strlcpy(board, CONFIG_BOARD, sizeof(board));
+    cr_protocol_boot(&proto);
     printk("ChipRemoteFirmware running on %s\n", board);
     printk("(activated!)\n");
     printk("(firmware-pid %u)\n", getpid());

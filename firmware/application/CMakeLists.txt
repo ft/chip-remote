@@ -11,10 +11,12 @@ target_sources(app PRIVATE common.c)
 if (${BOARD} STREQUAL nucleo_f767zi)
   target_sources(app PRIVATE
     ifc/bb/spi.c
+    ifc/os/spi.c
     init-usb-cdc-acm.c)
 elseif (${BOARD} STREQUAL nucleo_l476rg)
   target_sources(app PRIVATE
     ifc/bb/spi.c
+    ifc/os/spi.c
     init-uart.c)
 elseif (${BOARD} STREQUAL native_posix_64)
   target_sources(app PRIVATE

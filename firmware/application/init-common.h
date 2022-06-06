@@ -10,6 +10,9 @@ extern char cr_input[CR_MAX_LINE_SIZE];
 extern const struct device *uart0;
 extern struct cr_protocol proto;
 extern struct cr_port port00_spi;
+#ifdef CONFIG_SPI
+extern struct cr_port port01_spi;
+#endif /* CONFIG_SPI */
 
 void uart_sink(const char*);
 

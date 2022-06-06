@@ -38,6 +38,12 @@ cr_spi_text_init(UNUSED struct cr_protocol *proto, struct cr_port *port)
 }
 
 static int
+cr_spi_text_boot(struct cr_protocol *proto, struct cr_port *port)
+{
+    return cr_spi_text_init(proto, port);
+}
+
+static int
 cr_spi_text_xfer(struct cr_protocol *proto, struct cr_port *port,
                  unsigned int n, struct cr_value *args)
 {
@@ -87,6 +93,7 @@ cr_spi_text_set(UNUSED struct cr_protocol *proto, UNUSED struct cr_port *port,
 }
 
 struct cr_port_api cr_port_impl_spi_text = {
+    .boot = cr_spi_text_boot,
     .init = cr_spi_text_init,
     .xfer = cr_spi_text_xfer,
     .address = NULL,
