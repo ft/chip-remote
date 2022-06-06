@@ -23,6 +23,7 @@ void
 cr_handle_fw_version(struct cr_protocol *proto, UNUSED struct cr_command *cmd,
                      UNUSED struct cr_value *t, UNUSED unsigned int n)
 {
+    proto->reply("chip-remote firmware version ");
     cr_proto_put_number(proto, FIRMWARE_VERSION_MAJOR);
     cr_proto_put_space(proto);
     cr_proto_put_number(proto, FIRMWARE_VERSION_MINOR);
