@@ -14,9 +14,15 @@ struct cr_protocol proto = {
             ,
             [1] = &port01_spi
 #endif /* CONFIG_SPI */
+#ifdef CONFIG_I2C
+            ,
+            [2] = &port02_i2c
+#endif /* CONFIG_SPI */
         },
 
-#ifdef CONFIG_SPI
+#if (defined(CONFIG_SPI) && defined(CONFIG_I2C))
+        .tablesize = 3u,
+#elif (defined(CONFIG_SPI) || defined(CONFIG_I2C))
         .tablesize = 2u,
 #else
         .tablesize = 1u,

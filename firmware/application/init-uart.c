@@ -13,11 +13,13 @@
 
 #include "init-common.h"
 #include "ifc/bb/spi.h"
+#include "ifc/os/i2c.h"
 #include "ifc/os/spi.h"
 #include "sys/time_units.h"
 
 #define P_GPIOC DEVICE_DT_GET(DT_NODELABEL(gpioc))
 #define D_SPI1  DEVICE_DT_GET(DT_NODELABEL(spi1))
+#define D_I2C1  DEVICE_DT_GET(DT_NODELABEL(i2c1))
 
 struct cr_line port00_lines[] = {
     { .port = P_GPIOC, .pin = 5u, .mode = CR_LINE_OUTPUT_PUSHPULL },
@@ -78,6 +80,18 @@ struct cr_port port01_spi = {
             .phase_delay = false
         }
     },
+    .lines = 0,
+    .line = NULL,
+    .initialised = false
+};
+
+uint32_t i2c1data = 0u;
+
+struct cr_port port02_i2c = {
+    .name = "port02-i2c",
+    .type = CR_PORT_TYPE_I2C,
+    .api  = &cr_port_impl_i2c_os,
+    .data = &i2c1data,
     .lines = 0,
     .line = NULL,
     .initialised = false
