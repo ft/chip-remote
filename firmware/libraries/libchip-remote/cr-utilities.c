@@ -177,7 +177,7 @@ cr_value_max(struct cr_protocol *proto, struct cr_value *token,
     if (token[n].data.number > limit) {
         proto->reply("value-out-of-range ");
         cr_proto_put_number(proto, token[n].data.number);
-        proto->reply("> ");
+        proto->reply(" > ");
         cr_proto_put_number(proto, limit);
         cr_proto_put_newline(proto);
         return false;

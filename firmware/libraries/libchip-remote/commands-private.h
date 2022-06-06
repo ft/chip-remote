@@ -30,6 +30,7 @@ extern struct cr_command cr_commands[];
 DECLARE_COMMAND(address);
 DECLARE_COMMAND(bye);
 DECLARE_COMMAND(capabilities);
+DECLARE_COMMAND(focus);
 DECLARE_COMMAND(hi);
 DECLARE_COMMAND(init);
 DECLARE_COMMAND(ports);

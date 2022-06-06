@@ -8,6 +8,7 @@ add_library(chip-remote-protocol STATIC
   command-address.c
   command-bye.c
   command-capabilities.c
+  command-focus.c
   command-hi.c
   command-init.c
   command-ports.c

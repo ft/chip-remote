@@ -42,7 +42,7 @@
 struct cr_command cr_commands[] = {
     CR_COMMAND(BYE,          bye,          cr_handle_bye),
     CR_COMMAND(CAPABILITIES, capabilities, cr_handle_capabilities),
-    MISSING_COMMAND(FOCUS),
+    CR_COMMAND(FOCUS,        focus,        cr_handle_focus),
     CR_COMMAND(HI,           hi,           cr_handle_hi),
     CR_COMMAND(INIT,         init,         cr_handle_init),
     MISSING_COMMAND(LINES),
