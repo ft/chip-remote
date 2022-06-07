@@ -293,7 +293,8 @@ version."
    conn 'firmware-version
    (zip2 '(major minor micro)
          (with-read-raw-string (conn reply)
-           (expect-read reply '(int int int))))))
+           (expect-read reply '("chip-remote" "firmware" "version"
+                                int int int))))))
 
 (define (request->list-of-symbols conn request)
   "Apply ‘string->symbol’ to a list of strings and return a list of the
