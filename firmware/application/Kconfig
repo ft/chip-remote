@@ -2,6 +2,8 @@ mainmenu "Chip Remote Firmware"
 
 menu "Firmware Specific Build Configuration"
 
+menu "RCCEP Parser"
+
 config INPUT_BUFFER_SIZE
     int "Input Buffer Size in Bytes"
     default 64
@@ -19,6 +21,24 @@ config MAX_PROTOCOL_TOKENS
       parser can handle for any given line of protocol input. If
       increased, you likely want to increase CONFIG_INPUT_BUFFER_SIZE
       as well.
+
+endmenu
+
+menu "Zephyr Based I2C Port Implementation"
+
+config OS_I2C_TX_BUFFER_SIZE
+    int "Transmission buffer size"
+    default 128
+    help
+      Number of bytes allocated for I2C write messages.
+
+config OS_I2C_RX_BUFFER_SIZE
+    int "Receive buffer size"
+    default 128
+    help
+      Number of bytes allocated for I2C read messages.
+
+endmenu
 
 endmenu
 

@@ -439,11 +439,15 @@ The ~data-spec~ type can take the following forms:
   mode dependent. On ~I2C~ ports, it defines the number of octets to read from
   the device.
 
-- ~w:<data:integer>[,data:integer[,…]]~ This specification defines the data to
-  use in a write access to the focused port. The details depend on port mode.
-  On ~I2C~ ports, it defines the octets (range: ~0…255~) to write to the
-  focused device. The length of the write access are specified implicitly by
-  the length of the list of octets.
+- ~w:<length:integer> [data:integer [t:<times:integer>] […]]~ This
+  specification defines the data to use in a write access to the focused port.
+  The details depend on port mode. On ~I2C~ ports, it defines the octets
+  (range: ~0…255~) to write to the focused device. The length of the write
+  access are specified explicitly by the key-value pair that initialises the
+  sequence. If the sequence of octets is shorter than the indicated
+  write-length, the last octect specified is repeated to fill the rest of the
+  transmission. The optional ~t:n~ multiplier allows specifying an octet to be
+  repeated multiple times in the actual message.
 
 The request returns a port mode dependent value:
 
@@ -452,7 +456,9 @@ The request returns a port mode dependent value:
   returned.
 
 - On ~I2C~ ports, the return value is a list of lists of octets, corresponding
-  to the specified read accesses.
+  to the specified read accesses. The data for multiple read operations are
+  separated by commas. The ~t:n~ multiplier used with ~write~ specifications is
+  allowed as well.
 
 * Port Modes <<sec:port-modes>>
 ** SPI

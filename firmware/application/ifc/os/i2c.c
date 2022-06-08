@@ -18,6 +18,11 @@
 #include <common/bit-operations.h>
 #include <common/compiler.h>
 
+static struct {
+    uint8_t tx[CONFIG_OS_I2C_TX_BUFFER_SIZE];
+    uint8_t rx[CONFIG_OS_I2C_RX_BUFFER_SIZE];
+} buffer;
+
 int
 cr_i2c_os_set(struct cr_protocol *proto, UNUSED struct cr_port *port,
               UNUSED unsigned int n, UNUSED struct cr_value *value)
