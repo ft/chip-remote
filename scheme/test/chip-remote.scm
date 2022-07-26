@@ -193,7 +193,7 @@
 
 (define (instrument! tio exp)
   (when (tio-got-param? tio 'trace)
-    (format #t "# tio:write: ~s~%" exp))
+    (format #t "# tio:inst:write: ~s~%" exp))
   (format (tio-iconnection tio) "~a~%" exp)
   ;; The instrumentation request needs to return an ‘ok’ on the instrumentation
   ;; port. This is done after all processing of the request.
