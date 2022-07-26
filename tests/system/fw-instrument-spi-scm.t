@@ -11,7 +11,7 @@
              (chip-remote utilities))
 
 ;; Set to #t to get verbose tracing output.
-(define verbose? #t)
+(define verbose? #f)
 
 (define tio (make-test-io))
 

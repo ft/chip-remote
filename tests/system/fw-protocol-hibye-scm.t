@@ -10,7 +10,7 @@
              (chip-remote protocol))
 
 ;; Set to #t to get verbose tracing output.
-(define verbose? #t)
+(define verbose? #f)
 (define tio (make-test-io))
 (when verbose?
   (io-opt/set 'trace #t)
