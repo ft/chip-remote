@@ -113,21 +113,24 @@
   (format #t "# Could not determine chip-remote terminal. Giving up.~%")
   (quit 1))
 
-(define (handle-stdin! tio)
-  (let ((exp (xread (tio-fw-port tio)
-                    #:timeout (tio-timeout tio)
-                    #:handle-timeout (lambda (x)
-                                       (handle-xread-timeout tio x)))))
+(define (trace-read sel tio tag . args)
+  (let ((exp (apply xread (cons (sel tio) args))))
     (when (tio-got-param? tio 'trace)
-      (format #t "# tio:read: ~s~%" exp))
-    (match exp
-      (('firmware-pid pid)
-       (unless tio
-         (kill pid SIGINT)
-         (tio-unknown!))
-       (format #t "# Registering firmware PID: ~a~%" pid)
-       (set-tio-pid! tio pid))
-      (x (format #t "# Unhandled firmware message: ~s~%" x)))))
+      (format #t "# tio:~a:read: ~s~%" tag exp))
+    exp))
+
+(define (handle-stdin! tio)
+  (match (trace-read tio-fw-port tio 'inst
+                     #:timeout (tio-timeout tio)
+                     #:handle-timeout (lambda (x)
+                                        (handle-xread-timeout tio x)))
+    (('firmware-pid pid)
+     (unless tio
+       (kill pid SIGINT)
+       (tio-unknown!))
+     (format #t "# Registering firmware PID: ~a~%" pid)
+     (set-tio-pid! tio pid))
+    (x (format #t "# Unhandled firmware message: ~s~%" x))))
 
 (define (kill-fw! tio)
   (let ((pid (tio-pid tio)))
@@ -194,12 +197,12 @@
   (format (tio-iconnection tio) "~a~%" exp)
   ;; The instrumentation request needs to return an ‘ok’ on the instrumentation
   ;; port. This is done after all processing of the request.
-  (match (xread (tio-iconnection tio) #:timeout (tio-timeout tio))
+  (match (trace-read tio-iconnection tio 'inst #:timeout (tio-timeout tio))
     ('ok #t)
     (reply (throw 'expected-ok-from-instrumentation reply)))
   ;; The firmware echos the instrumentation request on its output port again.
   ;; This is mainly for debuggability, but we can certainly test for it.
-  (match (xread (tio-fw-port tio) #:timeout (tio-timeout tio))
+  (match (trace-read tio-fw-port tio 'fw #:timeout (tio-timeout tio))
     (('instrumentation rest ...) #t)
     (_ (throw 'expected-instrumentation-reply))))
 
@@ -208,5 +211,6 @@
     (unless (null? rest)
       (define-test (format #f "firmware expect: ~a" (car rest))
         (pass-if-equal? (car rest)
-                        (xread (tio-fw-port tio) #:timeout (tio-timeout tio))))
+                        (trace-read tio-fw-port tio 'inst
+                                    #:timeout (tio-timeout tio))))
       (loop (cdr rest)))))
