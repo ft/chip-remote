@@ -163,6 +163,8 @@
   (format #t "# Booting native firmware: ~a~%" (native-fw))
   (set-tio-fw-port! tio (open-pipe* OPEN_READ (native-fw)))
   (let loop ((line (read-line (tio-fw-port tio) 'trim)))
+    (when (tio-got-param? tio 'trace)
+      (format #t "# tio:inst:read: ~s~%" line))
     (unless (string= line *s-exp-boot-tag*)
       (let ((lst (string-split line #\space)))
         (cond ((and (not (null? lst))
