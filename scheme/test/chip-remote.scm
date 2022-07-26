@@ -27,6 +27,7 @@
             tio-fw-port
             set-tio-fw-port!
             tio-pid
+            tio-push-parm!
             set-tio-pid!
             tio-terminal
             set-tio-terminal!
@@ -96,6 +97,9 @@
 (define (tio-push-parm! tio p)
   (set-tio-parameters! tio (cons p (tio-parameters tio))))
 
+(define (tio-got-param? tio p)
+  (member p (tio-parameters tio)))
+
 (define (connect-test-io! io)
   (set-tio-connection! io (chip-remote-open! #:uri (tio-terminal io)))
   (set-tio-iconnection! io (open-file (tio-instrumentation io) "r+l")))
@@ -110,21 +114,24 @@
   (quit 1))
 
 (define (handle-stdin! tio)
-  (match (xread (tio-fw-port tio)
-                #:timeout (tio-timeout tio)
-                #:handle-timeout (lambda (x)
-                                   (handle-xread-timeout tio x)))
-    (('firmware-pid pid)
-     (unless tio
-       (kill pid SIGINT)
-       (tio-unknown!))
-     (format #t "# Registering firmware PID: ~a~%" pid)
-     (set-tio-pid! tio pid))
-    (x (format #t "# Unhandled firmware message: ~s~%" x))))
+  (let ((exp (xread (tio-fw-port tio)
+                    #:timeout (tio-timeout tio)
+                    #:handle-timeout (lambda (x)
+                                       (handle-xread-timeout tio x)))))
+    (when (tio-got-param? tio 'trace)
+      (format #t "# tio:read: ~s~%" exp))
+    (match exp
+      (('firmware-pid pid)
+       (unless tio
+         (kill pid SIGINT)
+         (tio-unknown!))
+       (format #t "# Registering firmware PID: ~a~%" pid)
+       (set-tio-pid! tio pid))
+      (x (format #t "# Unhandled firmware message: ~s~%" x)))))
 
 (define (kill-fw! tio)
   (let ((pid (tio-pid tio)))
-    (if (member 'dont-kill (tio-parameters tio))
+    (if (tio-got-param? tio 'dont-kill)
         (format #t "# Not terminating firmware (PID: ~a), as requested.~%" pid)
         (when pid
           (format #t "# Terminating firmware PID as indicated by itself: ~a~%" pid)
@@ -182,6 +189,8 @@
     (when suspend-execution? (debug-fw! tio))))
 
 (define (instrument! tio exp)
+  (when (tio-got-param? tio 'trace)
+    (format #t "# tio:write: ~s~%" exp))
   (format (tio-iconnection tio) "~a~%" exp)
   ;; The instrumentation request needs to return an ‘ok’ on the instrumentation
   ;; port. This is done after all processing of the request.

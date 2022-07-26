@@ -6,9 +6,15 @@
 
 (use-modules (test tap)
              (test chip-remote)
+             (chip-remote io)
              (chip-remote protocol))
 
+;; Set to #t to get verbose tracing output.
+(define verbose? #t)
 (define tio (make-test-io))
+(when verbose?
+  (io-opt/set 'trace #t)
+  (tio-push-parm! tio 'trace))
 
 (with-test-bundle (chip-remote firmware hi/bye)
   (require (native-firmware-built?))

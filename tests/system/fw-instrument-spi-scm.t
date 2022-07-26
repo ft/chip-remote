@@ -10,6 +10,9 @@
              (chip-remote protocol)
              (chip-remote utilities))
 
+;; Set to #t to get verbose tracing output.
+(define verbose? #t)
+
 (define tio (make-test-io))
 
 (define first-set '(#x100 #x200 #x300))
@@ -21,7 +24,9 @@
     (pass-if-= (transmit ($ tio) tx) rx))
   (fw-expect! tio `(spi-tx ,tx) `(spi-rx ,rx)))
 
-;;(io-opt/set 'trace #t)
+(when verbose?
+  (io-opt/set 'trace #t)
+  (tio-push-parm! tio 'trace))
 
 (with-test-bundle (chip-remote firmware instrumentation spi)
   (require (native-firmware-built?))
