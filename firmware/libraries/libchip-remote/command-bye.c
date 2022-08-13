@@ -9,7 +9,7 @@
  * @brief Implemenation of BYE command
  */
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 #include <chip-remote.h>
 #include <commands-private.h>

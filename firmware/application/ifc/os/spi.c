@@ -15,8 +15,8 @@
 
 #include "spi.h"
 
-#include <common/bit-operations.h>
-#include <common/compiler.h>
+#include <ufw/bit-operations.h>
+#include <ufw/compiler.h>
 
 static inline struct spi_config*
 cr_spi_get_config(struct cr_port_spi_os *p)

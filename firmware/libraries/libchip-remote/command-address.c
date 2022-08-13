@@ -9,7 +9,7 @@
  * @brief Implemenation of ADDRESS command
  */
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 #include <chip-remote.h>
 #include <commands-private.h>

@@ -6,7 +6,7 @@
 #include <cr-utilities.h>
 #include <parse-string.h>
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 void
 cr_process_init(struct cr_protocol *p, char *b, size_t n, string_sink r)

@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 #include "sx-parser.h"
 

@@ -15,7 +15,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 #include <commands.h>
 #include <chip-remote.h>

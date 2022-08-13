@@ -15,8 +15,8 @@
 
 #include "i2c.h"
 
-#include <common/bit-operations.h>
-#include <common/compiler.h>
+#include <ufw/bit-operations.h>
+#include <ufw/compiler.h>
 
 static struct {
     uint8_t tx[CONFIG_OS_I2C_TX_BUFFER_SIZE];

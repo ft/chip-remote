@@ -15,8 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <test/tap.h>
-#include <common/compiler.h>
+#include <ufw/compiler.h>
+#include <ufw/test/tap.h>
 
 #include <sx-parser.h>
 

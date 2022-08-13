@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 #include <chip-remote.h>
 #include <cr-port.h>

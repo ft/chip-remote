@@ -9,7 +9,7 @@
  * @brief Implemenation of TRANSMIT command
  */
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 #include <commands.h>
 #include <commands-private.h>

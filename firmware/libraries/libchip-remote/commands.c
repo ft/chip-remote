@@ -13,7 +13,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 #include <chip-remote.h>
 #include <commands.h>

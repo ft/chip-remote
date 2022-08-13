@@ -17,9 +17,9 @@
 
 #include <parse-string.h>
 
-#include <test/tap.h>
-#include <c/compat/strings.h>
-#include <common/compiler.h>
+#include <ufw/compat/strings.h>
+#include <ufw/compiler.h>
+#include <ufw/test/tap.h>
 
 static bool
 tokens_used(struct cr_tokens *t, unsigned int n)

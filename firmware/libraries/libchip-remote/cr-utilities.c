@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <common/bit-operations.h>
+#include <ufw/bit-operations.h>
 
 #include "cr-process.h"
 #include "cr-utilities.h"

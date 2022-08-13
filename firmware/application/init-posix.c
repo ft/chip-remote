@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <c/compat.h>
+#include <ufw/compat.h>
 
 #include <cr-process.h>
 #include <sx-parser.h>

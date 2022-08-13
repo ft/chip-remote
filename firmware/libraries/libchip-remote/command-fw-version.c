@@ -9,7 +9,7 @@
  * @brief Implemenation of extended firmware VERSION command
  */
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 #include <commands.h>
 #include <commands-private.h>

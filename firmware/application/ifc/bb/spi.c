@@ -11,8 +11,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <common/bit-operations.h>
-#include <common/compiler.h>
+#include <ufw/bit-operations.h>
+#include <ufw/compiler.h>
 #include <cr-port.h>
 #include <cr-utilities.h>
 

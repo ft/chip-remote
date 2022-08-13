@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 #include <cr-port.h>
 #include <cr-process.h>

@@ -5,7 +5,7 @@
 #include <drivers/uart.h>
 #include <usb/usb_device.h>
 
-#include <common/compiler.h>
+#include <ufw/compiler.h>
 
 #include <cr-port.h>
 #include <cr-process.h>
