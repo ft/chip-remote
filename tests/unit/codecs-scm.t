@@ -7,14 +7,14 @@
 (use-modules (ice-9 format)
              (ice-9 match)
              (test tap)
-	     (test setup)
+             (test setup)
              (chip-remote codecs)
              (chip-remote semantics))
 
 (init-test-tap!)
 
 (with-fs-test-bundle
-    (no-plan)
+  (plan 206)
 
   (for-each (lambda (n)
               (define-test (format #f "32-bit unsigned-integer ~a → ~a" n n)
@@ -104,6 +104,24 @@
               (      -1024 . #x7ffffc00)
               ( 2000000000 . #xf7359400)
               (-2000000000 . #x08ca6c00)))
+
+  (let* ((zig-zag32-range (s:range zig-zag 32))
+         (zz32-min (car zig-zag32-range))
+         (zz32-max (cdr zig-zag32-range)))
+    (for-each (lambda (c)
+                (let ((n (car c))
+                      (e (cdr c)))
+                  (define-test (format #f "32-bit zig-zag ~a → ~8,'0x" n e)
+                    (pass-if-= e (s:encode zig-zag 32 n)))
+                  (define-test (format #f "32-bit zig-zag ~a ← ~8,'0x" n e)
+                    (pass-if-= n (s:decode zig-zag 32 e)))))
+              `((         0 . #x00000000)
+                (        -1 . #x00000001)
+                (         1 . #x00000002)
+                (        -2 . #x00000003)
+                (         2 . #x00000004)
+                ( ,zz32-max . #xfffffffe)
+                ( ,zz32-min . #xffffffff))))
 
   (for-each (lambda (c)
               (let ((n (car c))

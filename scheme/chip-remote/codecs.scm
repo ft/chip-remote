@@ -20,6 +20,7 @@
             twos-complement
             signed-magnitude
             offset-binary
+            zig-zag
             ;; floating point semantics
             ieee-754-single
             ieee-754-double))
@@ -72,6 +73,15 @@
 ;; zero (namely with one's complement and signed magnitude), often referred to
 ;; positive and negative zero. When encoding, these semantics opt for the posi-
 ;; tive variant of zero. The decoders map both variants to an unsigned zero.
+;;
+;; Another possible integer encoding is the so-called zig-zag encoding, used by
+;; some of Google's protocol-buffers' data-types:
+;;
+;; https://developers.google.com/protocol-buffers/docs/encoding
+;;
+;; It has the property of using only few set bits for integers with small abso-
+;; lute values, which can be beneficial when combined with variable length en-
+;; coding.
 
 (define uint-codec '(lambda (w x) (bit-mask w x)))
 
@@ -149,6 +159,19 @@
   #:decode '(lambda (w x)
               (let (half (left-shift 1 (decrement w)))
                 (decrement (bit-mask w x) half))))
+
+(define zig-zag-min twos-complement-min)
+(define zig-zag-max twos-complement-max)
+
+(define-semantics zig-zag interpreter
+  #:range (lambda (s w) (cons (zig-zag-min w)
+                              (zig-zag-max w)))
+  #:encode '(lambda (w x)
+              (bit-mask w (bit-xor (right-shift x (decrement w))
+                                   (left-shift x 1))))
+  #:decode '(lambda (w x)
+              (bit-xor (right-shift x 1)
+                       (multiply -1 (bit-and x 1)))))
 
 (define (ensure-width! tag actual required)
   (unless (= actual required)
