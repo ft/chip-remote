@@ -19,7 +19,8 @@
             semantics-encode
             s:encode
             s:decode
-            s:range))
+            s:range
+            s:in-range?))
 
 (define-immutable-record-type <semantics>
   (make-semantics name type data range decode encode)
@@ -132,3 +133,9 @@
 
 (define (s:range s w)
   ((semantics-range s) s w))
+
+(define (s:in-range? s w v)
+  (match (s:range s w)
+    ((minimum . maximum)
+     (and (>= v minimum)
+          (<= v maximum)))))
