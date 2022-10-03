@@ -119,8 +119,17 @@
        (let ((base (make-base-name #'s #'w)))
          (with-syntax ((enc (datum->syntax #'op (symbol-append base '-encode)))
                        (dec (datum->syntax #'op (symbol-append base '-decode))))
-           #'(begin (define (dec bv) (varint-decode bv w s))
-                    (define (enc  n) (varint-encode  n w s)))))))))
+           #'(begin (define*-public (dec bv #:key return-consumed? (offset 0))
+                      (varint-decode bv
+                                     #:width w #:semantics s
+                                     #:return-consumed? return-consumed?
+                                     #:offset offset))
+                    (define*-public (enc n #:key return-used? buffer (offset 0))
+                      (varint-encode n
+                                     #:width w #:semantics s
+                                     #:return-used? return-used?
+                                     #:buffer buffer
+                                     #:offset offset)))))))))
 
 (generate-shorthands (unsigned-integer twos-complement zig-zag)
                      (32 64 128 256 512))
