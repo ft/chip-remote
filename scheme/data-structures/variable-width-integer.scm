@@ -104,35 +104,23 @@
 
 (define-syntax generate-shorthands
   (lambda (x)
+    (define (make-base-name s w)
+      (symbol-append 'varint:
+                     (match (syntax->datum s)
+                       ('unsigned-integer 'uint)
+                       ('twos-complement  'int)
+                       ('zig-zag          'sint))
+                     (string->symbol (number->string (syntax->datum w)))))
+
     (syntax-case x ()
-      ((_ (sems ...) (widths ...))
-       #'(begin (generate-shorthands sems (widths ...)) ...))
-      ((_ sem (widths ...))
-       (identifier? #'sem)
-       #'(begin (generate-shorthands sem widths) ...))
-      ((_ s w)
-       (and (identifier? #'s)
-            (integer? (syntax->datum #'w)))
-       (let ((base (symbol-append
-                       'varint:
-                       (match (syntax->datum #'s)
-                         ('unsigned-integer 'uint)
-                         ('twos-complement  'int)
-                         ('zig-zag          'sint))
-                       (number->symbol (syntax->datum #'w)))))
-         (with-syntax ((enc (datum->syntax x (symbol-append base '-encode)))
-                       (dec (datum->syntax x (symbol-append base '-decode))))
-           #'(begin (define*-public (dec bv #:key return-consumed? (offset 0))
-                      (varint-decode bv
-                                     #:width w #:semantics s
-                                     #:return-consumed? return-consumed?
-                                     #:offset offset))
-                    (define*-public (enc n #:key return-used? buffer (offset 0))
-                      (varint-encode n
-                                     #:width w #:semantics s
-                                     #:return-used? return-used?
-                                     #:buffer buffer
-                                     #:offset offset)))))))))
+      ((op (sems ...) (widths ...)) #'(begin (op sems (widths ...)) ...))
+      ((op sem        (widths ...)) #'(begin (op sem widths) ...))
+      ((op s w)
+       (let ((base (make-base-name #'s #'w)))
+         (with-syntax ((enc (datum->syntax #'op (symbol-append base '-encode)))
+                       (dec (datum->syntax #'op (symbol-append base '-decode))))
+           #'(begin (define (dec bv) (varint-decode bv w s))
+                    (define (enc  n) (varint-encode  n w s)))))))))
 
 (generate-shorthands (unsigned-integer twos-complement zig-zag)
                      (32 64 128 256 512))
