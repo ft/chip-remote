@@ -9,4 +9,4 @@
 	url = ../zephyr-hal-stm32.git
 [submodule "firmware/zephyr/modules/arm-cmsis"]
 	path = firmware/zephyr/modules/arm-cmsis
-	url = ../zephyr/arm-cmsis.git
+	url = ../zephyr-arm-cmsis.git
