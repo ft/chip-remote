@@ -150,8 +150,8 @@
   (file-exists? (native-fw)))
 
 (define *s-exp-boot-tag* "(activated!)")
-(define *cr-terminal* "UART_0")
-(define *cr-instrumentation* "UART_1")
+(define *cr-terminal* "uart")
+(define *cr-instrumentation* "uart_1")
 
 (define (debug-fw! tio)
   (format #t "# Debug Mode (PID: ~a): Press ENTER to continue!"
