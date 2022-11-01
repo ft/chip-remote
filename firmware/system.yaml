@@ -3,8 +3,9 @@ name: chip-remote
 common:
   build-configs: [ release, debug ]
   build-tool: ninja
-  zephyr-kernel: zephyr/kernel
-  zephyr-module-path: [ zephyr/modules ]
+  zephyr-kernel: '${system}/zephyr/kernel'
+  zephyr-module-path: [ '${system}/zephyr/modules' ]
+  install: ufw-git-install
 
 zephyr:
   - application: chip-remote
@@ -17,6 +18,7 @@ zephyr:
           - nucleo_f767zi
           - nucleo_l476rg
         modules:
+          - picolibc
           - arm-cmsis
           - hal-stm32
       - toolchains: [ host ]

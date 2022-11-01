@@ -1,8 +1,8 @@
-#include <device.h>
-#include <kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/kernel.h>
 
-#include <drivers/gpio.h>
-#include <drivers/uart.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/uart.h>
 
 #include <string.h>
 
@@ -15,7 +15,6 @@
 #include "ifc/bb/spi.h"
 #include "ifc/os/i2c.h"
 #include "ifc/os/spi.h"
-#include "sys/time_units.h"
 
 #define P_GPIOC DEVICE_DT_GET(DT_NODELABEL(gpioc))
 #define D_SPI1  DEVICE_DT_GET(DT_NODELABEL(spi1))
@@ -115,13 +114,12 @@ cr_handle_uart(const struct device *dev, UNUSED void *userdata)
 }
 
 #define LED0_NODE DT_ALIAS(led0)
-#define LED0 DT_GPIO_LABEL(LED0_NODE, gpios)
-#define PIN DT_GPIO_PIN(LED0_NODE, gpios)
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
 void
 main(void)
 {
-    uart0 = device_get_binding("UART_2");
+    uart0 = DEVICE_DT_GET(DT_NODELABEL(usart2));
     if (uart0 == NULL) {
         printk("Could not access uart-2. Giving up.\n");
         return;
@@ -132,25 +130,22 @@ main(void)
     printk("Enabling uart rx interrupt.\n");
     uart_irq_rx_enable(uart0);
 
-    const struct device *led = device_get_binding(LED0);
-    if (led == NULL) {
+    if (!device_is_ready(led.port)) {
         printk("Could not access LED.\n");
         return;
     }
 
-    int ret = gpio_pin_configure(led, PIN, GPIO_OUTPUT_ACTIVE);
+    int ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
     if (ret < 0) {
+        printk("Could not configure LED pin.\n");
         return;
     }
 
     cr_protocol_boot(&proto);
     printk("ChipRemote Command Processor online!\n");
 
-    bool led_is_on = true;
-
     for (;;) {
-        gpio_pin_set(led, PIN, (int)led_is_on);
-        led_is_on = !led_is_on;
+        gpio_pin_toggle_dt(&led);
         k_msleep(100);
     }
 }

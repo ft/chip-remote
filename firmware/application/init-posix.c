@@ -1,8 +1,8 @@
-#include <device.h>
-#include <kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/kernel.h>
 
-#include <drivers/uart.h>
-#include <drivers/console/native_posix_console.h>
+#include <zephyr/drivers/uart.h>
+#include <zephyr/drivers/console/native_posix_console.h>
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -17,7 +17,6 @@
 #include "chip-remote.h"
 #include "init-common.h"
 #include "ifc/text/spi.h"
-#include "sys/time_units.h"
 
 const struct device *uart1;
 
@@ -149,13 +148,13 @@ ni_toplevel(struct resizeable_buffer *rb, const char ch)
 void
 main(void)
 {
-    uart0 = device_get_binding(DT_LABEL(DT_NODELABEL(uart0)));
+    uart0 = DEVICE_DT_GET(DT_NODELABEL(uart0));
     if (uart0 == NULL) {
         printk("Could not access uart0. Giving up.\n");
         return;
     }
 
-    uart1 = device_get_binding(DT_LABEL(DT_NODELABEL(uart1)));
+    uart1 = DEVICE_DT_GET(DT_NODELABEL(uart1));
     if (uart1 == NULL) {
         printk("Could not access uart1. Giving up.\n");
         return;

@@ -1,9 +1,9 @@
-#include <device.h>
-#include <kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/kernel.h>
 
-#include <drivers/gpio.h>
-#include <drivers/uart.h>
-#include <usb/usb_device.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/uart.h>
+#include <zephyr/usb/usb_device.h>
 
 #include <ufw/compiler.h>
 
@@ -69,13 +69,12 @@ cr_handle_usb(const struct device *dev, UNUSED void *userdata)
 }
 
 #define LED0_NODE DT_ALIAS(led0)
-#define LED0 DT_GPIO_LABEL(LED0_NODE, gpios)
-#define PIN DT_GPIO_PIN(LED0_NODE, gpios)
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
 void
 main(void)
 {
-    uart0 = device_get_binding("CDC_ACM_0");
+    uart0 = DEVICE_DT_GET_ONE(zephyr_cdc_acm_uart);
     if (uart0 == NULL) {
         printk("Could not access usb. Giving up.\n");
         return;
@@ -91,21 +90,20 @@ main(void)
     printk("Enabling usb rx interrupt.\n");
     uart_irq_rx_enable(uart0);
 
-    const struct device *led = device_get_binding(LED0);
-    if (led == NULL) {
+    if (!device_is_ready(led.port)) {
         printk("Could not access LED.\n");
         return;
     }
 
-    int ret = gpio_pin_configure(led, PIN, GPIO_OUTPUT_ACTIVE);
+    int ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
     if (ret < 0) {
+        printk("Could not configure LED pin.\n");
         return;
     }
 
     cr_protocol_boot(&proto);
     printk("ChipRemote Command Processor online!\n");
 
-    bool led_is_on = true;
     uint32_t cnt = 0ul;
     for (;;) {
 #if 0
@@ -113,8 +111,7 @@ main(void)
             printk("Still here.\n");
 #endif
         cnt += 1u;
-        gpio_pin_set(led, PIN, (int)led_is_on);
-        led_is_on = !led_is_on;
+        gpio_pin_toggle_dt(&led);
         k_msleep(100);
     }
 }

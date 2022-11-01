@@ -5,7 +5,7 @@
  * Terms for redistribution and use can be found in LICENCE.
  */
 
-#include <drivers/gpio.h>
+#include <zephyr/drivers/gpio.h>
 
 #include <stdbool.h>
 #include <stdint.h>

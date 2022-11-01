@@ -1,8 +1,8 @@
 #ifndef INC_INIT_COMMON_H
 #define INC_INIT_COMMON_H
 
-#include <device.h>
-#include <kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/kernel.h>
 
 extern char cr_input[CONFIG_INPUT_BUFFER_SIZE];
 extern const struct device *uart0;
