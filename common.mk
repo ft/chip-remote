@@ -77,6 +77,7 @@ MODULES_DEVICES += $(CR)/devices/texas-instruments/ads4149.scm
 MODULES_DEVICES += $(CR)/devices/texas-instruments/cdce72010.scm
 
 MODULES_PROTO = $(CRP)/slip.scm
+MODULES_PROTO += $(CRP)/length-prefix.scm
 
 MODULES_DATASTRUCT = $(CRDS)/loadable-fifo.scm
 MODULES_DATASTRUCT += $(CRDS)/sized-stack.scm
