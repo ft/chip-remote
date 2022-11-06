@@ -6,6 +6,7 @@
 
 (use-modules (test tap)
              (test setup)
+             (ice-9 binary-ports)
              (rnrs bytevectors)
              (protocol slip))
 
@@ -22,7 +23,7 @@
                                           #:with-sof? #t))
 
 (with-fs-test-bundle
-    (plan 6)
+  (plan 9)
   (let* ((encoder (make-slip-state))
          (decoder (make-slip-state))
          (data '(1 2 3 4 5 6 7 8 9 0))
@@ -80,4 +81,18 @@
     (define-test "slip-extended: Complex octet-stream encodes correctly"
       (pass-if-equal? (slip-encode encoder complex) encoded*))
     (define-test "slip,extended: Decoding result returns the same complex vector"
-      (pass-if-equal? (slip-decode! decoder encoded*) (list complex)))))
+      (pass-if-equal? (slip-decode! decoder encoded*) (list complex))))
+
+  (let ((decoder (make-slip-state))
+        (data #vu8(49 50 51 #xc0 52 53 54 #xc0 55 56 57)))
+    (call-with-input-bytevector
+     data (lambda (port)
+            (define-test "slip-recv #1: #vu8(49 50 51)"
+              (pass-if-equal? (slip-recv decoder port)
+                              #vu8(49 50 51)))
+            (define-test "slip-recv #2: #vu8(52 53 54)"
+              (pass-if-equal? (slip-recv decoder port)
+                              #vu8(52 53 54)))
+            (define-test "slip-recv #3: #<eof>"
+              (pass-if-equal? (slip-recv decoder port)
+                              (eof-object)))))))

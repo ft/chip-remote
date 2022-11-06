@@ -7,11 +7,17 @@
 ;; positions.
 
 (define-module (protocol slip)
+  #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 optargs)
   #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-9)
   #:use-module (srfi srfi-9 gnu)
-  #:export (make-slip-encoding make-slip-state slip-decode! slip-encode))
+  #:export (make-slip-encoding
+            make-slip-state
+            slip-decode!
+            slip-encode
+            slip-recv
+            slip-send))
 
 ;; RFC-1055 suggests the use of EOF to mark starts of frames as well. So that's
 ;; what we're doing by default, if with-sof? is set.
@@ -71,6 +77,14 @@
   (let ((rv (slip-output state)))
     (set-slip-output! state '())
     rv))
+
+(define (slip-pop! state)
+  (let ((data (slip-output state)))
+    (set-slip-output! state (cdr data))
+    (car data)))
+
+(define (slip-got-data? state)
+  (not (null? (slip-output state))))
 
 (define-immutable-record-type <procbuf>
   (make-process-buffer* buffer index length)
@@ -181,3 +195,25 @@
     (if (null? rest)
         (u8-list->bytevector (if full-frame? (enclose! state acc) acc))
         (loop (cdr rest) (append! acc (slip-encode-bv state (car rest)))))))
+
+(define (slip-send state port data)
+  "SLIP encode ‘data’ in terms of ‘state’ and send to ‘port’."
+  (put-bytevector port (slip-encode state data)))
+
+(define (slip-recv state port)
+  "Return frame from ‘state’ with data via ‘port’.
+
+This SLIP decodes data from ‘port’ and returns the first frame it decodes. It
+retains excess input data and frames inside of ‘state’. If called with a state
+that still has data from previously processed frames, it first returns the next
+such frame."
+  (if (slip-got-data? state)
+      (slip-pop! state)
+      (let loop ((data (get-bytevector-some port)))
+        (if (eof-object? data)
+            data
+            (begin (slip-input! state data)
+                   (slip-process! state)
+                   (if (slip-got-data? state)
+                       (slip-pop! state)
+                       (loop (get-bytevector-some port))))))))
