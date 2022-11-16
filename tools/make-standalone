@@ -1,0 +1,172 @@
+#!/bin/sh
+
+# Copyright (c) 2022 chip-remote workers, All rights reserved.
+#
+# Terms for redistribution and use can be found in LICENCE.
+
+if test "$#" -ne 1; then
+    cat <<EOF
+usage: make-standalone TOPDIR
+EOF
+    exit 1
+fi
+
+top="$1"
+if test "$top" = .; then
+    top="$(pwd)"
+fi
+dest="${top}/standalone"
+
+if test -d "$dest"; then
+    cat <<EOF
+Standlone directory exists: $dest
+Leaving alone. If you want to re-run the automatic procedure, first
+remove that directory and then try again.
+EOF
+    exit 0
+fi
+
+host_program () {
+    _prg="$1"
+    oldifs="$IFS"
+    IFS=':'
+    set -- $PATH
+    IFS="$oldifs"
+    for dir in "$@"; do
+        if test -x "${dir}/${_prg}"; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+hostgood=1
+while read _type _program _package; do
+    case "$_type" in
+    host:) true     ;;
+    *)     continue ;;
+    esac
+    printf 'Checking for %s... ' "$_program"
+    if host_program "$_program"; then
+        printf 'found.\n'
+    else
+        hostgood=0
+        printf 'missing!\n'
+        cat <<EOF
+
+A required host-program is missing. On recent debian systems, this program can
+be found in the '$_package' package.
+
+If you don't know how to proceed, find your system administrator!
+
+EOF
+    fi
+done < "$top/.standalone"
+
+if test "$hostgood" -ne 1; then
+    printf '\nHost system is inadequate. Giving up!\n'
+    exit 1
+fi
+
+printf '\nHost system look good!\n\n'
+
+remote="$(git config --get branch.master.remote)"
+error="$?"
+if test "$error" != 0; then
+    cat <<EOF
+Could not determine git remote. Giving up.
+EOF
+    exit 1
+fi
+remote_url="$(git remote get-url "$remote")"
+error="$?"
+if test "$error" != 0; then
+    cat <<EOF
+Could not determine remote git URL. Giving up.
+EOF
+    exit 1
+fi
+
+printf 'Using git remote "%s": %s\n\n' "$remote" "$remote_url"
+
+mkdir -p "$dest" || exit 1
+cd "$dest" || exit 1
+
+is_relative () {
+    case "$1" in
+    ../*) return 0 ;;
+    *) return 1 ;;
+    esac
+}
+
+resolve_url () {
+    if ! is_relative "$2"; then
+        REPLY="$2"
+        return 0
+    fi
+    REPLY="$1"
+    __rest="$2"
+    while is_relative "$__rest"; do
+        __new="${REPLY%/*}"
+        if test "$__new" = "$REPLY"; then
+           printf 'resolve_url: Exhausted %s with %s.\n' "$1" "$2"
+           exit 1
+        fi
+        REPLY="$__new"
+        __rest="${__rest#../}"
+    done
+    REPLY="${REPLY}/${__rest}"
+    return 0
+}
+
+while read _type _url _subdir _loadpath; do
+    case "$_type" in
+    \#*)   continue ;;
+    host:) continue ;;
+    '')    continue ;;
+    esac
+    resolve_url "$remote_url" "$_url"
+    url="$REPLY"
+    loadpath="$dest/${_subdir}/${_loadpath}"
+    git clone "$url" "$_subdir"
+done < "$top/.standalone"
+
+printf 'Initialising some stand-alone repositories...'
+
+if test -d "$dest"/guile-termios; then
+    cd "$dest"/guile-termios || exit 1
+    make generate compile plausible || exit 1
+fi
+
+if test -d "$dest"/guile-tap; then
+    cd "$dest"/guile-tap || exit 1
+    make || exit 1
+fi
+
+cat <<EOF
+
+Initialisation done!
+
+From chip-remote's toplevel directory, you can now source the development
+environment into your environment by doing:
+
+    . ./tools/dev-env
+
+This will set up the system to work without any system-wide installation.
+
+If you do not wish to modify your execution environment, it is also possi-
+ble to run arbitrary commands in terms of the modified environment, by pre-
+fixing the command by ‘./tools/preinst’. For example:
+
+    ./tools/preinst make compile
+    ./tools/preinst guile -l ./examples/scratch.scm
+
+The latter can also be achieved by:
+
+    ./tools/guile-in-here -l ./examples/scratch.scm
+
+...which is the traditional way of running chip-remote scheme code from the
+source code directory directly.
+EOF
+
+exit 0

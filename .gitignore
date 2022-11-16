@@ -1,6 +1,7 @@
 .*
 !.gitignore
 !.clang-format
+!.standalone
 *~
 \#*
 compile_commands.json
@@ -40,3 +41,4 @@ doc/*.stripped
 !doc/template.latex
 !doc/template.man
 auto/*
+standalone/

@@ -72,4 +72,14 @@ test-verbose:
 test-debug:
 	$(RUNTESTS) -verbose -dispatch-verbose -debug
 
-.PHONY: all compile clean doc happiness install native-fw test test-debug test-verbose
+standalone:
+	@$(TOPDIR)/tools/make-standalone "$(TOPDIR)"
+
+.PHONY: all
+.PHONY: compile clean
+.PHONY: doc
+.PHONY: happiness
+.PHONY: install
+.PHONY: native-fw
+.PHONY: standalone
+.PHONY: test test-debug test-verbose

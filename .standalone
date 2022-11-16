@@ -1,0 +1,39 @@
+# Copyright (c) 2022 chip-remote workers, All rights reserved.
+#
+# Terms for redistribution and use can be found in LICENCE.
+
+# This file  is used by the ‘standalone’ target  (and there  for the shell
+# script tools/make-standalone) as well as the ‘tools/dev-env’ POSIX shell
+# snippet to offer  full operation without having to  install the required
+# dependencies to the host system.
+
+# Repository specification for standalone operation. The table format is:
+#
+#     type   URL   subdirectory   path-addition
+#
+# Type can  be "scm" and "bin"  to extend either guile's  load-path or the
+# execution environment's  PATH. The  URL can be  relative to  the current
+# branch's remote's  URL or  an absolute URL  of itself.  The subdirectory
+# token specifies the name of  the cloned repository inside the standalone
+# directory.  The path-addition  part specifies  the directory  inside the
+# cloned repository that is added to the respective environment variables.
+
+scm:   ../guile-tap.git       guile-tap       scheme
+scm:   ../guile-termios.git   guile-termios   scheme
+bin:   ../test-dispatch.git   test-dispatch   .
+
+
+# The system still requires a full Guile development environment. The host
+# type lines allow the initialisation to check for required host tools.
+# The format for these lines is:
+#
+#     type   program   debian-package
+#
+# I won't bother suggesting packages for  all manners of host systems. De-
+# velopers will know what to do.
+
+host:   cc      gcc
+host:   git     git
+host:   guile   guile-3.0
+host:   guild   guile-3.0-dev
+host:   prove   perl

@@ -1,5 +1,3 @@
 #!/bin/sh
 
-. ./tools/dev-env
-
-exec ${GUILE_BINARY:-guile} "$@"
+exec ./tools/preinst ${GUILE_BINARY:-guile} "$@"

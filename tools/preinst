@@ -1,0 +1,5 @@
+#!/bin/sh
+
+. ./tools/dev-env
+
+exec "$@"
