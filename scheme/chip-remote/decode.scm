@@ -238,7 +238,7 @@
         ((register? desc)
          (make-register/decoder
           value
-          (map (lambda (x) (decode* x (item-get x value)))
+          (map (lambda (x) (decode* x (item-get x (cdr value))))
                (register-items desc))
           desc))
         ((register-window? desc)
@@ -274,7 +274,7 @@
              value
              (map (lambda (rm v)
                     (cons (car rm)
-                          (decode* (cdr rm) v)))
+                          (decode* (cdr rm) (cdr v))))
                   (page-map-table pm)
                   value)
              pm))
