@@ -16,4 +16,4 @@ for i in SOURCE_DIR \
     export "$i"
 done
 
-exec dispatch-test "$@"
+exec ./tools/preinst dispatch-test "$@"
