@@ -58,91 +58,91 @@
 
   ;; Modifying registers
   (define-test "Modify item in register by name"
-    (pass-if-= 10 (xmodify r:ltc 8 'shutdown? #t)))
+    (pass-if-= 10 (modify r:ltc 8 'shutdown? #t)))
   (define-test "Modify item in register by idx"
-    (pass-if-= 10 (xmodify r:ltc 8 1 #t)))
+    (pass-if-= 10 (modify r:ltc 8 1 #t)))
   (define-test "Modify item in register by (name idx)"
-    (pass-if-= 10 (xmodify r:ltc 8 '(shutdown? 0) #t)))
+    (pass-if-= 10 (modify r:ltc 8 '(shutdown? 0) #t)))
 
   ;; Modifying registers-maps...
   (define-test "Modify item in register-map by name"
     (pass-if-equal? '((#f . 10))
-                    (xmodify rm:ltc '((#f . 8)) 'shutdown? #t)))
+                    (modify rm:ltc '((#f . 8)) 'shutdown? #t)))
   (define-test "Modify item in register-map by (addr name)"
     (pass-if-equal? '((#f . 10))
-                    (xmodify rm:ltc '((#f . 8)) '(#f shutdown?) #t)))
+                    (modify rm:ltc '((#f . 8)) '(#f shutdown?) #t)))
   (define-test "Modify item in register-map by (addr idx)"
     (pass-if-equal? '((#f . 10))
-                    (xmodify rm:ltc '((#f . 8)) '(#f 1) #t)))
+                    (modify rm:ltc '((#f . 8)) '(#f 1) #t)))
   (define-test "Modify item in register-map by (addr name idx)"
     (pass-if-equal? '((#f . 10))
-                    (xmodify rm:ltc '((#f . 8)) '(#f shutdown? 0) #t)))
+                    (modify rm:ltc '((#f . 8)) '(#f shutdown? 0) #t)))
 
   ;; Modifying page-maps...
   (define-test "Modify item in page-map by name"
     (pass-if-equal? '((#f . ((#f . 10))))
-                    (xmodify pm:ltc '((#f . ((#f . 8)))) 'shutdown? #t)))
+                    (modify pm:ltc '((#f . ((#f . 8)))) 'shutdown? #t)))
   (define-test "Modify item in page-map by (addr addr name)"
     (pass-if-equal? '((#f . ((#f . 10))))
-                    (xmodify pm:ltc '((#f . ((#f . 8)))) '(#f #f shutdown?) #t)))
+                    (modify pm:ltc '((#f . ((#f . 8)))) '(#f #f shutdown?) #t)))
   (define-test "Modify item in page-map by (addr addr idx)"
     (pass-if-equal? '((#f . ((#f . 10))))
-                    (xmodify pm:ltc '((#f . ((#f . 8)))) '(#f #f 1) #t)))
+                    (modify pm:ltc '((#f . ((#f . 8)))) '(#f #f 1) #t)))
   (define-test "Modify item in page-map by (addr addr name idx)"
     (pass-if-equal? '((#f . ((#f . 10))))
-                    (xmodify pm:ltc '((#f . ((#f . 8)))) '(#f #f shutdown? 0) #t)))
+                    (modify pm:ltc '((#f . ((#f . 8)))) '(#f #f shutdown? 0) #t)))
 
   ;; Modifying devices...
   (define-test "Modify item in device by name"
     (pass-if-equal? '((#f . ((#f . 10))))
-                    (xmodify ltc6603 '((#f . ((#f . 8)))) 'shutdown? #t)))
+                    (modify ltc6603 '((#f . ((#f . 8)))) 'shutdown? #t)))
   (define-test "Modify item in device by (addr addr name)"
     (pass-if-equal? '((#f . ((#f . 10))))
-                    (xmodify ltc6603 '((#f . ((#f . 8)))) '(#f #f shutdown?) #t)))
+                    (modify ltc6603 '((#f . ((#f . 8)))) '(#f #f shutdown?) #t)))
   (define-test "Modify item in device by (addr addr idx)"
     (pass-if-equal? '((#f . ((#f . 10))))
-                    (xmodify ltc6603 '((#f . ((#f . 8)))) '(#f #f 1) #t)))
+                    (modify ltc6603 '((#f . ((#f . 8)))) '(#f #f 1) #t)))
   (define-test "Modify item in device by (addr addr name idx)"
     (pass-if-equal? '((#f . ((#f . 10))))
-                    (xmodify ltc6603 '((#f . ((#f . 8)))) '(#f #f shutdown? 0) #t)))
+                    (modify ltc6603 '((#f . ((#f . 8)))) '(#f #f shutdown? 0) #t)))
 
   ;; Modify with default
   (define-test "Modify item in device with default value"
-    (pass-if-equal? '((#f . ((#f . 18)))) (xmodify* ltc6603 'shutdown? #t)))
+    (pass-if-equal? '((#f . ((#f . 18)))) (modify* ltc6603 'shutdown? #t)))
 
   ;; Chain modify
   (define-test "Chain-modify on register works"
     (pass-if-= 147
-               (xchain-modify r:ltc 0
-                              '(shutdown? #t)
-                              '(enable-output? #t)
-                              '(low-pass-cfg div-by-32)
-                              '(gain-cfg 6dB))))
+               (chain-modify r:ltc 0
+                             '(shutdown? #t)
+                             '(enable-output? #t)
+                             '(low-pass-cfg div-by-32)
+                             '(gain-cfg 6dB))))
   (define-test "Chain-modify on register-map works"
     (pass-if-equal? '((#f . 147))
-                    (xchain-modify rm:ltc '((#f . 0))
-                                   '(shutdown? #t)
-                                   '(enable-output? #t)
-                                   '(low-pass-cfg div-by-32)
-                                   '(gain-cfg 6dB))))
+                    (chain-modify rm:ltc '((#f . 0))
+                                  '(shutdown? #t)
+                                  '(enable-output? #t)
+                                  '(low-pass-cfg div-by-32)
+                                  '(gain-cfg 6dB))))
   (define-test "Chain-modify on page-map works"
     (pass-if-equal? '((#f . ((#f . 147))))
-                    (xchain-modify pm:ltc '((#f . ((#f. 0))))
-                                   '(shutdown? #t)
-                                   '(enable-output? #t)
-                                   '(low-pass-cfg div-by-32)
-                                   '(gain-cfg 6dB))))
+                    (chain-modify pm:ltc '((#f . ((#f. 0))))
+                                  '(shutdown? #t)
+                                  '(enable-output? #t)
+                                  '(low-pass-cfg div-by-32)
+                                  '(gain-cfg 6dB))))
   (define-test "Chain-modify on device works"
     (pass-if-equal? '((#f . ((#f . 147))))
-                    (xchain-modify ltc6603 '((#f . ((#f. 0))))
+                    (chain-modify ltc6603 '((#f . ((#f. 0))))
+                                  '(shutdown? #t)
+                                  '(enable-output? #t)
+                                  '(low-pass-cfg div-by-32)
+                                  '(gain-cfg 6dB))))
+  (define-test "Chain-modify with default on device works"
+    (pass-if-equal? '((#f . ((#f . 147))))
+                    (chain-modify* ltc6603
                                    '(shutdown? #t)
                                    '(enable-output? #t)
                                    '(low-pass-cfg div-by-32)
-                                   '(gain-cfg 6dB))))
-  (define-test "Chain-modify with default on device works"
-    (pass-if-equal? '((#f . ((#f . 147))))
-                    (xchain-modify* ltc6603
-                                    '(shutdown? #t)
-                                    '(enable-output? #t)
-                                    '(low-pass-cfg div-by-32)
-                                    '(gain-cfg 6dB)))))
+                                   '(gain-cfg 6dB)))))
