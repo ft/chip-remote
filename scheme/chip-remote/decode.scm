@@ -231,6 +231,14 @@
   (maybe-trace state thing)
   ((thing->cb thing) proc state thing))
 
+(define* (make-data-map descriptions values #:key (transform identity))
+  (map (lambda (d v)
+         (cons (car d)
+               (decode* (cdr d)
+                        (transform v))))
+       descriptions
+       values))
+
 (define (decode* desc value)
   (cond ((item? desc)
          (let ((item-decoded (item-decode desc value)))
@@ -251,20 +259,14 @@
         ((register-map? desc)
          (make-register-map/decoder
           value
-          (map (lambda (r v)
-                 (cons (car r)
-                       (decode* (cdr r) v)))
-               (register-map-table desc)
-               value)
+          (make-data-map (register-map-table desc) value
+                         #:transform cdr)
           desc))
         ((page-map? desc)
          (make-page-map/decoder
           value
-          (map (lambda (rm v)
-                 (cons (car rm)
-                       (decode* (cdr rm) v)))
-               (page-map-table desc)
-               value)
+          (make-data-map (page-map-table desc) value
+                         #:transform cdr)
           desc))
         ((device? desc)
          (make-device/decoder
@@ -272,11 +274,8 @@
           (let ((pm (device-page-map desc)))
             (make-page-map/decoder
              value
-             (map (lambda (rm v)
-                    (cons (car rm)
-                          (decode* (cdr rm) v)))
-                  (page-map-table pm)
-                  value)
+             (make-data-map (page-map-table pm) value
+                            #:transform cdr)
              pm))
           (let ((cs (device-combinations desc)))
             (make-combinations/decoder

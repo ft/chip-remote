@@ -8,6 +8,7 @@
              (test setup)
              (srfi srfi-1)
              (chip-remote decode)
+             (chip-remote decode to-text)
              (chip-remote device)
              (chip-remote devices linear-technology ltc6603)
              (chip-remote item)
@@ -19,7 +20,7 @@
 (init-test-tap!)
 
 (with-fs-test-bundle
- (plan 7)
+ (plan 9)
 
  (let* ((reg (device-ref ltc6603 #f #f))
         (items (register-items reg)))
@@ -40,4 +41,10 @@
      (define-test "Decoding a lookup item works (div-by-32)"
        (pass-if-equal? (decode tableitem 1) '(low-pass-cfg . div-by-32)))
      (define-test "Decoding a lookup item works (div-by-512)"
-       (pass-if-equal? (decode tableitem 0) '(low-pass-cfg . div-by-512))))))
+       (pass-if-equal? (decode tableitem 0) '(low-pass-cfg . div-by-512))))
+
+   ;; Test some regressions that were cause by the internal value rework.
+   (define-test "Decoding a complete device works (minimal)"
+     (pass-if-no-exception (decode ltc6603 (device-default ltc6603))))
+   (define-test "Decoding a complete device works (to-text)"
+     (pass-if-no-exception (decode-to-text ltc6603 (device-default ltc6603))))))
