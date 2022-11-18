@@ -173,7 +173,7 @@
              (d:reg:binary v w))))
 
 (define (d:register-value proc state d:reg)
-  (let* ((v (cdr (decoder-register-raw d:reg)))
+  (let* ((v (decoder-register-raw d:reg))
          (w (register-width (decoder-register-description d:reg)))
          (lvl (d:indent state 'register))
          (title "Raw Register Value: ")
