@@ -226,6 +226,8 @@ memory copy."
                        ;;(focus c port)
                        (when addr (address c addr)))))
 
+        (('decoder! f) (set-decoder! state f))
+
         (('trace!)     (assq 'trace (io-opt/set 'trace (not (io-opt/get 'trace)))))
         (('push!)      (update! #t state cr:push! '()))
         (('reset!)     (update! #f state cr:reset (list (get-default state))))
