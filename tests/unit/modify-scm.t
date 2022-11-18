@@ -13,6 +13,7 @@
              (chip-remote register-map)
              (chip-remote device)
              (chip-remote devices bosch bno055)
+             (chip-remote devices microchip mcp4351)
              (chip-remote devices linear-technology ltc6603)
              (chip-remote devices texas-instruments cdce72010)
              (chip-remote decode)
@@ -28,7 +29,7 @@
 (define pm:ltc (device-page-map ltc6603))
 
 (with-fs-test-bundle
-    (plan 25)
+  (plan 29)
 
   (let* ((dev (generate-device
                #:page-map
@@ -145,4 +146,37 @@
                                    '(shutdown? #t)
                                    '(enable-output? #t)
                                    '(low-pass-cfg div-by-32)
-                                   '(gain-cfg 6dB)))))
+                                   '(gain-cfg 6dB))))
+
+  ;; Loading bigger entities than items.
+  ;;
+  ;; The default operation of the modification functions is to apply changes
+  ;; directly to items. In some instances, it may be useful to directly load
+  ;; change to a bigger part of a value, like a register, or one of the maps.
+  ;;
+  ;; This is implemented by prefixing the ADDRESS parameter of a change spec by
+  ;; the #:load keyword.
+  (define-test "Loading a register value into a device works"
+    (pass-if-equal? '((#f . ((#f . 123))))
+                    (chain-modify* ltc6603 '(#:load #f #f 123))))
+  (define-test "Loading a register-map value into a device works"
+    (pass-if-equal? '((#f . ((#f . 123))))
+                    (chain-modify* ltc6603 '(#:load #f ((#f . 123))))))
+  (define-test "Loading a page-map value into a device works"
+    (pass-if-equal? '((#f . ((#f . 123))))
+                    (chain-modify* ltc6603 '(#:load ((#f . ((#f . 123))))))))
+
+  (define-test "Loading a register value into a less trivial device"
+    (pass-if-equal? '((#f . ((0  . #xa0)
+                             (1  . #xa1)
+                             (4  . #xa4)
+                             (6  . #xa6)
+                             (7  . #xa7)
+                             (10 . #xaa))))
+                    (chain-modify* mcp4351
+                                   '(#:load #f  0 #xa0)
+                                   '(#:load #f  1 #xa1)
+                                   '(#:load #f  4 #xa4)
+                                   '(#:load #f  6 #xa6)
+                                   '(#:load #f  7 #xa7)
+                                   '(#:load #f 10 #xaa)))))

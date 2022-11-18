@@ -31,7 +31,6 @@
             chain-modify-script
             minimise-modify-script
             merge-minimised-script
-            replace-register-value
             values-for-minimised-script
             apply-modify-script
             make-item-mod-expr))
@@ -90,21 +89,25 @@ position."
          (cons target args)))
 
 (define (modify target init address value)
-  (let* ((args ((if (list? address) cons list) target address))
-         (ca (apply xcanonical args))
-         (item (apply xref (cons target ca)))
-         (f (lambda (v)
-              (item-set item v (item-encode item value)))))
-    (cond ((register? target)
-           (update-item init (apply register-ref (cons target ca)) value))
-          (else (apply-at-address f init ca)))))
+  (match address
+    ((#:load) value)
+    ((#:load . a) (apply-at-address (const value) init (append a '(0))))
+    (else
+     (let* ((args ((if (list? address) cons list) target address))
+            (ca (apply xcanonical args))
+            (item (apply xref (cons target ca)))
+            (f (lambda (v)
+                 (item-set item v (item-encode item value)))))
+       (cond ((register? target)
+              (update-item init (apply register-ref (cons target ca)) value))
+             (else (apply-at-address f init ca)))))))
 
 (define (modify* target address value)
   (modify target (xdefault target) address value))
 
 (define (xchain-modify target init . lst)
   (fold (lambda (e acc)
-          (modify target acc (car e) (cadr e)))
+          (modify target acc (drop-right e 1) (last e)))
         init lst))
 
 (define (xchain-modify* target . lst)
@@ -157,6 +160,7 @@ default value that can be derived for ‘target’."
 (define (chain-modify-script device . lst)
   (fold (lambda (av acc)
           (match av
+            ((#:load . rest) (append acc (list av)))
             ((addr value)
              (let* ((full-addr (apply device-canonical ((if (list? addr) cons list) device addr)))
                     (description (apply device-ref (cons device full-addr))))
@@ -189,9 +193,6 @@ default value that can be derived for ‘target’."
        (iterate-to-index pi device-value
                          (lambda (regs)
                            (iterate-to-index ri regs update)))))))
-
-(define (replace-register-value device device-value address value)
-  (apply-at-address (const value) device-value address))
 
 (define (script-expression->register-address expr)
   (match expr
@@ -273,6 +274,11 @@ default value that can be derived for ‘target’."
 
 (define (apply-modify-expr device value expr)
   (match expr
+    ((#:load) value)
+    ((#:load . rest)
+     (let ((address (drop-right rest 1))
+           (new (last rest)))
+       (modify (device-page-map device) value (cons #:load address) new)))
     ((reg p r i v item) ;; Item modification expression
      (modify (device-page-map device) value (list p r i) v))
     (((reg p r) ((is os vs items) ...)) ;; Combination modification expression

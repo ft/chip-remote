@@ -37,7 +37,7 @@
 
 (define (replace-register-values d lst)
   (fold (lambda (entry previous)
-          (match entry ((a . v) (replace-register-value d previous a v))))
+          (match entry ((a . v) (modify d previous (cons #:load a) v))))
         (current-device-state d)
         lst))
 
@@ -125,7 +125,7 @@ register updated register table value."
 This returns a new device, with an updated device value, reflecting the
 register value that was just read. Note that if REGREF refers to a combination
 value, that the system may update more than one register value."
-  (let* ((faddr (lambda (x) (find-canonical-address d x)))
+  (let* ((faddr (lambda (x) (device-canonical d x)))
          (p+r (lambda (a) (take a 2)))
          (addresses (drop-dupes (map (compose p+r faddr) regref)))
          (av (read-register-values c d addresses)))
