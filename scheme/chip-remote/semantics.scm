@@ -97,7 +97,7 @@
                               table))))
     (if value
         (cdr value)
-        'chip-remote:undefined)))
+        (throw 'cr/undefined key table))))
 
 (define (make-table-encoder table)
   (lambda (w x) (encode-with-table table x)))

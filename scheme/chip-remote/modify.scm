@@ -97,7 +97,7 @@ position."
             (ca (apply xcanonical args))
             (item (apply xref (cons target ca)))
             (f (lambda (v)
-                 (item-set item v (item-encode item value)))))
+                 (update-item v item value))))
        (cond ((register? target)
               (update-item init (apply register-ref (cons target ca)) value))
              (else (apply-at-address f init ca)))))))
@@ -184,7 +184,7 @@ default value that can be derived for ‘target’."
   (item-set item register-value
             (if (validate-item-value item item-value)
                 (item-encode item item-value)
-                (throw 'invalid-value-for-item item-value item))))
+                (throw 'cr/invalid-value-for-item item-value item))))
 
 (define (modify-value-by-index device-value index item item-value)
   (let ((update (lambda (v) (update-item v item item-value))))
@@ -259,7 +259,7 @@ default value that can be derived for ‘target’."
   (match segment
     (((reg p r) ((is os vs items) ...))
      (list p r (fold (lambda (i o v item last)
-                       (item-set item last (item-encode item v)))
+                       (update-item last item v))
                      value
                      is os vs items)))))
 

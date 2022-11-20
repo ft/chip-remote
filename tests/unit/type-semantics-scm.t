@@ -36,5 +36,5 @@
     (define-test "table encoding works"
       (pass-if-= (s:encode s 4 'more) 5))
     (define-test "table encoding works (undefined)"
-      (pass-if-eq? (s:encode s 4 'does-not-exist)
-                   'chip-remote:undefined))))
+      (pass-if-exception 'cr/undefined
+                         (s:encode s 4 'does-not-exist)))))

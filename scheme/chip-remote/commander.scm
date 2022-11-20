@@ -3,8 +3,9 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote commander)
-  #:use-module (ice-9 optargs)
   #:use-module (ice-9 match)
+  #:use-module (ice-9 optargs)
+  #:use-module (ice-9 pretty-print)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module ((chip-remote decode) #:prefix cr:)
@@ -13,11 +14,17 @@
   #:use-module (chip-remote device access)
   #:use-module (chip-remote device transmit)
   #:use-module (chip-remote frontend)
+  #:use-module (chip-remote named-value)
   #:use-module (chip-remote page-map)
   #:use-module (chip-remote io)
   #:use-module (chip-remote modify)
   #:use-module (chip-remote protocol)
+  #:use-module (chip-remote semantics)
+  #:use-module (chip-remote validate)
   #:export (make-commander))
+
+(define (pp obj . args)
+  (apply pretty-print (cons* obj #:width 80 #:max-expr-width 100 args)))
 
 (define-record-type <cmdr-state>
   (make-cmdr-state device connection port address default decode open-hook)
@@ -65,6 +72,29 @@
   (when c? (must-be-connected s))
   (update-device! s (apply f (make-args c? s args)))
   *void*)
+
+(define* (pp-validator validator #:key (per-line-prefix ""))
+  (let ((type (validator-type validator)))
+    (format #t "~aType: ~a~%" per-line-prefix type)
+    (display per-line-prefix)
+    (case type
+      ((range)
+       (format #t "Range: ~a~%~%" (validator-expression validator)))
+      ((element-of not-element-of)
+       (format #t "Data:~%~%")
+       (pp (validator-expression validator)
+           #:per-line-prefix per-line-prefix)
+       (newline))
+      ((interpreter)
+       (format #t "Expression:~%~%")
+       (pp (validator-expression validator)
+           #:per-line-prefix per-line-prefix)
+       (newline))
+      ((scheme)
+       (format #t "Scheme Procedure: ~a~%~%" (validator-predicate validator)))
+      (else
+       (write validator)
+       (newline)))))
 
 (define* (make-commander #:key
                          device connection default (decode cr:decode)
@@ -236,7 +266,29 @@ memory copy."
         (('device)     (get-device state))
 
         (('load! datum)    (update! #t state cr:load '()))
-        (('set! kv ...)    (update! #f state cr:set kv))
+        (('set! kv ...)
+         (catch #t
+           (lambda () (update! #f state cr:set kv))
+           (lambda args
+             (match args
+               (('cr/invalid-value-for-item value item)
+                (format #t "set!: Invalid value: ~a~%~%" value)
+                (cond
+                 ((eq? 'table-lookup (semantics-type (item-semantics item)))
+                  (format #t "Key Value Table:~%~%")
+                  (let ((table (semantics-data (item-semantics item))))
+                    (pp (if (named-value? table)
+                            (value-data table)
+                            table)
+                        #:per-line-prefix "    "))
+                  (newline))
+                 (else
+                  (format #t "Validator:~%~%")
+                  (pp-validator (item-validator item)
+                                #:per-line-prefix "    "))))
+               (else
+                (apply throw args)))
+             *void*)))
         (('change! kv ...) (update! #t state cr:change! kv))
 
         (('transmit! addr)
