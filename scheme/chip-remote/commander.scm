@@ -318,4 +318,8 @@ memory copy."
                 (extr (device-extract device data addr)))
            (show state (assq-ref extr 'part) (assq-ref extr 'item))))
 
+        (('addresses) (device-address-map (get-device state)))
+        (('canonical . addr)
+         (apply device-canonical (cons (get-device state) addr)))
+
         (_ (throw 'unknown-command args))))))
