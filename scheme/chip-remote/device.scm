@@ -67,7 +67,7 @@
   (push-device-state device 'default (device-default device)))
 
 (define* (make-device meta page-map combinations access
-                      #:key (state (make-sized-stack 128)))
+                      #:key (state (make-sized-stack 1024)))
   (reset-device-state
    (make-device* meta page-map combinations access state)))
 
