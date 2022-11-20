@@ -32,6 +32,7 @@
             push-device-state
             reset-device-state
             device-default
+            device-diff
             device-history
             device-name
             device-registers
@@ -223,7 +224,10 @@
   (filter (compose not null?) lst))
 
 (define (fe1 lst)
-  (filter (lambda (x) (> (length x) 1)) lst))
+  (filter (lambda (x) (or (and (pair? x)
+                               (diff? (cdr x)))
+                          (> (length x) 1)))
+          lst))
 
 (define (minimise-diff/item item)
   (match item
@@ -233,7 +237,10 @@
 
 (define (minimise-diff/register reg)
   (match reg
-    ((addr items ...) (cons addr (fe0 (map minimise-diff/item items))))))
+    ((addr items ...) (cons addr (fe0 (map minimise-diff/item items))))
+    ((addr . value)   (if (diff? value)
+                          (cons addr value)
+                          '()))))
 
 (define (minimise-diff/page page)
   (match page
@@ -256,15 +263,18 @@
           (let-values (((diff? v) (diff ra rb)))
             v))))
 
-(define* (device-history dev #:optional count)
+(define* (device-history dev #:optional count #:key (decode? #t))
   (let* ((dec (lambda (x) (cons (car x) (decode dev (cdr x)))))
          (st (device-state dev))
          (count* (and count (min (1+ count) (sized-stack-used st))))
          (memory (sized-stack-memory st))
          (data (reverse (if count* (take memory count*) memory))))
-    (if (null? data)
-        '()
-        (map minimise-diff (pair-combine xdiff (map dec data))))))
+    (if decode? (map dec data) data)))
+
+(define* (device-diff dev #:optional count #:key (decode? #t))
+  (map minimise-diff
+       (pair-combine xdiff
+                     (device-history dev count #:decode? decode?))))
 
 (define (device-extract dev value addr)
   (let* ((faddr (apply device-canonical

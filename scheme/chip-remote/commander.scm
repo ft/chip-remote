@@ -301,8 +301,8 @@ memory copy."
                                         addr)))
              (transmit-data c (get-device state) extr))))
 
-        (('history)     (device-history (get-device state)))
-        (('history n)   (device-history (get-device state) n))
+        (('history . args) (apply device-history (cons (get-device state) args)))
+        (('diff . args)    (apply device-diff (cons (get-device state) args)))
         (('decode)      (commander:decode-all state))
         (('decode #:address . address)
          (let ((part (apply device-ref (cons (get-device state) address)))
