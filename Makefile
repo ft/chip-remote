@@ -49,9 +49,11 @@ native-fw:
 happiness: native-fw compile doc test
 
 clean:
-	find . -name "*.go" -exec rm -f '{}' +
-	find . -name "*~" -exec rm -f '{}' +
-	find . -name "*.failure" -exec rm -f '{}' +
+	find scheme -name "*.go"      -exec rm -f '{}' +
+	find scheme -name "*.mdwn"    -exec rm -f '{}' +
+	find .      -name "*~"        -exec rm -f '{}' +
+	find .      -name "*.failure" -exec rm -f '{}' +
+	$(MAKE) -C doc clean
 	rm -Rf $(NATIVE_DIR)
 
 doc:

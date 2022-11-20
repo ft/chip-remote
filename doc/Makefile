@@ -28,6 +28,9 @@ all: pdf man
 man: $(MAN)
 pdf: $(PDF)
 
+clean:
+	rm -f *.pdf *.7 *.fmdwn
+
 $(REFERENCE).fmdwn: $(REFMAN_SECTIONS) $(TOOL_SECTIONS)
 
 .org.pdf:
