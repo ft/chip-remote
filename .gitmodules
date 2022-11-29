@@ -13,3 +13,6 @@
 [submodule "firmware/zephyr/modules/picolibc"]
 	path = firmware/zephyr/modules/picolibc
 	url = ../zephyr-picolibc.git
+[submodule "scheme-lib/r6rs-protobuf"]
+	path = scheme-lib/r6rs-protobuf
+	url = ../r6rs-protobuf.git
