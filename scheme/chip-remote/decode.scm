@@ -128,7 +128,7 @@
                   (map (lambda (i)
                          (process proc (ps-level-up state 'register-window) i))
                        (decoder-register-window-items regwin)))))
-    ((p:register proc) proc (new-content state c) regwin)))
+    ((p:window proc) proc (new-content state c) regwin win items lsi msi)))
 
 (define (into-register-map proc state regmap)
   (define (into reg)
