@@ -81,7 +81,7 @@
                         (if (or (not a) (integer? a))
                             (cons a c)
                             c))))
-          (window (lambda (proc state d:win win lsi msi)
+          (window (lambda (proc state d:win win items lsi msi)
                     (cons (list `(lsi-complete? ,(lsi-complete? win) ,lsi)
                                 `(msi-complete? ,(msi-complete? win) ,msi))
                           (ps-content state))))
