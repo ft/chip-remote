@@ -2,9 +2,11 @@
   #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
+  #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (srfi srfi-11)
+  #:use-module (chip-remote bit-operations)
   #:export (!!
             2e
             non-negative-integer?
@@ -21,8 +23,17 @@
             pair-combine
             list-iterate
             map/last
+            map/carry
+            chain
+            put
+            fetch
+            get
             kwa-ref
+            in-range
             log2
+            uint-max
+            min-bits-for-uint
+            min-octets-for-uint
             fmt
             number->symbol
             symbol-upcase
@@ -98,6 +109,10 @@ calls. It returns the empty list for empty and singleton lists."
   (and (integer? obj)
        (not (negative? obj))))
 
+(define (in-range n a b)
+  (and (>= n a)
+       (<= n b)))
+
 (define (2e n)
   (ash 1 n))
 
@@ -105,6 +120,20 @@ calls. It returns the empty list for empty and singleton lists."
 
 (define (log2 n)
   (/ (log10 n) log2-scale))
+
+(define (uint-max n)
+  (1- (ash 1 n)))
+
+(define* (min-bits-for-uint value #:optional (step 1+))
+  (let loop ((bits (step 0)))
+    (if (<= value (uint-max bits))
+        bits
+        (loop (step bits)))))
+
+(define (min-octets-for-uint n)
+  (let ((bits-per-octet 8))
+    (/ (min-bits-for-uint n (lambda (n) (+ n bits-per-octet)))
+       bits-per-octet)))
 
 (define (kwa-ref kw-lst kw default)
   (let ((m (memq kw kw-lst)))
@@ -122,6 +151,46 @@ calls. It returns the empty list for empty and singleton lists."
   (cond ((null? lst) '())
         ((null? (cdr lst)) (cons (fnc #t (car lst)) '()))
         (else (cons (fnc #f (car lst)) (map/last fnc (cdr lst))))))
+
+(define (map/carry f c0 lst)
+  (cdr (fold (lambda (x res)
+               ;; (f carry value) needs to return a list: (carry result)
+               (let* ((carry (car res))
+                      (data (cdr res))
+                      (next (f carry x)))
+                 (cons (car next)
+                       (append! data (list (cdr next))))))
+             (list c0) lst)))
+
+(define (chain . f)
+  ((apply compose f) 0))
+
+(define (put offset value)
+  (lambda (n)
+    (logior n (ash value offset))))
+
+(define (get offset width)
+  (lambda (x)
+    (bit-extract-width x offset width)))
+
+(define (fetch-this bv offset thing)
+  (match thing
+    (((? positive? n) '→ f)   (values n (f bv offset)))
+    (((? positive? bits) ...)
+     (values 1 (let ((datum (bytevector-u8-ref bv offset)))
+                 (map/carry (lambda (offset bits)
+                              (cons (+ bits offset)
+                                    ((get offset bits) datum)))
+                            0 bits))))))
+
+(define (fetch* bv offset things)
+  (if (null? things)
+      '()
+      (let-values (((n thing) (fetch-this bv offset (car things))))
+        (cons thing (fetch* bv (+ offset n) (cdr things))))))
+
+(define (fetch bv offset . things)
+  (flatten (fetch* bv offset things)))
 
 (define (symbol-upcase sym)
   (string->symbol (string-upcase (symbol->string sym))))
