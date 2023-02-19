@@ -42,4 +42,16 @@ endmenu
 
 endmenu
 
+# This is from zephyr-3.0.0, but without the (toolchain = zephyr) check. I
+# think this is a bug in zephyr. The intend from the comment in 0e0f878ddc
+# seems to be to avoid trying to use picolibc with clang, and to only enable
+# support for GNU based toolchains. "gnuarmemb" is one of those however. So
+# that check is too restrictive. Luckily it is possible to override this be-
+# haviour in the application's Kconfig file. That's what we'll do for now.
+config PICOLIBC_SUPPORTED
+    bool
+    depends on !NATIVE_APPLICATION
+    depends on !(CPP && "$(ZEPHYR_TOOLCHAIN_VARIANT)" = "zephyr")
+    default y
+
 source "Kconfig.zephyr"
