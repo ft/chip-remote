@@ -1,0 +1,38 @@
+;; -*- scheme -*-
+
+(use-modules (rnrs bytevectors)
+             (termios)
+             (termios system)
+             (protocol slip)
+             ((protocol coap) #:prefix coap:))
+
+(define serial-device (let ((arg (cdr (command-line))))
+                        (if (null? arg)
+                            #f
+                            (car arg))))
+
+(unless serial-device
+  (format #t "usage: play-rewrite <device>~%")
+  (quit 1))
+
+(define tty (open-io-file serial-device))
+(define ts (make-termios-struct))
+(cf-make-raw! ts)
+(cf-set-speed! ts termios-B115200)
+(tc-set-attr tty ts)
+
+(define slip (make-slip-encoding #:with-sof? #t))
+(define slip:rx (make-slip-state #:encoding slip))
+(define slip:tx (make-slip-state #:encoding slip))
+
+(slip-send slip:tx tty
+           (coap:encode #:payload #vu8(1 2 3 4)
+                        #:token #x12345678
+                        #:message-id #xabcd
+                        #:type 'confirmable
+                        #:code 'put ;; equivalent: '(method put)
+                        #:options '((uri-host "localhost")
+                                    (uri-path "/foo/bar/baz/quux")
+                                    (uri-port 9910))))
+
+(close tty)
