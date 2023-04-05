@@ -4,6 +4,7 @@
 
 (define-module (chip-remote protocol)
   #:use-module (chip-remote io)
+  #:use-module (chip-remote utilities)
   #:use-module (srfi srfi-1)
   #:export (address
             bye
@@ -75,21 +76,6 @@ This function throws exceptions for the common failure the protocol specifies."
                                     (string->symbol (car tokens)))))
           (throw excp reply rest tokens)))
     reply))
-
-(define (zip2 la lb)
-  "This is like ‘zip’ from `(srfi srfi-1)`, except that it returns a list of
-pairs instead of a list of lists with two elements in them.
-
-    (zip2 '(a c e) '(b d f)) => ((a . b) (c . d) (e . f))"
-  (let next ((a la)
-             (b lb)
-             (acc '()))
-    (cond ((any null? (list a b))
-           (reverse acc))
-          (else
-           (next (cdr a) (cdr b)
-                 (cons (cons (car a) (car b))
-                       acc))))))
 
 ;; Words in the protocol may contain letters, a dash and digits from ASCII.
 (define protocol-char-set

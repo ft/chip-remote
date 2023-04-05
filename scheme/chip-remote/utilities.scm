@@ -17,6 +17,7 @@
             index>
             cat
             flatten
+            assq-change
             assoc-apply
             pair-combine
             list-iterate
@@ -42,7 +43,8 @@
             has-data?
             drain-whitespace
             xread
-            xselect))
+            xselect
+            zip2))
 
 (define-syntax-rule (cat str ...)
   (string-concatenate (list str ...)))
@@ -53,6 +55,30 @@
         ((not (pair? lst)) (list lst))
         (else (append (flatten (car lst))
                       (flatten (cdr lst))))))
+
+(define (zip2 la lb)
+  "This is like ‘zip’ from `(srfi srfi-1)`, except that it returns a list of
+pairs instead of a list of lists with two elements in them.
+
+    (zip2 '(a c e) '(b d f)) => ((a . b) (c . d) (e . f))"
+  (let next ((a la)
+             (b lb)
+             (acc '()))
+    (cond ((any null? (list a b))
+           (reverse acc))
+          (else
+           (next (cdr a) (cdr b)
+                 (cons (cons (car a) (car b))
+                       acc))))))
+
+(define (assq-change alist key value)
+  (let loop ((rest alist))
+    (match rest
+      (((k . v) . rest*)
+       (if (eq? k key)
+           (cons (cons key value) rest*)
+           (cons (cons k v) (loop rest*))))
+      (_ (list (cons key value))))))
 
 (define (assoc-apply compare f v a)
   "Apply a function to the value of a key in an associative array.
