@@ -189,7 +189,7 @@
   (when (and (> (length (command-line)) 1)
              (string= "--debug" (cadr (command-line))))
     (set-tio-timeout! tio #f)
-    (io-opt/set 'serial-timeout #f)
+    (io-opt/set 'timeout #f)
     (tio-push-parm! tio 'dont-kill)
     (when suspend-execution? (debug-fw! tio))))
 

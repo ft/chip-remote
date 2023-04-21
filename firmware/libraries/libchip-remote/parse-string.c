@@ -287,7 +287,7 @@ looking_at_keyvalue(const char *s)
 
     /* Key can be anything and will reach up to the last colon in the string.
      * Everything after the colon has to be a number. */
-    char *colon = rindex(s, ':');
+    char *colon = strrchr(s, ':');
     if (colon == NULL)
         return rv;
 

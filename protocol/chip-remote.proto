@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+message GenericRequest {
+    required uint64 id = 1;
+    required uint64 arg = 2;
+}
+
+message FirmwareVersion {
+    required uint64 fw_major = 1;
+    required uint64 fw_minor = 2;
+    required uint64 fw_patchlevel = 3;
+}
