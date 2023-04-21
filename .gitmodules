@@ -1,6 +1,9 @@
 [submodule "firmware/libraries/ufw"]
 	path = firmware/libraries/ufw
 	url = ../ufw.git
+[submodule "firmware/libraries/nanopb"]
+	path = firmware/libraries/nanopb
+	url = ../nanopb.git
 [submodule "firmware/zephyr/kernel"]
 	path = firmware/zephyr/kernel
 	url = ../zephyr.git
