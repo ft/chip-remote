@@ -48,10 +48,9 @@ enable_language(ASM)
 include(InitialiseToolchain)
 initialise_toolchain()
 
-# Set up nanopb and specify a target that generated nanopb code for the proto-
-# col spec in the “protocol” top-level subdirectory.
+# Set up nanopb.
 include(AddNanoPB)
-define_nanopb_protoc(zephyr/modules/nanopb)
+add_nanopb(libraries/nanopb)
 
 # This is ufw's way of saying “add_subdirectory()”. It takes care of some de-
 # tails and then, indeed, calls that function. We're doing this fairly early
