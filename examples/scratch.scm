@@ -6,6 +6,7 @@
              (termios system)
              (data-structures loadable-fifo)
              (data-structures sized-stack)
+             ((protocol saleae-spi) #:prefix saleae:)
              (chip-remote bit-operations)
              (chip-remote codecs)
              (chip-remote combination)
@@ -58,6 +59,9 @@
              (chip-remote devices analog-devices adf4169)
              ((chip-remote devices analog-devices adf4169 registers) #:prefix adf4169:)
              ((chip-remote devices analog-devices adf4169 tables) #:prefix adf4169:)
+             (chip-remote devices analog-devices ad9262)
+             ((chip-remote devices analog-devices ad9262 registers) #:prefix ad9262:)
+             ((chip-remote devices analog-devices ad9262 tables) #:prefix ad9262:)
              ;; Bosch
              (chip-remote devices bosch bme280)
              ((chip-remote devices bosch bme280 registers) #:prefix bme280:)
@@ -76,7 +80,8 @@
              ((chip-remote devices microchip mcp4351 registers) #:prefix mcp4351:)
              ;; Texas Instruments
              (chip-remote devices texas-instruments ads4149)
-             (chip-remote devices texas-instruments cdce72010))
+             (chip-remote devices texas-instruments cdce72010)
+             (chip-remote devices texas-instruments lmh6517))
 
 ;; Set up a serial connection if CR_SERIAL_DEVICE is set in the execution
 ;; environment. ‘s’ will be the name of the device, ‘c’ is the associated
