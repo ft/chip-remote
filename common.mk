@@ -73,6 +73,7 @@ MODULES_DEVICES += $(CR)/devices/decawave/dw1000.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw1000/registers.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw1000/tables.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw3000.scm
+MODULES_DEVICES += $(CR)/devices/decawave/dw3000/commands.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw3000/registers.scm
 MODULES_DEVICES += $(CR)/devices/decawave/dw3000/tables.scm
 MODULES_DEVICES += $(CR)/devices/invensense/icm-20602.scm
