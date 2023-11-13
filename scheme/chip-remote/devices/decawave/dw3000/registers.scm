@@ -3,6 +3,7 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices decawave dw3000 registers)
+  #:use-module (chip-remote codecs)
   #:use-module (chip-remote item builder)
   #:use-module (chip-remote register)
   #:use-module (chip-remote semantics)
@@ -12,16 +13,16 @@
             reg:sts-cfg
             reg:rx-tune
             reg:ext-sync
-            reg:gpio_ctrl
-            reg:drx
-            reg:rf-conf
-            reg:tx-cal
-            reg:fs-ctrl
-            reg:aon
-            reg:otp-if
+            reg:gpio-ctrl
+            reg:digital-rx-cfg
+            reg:analog-rf-cfg
+            reg:tx-calibration
+            reg:freq-synth-ctrl
+            reg:always-on-system-control
+            reg:otp-interface
             reg:cia-0
             reg:cia-1
-            reg:cia-2
+            reg:cia-2-and-rx-antenna-delay
             reg:digital-diag
             reg:pmsc
             reg:rx-buffer-0
@@ -355,47 +356,324 @@
   (rx-cal-block-status (offset #x20 0) 1)
   (reserved            (offset #x20 1) 7))
 
-(define-register reg:gpio_ctrl
+(define-register reg:gpio-ctrl
   #:address #x05
   #:description "General Purpose Input-Output control registers"
   #:double-buffer #f
-  #:register-width (octets 47)
+  ;;#:register-width (octets 47)
   #:contents
-  (gpio-ctrl 0 (octets 47)))
+  ;; 0x00: GPIO_MODE
+  (mode-select-gpio-0 (offset #x00  0) 3
+                      #:semantics lookup gpio-0-modes
+                      #:default 'gpio)
+  (mode-select-gpio-1 (offset #x00  3) 3
+                      #:semantics lookup gpio-1-modes
+                      #:default 'gpio)
+  (mode-select-gpio-2 (offset #x00  6) 3
+                      #:semantics lookup gpio-2-modes
+                      #:default 'gpio)
+  (mode-select-gpio-3 (offset #x00  9) 3
+                      #:semantics lookup gpio-3-modes
+                      #:default 'gpio)
+  (mode-select-gpio-4 (offset #x00 12) 3
+                      #:semantics lookup gpio-4-modes
+                      #:default 'gpio)
+  (mode-select-gpio-5 (offset #x00 15) 3
+                      #:semantics lookup gpio-5-modes
+                      #:default 'gpio)
+  (mode-select-gpio-6 (offset #x00 18) 3
+                      #:semantics lookup gpio-6-modes
+                      #:default 'gpio)
+  (mode-select-gpio-7 (offset #x00 21) 3
+                      #:semantics lookup gpio-7-modes
+                      #:default 'sync-input)
+  (mode-select-gpio-8 (offset #x00 24) 3
+                      #:semantics lookup gpio-8-modes
+                      #:default 'irq-output)
+  (reserved           (offset #x00 27) 5)
+  ;; 0x04: GPIO_PULL_EN
+  (gpio-0-pull-enable (offset #x04 0) 1)
+  (gpio-1-pull-enable (offset #x04 1) 1)
+  (gpio-2-pull-enable (offset #x04 2) 1)
+  (gpio-3-pull-enable (offset #x04 3) 1)
+  (gpio-4-pull-enable (offset #x04 4) 1)
+  (gpio-5-pull-enable (offset #x04 5) 1)
+  (gpio-6-pull-enable (offset #x04 6) 1)
+  (gpio-7-pull-enable (offset #x04 7) 1)
+  (gpio-8-pull-enable (offset #x04 8) 1)
+  (reserved           (offset #x04 9) 7)
+  ;; 0x08: GPIO_DIR
+  (gpio-0-direction (offset #x08 0) 1
+                    #:semantics lookup gpio-direction-map
+                    #:default 'input)
+  (gpio-1-direction (offset #x08 1) 1
+                    #:semantics lookup gpio-direction-map
+                    #:default 'input)
+  (gpio-2-direction (offset #x08 2) 1
+                    #:semantics lookup gpio-direction-map
+                    #:default 'input)
+  (gpio-3-direction (offset #x08 3) 1
+                    #:semantics lookup gpio-direction-map
+                    #:default 'input)
+  (gpio-4-direction (offset #x08 4) 1
+                    #:semantics lookup gpio-direction-map
+                    #:default 'input)
+  (gpio-5-direction (offset #x08 5) 1
+                    #:semantics lookup gpio-direction-map
+                    #:default 'input)
+  (gpio-6-direction (offset #x08 6) 1
+                    #:semantics lookup gpio-direction-map
+                    #:default 'input)
+  (gpio-7-direction (offset #x08 7) 1
+                    #:semantics lookup gpio-direction-map
+                    #:default 'input)
+  (gpio-8-direction (offset #x08 8) 1
+                    #:semantics lookup gpio-direction-map
+                    #:default 'input)
+  (reserved         (offset #x08 9) 7)
+  ;; 0x0C: GPIO_OUT
+  (gpio-0-output-value (offset #x0c 0) 1)
+  (gpio-1-output-value (offset #x0c 1) 1)
+  (gpio-2-output-value (offset #x0c 2) 1)
+  (gpio-3-output-value (offset #x0c 3) 1)
+  (gpio-4-output-value (offset #x0c 4) 1)
+  (gpio-5-output-value (offset #x0c 5) 1)
+  (gpio-6-output-value (offset #x0c 6) 1)
+  (gpio-7-output-value (offset #x0c 7) 1)
+  (gpio-8-output-value (offset #x0c 8) 1)
+  (reserved            (offset #x0c 9) 7)
+  ;; 0x10: GPIO_IRQE
+  (gpio-0-irq-enable (offset #x10 0) 1)
+  (gpio-1-irq-enable (offset #x10 1) 1)
+  (gpio-2-irq-enable (offset #x10 2) 1)
+  (gpio-3-irq-enable (offset #x10 3) 1)
+  (gpio-4-irq-enable (offset #x10 4) 1)
+  (gpio-5-irq-enable (offset #x10 5) 1)
+  (gpio-6-irq-enable (offset #x10 6) 1)
+  (gpio-7-irq-enable (offset #x10 7) 1)
+  (gpio-8-irq-enable (offset #x10 8) 1)
+  (reserved          (offset #x10 9) 7)
+  ;; 0x14: GPIO_ISTS
+  (gpio-0-irq-status (offset #x14 0) 1)
+  (gpio-1-irq-status (offset #x14 1) 1)
+  (gpio-2-irq-status (offset #x14 2) 1)
+  (gpio-3-irq-status (offset #x14 3) 1)
+  (gpio-4-irq-status (offset #x14 4) 1)
+  (gpio-5-irq-status (offset #x14 5) 1)
+  (gpio-6-irq-status (offset #x14 6) 1)
+  (gpio-7-irq-status (offset #x14 7) 1)
+  (gpio-8-irq-status (offset #x14 8) 1)
+  (reserved          (offset #x14 9) 7)
+  ;; 0x18: GPIO_ISEN
+  (gpio-0-irq-sense-mode (offset #x18 0) 1
+                         #:semantics lookup gpio-irq-mode-map
+                         #:default 'active-high/rising-edge)
+  (gpio-1-irq-sense-mode (offset #x18 1) 1
+                         #:semantics lookup gpio-irq-mode-map
+                         #:default 'active-high/rising-edge)
+  (gpio-2-irq-sense-mode (offset #x18 2) 1
+                         #:semantics lookup gpio-irq-mode-map
+                         #:default 'active-high/rising-edge)
+  (gpio-3-irq-sense-mode (offset #x18 3) 1
+                         #:semantics lookup gpio-irq-mode-map
+                         #:default 'active-high/rising-edge)
+  (gpio-4-irq-sense-mode (offset #x18 4) 1
+                         #:semantics lookup gpio-irq-mode-map
+                         #:default 'active-high/rising-edge)
+  (gpio-5-irq-sense-mode (offset #x18 5) 1
+                         #:semantics lookup gpio-irq-mode-map
+                         #:default 'active-high/rising-edge)
+  (gpio-6-irq-sense-mode (offset #x18 6) 1
+                         #:semantics lookup gpio-irq-mode-map
+                         #:default 'active-high/rising-edge)
+  (gpio-7-irq-sense-mode (offset #x18 7) 1
+                         #:semantics lookup gpio-irq-mode-map
+                         #:default 'active-high/rising-edge)
+  (gpio-8-irq-sense-mode (offset #x18 8) 1
+                         #:semantics lookup gpio-irq-mode-map
+                         #:default 'active-high/rising-edge)
+  (reserved              (offset #x18 9) 7)
+  ;; 0x1C: GPIO_IMODE
+  (gpio-0-irq-mode (offset #x1c 0) 1
+                   #:semantics lookup gpio-irq-level/edge-map
+                   #:default 'level)
+  (gpio-1-irq-mode (offset #x1c 1) 1
+                   #:semantics lookup gpio-irq-level/edge-map
+                   #:default 'level)
+  (gpio-2-irq-mode (offset #x1c 2) 1
+                   #:semantics lookup gpio-irq-level/edge-map
+                   #:default 'level)
+  (gpio-3-irq-mode (offset #x1c 3) 1
+                   #:semantics lookup gpio-irq-level/edge-map
+                   #:default 'level)
+  (gpio-4-irq-mode (offset #x1c 4) 1
+                   #:semantics lookup gpio-irq-level/edge-map
+                   #:default 'level)
+  (gpio-5-irq-mode (offset #x1c 5) 1
+                   #:semantics lookup gpio-irq-level/edge-map
+                   #:default 'level)
+  (gpio-6-irq-mode (offset #x1c 6) 1
+                   #:semantics lookup gpio-irq-level/edge-map
+                   #:default 'level)
+  (gpio-7-irq-mode (offset #x1c 7) 1
+                   #:semantics lookup gpio-irq-level/edge-map
+                   #:default 'level)
+  (gpio-8-irq-mode (offset #x1c 8) 1
+                   #:semantics lookup gpio-irq-level/edge-map
+                   #:default 'level)
+  (reserved        (offset #x1c 9) 23)
+  ;; 0x20: GPIO_IBES
+  (gpio-0-bothedge-enable (offset #x20 0) 1)
+  (gpio-1-bothedge-enable (offset #x20 1) 1)
+  (gpio-2-bothedge-enable (offset #x20 2) 1)
+  (gpio-3-bothedge-enable (offset #x20 3) 1)
+  (gpio-4-bothedge-enable (offset #x20 4) 1)
+  (gpio-5-bothedge-enable (offset #x20 5) 1)
+  (gpio-6-bothedge-enable (offset #x20 6) 1)
+  (gpio-7-bothedge-enable (offset #x20 7) 1)
+  (gpio-8-bothedge-enable (offset #x20 8) 1)
+  (reserved               (offset #x20 9) 7)
+  ;; 0x24: GPIO_IBES
+  (gpio-0-irq-latch-clear (offset #x24 0) 1)
+  (gpio-1-irq-latch-clear (offset #x24 1) 1)
+  (gpio-2-irq-latch-clear (offset #x24 2) 1)
+  (gpio-3-irq-latch-clear (offset #x24 3) 1)
+  (gpio-4-irq-latch-clear (offset #x24 4) 1)
+  (gpio-5-irq-latch-clear (offset #x24 5) 1)
+  (gpio-6-irq-latch-clear (offset #x24 6) 1)
+  (gpio-7-irq-latch-clear (offset #x24 7) 1)
+  (gpio-8-irq-latch-clear (offset #x24 8) 1)
+  (reserved               (offset #x24 9) 7)
+  ;; 0x28: GPIO_IDBE
+  (gpio-0-debounce-enable (offset #x28 0) 1)
+  (gpio-1-debounce-enable (offset #x28 1) 1)
+  (gpio-2-debounce-enable (offset #x28 2) 1)
+  (gpio-3-debounce-enable (offset #x28 3) 1)
+  (gpio-4-debounce-enable (offset #x28 4) 1)
+  (gpio-5-debounce-enable (offset #x28 5) 1)
+  (gpio-6-debounce-enable (offset #x28 6) 1)
+  (gpio-7-debounce-enable (offset #x28 7) 1)
+  (gpio-8-debounce-enable (offset #x28 8) 1)
+  (reserved               (offset #x28 9) 7)
+  ;; 0x2c: GPIO_RAW
+  (gpio-0-io-raw-state (offset #x2c 0) 1)
+  (gpio-1-io-raw-state (offset #x2c 1) 1)
+  (gpio-2-io-raw-state (offset #x2c 2) 1)
+  (gpio-3-io-raw-state (offset #x2c 3) 1)
+  (gpio-4-io-raw-state (offset #x2c 4) 1)
+  (gpio-5-io-raw-state (offset #x2c 5) 1)
+  (gpio-6-io-raw-state (offset #x2c 6) 1)
+  (gpio-7-io-raw-state (offset #x2c 7) 1)
+  (gpio-8-io-raw-state (offset #x2c 8) 1)
+  (reserved            (offset #x2c 9) 7))
 
-(define-register reg:drx
+(define-register reg:digital-rx-cfg
   #:address #x06
   #:description "Digital receiver configuration"
   #:double-buffer #f
-  #:register-width (octets 47)
+  ;;#:register-width (octets 47)
   #:contents
-  (rx-digi-configuration 0 (octets 47)))
+  ;; 0x00: DTUNE0
+  (preamble-aquisition-chunk-size (offset #x00 0)  2)
+  (reserved                       (offset #x00 2)  2)
+  (digital-tuning-bit-4           (offset #x00 4)  1)
+  (reserved                       (offset #x00 5) 11)
+  ;; 0x02: RX_SFD_TOC
+  (sfd-detection-timeout (offset #x02 0) 16 #:default 65)
+  ;; 0x04: PRE_TOC
+  (preamble-detection-timeout (offset #x04 0) 16)
+  ;; 0x0C: DTUNE3
+  ;; Again, the data-sheet says 0xaf5f35cc yields better performance than the
+  ;; default.
+  (digital-receiver-tuning-word-3 (offset #x0c 0) 32 #:default #xaf5f584c)
+  ;; 0x14: DTUNE5
+  (reserved (offset #x14 0) 32)
+  ;; 0x29: DRX_CAR_INT
+  (remote-tx-freq-offset-estimate (offset #x29 0) 24))
 
-(define-register reg:rf-conf
+(define-register reg:analog-rf-cfg
   #:address #x07
   #:description "Analog RF configuration block"
   #:double-buffer #f
-  #:register-width (octets 86)
+  ;;#:register-width (octets 86)
   #:contents
-  (rf-configuration 0 (octets 86)))
+  ;; The data-sheet says to write the same value into RF_ENABLE and
+  ;; RF_CTRL_MASK. The defaults transcribed are for channel 5. The values for
+  ;; channel 9 are in the comment.
+  ;; 0x00: RF_ENABLE
+  (rf-enable    (offset #x00 0) 32 #:default #x02003c00) ;; 0x02001C00
+  ;; 0x04: RF_CTRL_MASK
+  (rf-ctrl-mask (offset #x04 0) 32 #:default #x02003c00) ;; 0x02001C00
+  ;; 0x14: RF_SWITCH
+  (antenna-auto-toggle-enable (offset #x14  0) 1
+                              #:semantics* boolean/active-low #:default #t)
+  (pdoa-starting-port-select  (offset #x14  1) 1)
+  (reserved                   (offset #x14  2) 6)
+  (manual-antenna-switch-ctrl (offset #x14  8) 1)
+  (reserved                   (offset #x14  9) 3)
+  (antenna-switch-ctrl        (offset #x14 12) 3)
+  (reserved                   (offset #x14 15) 1)
+  (manual-txrx-switch         (offset #x14 16) 1)
+  (reserved                   (offset #x14 17) 7)
+  (txrx-switch-ctrl           (offset #x14 24) 6)
+  (reserved                   (offset #x14 30) 2)
+  ;; 0x1A: RX_TX_CTRL_1
+  (analog-tx-ctrl-1 (offset #x1a 0)  8 #:default #x0e)
+  ;; 0x1C: RX_TX_CTRL_2
+  ;; This is for ch5 and ch9 both.
+  (pulse-generator-delay      (offset #x1c 0)  6 #:default #x34)
+  ;; ch9: 0x0700400
+  (reserved                   (offset #x1c 6) 26 #:default #x0701c44)
+  ;; 0x28: TX_TEST
+  (tx-test-select (offset #x28 0) 4)
+  (reserved       (offset #x28 4) 4)
+  ;; 0x34: SAR_TEST
+  (reserved                    (offset #x34 0) 2)
+  (sar-temperature-read-enable (offset #x34 2) 1)
+  (reserved                    (offset #x34 3) 5)
+  ;; 0x40: LDO_TUNE
+  (internal-ldo-tuning-word (offset #x40  0) 60)
+  (reserved                 (offset #x40 60)  4)
+  ;; 0x48: LDO_CTRL (this is not documented)
+  (ldo-control (offset #x48 0) 32)
+  ;; 0x51: LDR_RLOAD
+  (ldo-tuning-word (offset #x51 0) 8 #:default #x14))
 
-(define-register reg:tx-cal
+(define-register reg:tx-calibration
   #:address #x08
   #:description "Transmitter calibration block"
   #:double-buffer #f
-  #:register-width (octets 31)
+  ;;#:register-width (octets 31)
   #:contents
   (tx-calibration 0 (octets 31)))
 
-(define-register reg:fs-ctrl
+(define-register reg:freq-synth-ctrl
   #:address #x09
   #:description "Frequency synthesizer control"
   #:double-buffer #f
-  #:register-width (octets 23)
+  ;;#:register-width (octets 23)
   #:contents
-  (fs-control 0 (octets 23)))
+  ;; 0x00: PLL_CFG
+  ;; The default is for channel 5; for channel 9: 0x0f3c
+  (pll-config (offset #x00 0) 16 #:default #x1f3c)
+  ;; 0x04: PLL_CC
+  (pll-coarse-code-ch9 (offset #x04  0)  8 #:default #b00001011)
+  (pll-coarse-code-ch5 (offset #x04 14)  8 #:default #b00000000001111)
+  (reserved            (offset #x04 22) 10)
+  ;; 0x08: PLL_CAL
+  (reserved        (offset #x08 0) 1)
+  (pll-cal-use-old (offset #x08 1) 1)
+  (reserved        (offset #x08 2) 2)
+  ;; The documentation says, 0x31 is the default, but a better value to use
+  ;; would be 0x81, which should be set during configuration.
+  (pll-cal-config  (offset #x08 4) 4 #:default #x31)
+  (pll-cal-enable  (offset #x08 8) 1)
+  (reserved        (offset #x08 9) 7)
+  ;; 0x14: PLL_XTAL
+  (xtal-trim-value (offset #x14 0) 6)
+  (reserved        (offset #x14 6) 2))
 
-(define-register reg:aon
+(define-register reg:always-on-system-control
   #:address #x0a
   #:description "Always-on system control interface"
   #:double-buffer #f
@@ -403,17 +681,42 @@
   #:contents
   (aon-configuration 0 (octets 23)))
 
-(define-register reg:otp-if
+(define-register reg:otp-interface
   #:address #x0b
   #:description "OTP memory interface"
   #:double-buffer #f
-  #:register-width (octets 23)
+  ;;#:register-width (octets 23)
   #:contents
-  (otp-interface 0 (octets 23)))
+  ;; 0x00: OTP_WDATA
+  (otp-write-data-word  (offset #x00  0) 32)
+  ;; 0x04: OTP_ADDR
+  (otp-access-address   (offset #x04  0) 11)
+  (reserved             (offset #x04 11)  5)
+  ;; 0x08: OTP_ADDR
+  (otp-manual-control   (offset #x08  0)  1)
+  (otp-read-enable      (offset #x08  1)  1)
+  (otp-write-enable     (offset #x08  2)  1)
+  (otp-write-mode       (offset #x08  3)  1)
+  (reserved             (offset #x08  4)  2)
+  (otp-kick-dgc         (offset #x08  6)  1)
+  (otp-kick-ldo         (offset #x08  7)  1)
+  (reserved             (offset #x08  8)  2)
+  (otp-kick-bias        (offset #x08 10)  1)
+  (otp-kick-ops         (offset #x08 11)  2)
+  (otp-kick-ops-params  (offset #x08 13)  1)
+  (reserved             (offset #x08 14)  2)
+  ;; 0x0C: OTP_STAT
+  (otp-programming-done (offset #x0c  0)  1)
+  (otp-vpp-ok           (offset #x0c  1)  1)
+  (reserved             (offset #x0c  2)  6)
+  ;; 0x10: OTP_RDATA
+  (otp-read-data-word   (offset #x10  0) 32)
+  ;; 0x14: OTP_SRDATA
+  (otp-special-read-data-word (offset #x14 0) 32))
 
 (define-register reg:cia-0
   #:address #x0c
-  #:description "CIA Interface Part 0"
+  #:description "Channel Impulse response Analyser (CIA) Interface Part 0"
   #:double-buffer #f
   ;;#:register-width (octets 105)
   #:contents
@@ -547,7 +850,7 @@
   (sts1-accumulated-symbols (offset #x68  0) 11)
   (reserved                 (offset #x68 11) 21))
 
-(define-register reg:cia-2
+(define-register reg:cia-2-and-rx-antenna-delay
   #:address #x0e
   #:description "CIA Interface Part 2 and RX Antenna delay"
   #:double-buffer #f
@@ -646,9 +949,73 @@
   #:address #x11
   #:description "PMSC control and status"
   #:double-buffer #f
-  #:register-width (octets 30)
+  ;;#:register-width (octets 30)
   #:contents
-  (pmsc-ctrl-status (offset 0 0) (octets 30)))
+  ;; 0x00: SOFT_RST
+  (soft-arm-reset  (offset #x00 0) 1)
+  (soft-prgn-reset (offset #x00 1) 1)
+  (soft-cia-reset  (offset #x00 2) 1)
+  (soft-bist-reset (offset #x00 3) 1)
+  (soft-rx-reset   (offset #x00 4) 1)
+  (soft-tx-reset   (offset #x00 5) 1)
+  (soft-hif-reset  (offset #x00 6) 1)
+  (soft-pmsc-reset (offset #x00 7) 1)
+  (soft-gpio-reset (offset #x00 8) 1)
+  (reserved        (offset #x00 9) 7)
+  ;; 0x04: CLK_CTRL
+  (sys-clock-ctrl             (offset #x04  0) 2)
+  (rx-clock-ctrl              (offset #x04  2) 2)
+  (tx-clock-ctrl              (offset #x04  4) 2)
+  (acc-clock-enable           (offset #x04  6) 1)
+  (reserved                   (offset #x04  7) 1)
+  (cia-clock-enable           (offset #x04  8) 1)
+  (reserved                   (offset #x04  9) 1 #:default #t)
+  (sar-clock-enable           (offset #x04 10) 1)
+  (reserved                   (offset #x04 11) 4)
+  (acc-memory-clock-enable    (offset #x04 15) 1)
+  (gpio-clock-enable          (offset #x04 16) 1)
+  (reserved                   (offset #x04 17) 1)
+  (gpio-debounce-clock-enable (offset #x04 18) 1)
+  (gpio-debounce-reset        (offset #x04 19) 1
+                              #:semantics* boolean/active-low
+                              #:default #f)
+  (reserved                   (offset #x04 20) 3 #:default #b011)
+  (kilohertz-clock-enable     (offset #x04 23) 1)
+  (reserved                   (offset #x04 24) 8 #:default #b11110000)
+  ;; 0x08: SEQ_CTRL
+  (reserved                 (offset #x08  0) 8 #:default #b00111000)
+  (auto-idle-rc-to-pll      (offset #x08  8) 1)
+  (reserved                 (offset #x08  9) 2 #:default #b11)
+  (auto-sleep-after-tx      (offset #x08 11) 1)
+  (auto-sleep-after-rx      (offset #x08 12) 1)
+  (reserved                 (offset #x08 13) 2)
+  (external-sync-pll-enable (offset #x08 15) 1)
+  (reserved                 (offset #x08 16) 1)
+  (cia-run-enable           (offset #x08 17) 1)
+  (reserved                 (offset #x08 18) 5)
+  (force-idle-rc-state      (offset #x08 23) 1)
+  (reserved                 (offset #x08 24) 2)
+  (kilohertz-clock-divider  (offset #x08 26) 6)
+  ;; 0x12: TXFSEQ
+  ;; To disable this, apparently you need to set this to 0x0d20874. The
+  ;; individual parts of this register are undocumented.
+  (tx-fine-pwr-sequencing (offset #x12 0) 32 #:default #x4d28874)
+  ;; 0x16: LED_CTRL
+  (led-blink-time    (offset #x16  0)  8 #:default #b00100000)
+  (led-blink-enable  (offset #x16  8)  1)
+  (reserved          (offset #x16  9)  7)
+  (led-0-force-blink (offset #x16 16)  1)
+  (led-1-force-blink (offset #x16 17)  1)
+  (led-2-force-blink (offset #x16 18)  1)
+  (led-3-force-blink (offset #x16 19)  1)
+  (reserved          (offset #x16 20) 12)
+  ;; 0x1A: RX_SNIFF
+  (sniff-mode-on-time  (offset #x1a  0)  4)
+  (reserved            (offset #x1a  4)  4)
+  (sniff-mode-off-time (offset #x1a  8)  8)
+  (reserved            (offset #x1a 16) 16)
+  ;; 0x1F: BIAS_CTRL
+  (bias-control (offset #x1f 0) 16))
 
 (define-register reg:rx-buffer-0
   #:address #x12
