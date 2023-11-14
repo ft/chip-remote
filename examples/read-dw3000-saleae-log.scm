@@ -251,5 +251,6 @@
 (define saleae-log (car (opt '())))
 (define frames (saleae:read-frames #:file saleae-log))
 (when (opt 'debug)
+  (format #t "# Number of SPI frames in log-file: ~a~%" (length frames))
   (pp (map without-time frames)))
 (for-each parse-frame frames)
