@@ -150,8 +150,11 @@
                              (bit-extract-width h1 2 6))))
     (cons base-address sub-address)))
 
-(define (extract-data mode miso mosi n)
-  (bytevector-uint-ref (list->u8vector (cdr (if (eq? mode 'read) miso mosi)))
+(define (extract-data mode miso mosi offset n)
+  (bytevector-uint-ref (list->u8vector (drop (if (eq? mode 'read)
+                                                 miso
+                                                 mosi)
+                                             offset))
                        0 'little n))
 
 (define (decode-dw3000 data address width)
@@ -180,7 +183,7 @@
          (address (cons (bit-extract-width (car mosi) 1 5) 0))
          (data-length (1- (length mosi)))
          (width (* 8 data-length))
-         (data (extract-data mode miso mosi data-length)))
+         (data (extract-data mode miso mosi 1 data-length)))
     (start-green-on)
     (format #t
             "short addressed transaction (~a 0x~2,'0x:~2,'0x, ~a bits): ~a"
@@ -196,7 +199,7 @@
          (address (get-full-address (car mosi) (cadr mosi)))
          (data-length (- (length mosi) 2))
          (width (* 8 data-length))
-         (data (extract-data mode miso mosi data-length)))
+         (data (extract-data mode miso mosi 2 data-length)))
     (start-green-on)
     (format #t
             "fully addressed transaction (~a 0x~2,'0x:~2,'0x, ~a bits): ~a"
