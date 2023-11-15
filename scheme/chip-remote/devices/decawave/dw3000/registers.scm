@@ -645,7 +645,34 @@
   #:double-buffer #f
   ;;#:register-width (octets 31)
   #:contents
-  (tx-calibration 0 (octets 31)))
+  ;; 0x00: SAR_CTRL
+  (sar-start (offset #x00 0) 1)
+  (reserved  (offset #x00 1) 7)
+  ;; 0x04: SAR_STATUS
+  (sar-done (offset #x04 0)  1)
+  (reserved (offset #x04 1) 15)
+  ;; 0x08: SAR_READING
+  (sar-voltage     (offset #x08  0) 8)
+  (sar-temperature (offset #x08  8) 8)
+  (reserved        (offset #x08 16) 8)
+  ;; 0x08: SAR_WAKE_RD
+  (sar-wake-up-voltage     (offset #x0c 0) 8)
+  (sar-wake-up-temperature (offset #x0c 8) 8)
+  ;; 0x10: PGC_CTRL
+  (pulsegen-calibration-start      (offset #x10 0)  1)
+  (pulsegen-auto-calibration-start (offset #x10 1)  1)
+  (pulsegen-calibration-time       (offset #x10 2)  4)
+  (reserved                        (offset #x10 6) 10)
+  ;; 0x14: PGC_STATUS
+  (pulsegen-delay              (offset #x14  0) 12)
+  (pulsegen-delay-autocal-done (offset #x14 12)  1)
+  (reserved                    (offset #x14 13)  3)
+  ;; 0x18: PGC_TEST
+  ;; The default (0) is normal operation; 0x000f is continuous-wave test mode.
+  (pulsegen-mode (offset #x18 0) 16)
+  ;; 0x1C: PG_CAL_TARGET
+  (pulsegen-target-value (offset #x1c  0) 12 #:default #b000010100110)
+  (reserved              (offset #x1c 12)  4))
 
 (define-register reg:freq-synth-ctrl
   #:address #x09
@@ -677,9 +704,40 @@
   #:address #x0a
   #:description "Always-on system control interface"
   #:double-buffer #f
-  #:register-width (octets 23)
+  ;;#:register-width (octets 23)
   #:contents
-  (aon-configuration 0 (octets 23)))
+  ;; 0x00: AON_DIG_CFG
+  (wake-up-always-on-data-download (offset #x00  0)  1)
+  (wake-up-run-sar                 (offset #x00  1)  1)
+  (reserved                        (offset #x00  2)  6)
+  (wake-up-goto-pll-from-idle      (offset #x00  8)  1)
+  (wake-up-goto-rx-from-pll        (offset #x00  9)  1)
+  (reserved                        (offset #x00 10)  1)
+  (wake-up-run-rx-calibration      (offset #x00 11)  1)
+  (reserved                        (offset #x00 12) 12)
+  ;; 0x04: AON_CTRL
+  (always-on-restore                  (offset #x04 0) 1)
+  (always-on-save                     (offset #x04 1) 1)
+  (always-on-cfg-upload               (offset #x04 2) 1)
+  (always-on-direct-access-read       (offset #x04 3) 1)
+  (always-on-direct-access-write      (offset #x04 4) 1)
+  (always-on-direct-access-write-high (offset #x04 5) 1)
+  (reserved                           (offset #x04 6) 1)
+  (always-on-direct-access-enable     (offset #x04 7) 1)
+  ;; 0x08: AON_RDATA
+  (always-on-access-read-data (offset #x08 0) 8)
+  ;; 0x0c: AON_ADDR
+  (always-on-access-address (offset #x0c 0) 16)
+  ;; 0x10: AON_WDATA
+  (always-on-access-write-data (offset #x10 0) 8)
+  ;; 0x14: AON_CFG
+  (always-on-sleep-enable           (offset #x14 0) 1)
+  (always-on-wake-count             (offset #x14 1) 1)
+  (always-on-brownout-detect-enable (offset #x14 2) 1 #:default #t)
+  (always-on-wake-on-spi            (offset #x14 3) 1 #:default #t)
+  (always-on-wake-on-wakeup-pin     (offset #x14 4) 1)
+  (always-on-preserve-sleep         (offset #x14 5) 1)
+  (reserved                         (offset #x14 6) 2))
 
 (define-register reg:otp-interface
   #:address #x0b
@@ -1096,19 +1154,23 @@
   ;;#:register-width (octets 19)
   #:contents
   ;; 0x00: FINT_STAT
-  (tx-ok-status (offset 0 0) 1)
-  (cca-fail-status (offset 0 1) 1)
-  (rxter-error-status (offset 0 2) 1)
-  (rx-ok-status (offset 0 3) 1)
-  (rx-error-status (offset 0 4) 1)
-  (rx-timeout-status (offset 0 5) 1)
-  (sys-event-status (offset 0 6) 1)
-  (sys-panic-status (offset 0 7) 1)
+  (tx-ok-status       (offset #x00 0) 1)
+  (cca-fail-status    (offset #x00 1) 1)
+  (rxter-error-status (offset #x00 2) 1)
+  (rx-ok-status       (offset #x00 3) 1)
+  (rx-error-status    (offset #x00 4) 1)
+  (rx-timeout-status  (offset #x00 5) 1)
+  (sys-event-status   (offset #x00 6) 1)
+  (sys-panic-status   (offset #x00 7) 1)
   ;; 0x04: PTR_ADDR_A
-  (ptr-a-base-addr (offset 4 0) 5)
+  (ptr-a-base-addr (offset #x04 0)  5)
+  (reserved        (offset #x04 5)  3)
   ;; 0x08: PTR_OFFSET_A
-  (ptr-a-offset (offset 8 0) 15)
+  (ptr-a-offset    (offset #x08  0) 15)
+  (reserved        (offset #x08 15)  1)
   ;; 0x0C: PTR_ADDR_B
-  (ptr-b-base-addr (offset 12 0) 5)
+  (ptr-b-base-addr (offset #x0c 0)  5)
+  (reserved        (offset #x0c 5)  3)
   ;; 0x10: PTR_OFFSET_B
-  (ptr-b-offset (offset 16 0) 15))
+  (ptr-b-offset    (offset #x10 0) 15)
+  (reserved        (offset #x08 15)  1))
