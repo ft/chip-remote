@@ -1,9 +1,10 @@
-;; Copyright (c) 2011-2021 chip-remote workers, All rights reserved.
+;; Copyright (c) 2011-2023 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote bit-operations)
   #:export (bit-extract-width
+            bitmask->indices
             clear-bits
             extract-octet
             one-bits
@@ -54,3 +55,17 @@ extract from ‘value’ is addressed by ‘start’ and ‘width’:
 
     (logclear #xff #b11000011) => #b111100"
   (logand (lognot bits) value))
+
+(define (bitmask->indices value offset width)
+  "Return a list of indices of set bits in a part of an integer.
+
+The scanning algorithm starts at bit OFFSET and runs for WIDTH bits.
+
+    (bitmask->indices #b00101011 0 2) => (0 1)
+    (bitmask->indices #b00101011 1 2) => (1)
+    (bitmask->indices #b00101011 0 8) => (0 1 3 5)"
+  (let loop ((idx 0))
+    (let ((n (+ offset idx)))
+      (cond ((>= idx width) '())
+            ((zero? (logand value (ash 1 n))) (loop (1+ idx)))
+            (else (cons n (loop (1+ idx))))))))
