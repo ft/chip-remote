@@ -231,7 +231,7 @@
   ;; 0x00: TX_RAWS
   (tx-raw-timestamp (offset #x00 0) (octets 4))
   ;; 0x04: TX_ANTD
-  (tx-antenna-dly (offset #x04 0) (octets 2))
+  (tx-antenna-delay (offset #x04 0) (octets 2))
   ;; 0x08: ACK_RESP_TIME
   (wait-for-resp-time (offset #x08  0) 20)
   (ack-time           (offset #x08 24)  8)
