@@ -165,6 +165,8 @@
          (offset (* 8 sub-address))
          (register (device-ref dw3000 #f base-address))
          (window (make-register-window register offset width)))
+    (format #t "# Register: ~a~%"
+            (assq-ref (register-meta register) #:description))
     (when show-window? (format #t "# win: ~a~%" window))
     (if verbose-decode?
         (decode-to-text window data)
@@ -204,6 +206,8 @@
          (or-idxs (map o+ (bitmask->indices or-mask 0 mask-size)))
          (and-items (collect-items register and-idxs offset))
          (or-items (collect-items register or-idxs offset)))
+    (format #t "# Register: ~a~%"
+            (assq-ref (register-meta register) #:description))
     (when (> (length and-idxs) 0)
       (format #t "# Bits cleared by and-mask ~a:~%" and-idxs)
       (format-items and-items))
