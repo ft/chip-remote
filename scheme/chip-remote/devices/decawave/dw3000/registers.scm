@@ -1172,5 +1172,5 @@
   (ptr-b-base-addr (offset #x0c 0)  5)
   (reserved        (offset #x0c 5)  3)
   ;; 0x10: PTR_OFFSET_B
-  (ptr-b-offset    (offset #x10 0) 15)
-  (reserved        (offset #x08 15)  1))
+  (ptr-b-offset    (offset #x10  0) 15)
+  (reserved        (offset #x10 15)  1))
