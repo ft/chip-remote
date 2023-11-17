@@ -71,6 +71,10 @@
              (chip-remote devices decawave dw1000)
              ((chip-remote devices decawave dw1000 registers) #:prefix dw1000:)
              ((chip-remote devices decawave dw1000 tables) #:prefix dw1000:)
+             (chip-remote devices decawave dw3000)
+             ((chip-remote devices decawave dw3000 commands) #:prefix dw3000:)
+             ((chip-remote devices decawave dw3000 registers) #:prefix dw3000:)
+             ((chip-remote devices decawave dw3000 tables) #:prefix dw3000:)
              ;; Invensense
              (chip-remote devices invensense icm-20602)
              ;; Linear Technology
