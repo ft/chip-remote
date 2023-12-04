@@ -112,7 +112,6 @@ cr_spi_set_config(struct spi_config *cfg, const struct cr_port *port)
 {
     const uint16_t full_duplex = BIT(11u);
     cfg->slave = 0;
-    cfg->cs = NULL;
     cfg->frequency = port->cfg.spi.clk.rate;
     cfg->operation =
         SPI_OP_MODE_MASTER                                                   |
