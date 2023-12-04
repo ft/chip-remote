@@ -2,7 +2,7 @@
 #include <zephyr/kernel.h>
 
 #include <zephyr/drivers/uart.h>
-#include <zephyr/drivers/console/native_posix_console.h>
+#include <zephyr/drivers/console/posix_arch_console.h>
 
 #include <sys/types.h>
 #include <unistd.h>
