@@ -8,7 +8,7 @@
 	path = firmware/zephyr/modules/hal-stm32
 	url = ../zephyr-hal-stm32.git
 [submodule "firmware/zephyr/modules/arm-cmsis"]
-	path = firmware/zephyr/modules/arm-cmsis
+	path = firmware/zephyr/modules/cmsis
 	url = ../zephyr-arm-cmsis.git
 [submodule "firmware/zephyr/modules/picolibc"]
 	path = firmware/zephyr/modules/picolibc

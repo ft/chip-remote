@@ -19,7 +19,7 @@ zephyr:
           - nucleo_l476rg
         modules:
           - picolibc
-          - arm-cmsis
+          - cmsis
           - hal-stm32
       - toolchains: [ host ]
         boards: [ native_posix_64 ]
