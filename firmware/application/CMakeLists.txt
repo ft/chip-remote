@@ -33,7 +33,9 @@ elseif (${BOARD} STREQUAL native_posix_64)
   target_sources(app PRIVATE
     ${common_sources}
     ${native_common_sources}
-    init-posix.c)
+    init-posix.c
+    native-instrumentation.c
+    resizable-buffer.c)
 else()
   message(WARNING "Unsupported board: ${BOARD}")
 endif()
