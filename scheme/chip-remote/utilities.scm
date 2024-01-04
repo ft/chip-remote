@@ -40,6 +40,7 @@
             string-ends-in-newline?
             string-strip-newlines
             now!
+            seconds->microseconds
             timeout->select
             whitespace?
             has-data?
@@ -259,6 +260,11 @@ calls. It returns the empty list for empty and singleton lists."
         ((string-ends-in-newline? s)
          (string-strip-newlines (substring s 0 (1- (string-length s)))))
         (else s)))
+
+(define (seconds->microseconds secs)
+  (let* ((full (inexact->exact (truncate secs)))
+         (sub  (inexact->exact (round (* 1e6 (- full secs))))))
+    (+ (* #e1e6 full) sub)))
 
 (define (timeout->select to)
   (if to
