@@ -8,6 +8,9 @@ include(GitIntegration)
 
 target_sources(app PRIVATE common.c)
 
+set(common_sources
+  registers.c)
+
 set(board_common_sources
   ifc/bb/spi.c
   ifc/os/i2c.c
@@ -17,11 +20,20 @@ set(native_common_sources
   ifc/text/spi.c)
 
 if (${BOARD} STREQUAL nucleo_f767zi)
-  target_sources(app PRIVATE ${board_common_sources} init-usb-cdc-acm.c)
+  target_sources(app PRIVATE
+    ${common_sources}
+    ${board_common_sources}
+    init-usb-cdc-acm.c)
 elseif (${BOARD} STREQUAL nucleo_l476rg)
-  target_sources(app PRIVATE ${board_common_sources} init-uart.c)
+  target_sources(app PRIVATE
+    ${common_sources}
+    ${board_common_sources}
+    init-uart.c)
 elseif (${BOARD} STREQUAL native_posix_64)
-  target_sources(app PRIVATE ${native_common_sources} init-posix.c)
+  target_sources(app PRIVATE
+    ${common_sources}
+    ${native_common_sources}
+    init-posix.c)
 else()
   message(WARNING "Unsupported board: ${BOARD}")
 endif()
