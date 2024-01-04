@@ -17,6 +17,7 @@
             index>
             cat
             flatten
+            assv-ref-reverse
             assq-change
             assoc-apply
             pair-combine
@@ -70,6 +71,13 @@ pairs instead of a list of lists with two elements in them.
            (next (cdr a) (cdr b)
                  (cons (cons (car a) (car b))
                        acc))))))
+
+(define (assv-ref-reverse dict key)
+  (let loop ((rest dict))
+    (match rest
+      (() #f)
+      (((v . k) . rest) (if (eqv? k key) v (loop rest)))
+      (_ #f))))
 
 (define (assq-change alist key value)
   (let loop ((rest alist))
