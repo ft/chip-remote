@@ -1,4 +1,3 @@
-#include <zephyr/device.h>
 #include <zephyr/kernel.h>
 
 #include <zephyr/drivers/gpio.h>
@@ -8,93 +7,9 @@
 
 #include <ufw/compiler.h>
 
-#include <cr-port.h>
-#include <cr-process.h>
-
 #include "init-common.h"
-#include "ifc/bb/spi.h"
-#include "ifc/os/i2c.h"
-#include "ifc/os/spi.h"
 
-#define P_GPIOC DEVICE_DT_GET(DT_NODELABEL(gpioc))
-#define D_SPI1  DEVICE_DT_GET(DT_NODELABEL(spi1))
-#define D_I2C1  DEVICE_DT_GET(DT_NODELABEL(i2c1))
-
-struct cr_line port00_lines[] = {
-    { .port = P_GPIOC, .pin = 5u, .mode = CR_LINE_OUTPUT_PUSHPULL },
-    { .port = P_GPIOC, .pin = 6u, .mode = CR_LINE_OUTPUT_PUSHPULL },
-    { .port = P_GPIOC, .pin = 8u, .mode = CR_LINE_OUTPUT_PUSHPULL },
-    { .port = P_GPIOC, .pin = 9u, .mode = CR_LINE_INPUT_PULLDOWN }
-};
-
-struct cr_port_spi_bb port00_spi_bb = {
-    .cs   = &port00_lines[0],
-    .clk  = &port00_lines[1],
-    .mosi = &port00_lines[2],
-    .miso = &port00_lines[3]
-};
-
-struct cr_port port00_spi = {
-    .name = "port00-spi",
-    .type = CR_PORT_TYPE_SPI,
-    .api  = &cr_port_impl_spi_bb,
-    .data = &port00_spi_bb,
-    .cfg.spi = {
-        .address = 0u,
-        .frame_length = 16u,
-        .bit_order = CR_BIT_MSB_FIRST,
-        .cs = {
-            .number = 1u,
-            .polarity = CR_LOGIC_INVERTED
-        },
-        .clk = {
-            .rate = 0u,
-            .edge = CR_EDGE_RISING,
-            .phase_delay = false
-        }
-    },
-    .lines = sizeof(port00_lines)/sizeof(*port00_lines),
-    .line = port00_lines,
-    .initialised = false
-};
-
-struct cr_port_spi_os spi1data = CR_PORT_SPI_OS_INIT(D_SPI1);
-
-struct cr_port port01_spi = {
-    .name = "port01-spi",
-    .type = CR_PORT_TYPE_SPI,
-    .api  = &cr_port_impl_spi_os,
-    .data = &spi1data,
-    .cfg.spi = {
-        .address = 0u,
-        .frame_length = 16u,
-        .bit_order = CR_BIT_MSB_FIRST,
-        .cs = {
-            .number = 1u,
-            .polarity = CR_LOGIC_INVERTED
-        },
-        .clk = {
-            .rate = 0u,
-            .edge = CR_EDGE_RISING,
-            .phase_delay = false
-        }
-    },
-    .lines = 0,
-    .line = NULL,
-    .initialised = false
-};
-
-struct cr_port_i2c_os i2c1data = { .bus = D_I2C1 };
-
-struct cr_port port02_i2c = {
-    .name = "port02-i2c",
-    .type = CR_PORT_TYPE_I2C,
-    .api  = &cr_port_impl_i2c_os,
-    .data = &i2c1data,
-    .lines = 0,
-    .line = NULL,
-    .initialised = false
-};
+const struct device *uart0;
 
 void
 uart_sink(const char *str)
@@ -105,6 +20,7 @@ uart_sink(const char *str)
     }
 }
 
+#if 0
 static void
 cr_handle_uart(const struct device *dev, UNUSED void *userdata)
 {
@@ -112,6 +28,7 @@ cr_handle_uart(const struct device *dev, UNUSED void *userdata)
     while (uart_fifo_read(dev, &ch, 1u) > 0u)
         cr_toplevel(&proto, ch);
 }
+#endif
 
 #define LED0_NODE DT_ALIAS(led0)
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
@@ -126,9 +43,11 @@ main(void)
     }
 
     printk("Registering uart callback.\n");
+#if 0
     uart_irq_callback_set(uart0, cr_handle_uart);
     printk("Enabling uart rx interrupt.\n");
     uart_irq_rx_enable(uart0);
+#endif
 
     if (!device_is_ready(led.port)) {
         printk("Could not access LED.\n");
@@ -141,7 +60,6 @@ main(void)
         return;
     }
 
-    cr_protocol_boot(&proto);
     printk("ChipRemote Command Processor online!\n");
 
     for (;;) {

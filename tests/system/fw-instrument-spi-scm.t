@@ -28,7 +28,7 @@
   (io-opt/set 'trace #t)
   (tio-push-parm! tio 'trace))
 
-(with-test-bundle (chip-remote firmware instrumentation spi)
+(with-test-bundle skip (chip-remote firmware instrumentation spi)
   (require (native-firmware-built?))
   (plan 39)
   (boot-fw! tio)

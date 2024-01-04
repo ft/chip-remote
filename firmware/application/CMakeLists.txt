@@ -6,18 +6,18 @@ initialise_toolchain()
 
 include(GitIntegration)
 
-target_sources(app PRIVATE common.c)
-
 set(common_sources
   registers.c)
 
 set(board_common_sources
-  ifc/bb/spi.c
-  ifc/os/i2c.c
-  ifc/os/spi.c)
+  # ifc/bb/spi.c
+  # ifc/os/i2c.c
+  # ifc/os/spi.c
+)
 
 set(native_common_sources
-  ifc/text/spi.c)
+  # ifc/text/spi.c
+)
 
 if (${BOARD} STREQUAL nucleo_f767zi)
   target_sources(app PRIVATE
@@ -38,7 +38,7 @@ else()
   message(WARNING "Unsupported board: ${BOARD}")
 endif()
 
-target_link_libraries(app PRIVATE ufw chip-remote-protocol)
+target_link_libraries(app PRIVATE ufw)
 if (${BOARD} MATCHES "^native")
   target_link_libraries(app PRIVATE sx-parser)
 endif()

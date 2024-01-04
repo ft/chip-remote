@@ -16,7 +16,7 @@
   (io-opt/set 'trace #t)
   (tio-push-parm! tio 'trace))
 
-(with-test-bundle (chip-remote firmware hi/bye)
+(with-test-bundle skip (chip-remote firmware hi/bye)
   (require (native-firmware-built?))
   (plan 2)
   (boot-fw! tio)

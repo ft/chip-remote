@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
 list(APPEND test_names
-  t-utilities
-  t-parse-string
   t-sx-parser)
 
 set(test_prgs)
@@ -21,9 +19,7 @@ foreach (tst ${test_names})
   list(APPEND test_prgs $<TARGET_FILE:${tst}>)
 endforeach()
 
-target_link_libraries(t-parse-string PRIVATE chip-remote-protocol)
 target_link_libraries(t-sx-parser PRIVATE sx-parser)
-target_link_libraries(t-utilities PRIVATE chip-remote-protocol)
 
 add_test(
   NAME chip-remote-firmware-tests

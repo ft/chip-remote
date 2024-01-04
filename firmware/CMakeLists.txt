@@ -15,7 +15,6 @@ include(InitialiseToolchain)
 initialise_toolchain()
 
 setup_ufw(libraries/ufw)
-add_subdirectory(libraries/libchip-remote)
 
 ufw_subtree_build()
 message(STATUS "BOARD: ${BOARD}")
