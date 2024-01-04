@@ -39,6 +39,7 @@
             diff?
             string-ends-in-newline?
             string-strip-newlines
+            now!
             timeout->select
             whitespace?
             has-data?
@@ -309,3 +310,8 @@ calls. It returns the empty list for empty and singleton lists."
             (handle-timeout rv)
             (throw 'xread-timeout rv))
         (do-read port))))
+
+(define (now!)
+  (let ((now (gettimeofday)))
+    (+ (* #e1e6 (car now))
+       (cdr now))))
