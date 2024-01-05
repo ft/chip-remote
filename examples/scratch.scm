@@ -7,6 +7,7 @@
              (data-structures loadable-fifo)
              (data-structures sized-stack)
              ((protocol saleae-spi) #:prefix saleae:)
+             (protocol ufw-regp)
              (chip-remote bit-operations)
              (chip-remote codecs)
              (chip-remote combination)
@@ -93,16 +94,16 @@
 
 (define s (getenv "CR_SERIAL_DEVICE"))
 (define c #f)
+(define tty #f)
 
 (when s
-  (let ((tty (open-io-file s))
-        (ts (make-termios-struct)))
+  (set! tty (open-io-file s))
+  (let ((ts (make-termios-struct)))
     (cf-make-raw! ts)
     (cf-set-speed! ts termios-B921600)
-    (tc-set-attr tty ts)
-    (close-port tty))
-  (set! c (make-cr-connection s))
-  (io-open c))
+    (tc-set-attr tty ts))
+  (setvbuf tty 'none)
+  (set! c (regp:serial-connection tty #:word-size-16? #t)))
 
 (define (ignore x) (if #f #t))
 (define (pp obj) (pretty-print obj #:width 80 #:max-expr-width 100))
