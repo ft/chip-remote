@@ -26,15 +26,55 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <sx-parser.h>
 #include <ufw/endpoints.h>
+#include <ufw/register-protocol.h>
+#include <ufw/register-table.h>
+#include <ufw/register-utilities.h>
+
+#include <sx-parser.h>
 
 #include "native-instrumentation.h"
-
-Source regpsource;
-Sink regpsink;
+#include "registers.h"
 
 const struct device *uart0;
+
+static size_t cnt = 0u;
+
+static int
+uart_octet_source(void *driver, void *value)
+{
+    const int rc = uart_poll_in(driver, value);
+    if (rc >= 0) {
+        cnt++;
+    }
+#if 0
+    if (rc >= 0) {
+        printk("uart0: 0x%02x (rc: %d)\n", *(unsigned char*)value, rc);
+    }
+#endif
+    return rc < 0 ? -EAGAIN : 1;
+}
+
+static int
+uart_octet_sink(void *driver, unsigned char value)
+{
+    uart_poll_out(driver, value);
+    return 1;
+}
+
+static RPBlockAccess
+regread(uint32_t address, size_t n, uint16_t *value)
+{
+    return regaccess2blockaccess(
+        register_block_read(&registers, address, n, value));
+}
+
+static RPBlockAccess
+regwrite(uint32_t address, size_t n, const uint16_t *value)
+{
+    return regaccess2blockaccess(
+        register_block_write(&registers, address, n, (void*)value));
+}
 
 void
 main(void)
@@ -51,6 +91,24 @@ main(void)
         return;
     }
 
+    register_make_bigendian(&registers, true);
+    const RegisterInit regtabrc = register_init(&registers);
+
+    if (regtabrc.code != REG_INIT_SUCCESS) {
+        register_table_print(stdout, "# ", &registers);
+        printf("#\n");
+        register_init_print(stdout, "# ", regtabrc);
+        return;
+    }
+
+    Source regpsource = OCTET_SOURCE_INIT(uart_octet_source, (void*)uart0);
+    Sink   regpsink   = OCTET_SINK_INIT(  uart_octet_sink,   (void*)uart0);
+
+    RegP protocol;
+    regp_init(&protocol);
+    regp_use_memory16(&protocol, regread, regwrite);
+    regp_use_channel(&protocol, RP_EP_SERIAL, regpsource, regpsink);
+
     struct resizeable_buffer nirb;
     rb_init(&nirb);
 
@@ -61,20 +119,24 @@ main(void)
     /* Disable stderr output */
     close(STDERR_FILENO);
 
-    char ch0 = 0;
     char ch1 = 0;
     for (;;) {
-        /* Poll controlling UART port and feed fifo */
-        const int rc0 = uart_poll_in(uart0, &ch0);
-        const int rc1 = uart_poll_in(uart1, &ch1);
-
-        if (rc0 == 0) {
+        RPMaybeFrame mf;
+        const int recvrc = regp_recv(&protocol, &mf);
+        if (recvrc < 0 && recvrc != -EAGAIN) {
+            printk("# Error in regp_recv(): %d\n", recvrc);
         }
+        const int procrc = regp_process(&protocol, &mf);
+        if (procrc < 0) {
+            printk("# Error in regp_process(): %d\n", procrc);
+        }
+        regp_free(&protocol, mf.frame);
+
+        const int rc1 = uart_poll_in(uart1, &ch1);
         if (rc1 == 0) {
             ni_toplevel(&nirb, ch1);
         }
-
-        if (rc1 != 0 && rc1 != 0) {
+        if (rc1 != 0 && recvrc < 0) {
             k_usleep(1000);
         }
     }
