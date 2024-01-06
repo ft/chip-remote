@@ -76,6 +76,25 @@ regwrite(uint32_t address, size_t n, const uint16_t *value)
         register_block_write(&registers, address, n, (void*)value));
 }
 
+#define PROTO_SLAB_SLOTS 4u
+#define PROTO_SLAB_SIZE  (128u + sizeof(RPFrame))
+
+static int
+proto_alloc(void *driver, void **memory)
+{
+    return k_mem_slab_alloc(driver, memory, K_NO_WAIT);
+}
+
+static void
+proto_free(void *driver, void *memory)
+{
+    k_mem_slab_free(driver, memory);
+}
+
+K_MEM_SLAB_DEFINE_STATIC(proto_slab, PROTO_SLAB_SIZE, PROTO_SLAB_SLOTS, 4);
+BlockAllocator palloc = MAKE_SLAB_BLOCKALLOC(
+    &proto_slab, proto_alloc, proto_free, PROTO_SLAB_SIZE);
+
 void
 main(void)
 {
@@ -106,6 +125,7 @@ main(void)
 
     RegP protocol;
     regp_init(&protocol);
+    regp_use_allocator(&protocol, &palloc);
     regp_use_memory16(&protocol, regread, regwrite);
     regp_use_channel(&protocol, RP_EP_SERIAL, regpsource, regpsink);
 
