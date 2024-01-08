@@ -23,7 +23,6 @@
              (chip-remote frontend)
              (chip-remote interact)
              (chip-remote interpreter)
-             (chip-remote io)
              (chip-remote item)
              (chip-remote item access)
              (chip-remote item builder)
