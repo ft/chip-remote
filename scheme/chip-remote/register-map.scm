@@ -21,6 +21,7 @@
             register-map-item-names
             register-map-register
             register-map-fold
+            register-map-fold-right
             register-map-canonical
             register-map-find-item
             register-map-ref
@@ -106,6 +107,12 @@
           (fnc (car reg) (cdr reg) acc))
         init
         (register-map-table rm)))
+
+(define (register-map-fold-right fnc init rm)
+  (fold-right (lambda (reg acc)
+                (fnc (car reg) (cdr reg) acc))
+              init
+              (register-map-table rm)))
 
 (define (register-map-ref rm . args)
   (match args
