@@ -107,6 +107,7 @@
   (setvbuf tty 'none)
   (set! c (regp:serial-connection tty #:word-size-16? #t)))
 
+(define cr (and c (make-cr-connection c)))
 (define (ignore x) (if #f #t))
 (define (pp obj) (pretty-print obj #:width 80 #:max-expr-width 100))
 
