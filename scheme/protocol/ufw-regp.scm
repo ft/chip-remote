@@ -23,6 +23,8 @@
             regp:write-request!       ; Perform request on connection
             regp:frame-errors         ; Frame type query
             regp:frame-valid?         ; Frame type query
+            regp:acknowledge?         ; Frame type query
+            regp:valid-ack?           ; Frame type query
             regp:tcp-connection       ; Connection generator
             regp:serial-connection    ; Connection generator
             regp:connection?          ; Connection predicate
@@ -518,3 +520,10 @@ it impossible to parse."
 
 (define (regp:frame-valid? frame)
   (not (regp:frame-errors frame)))
+
+(define (regp:acknowledge? frame)
+  (eq? (assq-ref frame 'meta) 'acknowledge))
+
+(define (regp:valid-ack? frame)
+  (and (regp:frame-valid? frame)
+       (regp:acknowledge? frame)))
