@@ -25,7 +25,9 @@
             proto-engage!
             proto-get-ifc-ctrl!
             proto-interfaces
-            cr:setup-spi!))
+            cr:setup-spi!
+            cr:ctrl-comand!
+            cr:load-frame-buffer!))
 
 (define (pp obj) (pretty-print obj #:width 80 #:max-expr-width 100))
 
@@ -126,9 +128,9 @@
                              (clock-phase-delay?   3 1 #:default #f)))
   (#x0005 (generate-u16-register frame-buffer-size))
   (#x0006 (generate-u32-register frame-buffer-address))
-  (#x0008 (generate-u16-register spi-command))
-  (#x0009 (generate-u32-register spi-command-argument))
-  (#x000b (generate-u32-register spi-command-status)))
+  (#x0008 (generate-u16-register command))
+  (#x0009 (generate-u32-register command-argument))
+  (#x000b (generate-u32-register command-status)))
 
 (define (interface-size rm)
   (let* ((table (register-map-table:sorted rm))
@@ -147,8 +149,8 @@
                                               table))))
     (list start (interface-size new) new)))
 
-(define (make-frame-buffer-register n)
-  (generate-register #:contents (frame-buffer 0 (* 16 n))))
+(define ctrl-commands '((init     . 0)
+                        (transmit . 1)))
 
 ;; Communication
 
@@ -167,10 +169,14 @@
 (define (octet-address a)
   (* 2 a))
 
+(define (word-width-to-fit n g)
+  "Return word-width in granularity g to fit n."
+  (ash 1 (inexact->exact (ceiling (log2 (ceiling (/ n g)))))))
+
 (define (proto-register-width register addressing)
   (let* ((w* (register-width register))
          (w (if (< w* 16) 16 w*)))
-    (ash 1 (inexact->exact (ceiling (log2 (ceiling (/ w addressing))))))))
+    (word-width-to-fit w addressing)))
 
 (define (proto-ref bv offset reg)
   (bytevector-uint-ref bv offset 'big (proto-register-width reg 8)))
@@ -208,6 +214,12 @@
          (bytevector-uint-set! bv offset (assv-ref value address) 'big n)
          bv))
      bv rm)))
+
+(define (register-put reg value)
+  (let* ((size (proto-register-width reg 8))
+         (bv (make-bytevector size)))
+    (bytevector-uint-set! bv 0 value 'big size)
+    bv))
 
 (define (proto-read-static! c)
   (let* ((table (register-map-table crfw-static))
@@ -337,3 +349,66 @@
                                                   block)))
               (unless (regp:valid-ack? response)
                 (throw 'protocol-error response))))))))))
+
+(define (ifc:find-register rm name)
+  (let* ((address* (register-map-canonical rm name))
+         (address (and address* (car address*)))
+         (register (and address (register-map-ref rm address))))
+    (and register (cons address register))))
+
+(define (proto-write-register! c ifc name value)
+  (let* ((access (proto-get-ifc-access c ifc))
+         (start (first access))
+         (addr+reg (ifc:find-register (third access) name))
+         (block (register-put (cdr addr+reg) value))
+         (response (regp:write-request! (cr-low-level c)
+                                        (+ start (car addr+reg))
+                                        block)))
+    (unless (regp:valid-ack? response)
+      (throw 'protocol-error response))
+    response))
+
+(define (proto-read-register! c ifc name)
+  (let* ((access (proto-get-ifc-access c ifc))
+         (start (first access))
+         (addr+reg (ifc:find-register (third access) name))
+         (response
+          (regp:read-request! (cr-low-level c)
+                              (+ start (car addr+reg))
+                              (proto-register-width (cdr addr+reg) 16))))
+    (unless (regp:valid-ack? response)
+      (throw 'protocol-error response))
+    (bytevector-uint-ref (assq-ref response 'payload)
+                         0 'big (* 2 (assq-ref response 'block-size)))))
+
+(define* (cr:ctrl-comand! c ifc cmd #:optional arg)
+  (and arg (proto-write-register! c ifc 'command-argument arg))
+  (proto-write-register! c ifc 'command (assq-ref ctrl-commands cmd))
+  ;; The protocol implementation guarantees, that when an ack for a command
+  ;; register write request comes in, the corresponding status register will
+  ;; already be loaded with the correct status value for the command that was
+  ;; just processed. Thus, this is not a race.
+  (proto-read-register! c ifc 'command-status))
+
+(define (required-fb-size frame-length n)
+  (let* ((bytes-per-word (word-width-to-fit frame-length 8))
+         (k (* n bytes-per-word)))
+    (+ k (modulo k 2))))
+
+(define (cr:load-frame-buffer! c ifc lst)
+  (let* ((frame-length (proto-read-register! c ifc 'frame-length))
+         (fb-size (proto-read-register! c ifc 'frame-buffer-size))
+         (fb-bytes (octet-address fb-size))
+         (required-bytes (required-fb-size frame-length (length lst))))
+    (unless (>= fb-bytes required-bytes)
+      (throw 'frame-buffer-overflow frame-length required-bytes fb-bytes))
+    (let ((block (make-bytevector required-bytes))
+          (bytes-per-word (word-width-to-fit frame-length 8)))
+      (fold (lambda (word offset)
+              (bytevector-uint-set! block offset word 'big bytes-per-word)
+              (+ offset bytes-per-word))
+            0 lst)
+      (let* ((address (proto-read-register! c ifc 'frame-buffer-address))
+             (response (regp:write-request! (cr-low-level c) address block)))
+        (unless (regp:valid-ack? response)
+          (throw 'protocol-error response))))))
