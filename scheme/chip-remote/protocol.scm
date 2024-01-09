@@ -9,6 +9,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module (chip-remote decode)
+  #:use-module (chip-remote modify)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote register)
   #:use-module (chip-remote register common)
@@ -23,7 +24,8 @@
             cr-access
             proto-engage!
             proto-get-ifc-ctrl!
-            proto-interfaces))
+            proto-interfaces
+            cr:setup-spi!))
 
 (define (pp obj) (pretty-print obj #:width 80 #:max-expr-width 100))
 
@@ -118,10 +120,10 @@
   (#x0001 (generate-u16-register frame-length))
   (#x0002 (generate-u32-register clock-rate))
   (#x0004 (generate-register #:contents
-                             (cs-active-low?       0 1)
-                             (bit-order-msb-first? 1 1)
-                             (clock-idle-low?      2 1)
-                             (clock-phase-delay?   3 1)))
+                             (cs-active-low?       0 1 #:default #t)
+                             (bit-order-msb-first? 1 1 #:default #t)
+                             (clock-idle-low?      2 1 #:default #t)
+                             (clock-phase-delay?   3 1 #:default #f)))
   (#x0005 (generate-u16-register frame-buffer-size))
   (#x0006 (generate-u32-register frame-buffer-address))
   (#x0008 (generate-u16-register spi-command))
@@ -135,6 +137,15 @@
          (end (+ (car finish)
                  (proto-register-width (cdr finish) 16))))
     (- end start)))
+
+(define (make-spi-config-rm rm)
+  (let* ((table (take (drop (register-map-table:sorted rm) 1) 3))
+         (start (caar table))
+         (new (make-register-map #:table (map (lambda (e)
+                                                (cons (- (car e) start)
+                                                      (cdr e)))
+                                              table))))
+    (list start (interface-size new) new)))
 
 (define (make-frame-buffer-register n)
   (generate-register #:contents (frame-buffer 0 (* 16 n))))
@@ -177,6 +188,26 @@
        (append acc info)))
    '()
    rm))
+
+(define (block->regmap rm bv)
+  (register-map-fold-right
+   (lambda (address register acc)
+     (let* ((a (octet-address address))
+            (raw (proto-ref bv a register)))
+       (cons (cons address raw) acc)))
+   '()
+   rm))
+
+(define (regmap->block rm value)
+  (let* ((size (octet-address (interface-size rm)))
+         (bv (make-bytevector size)))
+    (register-map-fold
+     (lambda (address register acc)
+       (let ((offset (octet-address address))
+             (n (proto-register-width register 8)))
+         (bytevector-uint-set! bv offset (assv-ref value address) 'big n)
+         bv))
+     bv rm)))
 
 (define (proto-read-static! c)
   (let* ((table (register-map-table crfw-static))
@@ -271,14 +302,38 @@
 (define (proto-interfaces c)
   (map car (cr-access c)))
 
-(define (proto-get-ifc-ctrl! c key)
+(define (proto-get-ifc-access c key)
   (let* ((info (cr-access c))
          (access (assq-ref info key)))
     (unless access
       (throw 'unknown-interface key info))
+    access))
+
+(define (proto-get-ifc-ctrl! c key)
+  (let ((access (proto-get-ifc-access c key)))
     (match access
       ((address size spec)
        (let ((response (regp:read-request! (cr-low-level c) address size)))
          (unless (regp:valid-ack? response)
            (throw 'protocol-error response))
          (block-decode spec (assq-ref response 'payload)))))))
+
+(define (cr:setup-spi! c spi-n . lst)
+  (let ((access (proto-get-ifc-access c spi-n)))
+    (match access
+      ((address size spec)
+       (match (make-spi-config-rm spec)
+         ((start size cfg)
+          (let ((response (regp:read-request! (cr-low-level c)
+                                              (+ start address)
+                                              size)))
+            (unless (regp:valid-ack? response)
+              (throw 'protocol-error response))
+            (let* ((current (block->regmap cfg (assq-ref response 'payload)))
+                   (next (apply chain-modify (cons* cfg current lst)))
+                   (block (regmap->block cfg next))
+                   (response (regp:write-request! (cr-low-level c)
+                                                  (+ start address)
+                                                  block)))
+              (unless (regp:valid-ack? response)
+                (throw 'protocol-error response))))))))))
