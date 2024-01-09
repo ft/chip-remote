@@ -39,20 +39,10 @@
 
 const struct device *uart0;
 
-static size_t cnt = 0u;
-
 static int
 uart_octet_source(void *driver, void *value)
 {
     const int rc = uart_poll_in(driver, value);
-    if (rc >= 0) {
-        cnt++;
-    }
-#if 0
-    if (rc >= 0) {
-        printk("uart0: 0x%02x (rc: %d)\n", *(unsigned char*)value, rc);
-    }
-#endif
     return rc < 0 ? -EAGAIN : 1;
 }
 
