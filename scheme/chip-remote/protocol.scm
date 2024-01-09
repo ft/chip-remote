@@ -400,7 +400,7 @@
          (fb-size (proto-read-register! c ifc 'frame-buffer-size))
          (fb-bytes (octet-address fb-size))
          (required-bytes (required-fb-size frame-length (length lst))))
-    (unless (>= fb-bytes required-bytes)
+    (unless (>= (/ fb-bytes 2) required-bytes)
       (throw 'frame-buffer-overflow frame-length required-bytes fb-bytes))
     (let ((block (make-bytevector required-bytes))
           (bytes-per-word (word-width-to-fit frame-length 8)))

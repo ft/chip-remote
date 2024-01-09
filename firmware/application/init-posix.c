@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <ufw/binary-format.h>
 #include <ufw/endpoints.h>
 #include <ufw/register-protocol.h>
 #include <ufw/register-table.h>
@@ -95,6 +96,93 @@ K_MEM_SLAB_DEFINE_STATIC(proto_slab, PROTO_SLAB_SIZE, PROTO_SLAB_SLOTS, 4);
 BlockAllocator palloc = MAKE_SLAB_BLOCKALLOC(
     &proto_slab, proto_alloc, proto_free, PROTO_SLAB_SIZE);
 
+struct spi_control {
+    FirmwareRegister framelength;
+    FirmwareRegister clockrate;
+    FirmwareRegister flags;
+};
+
+enum peripheral_type {
+    PERIH_TYPE_SPI = 0
+};
+
+struct peripheral_control {
+    enum peripheral_type type;
+    union {
+        struct spi_control spi;
+    } backend;
+    FirmwareRegister fbsize;
+    FirmwareRegister fbaddr;
+    FirmwareRegister cmd;
+    FirmwareRegister cmdarg;
+    FirmwareRegister cmdstatus;
+};
+
+#define MAKE_SPI_CTRL(ID)                               \
+    struct peripheral_control spi##ID##_ctrl = {        \
+        .type = PERIH_TYPE_SPI,                         \
+        .backend.spi = {                                \
+            .framelength = R_SPI##ID##_FLEN,            \
+            .clockrate   = R_SPI##ID##_RATE,            \
+            .flags       = R_SPI##ID##_FLAGS,           \
+        },                                              \
+        .fbsize      = R_SPI##ID##_FBSIZE,              \
+        .fbaddr      = R_SPI##ID##_FBADDR,              \
+        .cmd         = R_SPI##ID##_CMD,                 \
+        .cmdarg      = R_SPI##ID##_CMDARG,              \
+        .cmdstatus   = R_SPI##ID##_STATUS               \
+    }
+
+#ifdef CONFIG_ENABLE_IFC_SPI0
+MAKE_SPI_CTRL(0);
+#endif /* CONFIG_ENABLE_IFC_SPI0 */
+
+#ifdef CONFIG_ENABLE_IFC_SPI1
+MAKE_SPI_CTRL(1);
+#endif /* CONFIG_ENABLE_IFC_SPI1 */
+
+struct peripheral_control *periph_ctrl[] = {
+#ifdef CONFIG_ENABLE_IFC_SPI0
+    &spi0_ctrl,
+#endif /* CONFIG_ENABLE_IFC_SPI0 */
+#ifdef CONFIG_ENABLE_IFC_SPI1
+    &spi1_ctrl,
+#endif /* CONFIG_ENABLE_IFC_SPI1 */
+    NULL
+};
+
+#define PERIPH_COMMAND_INIT     0ull
+#define PERIPH_COMMAND_TRANSMIT 1ull
+
+static void
+process_command(RegisterTable *t,
+                const struct peripheral_control *ctrl,
+                const RPFrame *f)
+{
+    const uint32_t cmd = bf_ref_u16b(f->payload.data);
+    printk("Got spi command: %u\n", cmd);
+    switch (cmd) {
+    case PERIPH_COMMAND_INIT:
+        break;
+    case PERIPH_COMMAND_TRANSMIT:
+        break;
+    default:
+        register_set_unsafe(t, ctrl->cmdstatus,
+                            (RegisterValue) {
+                                .type = REG_TYPE_UINT32,
+                                .value.u32 = UINT32_MAX });
+        break;
+    }
+}
+
+static bool
+cmd_was_used(const RegisterTable *t, const RegisterHandle h, const RPFrame *f)
+{
+    const RegisterEntry *e = register_get_entry(t, h);
+    const size_t size = register_entry_size(e);
+    return (f->header.address == e->address && f->header.blocksize == size);
+}
+
 void
 main(void)
 {
@@ -141,14 +229,50 @@ main(void)
 
     char ch1 = 0;
     for (;;) {
+        bool normal_processing = true;
         RPMaybeFrame mf;
         const int recvrc = regp_recv(&protocol, &mf);
         if (recvrc < 0 && recvrc != -EAGAIN) {
             printk("# Error in regp_recv(): %d\n", recvrc);
         }
-        const int procrc = regp_process(&protocol, &mf);
-        if (procrc < 0) {
-            printk("# Error in regp_process(): %d\n", procrc);
+
+        /*
+         * This special behaviour is implemented before processing happens. As
+         * such, the command value was not committed to the register table yet
+         * and therefore we cannot use things like register_was_touched() or
+         * register_get() to use its value. We must look into the new frame
+         * ourselves.
+         *
+         * We are requiring the remote side to write the all data it needs to
+         * before doing a single write to exactly and only the command regi-
+         * ster. Therefore the rest of the processing can indeed be fetched
+         * from the register table.
+         *
+         * This has the additional guarantee (beyond ufw-regp), that any side
+         * effects caused by the command processing will have been carried out
+         * before the remote side receives the acknowledging response for the
+         * command write request.
+         */
+        if (mf.error.id == 0 && regp_is_write_request(mf.frame)) {
+            struct peripheral_control **pc = periph_ctrl;
+            for (size_t i = 0u; pc[i] != NULL; ++i) {
+                if (cmd_was_used(&registers, pc[i]->cmd, mf.frame)) {
+                    process_command(&registers, pc[i], mf.frame);
+                    normal_processing = false;
+                }
+            }
+        }
+
+        if (normal_processing) {
+            const int procrc = regp_process(&protocol, &mf);
+            if (procrc < 0) {
+                printk("# Error in regp_process(): %d\n", procrc);
+            }
+        } else {
+            /* Writes to command registers are not processed regularly. We're
+             * just acknowledging them and move on. This means, that these
+             * registers will, for the reader stay zero at all times. */
+            regp_resp_ack(&protocol, mf.frame, NULL, 0);
         }
         regp_free(&protocol, mf.frame);
 

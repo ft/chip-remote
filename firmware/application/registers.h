@@ -46,7 +46,7 @@ typedef enum FirmwareRegisterArea {
 
 /* Register Names */
 
-typedef enum SensorRegister {
+typedef enum FirmwareRegister {
     R_TAB_SEMANTICS = 0u,
     R_INDEX_ADDRESS,
     R_FW_MAJOR,
@@ -74,6 +74,6 @@ typedef enum SensorRegister {
 #ifdef CONFIG_ENABLE_IFC_SPI1
     IFC_SPI_NAMES(1)
 #endif /* CONFIG_ENABLE_IFC_SPI1 */
-} SensorRegister;
+} FirmwareRegister;
 
 #endif /* INC_REGISTERS_H_6a5bd7c3 */
