@@ -12,27 +12,15 @@
 #include <ufw/register-protocol.h>
 #include <ufw/register-table.h>
 #include <ufw/register-utilities.h>
+#include <ufwz/slab-allocator.h>
 
 #include "peripherals.h"
 
 #define PROTO_SLAB_SLOTS 4u
 #define PROTO_SLAB_SIZE  (128u + sizeof(RPFrame))
 
-static int
-proto_alloc(void *driver, void **memory)
-{
-    return k_mem_slab_alloc(driver, memory, K_NO_WAIT);
-}
-
-static void
-proto_free(void *driver, void *memory)
-{
-    k_mem_slab_free(driver, memory);
-}
-
 K_MEM_SLAB_DEFINE_STATIC(proto_slab, PROTO_SLAB_SIZE, PROTO_SLAB_SLOTS, 4);
-BlockAllocator palloc = MAKE_SLAB_BLOCKALLOC(
-    &proto_slab, proto_alloc, proto_free, PROTO_SLAB_SIZE);
+BlockAllocator palloc = UFWZ_SLAB_BLOCKALLOC(&proto_slab, PROTO_SLAB_SIZE);
 
 static bool
 cmd_was_used(const RegisterTable *t, const RegisterHandle h, const RPFrame *f)
