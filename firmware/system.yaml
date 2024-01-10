@@ -21,5 +21,8 @@ zephyr:
           - picolibc
           - cmsis
           - hal-stm32
+          - ufwz
       - toolchains: [ host ]
         boards: [ native_posix_64 ]
+        modules:
+          - ufwz

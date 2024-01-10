@@ -1,0 +1,24 @@
+/ {
+        spi_text_0: spi@10000 {
+                compatible = "ufw,spi-text";
+                status = "okay";
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0x10000 0x10>;
+                clock-frequency = <2000000>;
+        };
+
+        spi_text_1: spi@20000 {
+                compatible = "ufw,spi-text";
+                status = "okay";
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0x20000 0x10>;
+                clock-frequency = <2000000>;
+        };
+
+        chosen {
+                chipremote,spi0 = &spi_text_0;
+                chipremote,spi1 = &spi_text_1;
+        };
+};

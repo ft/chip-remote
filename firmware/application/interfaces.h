@@ -7,6 +7,16 @@
 #ifndef INC_INTERFACES_H_a63e12ee
 #define INC_INTERFACES_H_a63e12ee
 
+#include <zephyr/kernel.h>
+
+#if DT_NODE_EXISTS(DT_CHOSEN(chipremote_spi0))
+#define CR_WITH_SPI_0
+#endif /* cr_spi_0 */
+
+#if DT_NODE_EXISTS(DT_CHOSEN(chipremote_spi1))
+#define CR_WITH_SPI_1
+#endif /* cr_spi_1 */
+
 /* Common Interface Definitions */
 
 #define R_DEFAULT_FB_SIZE 0x40u
@@ -14,21 +24,24 @@
 
 /* Counting stuff */
 
-#ifdef CONFIG_ENABLE_IFC_SPI0
+#ifdef CR_WITH_SPI_0
 #define CR__CNT_SPI0 1u
 #else
 #define CR__CNT_SPI0 0u
-#endif /* CONFIG_ENABLE_IFC_SPI0 */
+#endif /* CR_WITH_SPI_0 */
 
-#ifdef CONFIG_ENABLE_IFC_SPI1
+#ifdef CR_WITH_SPI_1
 #define CR__CNT_SPI1 1u
 #else
 #define CR__CNT_SPI1 0u
-#endif /* CONFIG_ENABLE_IFC_SPI1 */
+#endif /* CR_WITH_SPI_1 */
 
 #define FW_IFC_SPI_SIZE    13u
 #define FW_IFC_SPI0_OFFSET IFC_START
-#define FW_IFC_SPI1_OFFSET (FW_IFC_SPI0_OFFSET + FW_IFC_SPI_SIZE)
+#define FW_IFC_SPI1_OFFSET (FW_IFC_SPI0_OFFSET + FW_IFC_SPI_SIZE * CR__CNT_SPI0)
+
+#define FW_IDX_SPI0 1
+#define FW_IDX_SPI1 (FW_IDX_SPI0 + 2 * CR__CNT_SPI0)
 
 #define FW_INTERFACE_COUNT (CR__CNT_SPI0 + CR__CNT_SPI1)
 

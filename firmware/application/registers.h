@@ -7,8 +7,6 @@
 #ifndef INC_REGISTERS_H_6a5bd7c3
 #define INC_REGISTERS_H_6a5bd7c3
 
-#define CONFIG_ENABLE_IFC_SPI0
-
 #include <ufw/register-table.h>
 
 #include "interfaces.h"
@@ -62,18 +60,18 @@ typedef enum FirmwareRegister {
     R_UFW_MINOR,
     R_UFW_PATCH,
     R_IDX_SIZE,
-#ifdef CONFIG_ENABLE_IFC_SPI0
+#ifdef CR_WITH_SPI_0
     R_IDX_SPI0,
-#endif /* CONFIG_ENABLE_IFC_SPI0 */
-#ifdef CONFIG_ENABLE_IFC_SPI1
+#endif /* CR_WITH_SPI_0 */
+#ifdef CR_WITH_SPI_1
     R_IDX_SPI1,
-#endif /* CONFIG_ENABLE_IFC_SPI1 */
-#ifdef CONFIG_ENABLE_IFC_SPI0
+#endif /* CR_WITH_SPI_1 */
+#ifdef CR_WITH_SPI_0
     IFC_SPI_NAMES(0),
-#endif /* CONFIG_ENABLE_IFC_SPI0 */
-#ifdef CONFIG_ENABLE_IFC_SPI1
+#endif /* CR_WITH_SPI_0 */
+#ifdef CR_WITH_SPI_1
     IFC_SPI_NAMES(1)
-#endif /* CONFIG_ENABLE_IFC_SPI1 */
+#endif /* CR_WITH_SPI_1 */
 } FirmwareRegister;
 
 #endif /* INC_REGISTERS_H_6a5bd7c3 */

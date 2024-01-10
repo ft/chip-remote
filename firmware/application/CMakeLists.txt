@@ -7,6 +7,7 @@ initialise_toolchain()
 include(GitIntegration)
 
 set(common_sources
+  peripherals.c
   registers.c)
 
 set(board_common_sources
@@ -40,7 +41,7 @@ else()
   message(WARNING "Unsupported board: ${BOARD}")
 endif()
 
-target_link_libraries(app PRIVATE ufw)
+target_link_libraries(app PRIVATE ufw ufw-zephyr)
 if (${BOARD} MATCHES "^native")
   target_link_libraries(app PRIVATE sx-parser)
 endif()

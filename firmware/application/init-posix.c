@@ -19,6 +19,7 @@
 
 #include <zephyr/kernel.h>
 
+#include <zephyr/drivers/spi.h>
 #include <zephyr/drivers/uart.h>
 #include <zephyr/drivers/console/posix_arch_console.h>
 
@@ -35,6 +36,7 @@
 #include <sx-parser.h>
 
 #include "native-instrumentation.h"
+#include "peripherals.h"
 #include "registers.h"
 
 const struct device *uart0;
@@ -86,84 +88,8 @@ K_MEM_SLAB_DEFINE_STATIC(proto_slab, PROTO_SLAB_SIZE, PROTO_SLAB_SLOTS, 4);
 BlockAllocator palloc = MAKE_SLAB_BLOCKALLOC(
     &proto_slab, proto_alloc, proto_free, PROTO_SLAB_SIZE);
 
-struct spi_control {
-    FirmwareRegister framelength;
-    FirmwareRegister clockrate;
-    FirmwareRegister flags;
-};
+/* =========================================================== */
 
-enum peripheral_type {
-    PERIH_TYPE_SPI = 0
-};
-
-struct peripheral_control {
-    enum peripheral_type type;
-    union {
-        struct spi_control spi;
-    } backend;
-    FirmwareRegister fbsize;
-    FirmwareRegister fbaddr;
-    FirmwareRegister cmd;
-    FirmwareRegister cmdarg;
-    FirmwareRegister cmdstatus;
-};
-
-#define MAKE_SPI_CTRL(ID)                               \
-    struct peripheral_control spi##ID##_ctrl = {        \
-        .type = PERIH_TYPE_SPI,                         \
-        .backend.spi = {                                \
-            .framelength = R_SPI##ID##_FLEN,            \
-            .clockrate   = R_SPI##ID##_RATE,            \
-            .flags       = R_SPI##ID##_FLAGS,           \
-        },                                              \
-        .fbsize      = R_SPI##ID##_FBSIZE,              \
-        .fbaddr      = R_SPI##ID##_FBADDR,              \
-        .cmd         = R_SPI##ID##_CMD,                 \
-        .cmdarg      = R_SPI##ID##_CMDARG,              \
-        .cmdstatus   = R_SPI##ID##_STATUS               \
-    }
-
-#ifdef CONFIG_ENABLE_IFC_SPI0
-MAKE_SPI_CTRL(0);
-#endif /* CONFIG_ENABLE_IFC_SPI0 */
-
-#ifdef CONFIG_ENABLE_IFC_SPI1
-MAKE_SPI_CTRL(1);
-#endif /* CONFIG_ENABLE_IFC_SPI1 */
-
-struct peripheral_control *periph_ctrl[] = {
-#ifdef CONFIG_ENABLE_IFC_SPI0
-    &spi0_ctrl,
-#endif /* CONFIG_ENABLE_IFC_SPI0 */
-#ifdef CONFIG_ENABLE_IFC_SPI1
-    &spi1_ctrl,
-#endif /* CONFIG_ENABLE_IFC_SPI1 */
-    NULL
-};
-
-#define PERIPH_COMMAND_INIT     0ull
-#define PERIPH_COMMAND_TRANSMIT 1ull
-
-static void
-process_command(RegisterTable *t,
-                const struct peripheral_control *ctrl,
-                const RPFrame *f)
-{
-    const uint32_t cmd = bf_ref_u16b(f->payload.data);
-    printk("Got spi command: %u\n", cmd);
-    switch (cmd) {
-    case PERIPH_COMMAND_INIT:
-        break;
-    case PERIPH_COMMAND_TRANSMIT:
-        break;
-    default:
-        register_set_unsafe(t, ctrl->cmdstatus,
-                            (RegisterValue) {
-                                .type = REG_TYPE_UINT32,
-                                .value.u32 = UINT32_MAX });
-        break;
-    }
-}
 
 static bool
 cmd_was_used(const RegisterTable *t, const RegisterHandle h, const RPFrame *f)
@@ -185,6 +111,10 @@ main(void)
     uart1 = DEVICE_DT_GET(DT_NODELABEL(uart1));
     if (uart1 == NULL) {
         printk("Could not access uart1. Giving up.\n");
+        return;
+    }
+
+    if (peripheral_check() < 0) {
         return;
     }
 
