@@ -50,7 +50,7 @@ main(void)
         return;
     }
 
-    uart1 = DEVICE_DT_GET(DT_NODELABEL(uart1));
+    const struct device *uart1 = DEVICE_DT_GET(DT_NODELABEL(uart1));
     if (uart1 == NULL) {
         printk("Could not access uart1. Giving up.\n");
         return;
@@ -84,7 +84,7 @@ main(void)
         const int rc1 = uart_poll_in(uart1, &ch1);
 
         if (rc1 == 0) {
-            ni_toplevel(&nirb, ch1);
+            ni_toplevel(&nirb, ch1, uart1);
         }
         if (rc1 != 0 && rc0 < 0) {
             k_usleep(1000);

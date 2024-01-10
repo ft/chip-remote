@@ -18,7 +18,6 @@
 
 struct resizeable_buffer ni_buffer;
 struct sx_node *rxring = NULL;
-const struct device *uart1;
 
 void
 cr_uart_send(const struct device *tty, const char *str)
@@ -57,7 +56,8 @@ ni_dispatch(struct sx_node *node)
 }
 
 void
-ni_toplevel(struct resizeable_buffer *rb, const char ch)
+ni_toplevel(struct resizeable_buffer *rb, const char ch,
+            const struct device *uart)
 {
     if (rb->index > rb->size) {
         rb_enlarge(rb);
@@ -75,7 +75,7 @@ ni_toplevel(struct resizeable_buffer *rb, const char ch)
         }
         /* Acknowledge processing of instrumentation request. This ensures a
          * client can block until this happens to avoid race conditions. */
-        cr_uart_send(uart1, "ok\n");
+        cr_uart_send(uart, "ok\n");
     } else {
         rb->buffer[rb->index] = ch;
         rb->index++;
