@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 
+#include <ufw/compat/strings.h>
 #include <ufw/compiler.h>
 
 #include "sx-parser.h"
@@ -119,7 +120,7 @@ sx_make_symboln(const char *s, size_t len)
     if (node->data.symbol == NULL) {
         sxoom(__FILE__, __LINE__);
     }
-    strncpy(node->data.symbol, s, len);
+    strlcpy(node->data.symbol, s, n);
     return node;
 }
 
