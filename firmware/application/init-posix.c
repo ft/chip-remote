@@ -26,8 +26,6 @@
 #include <ufw/register-protocol.h>
 #include <ufwz/endpoint-uart-poll.h>
 
-#include <sx-parser.h>
-
 #include "chip-remote.h"
 #include "native-instrumentation.h"
 #include "peripherals.h"

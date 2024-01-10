@@ -9,6 +9,8 @@
 
 #include <zephyr/device.h>
 
+#include <sx-parser.h>
+
 #include "resizable-buffer.h"
 
 extern struct resizeable_buffer ni_buffer;
