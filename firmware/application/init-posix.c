@@ -21,6 +21,7 @@
 
 #include <zephyr/drivers/spi.h>
 #include <zephyr/drivers/uart.h>
+
 #include <zephyr/drivers/console/posix_arch_console.h>
 
 #include <stdio.h>
@@ -31,6 +32,7 @@
 #include <ufw/endpoints.h>
 #include <ufw/register-protocol.h>
 #include <ufw/register-table.h>
+#include <ufwz/endpoint-uart-poll.h>
 
 #include <sx-parser.h>
 
@@ -39,26 +41,10 @@
 #include "peripherals.h"
 #include "registers.h"
 
-const struct device *uart0;
-
-static int
-uart_octet_source(void *driver, void *value)
-{
-    const int rc = uart_poll_in(driver, value);
-    return rc < 0 ? -EAGAIN : 1;
-}
-
-static int
-uart_octet_sink(void *driver, unsigned char value)
-{
-    uart_poll_out(driver, value);
-    return 1;
-}
-
 void
 main(void)
 {
-    uart0 = DEVICE_DT_GET(DT_NODELABEL(uart0));
+    const struct device *uart0 = DEVICE_DT_GET(DT_NODELABEL(uart0));
     if (uart0 == NULL) {
         printk("Could not access uart0. Giving up.\n");
         return;
@@ -75,8 +61,8 @@ main(void)
     }
 
     RegP protocol;
-    Source regpsource = OCTET_SOURCE_INIT(uart_octet_source, (void*)uart0);
-    Sink   regpsink   = OCTET_SINK_INIT(  uart_octet_sink,   (void*)uart0);
+    Source regpsource = UFWZ_UART_POLL_SOURCE(uart0);
+    Sink regpsink = UFWZ_UART_POLL_SINK(uart0);
 
     if (chip_remote_init(&protocol, regpsource, regpsink, &registers) < 0) {
         return;
