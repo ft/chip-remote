@@ -7,6 +7,7 @@ initialise_toolchain()
 include(GitIntegration)
 
 set(common_sources
+  chip-remote.c
   peripherals.c
   registers.c)
 
