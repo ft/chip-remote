@@ -12,14 +12,11 @@ set(common_sources
   registers.c)
 
 set(board_common_sources
-  # ifc/bb/spi.c
-  # ifc/os/i2c.c
-  # ifc/os/spi.c
-)
+  heartbeat.c)
 
 set(native_common_sources
-  # ifc/text/spi.c
-)
+    native-instrumentation.c
+    resizable-buffer.c)
 
 if (${BOARD} STREQUAL nucleo_f767zi)
   target_sources(app PRIVATE
@@ -35,9 +32,7 @@ elseif (${BOARD} STREQUAL native_posix_64)
   target_sources(app PRIVATE
     ${common_sources}
     ${native_common_sources}
-    init-posix.c
-    native-instrumentation.c
-    resizable-buffer.c)
+    init-posix.c)
 else()
   message(WARNING "Unsupported board: ${BOARD}")
 endif()
