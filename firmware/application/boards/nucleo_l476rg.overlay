@@ -1,5 +1,7 @@
 / {
 	chosen {
 		zephyr,console = &usart1;
+		zephyr,shell-uart = &usart1;
+                chipremote,spi0 = &spi1;
 	};
 };

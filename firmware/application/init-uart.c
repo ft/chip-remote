@@ -1,71 +1,76 @@
+/*
+ * Copyright (c) 2024 chip-remote workers, All rights reserved.
+ *
+ * Terms for redistribution and use can be found in LICENCE.
+ */
+
 #include <zephyr/kernel.h>
 
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/uart.h>
+#include <zephyr/usb/usb_device.h>
 
-#include <string.h>
 #include <stdlib.h>
 
 #include <ufw/compiler.h>
+#include <ufw/endpoints.h>
+#include <ufw/register-protocol.h>
+#include <ufwz/endpoint-uart-poll.h>
+#include <ufwz/endpoint-uart-fifo.h>
 
-#include "init-common.h"
+#include "chip-remote.h"
+#include "peripherals.h"
+#include "registers.h"
 
-const struct device *uart0;
-
-void
-uart_sink(const char *str)
-{
-    const size_t len = strlen(str);
-    for (size_t i = 0; i < len; ++i) {
-        uart_poll_out(uart0, str[i]);
-    }
-}
-
-#if 0
-static void
-cr_handle_uart(const struct device *dev, UNUSED void *userdata)
-{
-    char ch;
-    while (uart_fifo_read(dev, &ch, 1u) > 0u)
-        cr_toplevel(&proto, ch);
-}
-#endif
-
-#define LED0_NODE DT_ALIAS(led0)
-static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
+struct uart_config uart_cfg = {
+    .baudrate  = 921600u,
+    .parity    = UART_CFG_PARITY_NONE,
+    .stop_bits = UART_CFG_STOP_BITS_1,
+    .flow_ctrl = UART_CFG_FLOW_CTRL_NONE,
+    .data_bits = UART_CFG_DATA_BITS_8
+};
 
 int
 main(void)
 {
-    uart0 = DEVICE_DT_GET(DT_NODELABEL(usart2));
-    if (uart0 == NULL) {
+    const struct device *uart0 = DEVICE_DT_GET(DT_NODELABEL(usart2));
+    if (uart0 == NULL || device_is_ready(uart0) == false) {
         printk("Could not access uart-2. Giving up.\n");
         return EXIT_FAILURE;
     }
 
-    printk("Registering uart callback.\n");
-#if 0
-    uart_irq_callback_set(uart0, cr_handle_uart);
-    printk("Enabling uart rx interrupt.\n");
-    uart_irq_rx_enable(uart0);
-#endif
-
-    if (!device_is_ready(led.port)) {
-        printk("Could not access LED.\n");
+    if (peripheral_check() < 0) {
         return EXIT_FAILURE;
     }
 
-    int ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
-    if (ret < 0) {
-        printk("Could not configure LED pin.\n");
+    if (uart_configure(uart0, &uart_cfg) < 0) {
+        printk("Could not configure uart-2. Giving up.\n");
         return EXIT_FAILURE;
     }
 
-    printk("ChipRemote Command Processor online!\n");
+    DEFINE_UART_FIFO_SOURCE_DATA(uart0data, 128u);
+
+    if (ufwz_uart_fifo_source_init(uart0, &uart0data) < 0) {
+        printk("Could not setup uart-2 fifo. Giving up.\n");
+        return EXIT_FAILURE;
+    }
+
+    Source regpsource = UFWZ_UART_FIFO_SOURCE(&uart0data);
+    Sink regpsink = UFWZ_UART_POLL_SINK(uart0);
+    RegP protocol;
+
+    if (chip_remote_init(&protocol, regpsource, regpsink, &registers) < 0) {
+        printk("Could not setup chip-remote processor. Giving up.\n");
+        return EXIT_FAILURE;
+    }
+
+    printk("ChipRemoteFirmware running on %s\n", CONFIG_BOARD);
 
     for (;;) {
-        gpio_pin_toggle_dt(&led);
-        k_msleep(100);
+        const int rc = chip_remote_process(&protocol);
+        if (rc < 0) {
+            k_usleep(1000);
+        }
     }
 
     /* NOTREACHED */
