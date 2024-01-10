@@ -17,21 +17,13 @@
  * to its stdout output, for automation runners to read.
  */
 
-#include <zephyr/kernel.h>
-
-#include <zephyr/drivers/spi.h>
+#include <zephyr/drivers/console/posix_arch_console.h>
 #include <zephyr/drivers/uart.h>
 
-#include <zephyr/drivers/console/posix_arch_console.h>
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 
-#include <ufw/binary-format.h>
 #include <ufw/endpoints.h>
 #include <ufw/register-protocol.h>
-#include <ufw/register-table.h>
 #include <ufwz/endpoint-uart-poll.h>
 
 #include <sx-parser.h>
