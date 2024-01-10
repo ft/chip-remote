@@ -4,6 +4,7 @@
 #include <zephyr/drivers/uart.h>
 
 #include <string.h>
+#include <stdlib.h>
 
 #include <ufw/compiler.h>
 
@@ -33,13 +34,13 @@ cr_handle_uart(const struct device *dev, UNUSED void *userdata)
 #define LED0_NODE DT_ALIAS(led0)
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
-void
+int
 main(void)
 {
     uart0 = DEVICE_DT_GET(DT_NODELABEL(usart2));
     if (uart0 == NULL) {
         printk("Could not access uart-2. Giving up.\n");
-        return;
+        return EXIT_FAILURE;
     }
 
     printk("Registering uart callback.\n");
@@ -51,13 +52,13 @@ main(void)
 
     if (!device_is_ready(led.port)) {
         printk("Could not access LED.\n");
-        return;
+        return EXIT_FAILURE;
     }
 
     int ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
     if (ret < 0) {
         printk("Could not configure LED pin.\n");
-        return;
+        return EXIT_FAILURE;
     }
 
     printk("ChipRemote Command Processor online!\n");
@@ -66,4 +67,7 @@ main(void)
         gpio_pin_toggle_dt(&led);
         k_msleep(100);
     }
+
+    /* NOTREACHED */
+    return EXIT_SUCCESS;
 }

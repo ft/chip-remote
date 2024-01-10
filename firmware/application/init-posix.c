@@ -31,23 +31,23 @@
 #include "peripherals.h"
 #include "registers.h"
 
-void
+int
 main(void)
 {
     const struct device *uart0 = DEVICE_DT_GET(DT_NODELABEL(uart0));
     if (uart0 == NULL) {
         printk("Could not access uart0. Giving up.\n");
-        return;
+        return EXIT_FAILURE;
     }
 
     const struct device *uart1 = DEVICE_DT_GET(DT_NODELABEL(uart1));
     if (uart1 == NULL) {
         printk("Could not access uart1. Giving up.\n");
-        return;
+        return EXIT_FAILURE;
     }
 
     if (peripheral_check() < 0) {
-        return;
+        return EXIT_FAILURE;
     }
 
     RegP protocol;
@@ -55,7 +55,7 @@ main(void)
     Sink regpsink = UFWZ_UART_POLL_SINK(uart0);
 
     if (chip_remote_init(&protocol, regpsource, regpsink, &registers) < 0) {
-        return;
+        return EXIT_FAILURE;
     }
 
     struct resizeable_buffer nirb;
@@ -80,4 +80,7 @@ main(void)
             k_usleep(1000);
         }
     }
+
+    /* NOTREACHED */
+    return EXIT_SUCCESS;
 }

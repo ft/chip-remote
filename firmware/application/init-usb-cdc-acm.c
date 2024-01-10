@@ -10,6 +10,8 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/usb/usb_device.h>
 
+#include <stdlib.h>
+
 #include <ufw/compiler.h>
 #include <ufw/endpoints.h>
 #include <ufw/register-protocol.h>
@@ -19,13 +21,13 @@
 #include "peripherals.h"
 #include "registers.h"
 
-void
+int
 main(void)
 {
     const struct device *uart0 = DEVICE_DT_GET(DT_NODELABEL(cdc_acm_uart0));
     if (uart0 == NULL) {
         printk("Could not access usb. Giving up.\n");
-        return;
+        return EXIT_FAILURE;
     }
 
     if (usb_enable(NULL) != 0) {
@@ -34,7 +36,7 @@ main(void)
     }
 
     if (peripheral_check() < 0) {
-        return;
+        return EXIT_FAILURE;
     }
 
     RegP protocol;
@@ -42,7 +44,7 @@ main(void)
     Sink regpsink = UFWZ_UART_POLL_SINK(uart0);
 
     if (chip_remote_init(&protocol, regpsource, regpsink, &registers) < 0) {
-        return;
+        return EXIT_FAILURE;
     }
 
     printk("ChipRemoteFirmware running on %s\n", CONFIG_BOARD);
@@ -53,4 +55,7 @@ main(void)
             k_usleep(1000);
         }
     }
+
+    /* NOTREACHED */
+    return EXIT_SUCCESS;
 }
