@@ -1,5 +1,11 @@
+/ {
+        chosen {
+                chipremote,spi0 = &spi1;
+        };
+};
+
 &zephyr_udc0 {
-	cdc_acm_uart0 {
-		compatible = "zephyr,cdc-acm-uart";
-	};
+        cdc_acm_uart0: cdc_acm_uart0 {
+                compatible = "zephyr,cdc-acm-uart";
+        };
 };
