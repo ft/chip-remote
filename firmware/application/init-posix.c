@@ -55,20 +55,6 @@ uart_octet_sink(void *driver, unsigned char value)
     return 1;
 }
 
-static RPBlockAccess
-regread(uint32_t address, size_t n, uint16_t *value)
-{
-    return regaccess2blockaccess(
-        register_block_read(&registers, address, n, value));
-}
-
-static RPBlockAccess
-regwrite(uint32_t address, size_t n, const uint16_t *value)
-{
-    return regaccess2blockaccess(
-        register_block_write(&registers, address, n, (void*)value));
-}
-
 #define PROTO_SLAB_SLOTS 4u
 #define PROTO_SLAB_SIZE  (128u + sizeof(RPFrame))
 

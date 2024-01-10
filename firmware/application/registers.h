@@ -7,6 +7,7 @@
 #ifndef INC_REGISTERS_H_6a5bd7c3
 #define INC_REGISTERS_H_6a5bd7c3
 
+#include <ufw/register-protocol.h>
 #include <ufw/register-table.h>
 
 #include "interfaces.h"
@@ -73,5 +74,8 @@ typedef enum FirmwareRegister {
     IFC_SPI_NAMES(1)
 #endif /* CR_WITH_SPI_1 */
 } FirmwareRegister;
+
+RPBlockAccess regwrite(uint32_t address, size_t n, const uint16_t *value);
+RPBlockAccess regread(uint32_t address, size_t n, uint16_t *value);
 
 #endif /* INC_REGISTERS_H_6a5bd7c3 */

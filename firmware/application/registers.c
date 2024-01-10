@@ -7,6 +7,7 @@
 /* A bit of a generic name there zephyr, but alright. */
 #include <version.h>
 
+#include <ufw/register-protocol.h>
 #include <ufw/register-table.h>
 #include <ufw/meta.h>
 
@@ -65,3 +66,17 @@ RegisterTable registers = {
         REGISTER_ENTRY_END
     }
 };
+
+RPBlockAccess
+regread(uint32_t address, size_t n, uint16_t *value)
+{
+    return regaccess2blockaccess(
+        register_block_read(&registers, address, n, value));
+}
+
+RPBlockAccess
+regwrite(uint32_t address, size_t n, const uint16_t *value)
+{
+    return regaccess2blockaccess(
+        register_block_write(&registers, address, n, (void*)value));
+}
