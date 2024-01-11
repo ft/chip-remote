@@ -6,6 +6,10 @@ initialise_toolchain()
 
 include(GitIntegration)
 
+set(native_boards  native_posix_64)
+set(uart_boards    nucleo_l476rg)
+set(usb_boards     nucleo_f767zi)
+
 set(common_sources
   chip-remote.c
   peripherals.c
@@ -15,20 +19,20 @@ set(board_common_sources
   heartbeat.c)
 
 set(native_common_sources
-    native-instrumentation.c
-    resizable-buffer.c)
+  native-instrumentation.c
+  resizable-buffer.c)
 
-if (${BOARD} STREQUAL nucleo_f767zi)
+if (${BOARD} IN_LIST usb_boards)
   target_sources(app PRIVATE
     ${common_sources}
     ${board_common_sources}
     init-usb-cdc-acm.c)
-elseif (${BOARD} STREQUAL nucleo_l476rg)
+elseif (${BOARD} IN_LIST uart_boards)
   target_sources(app PRIVATE
     ${common_sources}
     ${board_common_sources}
     init-uart.c)
-elseif (${BOARD} STREQUAL native_posix_64)
+elseif (${BOARD} IN_LIST native_boards)
   target_sources(app PRIVATE
     ${common_sources}
     ${native_common_sources}
