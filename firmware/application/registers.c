@@ -20,14 +20,14 @@
 #define INFO(x)  (INFO_START  + (x))
 #define INDEX(x) (INDEX_START + (x))
 #define IFC(x)   (IFC_START   + (x))
-#define FB(x)    (FB_START    + (x))
 
 RegisterTable registers = {
     .area = (RegisterArea[]) {
-        [REG_AREA_INFO]  = MEMORY_AREA_RO(INFO_START,  INFO_SIZE),
+        [REG_AREA_INFO]  = MEMORY_AREA_RO(INFO_START, INFO_SIZE),
         [REG_AREA_INDEX] = MEMORY_AREA_RO(INDEX_START, INDEX_SIZE),
-        [REG_AREA_IFC]   = MEMORY_AREA(   IFC_START,   IFC_SIZE),
-        [REG_AREA_FB]    = MEMORY_AREA(   FB_START,    FB_SIZE),
+        [REG_AREA_IFC]   = MEMORY_AREA(IFC_START, IFC_SIZE),
+        [REG_AREA_FBTX]  = MEMORY_AREA(FBTX_START, FBTX_SIZE),
+        [REG_AREA_FBRX]  = MEMORY_AREA_RO(FBRX_START, FBRX_SIZE),
         REGISTER_AREA_END
     },
 

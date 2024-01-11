@@ -19,8 +19,10 @@
 
 /* Common Interface Definitions */
 
-#define R_DEFAULT_FB_SIZE 0x40u
-#define R_DEFAULT_FB_ADDR 0x10000u
+#define R_DEFAULT_FBTX_SIZE 0x40u
+#define R_DEFAULT_FBTX_ADDR 0x10000u
+#define R_DEFAULT_FBRX_SIZE 0x40u
+#define R_DEFAULT_FBRX_ADDR (0x10000u + R_DEFAULT_FBTX_SIZE)
 
 /* Counting stuff */
 
@@ -36,7 +38,7 @@
 #define CR__CNT_SPI1 0u
 #endif /* CR_WITH_SPI_1 */
 
-#define FW_IFC_SPI_SIZE    13u
+#define FW_IFC_SPI_SIZE    16u
 #define FW_IFC_SPI0_OFFSET IFC_START
 #define FW_IFC_SPI1_OFFSET (FW_IFC_SPI0_OFFSET + FW_IFC_SPI_SIZE * CR__CNT_SPI0)
 
@@ -63,24 +65,28 @@
     |R_SPI_FLAG_CS_ACTIVE_LOW                   \
     |R_SPI_FLAG_CLOCK_IDLE_LOW)
 
-#define IFC_SPI(ID, OFFSET)                                               \
-    REG_U16FAIL(R_SPI##ID##_TYPE,   (OFFSET) +  0u, R_TYPE_SPI),          \
-    REG_U16(R_SPI##ID##_FLEN,       (OFFSET) +  1u, R_SPI_DEFAULT_FLEN),  \
-    REG_U32(R_SPI##ID##_RATE,       (OFFSET) +  2u, R_SPI_DEFAULT_RATE),  \
-    REG_U16(R_SPI##ID##_FLAGS,      (OFFSET) +  4u, R_SPI_DEFAULT_FLAGS), \
-    REG_U16FAIL(R_SPI##ID##_FBSIZE, (OFFSET) +  5u, R_DEFAULT_FB_SIZE),   \
-    REG_U32FAIL(R_SPI##ID##_FBADDR, (OFFSET) +  6u, R_DEFAULT_FB_ADDR),   \
-    REG_U16(R_SPI##ID##_CMD,        (OFFSET) +  8u, 0u),                  \
-    REG_U32(R_SPI##ID##_CMDARG,     (OFFSET) +  9u, 0u),                  \
-    REG_U32FAIL(R_SPI##ID##_STATUS, (OFFSET) + 11u, 0u)
+#define IFC_SPI(ID, OFFSET)                                                 \
+    REG_U16FAIL(R_SPI##ID##_TYPE,     (OFFSET) +  0u, R_TYPE_SPI),          \
+    REG_U16(R_SPI##ID##_FLEN,         (OFFSET) +  1u, R_SPI_DEFAULT_FLEN),  \
+    REG_U32(R_SPI##ID##_RATE,         (OFFSET) +  2u, R_SPI_DEFAULT_RATE),  \
+    REG_U16(R_SPI##ID##_FLAGS,        (OFFSET) +  4u, R_SPI_DEFAULT_FLAGS), \
+    REG_U16FAIL(R_SPI##ID##_FBTXSIZE, (OFFSET) +  5u, R_DEFAULT_FBTX_SIZE), \
+    REG_U32FAIL(R_SPI##ID##_FBTXADDR, (OFFSET) +  6u, R_DEFAULT_FBTX_ADDR), \
+    REG_U16FAIL(R_SPI##ID##_FBRXSIZE, (OFFSET) +  8u, R_DEFAULT_FBRX_SIZE), \
+    REG_U32FAIL(R_SPI##ID##_FBRXADDR, (OFFSET) +  9u, R_DEFAULT_FBRX_ADDR), \
+    REG_U16(R_SPI##ID##_CMD,          (OFFSET) + 11u, 0u),                  \
+    REG_U32(R_SPI##ID##_CMDARG,       (OFFSET) + 12u, 0u),                  \
+    REG_U32FAIL(R_SPI##ID##_STATUS,   (OFFSET) + 14u, 0u)
 
 #define IFC_SPI_NAMES(ID)     \
     R_SPI##ID##_TYPE,         \
     R_SPI##ID##_FLEN,         \
     R_SPI##ID##_RATE,         \
     R_SPI##ID##_FLAGS,        \
-    R_SPI##ID##_FBSIZE,       \
-    R_SPI##ID##_FBADDR,       \
+    R_SPI##ID##_FBTXSIZE,     \
+    R_SPI##ID##_FBTXADDR,     \
+    R_SPI##ID##_FBRXSIZE,     \
+    R_SPI##ID##_FBRXADDR,     \
     R_SPI##ID##_CMD,          \
     R_SPI##ID##_CMDARG,       \
     R_SPI##ID##_STATUS

@@ -50,6 +50,7 @@ update_u32(const RegisterHandle r, const uint32_t value)
 
 #define PSTATUS_SUCCESS          0ul
 #define PSTATUS_ARG_OUT_OF_RANGE 1ul
+#define PSTATUS_INTERNAL_ERROR   2ul
 #define PSTATUS_INVALID_COMMAND  UINT32_MAX
 
 struct peripheral_api {
@@ -74,7 +75,7 @@ papi_spi_init(struct peripheral_control *ctrl)
 
     if (spi->cfg == NULL) {
         memcpy(&spi->cfg_b, &spi->cfg_a, sizeof(struct spi_config));
-        spi->cfg = &spi->cfg_b;
+        spi->cfg = &spi->cfg_a;
         spi->flags = 0u;
     }
 
@@ -109,34 +110,35 @@ papi_spi_transmit(struct peripheral_control *ctrl)
         papi_spi_init(ctrl);
     }
 
-    RegisterValue arg, flen, fbsize;
+    RegisterValue arg, flen;
     register_get(&registers, ctrl->cmdarg, &arg);
     register_get(&registers, spi->ctrl.framelength, &flen);
-    register_get(&registers, ctrl->fbsize, &fbsize);
 
     const size_t wsize = nextpow2(flen.value.u16) / 8u;
-    const size_t maxframes = fbsize.value.u32 / wsize / 2u;
-
-    printk("fbsize: %"PRIu32", wsize: %zu, maxframes: %zu\n",
-           fbsize.value.u16, wsize, maxframes);
+    const size_t maxframes = FBTX_SIZE / wsize;
 
     if (arg.value.u32 > maxframes) {
         update_u32(ctrl->cmdstatus, PSTATUS_ARG_OUT_OF_RANGE);
         return;
     }
 
-    unsigned char *fbtx = (void*)registers.area[REG_AREA_FB].mem;
-    unsigned char *fbrx = fbtx + wsize * arg.value.u32;
+    unsigned char *fbtx = (void*)registers.area[REG_AREA_FBTX].mem;
+    unsigned char *fbrx = (void*)registers.area[REG_AREA_FBRX].mem;
 
-    for (size_t i = 0u; i < arg.value.u32; ++i) {
-        struct spi_buf tx_buf[] = {{ .buf = fbtx + i * wsize, .len = wsize }};
-        struct spi_buf rx_buf[] = {{ .buf = fbrx + i * wsize, .len = wsize }};
-        struct spi_buf_set tx = { .buffers = tx_buf, .count = 1 };
-        struct spi_buf_set rx = { .buffers = rx_buf, .count = 1 };
-        spi_transceive(ctrl->dev, spi->cfg, &tx, &rx);
+    struct spi_buf tx_buf[] = {{ .buf = fbtx, .len = wsize * arg.value.u32 }};
+    struct spi_buf rx_buf[] = {{ .buf = fbrx, .len = wsize * arg.value.u32 }};
+    struct spi_buf_set tx = { .buffers = tx_buf, .count = 1 };
+    struct spi_buf_set rx = { .buffers = rx_buf, .count = 1 };
+    printk("# %s %d\n", spi->cfg->cs.gpio.port->name, spi->cfg->cs.gpio.pin);
+    const int rc = spi_transceive(ctrl->dev, spi->cfg, &tx, &rx);
+    if (rc < 0) {
+        update_u32(ctrl->cmdstatus, PSTATUS_INTERNAL_ERROR);
+        printk("error: %d %s\n", -rc, strerror(-rc));
+    } else {
+        ctrl->backend.spi.flags |= 1u;
+        update_u32(ctrl->cmdstatus, PSTATUS_SUCCESS);
+        printk("ok.\n");
     }
-
-    update_u32(ctrl->cmdstatus, PSTATUS_SUCCESS);
 }
 
 #define PAPI(var, ucmd, lcmd)                   \
@@ -193,13 +195,18 @@ peripheral_check(void)
         .backend.spi.flags = 0u,                                \
         .backend.spi.cfg = NULL,                                \
         .backend.spi.cfg_a = {                                  \
+            .cs = {                                             \
+                .gpio = {                                       \
+                    .port = DEVICE_DT_GET(DT_NODELABEL(gpiod)), \
+                    .pin = 14                                   \
+                },                                              \
+                .delay = 2                                      \
+            },                                                  \
             .frequency = 1000000ul,                             \
             .operation = (  SPI_OP_MODE_MASTER                  \
                           | SPI_TRANSFER_MSB                    \
                           | SPI_WORD_SET(8))                    \
         },                                                      \
-        .fbsize      = R_SPI##ID##_FBSIZE,                      \
-        .fbaddr      = R_SPI##ID##_FBADDR,                      \
         .cmd         = R_SPI##ID##_CMD,                         \
         .cmdarg      = R_SPI##ID##_CMDARG,                      \
         .cmdstatus   = R_SPI##ID##_STATUS                       \

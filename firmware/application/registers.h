@@ -25,14 +25,16 @@ extern RegisterTable registers;
 
 /* Table Layout */
 
-#define INFO_START        0x0000ul
-#define INFO_SIZE           0x20ul
-#define INDEX_START       0x1000ul
-#define INDEX_SIZE          0x10ul
-#define IFC_START         0x8000ul
-#define IFC_SIZE           0x100ul
-#define FB_START R_DEFAULT_FB_ADDR
-#define FB_SIZE  R_DEFAULT_FB_SIZE
+#define INFO_START          0x0000ul
+#define INFO_SIZE             0x20ul
+#define INDEX_START         0x1000ul
+#define INDEX_SIZE            0x10ul
+#define IFC_START           0x8000ul
+#define IFC_SIZE             0x100ul
+#define FBTX_START R_DEFAULT_FBTX_ADDR
+#define FBTX_SIZE  R_DEFAULT_FBRX_SIZE
+#define FBRX_START R_DEFAULT_FBRX_ADDR
+#define FBRX_SIZE  R_DEFAULT_FBRX_SIZE
 
 /* Area Names */
 
@@ -40,7 +42,8 @@ typedef enum FirmwareRegisterArea {
     REG_AREA_INFO = 0u,
     REG_AREA_INDEX,
     REG_AREA_IFC,
-    REG_AREA_FB
+    REG_AREA_FBTX,
+    REG_AREA_FBRX
 } FirmwareRegisterArea;
 
 /* Register Names */
