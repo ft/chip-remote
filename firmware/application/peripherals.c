@@ -183,33 +183,38 @@ peripheral_check(void)
  * Generate list of actively exposed peripherals
  */
 
-#define MAKE_SPI_CTRL(ID)                                       \
-    struct peripheral_control spi##ID##_ctrl = {                \
-        .type = PERIPH_TYPE_SPI,                                \
-        .dev = DEVICE_DT_GET(DT_CHOSEN(chipremote_spi##ID)),    \
-        .backend.spi.ctrl = {                                   \
-            .framelength = R_SPI##ID##_FLEN,                    \
-            .clockrate   = R_SPI##ID##_RATE,                    \
-            .flags       = R_SPI##ID##_FLAGS,                   \
-        },                                                      \
-        .backend.spi.flags = 0u,                                \
-        .backend.spi.cfg = NULL,                                \
-        .backend.spi.cfg_a = {                                  \
-            .cs = {                                             \
-                .gpio = {                                       \
-                    .port = DEVICE_DT_GET(DT_NODELABEL(gpiod)), \
-                    .pin = 14                                   \
-                },                                              \
-                .delay = 2                                      \
-            },                                                  \
-            .frequency = 1000000ul,                             \
-            .operation = (  SPI_OP_MODE_MASTER                  \
-                          | SPI_TRANSFER_MSB                    \
-                          | SPI_WORD_SET(8))                    \
-        },                                                      \
-        .cmd         = R_SPI##ID##_CMD,                         \
-        .cmdarg      = R_SPI##ID##_CMDARG,                      \
-        .cmdstatus   = R_SPI##ID##_STATUS                       \
+#define spi(ID) DT_CHOSEN(chipremote_spi##ID)
+#define PAPI_SPI(ID) DEVICE_DT_GET(spi(ID))
+#ifdef CONFIG_ARCH_POSIX
+#define PAPI_SPI_CS(ID) {}
+#else
+#define PAPI_SPI_CS(ID) GPIO_DT_SPEC_GET_BY_IDX(spi(ID), cs_gpios, 0)
+#endif /* CONFIG_ARCH_POSIX */
+
+#define MAKE_SPI_CTRL(ID)                               \
+    struct peripheral_control spi##ID##_ctrl = {        \
+        .type = PERIPH_TYPE_SPI,                        \
+        .dev = PAPI_SPI(ID),                            \
+        .backend.spi.ctrl = {                           \
+            .framelength = R_SPI##ID##_FLEN,            \
+            .clockrate   = R_SPI##ID##_RATE,            \
+            .flags       = R_SPI##ID##_FLAGS,           \
+        },                                              \
+        .backend.spi.flags = 0u,                        \
+        .backend.spi.cfg = NULL,                        \
+        .backend.spi.cfg_a = {                          \
+            .cs = {                                     \
+                .gpio = PAPI_SPI_CS(ID),                \
+                .delay = 2u                             \
+            },                                          \
+            .frequency = 1000000ul,                     \
+            .operation = (  SPI_OP_MODE_MASTER          \
+                            | SPI_TRANSFER_MSB          \
+                            | SPI_WORD_SET(8))          \
+        },                                              \
+        .cmd         = R_SPI##ID##_CMD,                 \
+        .cmdarg      = R_SPI##ID##_CMDARG,              \
+        .cmdstatus   = R_SPI##ID##_STATUS               \
     }
 
 #ifdef CR_WITH_SPI_0
