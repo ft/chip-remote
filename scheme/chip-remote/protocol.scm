@@ -1,6 +1,48 @@
-;; Copyright (c) 2011-2021 chip-remote workers, All rights reserved.
+;; Copyright (c) 2011-2024 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
+
+;; This is the implementation of chip-remote's  high-level protocol on top of a
+;; low-level memory transferral protocol. From the  point of view of a chip-re-
+;; mote user it is still fairly low-level.  You would normally not use it your-
+;; self.  It is a vehicle  to interact  with chips behind  the interface-bridge
+;; that is implemented  by the chip-remote firmware.  The high-level modules of
+;; the library are the users of this module.
+;;
+;; The most important procedures in this module are:
+;;
+;;   - make-cr-connection!
+;;       Generates a new chip-remote connection object, that will be used with
+;;       all parts pf the API of this module.
+;;
+;;   - proto-engage!
+;;       Performs service discovery with the  remote firmware. This exposes the
+;;       peripheral interfaces the remote firmware  supports on its given hard-
+;;       ware platform.
+;;
+;;   - proto-interfaces
+;;       Returns a list  of symbols that name the  peripherals available within
+;;       the remote firmware.
+;;
+;;   - cr:spi-transceive!
+;;       This performs an SPI transaction with a given list of words to send to
+;;       the remote firmware  and returns a list of words  received in the pro-
+;;       cess.
+;;
+;;   - cr:i2c-transceive!
+;;       This is similar to cr:spi-transceive!, except that it works for I²C
+;;       peripherals. The specifications of I²C messages is a little more com-
+;;       plicated than with SPI, and is described with the procedure.
+;;
+;; The other parts of the API  are mostly interesting for developers. The parts
+;; mentioned here might be interesting for users that want to do extremely low-
+;; level interactions without being interfered by the higher-level logic.
+;;
+;; The names of all procedures that  have notable side-effects end in an excla-
+;; mation point.  Since this module  does the heavy  lifting of talking  to the
+;; outside world, that makes up most of the API.
+;;
+;; Note that the API names may not be final, yet.
 
 (define-module (chip-remote protocol)
   #:use-module (ice-9 match)
