@@ -24,6 +24,7 @@
             cr-index
             cr-interfaces
             cr-access
+            cr-low-level
             proto-engage!
             proto-get-ifc-ctrl!
             proto-interfaces
