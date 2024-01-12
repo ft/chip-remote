@@ -46,18 +46,18 @@
 ;; controlled via register tables, it has  many utilities to work with register
 ;; tables, which makes using this kind of protocol a neat fit.
 ;;
-;; The chip-remote  protocol is therefore  an access scheme upon  this register
-;; table. This scheme support service discovery by an index of peripheraly made
-;; accessible by the firware. The address of  this index is encoded in the sta-
-;; tic part of the register table.
+;; The chip-remote protocol is therefore  a protocol that specifies accesses on
+;; top of this register table. This  scheme support service discovery by an in-
+;; dex of peripherals made accessible by  the firmware. The address of this in-
+;; dex is encoded in the static part of the register table.
 ;;
 ;; The index  itself consists of  a length  register (u16) followed  by exactly
 ;; that many  u32 registers that encode  the address of the  peripheral control
 ;; block.
 ;;
-;; The format of  peripheral control blocks are dependant on  the type of peri-
-;; pheral. But they all start with a u16 register that encodes the type of con-
-;; trol block.
+;; The format  of peripheral control blocks  depend on the type  of peripheral.
+;; However, they all start with a u16 register that encodes the type of control
+;; block.
 ;;
 ;; This scheme allows a remote client  to dynamically work out the complete re-
 ;; gister table of the remote firmware,  offering the user a coherent interface
