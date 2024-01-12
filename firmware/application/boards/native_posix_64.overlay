@@ -17,8 +17,28 @@
                 clock-frequency = <2000000>;
         };
 
+        i2c_text_0: i2c@30000 {
+                compatible = "ufw,i2c-text";
+                status = "okay";
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0x30000 0x10>;
+                clock-frequency = <2000000>;
+        };
+
+        i2c_text_1: i2c@40000 {
+                compatible = "ufw,i2c-text";
+                status = "okay";
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0x40000 0x10>;
+                clock-frequency = <2000000>;
+        };
+
         chosen {
                 chipremote,spi0 = &spi_text_0;
                 chipremote,spi1 = &spi_text_1;
+                chipremote,i2c0 = &i2c_text_0;
+                chipremote,i2c1 = &i2c_text_1;
         };
 };

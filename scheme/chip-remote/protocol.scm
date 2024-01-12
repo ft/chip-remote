@@ -9,6 +9,7 @@
   #:use-module (rnrs bytevectors gnu)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
+  #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote modify)
   #:use-module (chip-remote register-map)
@@ -29,7 +30,11 @@
             cr:setup-spi!
             cr:ctrl-comand!
             cr:load-tx-frame-buffer!
-            cr:fetch-rx-frame-buffer!))
+            cr:fetch-rx-frame-buffer!
+            cr:load-i2c-message!
+            cr:fetch-i2c-rx-sections!
+            cr:i2c-transceive!
+            cr:spi-transceive!))
 
 (define (pp obj) (pretty-print obj #:width 80 #:max-expr-width 100))
 
@@ -117,24 +122,28 @@
                                         (lambda (n) (- n 2))
                                         (1+ (* 2 (1- size)))))))
 
-;; This is the interface control block for SPI peripherals.
-(define-register-map ifc:spi
-  #:table*
-  (#x0000 interface-type-register)
-  (#x0001 (generate-u16-register frame-length))
-  (#x0002 (generate-u32-register clock-rate))
-  (#x0004 (generate-register #:contents
-                             (cs-active-low?       0 1 #:default #t)
-                             (bit-order-msb-first? 1 1 #:default #t)
-                             (clock-idle-low?      2 1 #:default #t)
-                             (clock-phase-delay?   3 1 #:default #f)))
-  (#x0005 (generate-u16-register tx-frame-buffer-size))
-  (#x0006 (generate-u32-register tx-frame-buffer-address))
-  (#x0008 (generate-u16-register rx-frame-buffer-size))
-  (#x0009 (generate-u32-register rx-frame-buffer-address))
-  (#x000b (generate-u16-register command))
-  (#x000c (generate-u32-register command-argument))
-  (#x000e (generate-u32-register command-status)))
+(define control-table-header (list interface-type-register))
+(define control-table-footer (list
+                              (generate-u16-register tx-frame-buffer-size)
+                              (generate-u32-register tx-frame-buffer-address)
+                              (generate-u16-register tx-frame-buffer-size)
+                              (generate-u32-register tx-frame-buffer-address)
+                              (generate-u16-register command)
+                              (generate-u32-register command-argument)
+                              (generate-u32-register command-status)))
+
+(define (generate-control-table . lst)
+  (let loop ((rest (append control-table-header lst control-table-footer))
+             (address 0))
+    (if (null? rest)
+        '()
+        (let ((reg (car rest)))
+          (cons (cons address reg)
+                (loop (cdr rest)
+                      (+ address (proto-register-width reg 16))))))))
+
+(define-syntax-rule (define-control-block name exp ...)
+  (define name (make-register-map #:table (generate-control-table exp ...))))
 
 (define (interface-size rm)
   (let* ((table (register-map-table:sorted rm))
@@ -144,14 +153,84 @@
                  (proto-register-width (cdr finish) 16))))
     (- end start)))
 
-(define (make-spi-config-rm rm)
-  (let* ((table (take (drop (register-map-table:sorted rm) 1) 3))
+(define (make-config-rm rm)
+  (let* ((table (drop-right (drop (register-map-table:sorted rm)
+                                  (length control-table-header))
+                            (length control-table-footer)))
          (start (caar table))
          (new (make-register-map #:table (map (lambda (e)
                                                 (cons (- (car e) start)
                                                       (cdr e)))
                                               table))))
     (list start (interface-size new) new)))
+
+;; This is the interface control block for SPI peripherals.
+(define-control-block ifc:spi
+  (generate-u16-register frame-length)
+  (generate-u32-register clock-rate)
+  (generate-register #:contents
+                     (cs-active-low?       0 1 #:default #t)
+                     (bit-order-msb-first? 1 1 #:default #t)
+                     (clock-idle-low?      2 1 #:default #t)
+                     (clock-phase-delay?   3 1 #:default #f)))
+
+;; This is the interface control block for I²C peripherals.
+(define-semantics i2c-speed-grade lookup '((standard  . 0)
+                                           (fast      . 1)
+                                           (fast-plus . 2)
+                                           (high      . 3)
+                                           (ultra     . 4)))
+
+;; I2C messages are (potentially) made of multiple sections, that can be either
+;; read or write accesses. A message can have an arbitrary amount of these.
+;;
+;; We will encode the message specification in the beginning of the TX frame
+;; buffer of the chip-remote firmware interface. Each message section will be
+;; encoded in either one or two octets (a: access [1: write, 0: read], l:
+;; length [1: 2 octets, 0: 1 octet], x: end marker [1: end of section list, 0:
+;; next word belongs to section spec]):
+;;
+;;    alxSSSSS [SSSSSSSS]
+;;    00.SSSSS              read   5 bit length
+;;    10.SSSSS              write  5 bit length
+;;    01.SSSSS  SSSSSSSS    read  13 bit length
+;;    11.SSSSS  SSSSSSSS    write 13 bit length
+;;    ??1?????  ????????    end of message spec.
+;;
+;; Example:
+;;
+;;     0x4 0xa8:
+;;       Message with two sections:
+;;         - Read 4 octets
+;;         - Write 8 octets
+;;      The message spec here is 2 octets and there is one write access
+;;      consisting of 8 octets, so the TX framebuffer needs to keep 10
+;;      octets in total. The RX framebuffer must be able to fit 4 octets.
+;;
+;;     0xc0 0x20 0x82 0xe0 0x40:
+;;       Message with three sections:
+;;         - Write 32 octets
+;;         - Read 2 octets
+;;         - Write 64 octets
+;;       Here the spec is 5 octets long, since there are two extended
+;;       size sections. There are two write sections, one consisting of
+;;       32 and one consisting of 64 octets. Thus, the TX framebuffer
+;;       must be able to fit 5+32+64=101 octets. The RX framebuffer only
+;;       has to fit 2 octets.
+;;
+;; With this, the message structures can point to places in the frame
+;; buffers and the complexity of the messages is only limited by the
+;; size of the framebuffer. (Plus the firmware implementation, which
+;; will limit the maximum number of sections in a message.)
+
+(define-control-block ifc:i2c
+  (generate-register #:contents
+                     (speed 0 3
+                            #:semantics* i2c-speed-grade
+                            #:default 'standard)
+                     (address-10-bit? 3 1 #:default #f))
+  (generate-u16-register chip-address))
+
 
 (define ctrl-commands '((init     . 0)
                         (transmit . 1)))
@@ -279,21 +358,28 @@
                                                  interface-type-register)))))
                 idx))))))
 
+
 (define (proto-generate-access! c)
-  (set-cr-access!
-   c
-   (let loop ((rest (cr-interfaces c)) (spi 0))
-     (if (null? rest)
-         '()
-         (let ((address (caar rest))
-               (type (cdar rest)))
-           (cons (case type
-                   ((spi) (list (symbol-append 'spi- (number->symbol spi))
-                                address
-                                (interface-size ifc:spi)
-                                ifc:spi))
-                   (else (throw 'unknown-interface-type type)))
-                 (loop (cdr rest) (if (eq? type 'spi) (1+ spi) spi))))))))
+  (define (make-access prefix index address ctrl)
+    (list (symbol-append prefix (number->symbol index))
+          address
+          (interface-size ctrl)
+          ctrl))
+  (define (maybe+1 actual expect idx)
+    (if (eq? actual expect) (1+ idx) idx))
+  (set-cr-access! c (let loop ((rest (cr-interfaces c)) (spi 0) (i2c 0))
+                      (if (null? rest)
+                          '()
+                          (let ((address (caar rest))
+                                (type (cdar rest)))
+                            (cons
+                             (case type
+                               ((spi) (make-access 'spi- spi address ifc:spi))
+                               ((i2c) (make-access 'i2c- i2c address ifc:i2c))
+                               (else (throw 'unknown-interface-type type)))
+                             (loop (cdr rest)
+                                   (maybe+1 type 'spi spi)
+                                   (maybe+1 type 'i2c i2c))))))))
 
 (define (proto-engage! c)
   (let* ((table (register-map-table crfw-static))
@@ -338,7 +424,7 @@
   (let ((access (proto-get-ifc-access c spi-n)))
     (match access
       ((address size spec)
-       (match (make-spi-config-rm spec)
+       (match (make-config-rm spec)
          ((start size cfg)
           (let ((response (regp:read-request! (cr-low-level c)
                                               (+ start address)
@@ -375,7 +461,8 @@
 (define (proto-read-register! c ifc name)
   (let* ((access (proto-get-ifc-access c ifc))
          (start (first access))
-         (addr+reg (ifc:find-register (third access) name))
+         (addr+reg (or (ifc:find-register (third access) name)
+                       (throw 'unknown-register (third access) name)))
          (response
           (regp:read-request! (cr-low-level c)
                               (+ start (car addr+reg))
@@ -384,6 +471,11 @@
       (throw 'protocol-error response))
     (bytevector-uint-ref (assq-ref response 'payload)
                          0 'big (* 2 (assq-ref response 'block-size)))))
+
+(define (maybe-read-register! c ifc name)
+  (catch 'unknown-register
+    (lambda () (proto-read-register! c ifc name))
+    (lambda _ #f)))
 
 (define* (cr:ctrl-comand! c ifc cmd #:optional arg)
   (and arg (proto-write-register! c ifc 'command-argument arg))
@@ -400,7 +492,7 @@
     (+ k (modulo k 2))))
 
 (define (cr:load-tx-frame-buffer! c ifc lst)
-  (let* ((frame-length (proto-read-register! c ifc 'frame-length))
+  (let* ((frame-length (or (maybe-read-register! c ifc 'frame-length) 8))
          (fb-size (proto-read-register! c ifc 'tx-frame-buffer-size))
          (fb-bytes (octet-address fb-size))
          (required-bytes (required-fb-size frame-length (length lst))))
@@ -418,7 +510,7 @@
           (throw 'protocol-error response))))))
 
 (define (cr:fetch-rx-frame-buffer! c ifc n)
-  (let* ((frame-length (proto-read-register! c ifc 'frame-length))
+  (let* ((frame-length (or (maybe-read-register! c ifc 'frame-length) 8))
          (bytes-per-word (word-width-to-fit frame-length 8))
          (fb-size (proto-read-register! c ifc 'tx-frame-buffer-size))
          (fb-bytes (octet-address fb-size))
@@ -436,3 +528,103 @@
                                              'big bytes-per-word))
                       1-
                       n)))))
+
+(define (in-range? n lower upper)
+  (and (>= n lower)
+       (<= n upper)))
+
+(define (i2c-what-section-size? n)
+  (cond ((in-range? n 0 31)    'short)
+        ((in-range? n 32 8191) 'extended)
+        (else 'too-large)))
+
+(define (i2c-msg-size lst)
+  (fold (lambda (e acc)
+          (let* ((n (if (bytevector? e)
+                        (bytevector-length e)
+                        e))
+                 (s (if (eq? 'short (i2c-what-section-size? n)) 1 2))
+                 (m (if (bytevector? e) n 0)))
+            (+ acc s m)))
+        0 lst))
+
+(define (make-i2c-spec-value w? e? l? n)
+  (logior (ash (logior (if w? #x80 0)
+                       (if e? #x40 0)
+                       (if l? #x20 0))
+               (if e? 8 0))
+          (logand n (one-bits (if e? 13 5)))))
+
+(define (i2c-encode-spec! block lst)
+  (let loop ((rest lst) (offset 0))
+    (if (null? rest)
+        offset
+        (let* ((e (car rest))
+               (last? (null? (cdr rest)))
+               (write? (bytevector? e))
+               (n (if write? (bytevector-length e) e))
+               (extended? (case (i2c-what-section-size? n)
+                            ((short) #f)
+                            ((extended) #t)
+                            (else (throw 'i2c-section-too-large n))))
+               (size (if extended? 2 1)))
+          (bytevector-uint-set! block offset
+                                (make-i2c-spec-value write? extended? last? n)
+                                'big size)
+          (loop (cdr rest) (+ offset size))))))
+
+(define (i2c-encode-tx! block offset lst)
+  (let loop ((rest lst) (offset offset))
+    (if (null? rest)
+        #t
+        (let* ((chunk (car rest))
+               (n (bytevector-length chunk)))
+          (bytevector-copy! chunk 0 block offset n)
+          (loop (cdr rest) (+ offset n))))))
+
+(define (maybe-pad n)
+  (+ n (logand n 1)))
+
+(define (cr:load-i2c-message! c ifc lst)
+  "Upload a message to the firmware's tx framebuffer.
+
+The message is described by the contents of LST. Bytevectors describe write
+sections of a message, and integers describe the length of read sections.
+
+After loading, the message can be send using the transmit command.
+
+The read back data will be available in the RX frame buffer afterwards."
+  (let* ((n (i2c-msg-size lst))
+         (block (make-bytevector (maybe-pad n)))
+         (txoffset (i2c-encode-spec! block lst)))
+    (i2c-encode-tx! block txoffset (filter bytevector? lst))
+    (let* ((address (proto-read-register! c ifc 'tx-frame-buffer-address))
+           (response (regp:write-request! (cr-low-level c) address block)))
+      (unless (regp:valid-ack? response)
+        (throw 'protocol-error response)))))
+
+(define (cr:fetch-i2c-rx-sections! c ifc lst)
+  (cr:fetch-rx-frame-buffer! c ifc (apply + lst)))
+
+(define (cr:i2c-transceive! c ifc lst)
+  "Perform a full I2C transaction.
+
+This loads the TX framebuffer, performs a transaction and then retrieves the
+data from the RX framebuffer."
+  (cr:load-i2c-message! c ifc lst)
+  (let ((rc (cr:ctrl-comand! c ifc 'transmit)))
+    (if (zero? rc)
+        (cr:fetch-i2c-rx-sections! c ifc (filter integer? lst))
+        rc)))
+
+(define (cr:spi-transceive! c ifc lst)
+  "Perform a full SPI transaction.
+
+This loads the TX framebuffer, performs a transaction and then retrieves the
+data from the RX framebuffer."
+  (let ((n (length lst)))
+    (cr:load-tx-frame-buffer! c ifc lst)
+    (let ((rc (cr:ctrl-comand! c ifc 'transmit n)))
+      (if (zero? rc)
+          (cr:fetch-rx-frame-buffer! c ifc n)
+          rc))))

@@ -5,6 +5,7 @@
  */
 
 #include <zephyr/device.h>
+#include <zephyr/drivers/i2c.h>
 #include <zephyr/drivers/spi.h>
 
 #include <stddef.h>
@@ -50,7 +51,10 @@ update_u32(const RegisterHandle r, const uint32_t value)
 
 #define PSTATUS_SUCCESS          0ul
 #define PSTATUS_ARG_OUT_OF_RANGE 1ul
-#define PSTATUS_INTERNAL_ERROR   2ul
+#define PSTATUS_INVALID_CONFIG   2ul
+#define PSTATUS_TX_OVERFLOW      3ul
+#define PSTATUS_RX_OVERFLOW      4ul
+#define PSTATUS_INTERNAL_ERROR   5ul
 #define PSTATUS_INVALID_COMMAND  UINT32_MAX
 
 struct peripheral_api {
@@ -59,12 +63,19 @@ struct peripheral_api {
 };
 
 static void papi_spi_init(struct peripheral_control *ctrl);
+static void papi_i2c_init(struct peripheral_control *ctrl);
+
 static void papi_spi_transmit(struct peripheral_control *ctrl);
+static void papi_i2c_transmit(struct peripheral_control *ctrl);
 
 struct peripheral_api papi[] = {
     [PERIPH_TYPE_SPI] = {
         .init = papi_spi_init,
         .transmit = papi_spi_transmit
+    },
+    [PERIPH_TYPE_I2C] = {
+        .init = papi_i2c_init,
+        .transmit = papi_i2c_transmit
     }
 };
 
@@ -129,7 +140,6 @@ papi_spi_transmit(struct peripheral_control *ctrl)
     struct spi_buf rx_buf[] = {{ .buf = fbrx, .len = wsize * arg.value.u32 }};
     struct spi_buf_set tx = { .buffers = tx_buf, .count = 1 };
     struct spi_buf_set rx = { .buffers = rx_buf, .count = 1 };
-    printk("# %s %d\n", spi->cfg->cs.gpio.port->name, spi->cfg->cs.gpio.pin);
     const int rc = spi_transceive(ctrl->dev, spi->cfg, &tx, &rx);
     if (rc < 0) {
         update_u32(ctrl->cmdstatus, PSTATUS_INTERNAL_ERROR);
@@ -141,9 +151,140 @@ papi_spi_transmit(struct peripheral_control *ctrl)
     }
 }
 
-#define PAPI(var, ucmd, lcmd)                   \
-    (cmd == PERIPH_COMMAND_##ucmd               \
-  && papi[var->type].lcmd != NULL)
+#define CR_I2C_SPEED_STANDARD 0u
+#define CR_I2C_SPEED_FAST     1u
+#define CR_I2C_SPEED_FASTPLUS 2u
+#define CR_I2C_SPEED_HIGH     3u
+#define CR_I2C_SPEED_ULTRA    4u
+
+static void
+papi_i2c_init(struct peripheral_control *ctrl)
+{
+    RegisterValue cfgreg;
+    register_get(&registers, ctrl->backend.i2c.ctrl.config, &cfgreg);
+    uint32_t config = I2C_MODE_CONTROLLER;
+    switch (cfgreg.value.u16 & 0x07u) {
+    case CR_I2C_SPEED_STANDARD:
+        config |= I2C_SPEED_SET(I2C_SPEED_STANDARD);
+        break;
+    case CR_I2C_SPEED_FAST:
+        config |= I2C_SPEED_SET(I2C_SPEED_FAST);
+        break;
+    case CR_I2C_SPEED_FASTPLUS:
+        config |= I2C_SPEED_SET(I2C_SPEED_FAST_PLUS);
+        break;
+    case CR_I2C_SPEED_HIGH:
+        config |= I2C_SPEED_SET(I2C_SPEED_HIGH);
+        break;
+    case CR_I2C_SPEED_ULTRA:
+        config |= I2C_SPEED_SET(I2C_SPEED_ULTRA);
+        break;
+    default:
+        update_u32(ctrl->cmdstatus, PSTATUS_INVALID_CONFIG);
+        return;
+    }
+    const int rc = i2c_configure(ctrl->dev, config);
+    update_u32(ctrl->cmdstatus,
+               (rc < 0)
+               ? PSTATUS_INTERNAL_ERROR
+               : PSTATUS_SUCCESS);
+}
+
+#define PAPI_I2C_CFG_10bit_MASK  0x80u
+
+#define PAPI_I2C_WRITE_MASK    0x80u
+#define PAPI_I2C_EXTENDED_MASK 0x40u
+#define PAPI_I2C_END_MASK      0x20u
+#define PAPI_I2C_LENGTH_MASK   0x1fu
+
+static void
+papi_i2c_transmit(struct peripheral_control *ctrl)
+{
+    struct i2c_msg msg[CONFIG_CR_MAX_I2C_SECTIONS];
+    size_t nmsg = 0u;
+    size_t pos = 0u;
+    size_t txoffset = 0u;
+    size_t rxoffset = 0u;
+
+    RegisterValue config;
+    register_get(&registers, ctrl->backend.i2c.ctrl.config, &config);
+    const bool use10bitaddr = config.value.u16 & PAPI_I2C_CFG_10bit_MASK;
+
+    unsigned char *fbtx = (void*)registers.area[REG_AREA_FBTX].mem;
+    unsigned char *fbrx = (void*)registers.area[REG_AREA_FBRX].mem;
+
+    for (;;) {
+        if (fbtx[pos] & PAPI_I2C_END_MASK) {
+            txoffset = pos + (fbtx[pos] & PAPI_I2C_END_MASK ? 1u : 0u);
+            break;
+        }
+        pos++;
+        if (pos >= R_DEFAULT_FBTX_SIZE) {
+            update_u32(ctrl->cmdstatus, PSTATUS_TX_OVERFLOW);
+            return;
+        }
+    }
+
+    if (txoffset >= R_DEFAULT_FBTX_SIZE) {
+        update_u32(ctrl->cmdstatus, PSTATUS_TX_OVERFLOW);
+        return;
+    }
+
+    pos = 0u;
+    for (;;) {
+        const bool iswrite = fbtx[pos] & PAPI_I2C_WRITE_MASK;
+        const bool islast = fbtx[pos] & PAPI_I2C_END_MASK;
+        msg[nmsg].flags = iswrite ? I2C_MSG_WRITE : 0u;
+        msg[nmsg].flags |= use10bitaddr ? I2C_MSG_ADDR_10_BITS : 0u;
+        msg[nmsg].flags |= islast ? I2C_MSG_STOP : 0u;
+        size_t len = fbtx[pos] & PAPI_I2C_LENGTH_MASK;
+        if (fbtx[pos] & PAPI_I2C_EXTENDED_MASK) {
+            pos++;
+            len <<= 8u;
+            len |= fbtx[pos];
+        }
+        msg[nmsg].len = len;
+        if (iswrite) {
+            printk("i2c: Write of %zu octets.\n", len);
+            msg[nmsg].buf = fbtx + txoffset;
+            txoffset += len;
+        } else {
+            printk("i2c: Read of %zu octets.\n", len);
+            msg[nmsg].buf = fbrx + rxoffset;
+            rxoffset += len;
+        }
+        if (islast) {
+            printk("i2c: End spec found.\n");
+            break;
+        }
+        nmsg++;
+        pos++;
+        if (nmsg >= CONFIG_CR_MAX_I2C_SECTIONS) {
+            update_u32(ctrl->cmdstatus, PSTATUS_ARG_OUT_OF_RANGE);
+            return;
+        }
+        if (pos >= R_DEFAULT_FBTX_SIZE || txoffset >= R_DEFAULT_FBTX_SIZE) {
+            update_u32(ctrl->cmdstatus, PSTATUS_TX_OVERFLOW);
+            return;
+        }
+        if (rxoffset >= R_DEFAULT_FBRX_SIZE) {
+            update_u32(ctrl->cmdstatus, PSTATUS_RX_OVERFLOW);
+            return;
+        }
+    }
+
+    RegisterValue address;
+    register_get(&registers, ctrl->backend.i2c.ctrl.address, &address);
+    const int rc = i2c_transfer(ctrl->dev, msg, nmsg, address.value.u16);
+
+    update_u32(ctrl->cmdstatus,
+               (rc < 0)
+               ? PSTATUS_INTERNAL_ERROR
+               : PSTATUS_SUCCESS);
+}
+
+#define PAPI(var, ucmd, lcmd)                                           \
+    (cmd == PERIPH_COMMAND_##ucmd && papi[var->type].lcmd != NULL)
 
 void
 process_command(RegisterTable *t,
@@ -151,7 +292,7 @@ process_command(RegisterTable *t,
                 const RPFrame *f)
 {
     const uint32_t cmd = bf_ref_u16b(f->payload.data);
-    printk("Got spi command: %u\n", cmd);
+    printk("papi: Got command: %u\n", cmd);
     if (PAPI(ctrl, INIT, init)) {
         papi[ctrl->type].init(ctrl);
     } else if (PAPI(ctrl, TRANSMIT, transmit)) {
@@ -217,6 +358,21 @@ peripheral_check(void)
         .cmdstatus   = R_SPI##ID##_STATUS               \
     }
 
+#define i2c(ID) DT_CHOSEN(chipremote_i2c##ID)
+#define PAPI_I2C(ID) DEVICE_DT_GET(i2c(ID))
+
+#define MAKE_I2C_CTRL(ID)                                       \
+    struct peripheral_control i2c##ID##_ctrl = {                \
+        .type = PERIPH_TYPE_I2C,                                \
+        .dev = PAPI_I2C(ID),                                    \
+        .backend.i2c.ctrl = {                                   \
+            .config = R_I2C##ID##_CONFIG                        \
+        },                                                      \
+        .cmd         = R_I2C##ID##_CMD,                         \
+        .cmdarg      = R_I2C##ID##_CMDARG,                      \
+        .cmdstatus   = R_I2C##ID##_STATUS                       \
+    }
+
 #ifdef CR_WITH_SPI_0
 MAKE_SPI_CTRL(0);
 #endif /* CR_WITH_SPI_0 */
@@ -225,6 +381,14 @@ MAKE_SPI_CTRL(0);
 MAKE_SPI_CTRL(1);
 #endif /* CR_WITH_SPI_1 */
 
+#ifdef CR_WITH_I2C_0
+MAKE_I2C_CTRL(0);
+#endif /* CR_WITH_I2C_0 */
+
+#ifdef CR_WITH_I2C_1
+MAKE_I2C_CTRL(1);
+#endif /* CR_WITH_I2C_1 */
+
 struct peripheral_control *periph_ctrl[] = {
 #ifdef CR_WITH_SPI_0
     &spi0_ctrl,
@@ -232,5 +396,11 @@ struct peripheral_control *periph_ctrl[] = {
 #ifdef CR_WITH_SPI_1
     &spi1_ctrl,
 #endif /* CR_WITH_SPI_1 */
+#ifdef CR_WITH_I2C_0
+    &i2c0_ctrl,
+#endif /* CR_WITH_I2C_0 */
+#ifdef CR_WITH_I2C_1
+    &i2c1_ctrl,
+#endif /* CR_WITH_I2C_1 */
     NULL
 };

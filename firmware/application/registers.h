@@ -70,12 +70,24 @@ typedef enum FirmwareRegister {
 #ifdef CR_WITH_SPI_1
     R_IDX_SPI1,
 #endif /* CR_WITH_SPI_1 */
+#ifdef CR_WITH_I2C_0
+    R_IDX_I2C0,
+#endif /* CR_WITH_I2C_0 */
+#ifdef CR_WITH_I2C_1
+    R_IDX_I2C1,
+#endif /* CR_WITH_I2C_1 */
 #ifdef CR_WITH_SPI_0
     IFC_SPI_NAMES(0),
 #endif /* CR_WITH_SPI_0 */
 #ifdef CR_WITH_SPI_1
-    IFC_SPI_NAMES(1)
+    IFC_SPI_NAMES(1),
 #endif /* CR_WITH_SPI_1 */
+#ifdef CR_WITH_I2C_0
+    IFC_I2C_NAMES(0),
+#endif /* CR_WITH_I2C_0 */
+#ifdef CR_WITH_I2C_1
+    IFC_I2C_NAMES(1)
+#endif /* CR_WITH_I2C_1 */
 } FirmwareRegister;
 
 RPBlockAccess regwrite(uint32_t address, size_t n, const uint16_t *value);

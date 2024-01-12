@@ -7,6 +7,10 @@
 /* A bit of a generic name there zephyr, but alright. */
 #include <version.h>
 
+#ifdef CONFIG_ARCH_POSIX
+#define REGISTER_TABLE_WITH_NAMES
+#endif /* CONFIG_ARCH_POSIX */
+
 #include <ufw/register-protocol.h>
 #include <ufw/register-table.h>
 #include <ufw/meta.h>
@@ -54,15 +58,26 @@ RegisterTable registers = {
         REG_U32(R_IDX_SPI0,      INDEX(FW_IDX_SPI0), FW_IFC_SPI0_OFFSET),
 #endif /* CR_WITH_SPI_0 */
 #ifdef CR_WITH_SPI_1
-        /* TODO: The offset for this needs to be generated too. */
         REG_U32(R_IDX_SPI1,      INDEX(FW_IDX_SPI1), FW_IFC_SPI1_OFFSET),
 #endif /* CR_WITH_SPI_1 */
+#ifdef CR_WITH_I2C_0
+        REG_U32(R_IDX_I2C0,      INDEX(FW_IDX_I2C0), FW_IFC_I2C0_OFFSET),
+#endif /* CR_WITH_I2C_0 */
+#ifdef CR_WITH_I2C_1
+        REG_U32(R_IDX_I2C1,      INDEX(FW_IDX_I2C1), FW_IFC_I2C1_OFFSET),
+#endif /* CR_WITH_I2C_1 */
 #ifdef CR_WITH_SPI_0
         IFC_SPI(0, FW_IFC_SPI0_OFFSET),
 #endif /* CR_WITH_SPI_0 */
 #ifdef CR_WITH_SPI_1
         IFC_SPI(1, FW_IFC_SPI1_OFFSET),
 #endif /* CR_WITH_SPI_1 */
+#ifdef CR_WITH_I2C_0
+        IFC_I2C(0, FW_IFC_I2C0_OFFSET),
+#endif /* CR_WITH_I2C_0 */
+#ifdef CR_WITH_I2C_1
+        IFC_I2C(1, FW_IFC_I2C1_OFFSET),
+#endif /* CR_WITH_I2C_1 */
         REGISTER_ENTRY_END
     }
 };

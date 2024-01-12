@@ -17,6 +17,14 @@
 #define CR_WITH_SPI_1
 #endif /* cr_spi_1 */
 
+#if DT_NODE_EXISTS(DT_CHOSEN(chipremote_i2c0))
+#define CR_WITH_I2C_0
+#endif /* cr_i2c_0 */
+
+#if DT_NODE_EXISTS(DT_CHOSEN(chipremote_i2c1))
+#define CR_WITH_I2C_1
+#endif /* cr_i2c_1 */
+
 /* Common Interface Definitions */
 
 #define R_DEFAULT_FBTX_SIZE 0x40u
@@ -38,18 +46,40 @@
 #define CR__CNT_SPI1 0u
 #endif /* CR_WITH_SPI_1 */
 
-#define FW_IFC_SPI_SIZE    16u
+#ifdef CR_WITH_I2C_0
+#define CR__CNT_I2C0 1u
+#else
+#define CR__CNT_I2C0 0u
+#endif /* CR_WITH_I2C_0 */
+
+#ifdef CR_WITH_I2C_1
+#define CR__CNT_I2C1 1u
+#else
+#define CR__CNT_I2C1 0u
+#endif /* CR_WITH_I2C_1 */
+
+#define FW_IFC_SPI_SIZE 16u
+#define FW_IFC_I2C_SIZE 14u
+
 #define FW_IFC_SPI0_OFFSET IFC_START
 #define FW_IFC_SPI1_OFFSET (FW_IFC_SPI0_OFFSET + FW_IFC_SPI_SIZE * CR__CNT_SPI0)
 
-#define FW_IDX_SPI0 1
-#define FW_IDX_SPI1 (FW_IDX_SPI0 + 2 * CR__CNT_SPI0)
+#define FW_IFC_I2C0_OFFSET (FW_IFC_SPI1_OFFSET + FW_IFC_SPI_SIZE * CR__CNT_SPI1)
+#define FW_IFC_I2C1_OFFSET (FW_IFC_I2C0_OFFSET + FW_IFC_I2C_SIZE * CR__CNT_I2C0)
 
-#define FW_INTERFACE_COUNT (CR__CNT_SPI0 + CR__CNT_SPI1)
+#define ADDRREG_SIZE 2
+#define FW_IDX_SPI0 1
+#define FW_IDX_SPI1 (FW_IDX_SPI0 + ADDRREG_SIZE * CR__CNT_SPI0)
+#define FW_IDX_I2C0 (FW_IDX_SPI1 + ADDRREG_SIZE * CR__CNT_SPI1)
+#define FW_IDX_I2C1 (FW_IDX_I2C0 + ADDRREG_SIZE * CR__CNT_I2C0)
+
+#define FW_INTERFACE_COUNT (CR__CNT_SPI0 + CR__CNT_SPI1 +       \
+                            CR__CNT_I2C0 + CR__CNT_I2C1)
 
 /* Interface Types */
 
 #define R_TYPE_SPI 0u
+#define R_TYPE_I2C 1u
 
 /* SPI Interface */
 
@@ -90,5 +120,31 @@
     R_SPI##ID##_CMD,          \
     R_SPI##ID##_CMDARG,       \
     R_SPI##ID##_STATUS
+
+#define R_I2C_DEFAULT_CFG 0u
+
+#define IFC_I2C(ID, OFFSET)                                                 \
+    REG_U16FAIL(R_I2C##ID##_TYPE,     (OFFSET) +  0u, R_TYPE_I2C),          \
+    REG_U16(R_I2C##ID##_CONFIG,       (OFFSET) +  1u, R_I2C_DEFAULT_CFG),   \
+    REG_U16(R_I2C##ID##_CHIP_ADDRESS, (OFFSET) +  2u, 0u),                  \
+    REG_U16FAIL(R_I2C##ID##_FBTXSIZE, (OFFSET) +  3u, R_DEFAULT_FBTX_SIZE), \
+    REG_U32FAIL(R_I2C##ID##_FBTXADDR, (OFFSET) +  4u, R_DEFAULT_FBTX_ADDR), \
+    REG_U16FAIL(R_I2C##ID##_FBRXSIZE, (OFFSET) +  6u, R_DEFAULT_FBRX_SIZE), \
+    REG_U32FAIL(R_I2C##ID##_FBRXADDR, (OFFSET) +  7u, R_DEFAULT_FBRX_ADDR), \
+    REG_U16(R_I2C##ID##_CMD,          (OFFSET) +  9u, 0u),                  \
+    REG_U32(R_I2C##ID##_CMDARG,       (OFFSET) + 10u, 0u),                  \
+    REG_U32FAIL(R_I2C##ID##_STATUS,   (OFFSET) + 12u, 0u)
+
+#define IFC_I2C_NAMES(ID)     \
+    R_I2C##ID##_TYPE,         \
+    R_I2C##ID##_CONFIG,       \
+    R_I2C##ID##_CHIP_ADDRESS, \
+    R_I2C##ID##_FBTXSIZE,     \
+    R_I2C##ID##_FBTXADDR,     \
+    R_I2C##ID##_FBRXSIZE,     \
+    R_I2C##ID##_FBRXADDR,     \
+    R_I2C##ID##_CMD,          \
+    R_I2C##ID##_CMDARG,       \
+    R_I2C##ID##_STATUS
 
 #endif /* INC_INTERFACES_H_a63e12ee */

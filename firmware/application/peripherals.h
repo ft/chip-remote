@@ -9,12 +9,15 @@
 
 #include <zephyr/drivers/spi.h>
 
+#include <stdint.h>
+
 #include <ufw/register-protocol.h>
 
 #include "registers.h"
 
 enum peripheral_type {
-    PERIPH_TYPE_SPI = 0
+    PERIPH_TYPE_SPI = 0,
+    PERIPH_TYPE_I2C
 };
 
 struct spi_control {
@@ -31,14 +34,22 @@ struct peripheral_spi {
     uint32_t flags;
 };
 
+struct i2c_control {
+    FirmwareRegister config;
+    FirmwareRegister address;
+};
+
+struct peripheral_i2c {
+    struct i2c_control ctrl;
+};
+
 struct peripheral_control {
     enum peripheral_type type;
     const struct device *dev;
     union {
         struct peripheral_spi spi;
+        struct peripheral_i2c i2c;
     } backend;
-    FirmwareRegister fbsize;
-    FirmwareRegister fbaddr;
     FirmwareRegister cmd;
     FirmwareRegister cmdarg;
     FirmwareRegister cmdstatus;
