@@ -2,6 +2,8 @@
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
+;; TODO: I think META messages are not properly decoded.
+
 (define-module (protocol ufw-regp)
   #:use-module (ice-9 match)
   #:use-module (rnrs bytevectors)
@@ -13,29 +15,29 @@
   #:use-module (chip-remote utilities)
   #:use-module (protocol length-prefix)
   #:use-module (protocol slip)
-  #:export (regp:decode*              ; Low Level decode
-            regp:encode               ; Low Level encode
-            regp:encode-header        ; Low Level Header encode
-            regp:decode               ; High Level decode
-            regp:read-request         ; High Level encode
-            regp:write-request        ; High Level encode
-            regp:read-request!        ; Perform request on connection
-            regp:write-request!       ; Perform request on connection
-            regp:frame-errors         ; Frame type query
-            regp:frame-valid?         ; Frame type query
-            regp:acknowledge?         ; Frame type query
-            regp:valid-ack?           ; Frame type query
-            regp:tcp-connection       ; Connection generator
-            regp:serial-connection    ; Connection generator
-            regp:connection?          ; Connection predicate
-            regp:set-port!            ; Connection update
-            regp:framing              ; Connection query
-            regp:port                 ; Connection query
-            regp:word-size-16?        ; Connection query
-            regp:with-header-crc?     ; Connection query
-            regp:with-payload-crc?    ; Connection query
-            regp:send                 ; Connection primitive
-            regp:recv))               ; Connection primitive
+  #:export (regp:decode*                ; Low Level decode
+            regp:encode                 ; Low Level encode
+            regp:encode-header          ; Low Level Header encode
+            regp:decode                 ; High Level decode
+            regp:read-request           ; High Level encode
+            regp:write-request          ; High Level encode
+            regp:read-request!          ; Perform request on connection
+            regp:write-request!         ; Perform request on connection
+            regp:frame-errors           ; Frame type query
+            regp:frame-valid?           ; Frame type query
+            regp:acknowledge?           ; Frame type query
+            regp:valid-ack?             ; Frame type query
+            regp:tcp-connection         ; Connection generator
+            regp:serial-connection      ; Connection generator
+            regp:connection?            ; Connection predicate
+            regp:set-port!              ; Connection update
+            regp:framing                ; Connection query
+            regp:port                   ; Connection query
+            regp:word-size-16?          ; Connection query
+            regp:with-header-crc?       ; Connection query
+            regp:with-payload-crc?      ; Connection query
+            regp:send                   ; Connection primitive
+            regp:recv))                 ; Connection primitive
 
 ;;; Checksumming
 
