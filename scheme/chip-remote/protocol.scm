@@ -18,7 +18,7 @@
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote utilities)
   #:use-module (protocol ufw-regp)
-  #:export (make-cr-connection
+  #:export (make-cr-connection!
             cr-connection?
             cr-static-info
             cr-index
@@ -247,8 +247,30 @@
   (interfaces cr-interfaces  set-cr-interfaces!)
   (access     cr-access      set-cr-access!))
 
-(define (make-cr-connection ll)
-  (make-cr-connection* ll #f #f #f #f))
+(define* (make-cr-connection! #:key from (type 'serial))
+  "Make a new chip-remote connection.
+
+If the #:from parameter is used, its value must be a ufw-regp connection as
+created by the (protocol ufw-regp) module. Any other parameters are ignore in
+this case.
+
+If #:from is not used, one of #:serial #:and #:tcp is considered. When both are
+used, the result is unspecified. With #:serial (specifying the serial device
+file), #:baudrate can be used optionally with a value from the termios library.
+The default is termios-B115200. With #:tcp, the #:port keyword can be used
+optionally. Its default is 9999.
+
+Examples:
+
+  (make-cr-connection! #:serial   \"/dev/ttyACM0\"
+                       #:baudrate termios-B921600)
+
+  (make-cr-connection! #:tcp  \"192.168.22.1\"
+                       #:port 9999)
+
+Use #:from if you need more control."
+  (let ((ll (if from from (throw 'not-implemented-yet))))
+    (make-cr-connection* ll #f #f #f #f)))
 
 (define (octet-address a)
   (* 2 a))
