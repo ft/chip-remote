@@ -112,6 +112,18 @@
 ;; ly the version of the new chip-remote protocol.
 (define register-semantics-version 0)
 
+(define (octet-address a)
+  (* 2 a))
+
+(define (word-width-to-fit n g)
+  "Return word-width in granularity g to fit n."
+  (ash 1 (inexact->exact (ceiling (log2 (ceiling (/ n g)))))))
+
+(define (proto-register-width register addressing)
+  (let* ((w* (register-width register))
+         (w (if (< w* 16) 16 w*)))
+    (word-width-to-fit w addressing)))
+
 ;; This is the  static section of the remote register-table.  It is mostly con-
 ;; cerned with  encoding versions (the  register table semantics,  the firmware
 ;; version, and the versions of the  zephyr operating system and the ufw libra-
@@ -313,18 +325,6 @@ Examples:
 Use #:from if you need more control."
   (let ((ll (if from from (throw 'not-implemented-yet))))
     (make-cr-connection* ll #f #f #f #f)))
-
-(define (octet-address a)
-  (* 2 a))
-
-(define (word-width-to-fit n g)
-  "Return word-width in granularity g to fit n."
-  (ash 1 (inexact->exact (ceiling (log2 (ceiling (/ n g)))))))
-
-(define (proto-register-width register addressing)
-  (let* ((w* (register-width register))
-         (w (if (< w* 16) 16 w*)))
-    (word-width-to-fit w addressing)))
 
 (define (proto-ref bv offset reg)
   (bytevector-uint-ref bv offset 'big (proto-register-width reg 8)))
