@@ -57,10 +57,6 @@
 #include <ufwz/endpoint-uart-poll.h>
 #include <ufwz/endpoint-uart-fifo.h>
 
-#ifdef CONFIG_BOARD_NATIVE_POSIX
-#include "native-instrumentation.h"
-#endif /* CONFIG_BOARD_NATIVE_POSIX */
-
 #include "chip-remote.h"
 #include "peripherals.h"
 #include "registers.h"
@@ -73,6 +69,7 @@
 #define CR_PROTO_IFC  DEVICE_DT_GET(CR_PROTO_NODE)
 
 #if DT_NODE_EXISTS(DT_CHOSEN(chipremote_instr_ifc))
+#include "native-instrumentation.h"
 #define CR_INSTRUMENTATION_NODE DT_CHOSEN(chipremote_instr_ifc)
 #define CR_INSTRUMENTATION_IFC  DEVICE_DT_GET(CR_INSTRUMENTATION_NODE)
 #endif /* DT_NODE_EXISTS(DT_CHOSEN(chipremote_instr_ifc)) */
@@ -154,10 +151,10 @@ main(void)
         return EXIT_FAILURE;
     }
 
-#ifdef CONFIG_BOARD_NATIVE_POSIX
+#ifdef CR_INSTRUMENTATION_IFC
     struct resizeable_buffer nirb;
     rb_init(&nirb);
-#endif /* CONFIG_BOARD_NATIVE_POSIX */
+#endif /* CR_INSTRUMENTATION_IFC */
 
     printk("ChipRemoteFirmware running on %s\n", CONFIG_BOARD);
 
