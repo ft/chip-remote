@@ -6,6 +6,32 @@ config CR_MAX_I2C_SECTIONS
     int "Maximum number of sections in an I2C message"
     default 8
 
+choice CR_INTERFACE_TYPE
+       prompt "Control Interface Type"
+       default CR_INTERFACE_NONE
+
+config CR_INTERFACE_SIMPLE_SERIAL
+       bool "Simple Serial Interface"
+       help
+         This is the right choice for serial interfaces such as UART.
+
+config CR_INTERFACE_SMART_SERIAL
+       bool "Smart Serial Interface"
+       help
+         This is for serial interfaces such as USB CDC ACM for native
+         POSIX build serial ports.
+
+config CR_INTERFACE_TCPIP
+       bool "Networking interface using TCP/IP"
+
+config CR_INTERFACE_NONE
+       bool "None (Default, but invalid - see help)"
+       help
+         Every board port must specify this type in their board specific
+         configuration file.
+
+endchoice # CR_INTERFACE_TYPE
+
 endmenu
 
 # This is from zephyr-3.0.0, but without the (toolchain = zephyr) check. I

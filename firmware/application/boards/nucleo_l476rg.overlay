@@ -1,7 +1,8 @@
 / {
-	chosen {
-		zephyr,console = &usart1;
-		zephyr,shell-uart = &usart1;
+        chosen {
+                zephyr,console = &usart1;
+                zephyr,shell-uart = &usart1;
+                chipremote,proto-ifc = &usart2;
                 chipremote,spi0 = &spi1;
                 chipremote,i2c0 = &i2c1;
 	};

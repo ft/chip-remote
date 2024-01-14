@@ -14,7 +14,6 @@
 #include "resizable-buffer.h"
 
 extern struct resizeable_buffer ni_buffer;
-extern const struct device *uart1;
 
 void ni_dispatch(struct sx_node *node);
 void ni_toplevel(struct resizeable_buffer *rb, char ch,
