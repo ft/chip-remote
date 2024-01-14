@@ -320,6 +320,10 @@ peripheral_check(void)
             printk("Could not access %s. Giving up.\n", pc[i]->dev->name);
             rc = -EINVAL;
         }
+        if (device_is_ready(pc[i]->dev) == false) {
+            printk("Device not ready: s %s. Giving up.\n", pc[i]->dev->name);
+            rc = -EINVAL;
+        }
     }
 
     return rc;
