@@ -542,6 +542,19 @@ Use #:from if you need more control."
     (lambda () (proto-read-register! c ifc name))
     (lambda _ #f)))
 
+(define (resolve-command-status code)
+  (or (assv-ref '((#x00000000 . success)
+                  (#x00000001 . argument-out-of-range)
+                  (#x00000002 . invalid-configuraion)
+                  (#x00000003 . tx-framebuffer-overflow)
+                  (#x00000004 . rx-framebuffer-overflow)
+                  (#x00000005 . input-output-error)
+                  (#x00000006 . invalid-value)
+                  (#x00000007 . internal-error)
+                  (#xffffffff . invalid-command))
+                code)
+      code))
+
 (define* (cr:ctrl-comand! c ifc cmd #:optional arg)
   (and arg (proto-write-register! c ifc 'command-argument arg))
   (proto-write-register! c ifc 'command (assq-ref ctrl-commands cmd))
@@ -549,7 +562,7 @@ Use #:from if you need more control."
   ;; register write request comes in, the corresponding status register will
   ;; already be loaded with the correct status value for the command that was
   ;; just processed. Thus, this is not a race.
-  (proto-read-register! c ifc 'command-status))
+  (resolve-command-status (proto-read-register! c ifc 'command-status)))
 
 (define (required-fb-size frame-length n)
   (let* ((bytes-per-word (word-width-to-fit frame-length 8))
@@ -678,7 +691,7 @@ This loads the TX framebuffer, performs a transaction and then retrieves the
 data from the RX framebuffer."
   (cr:load-i2c-message! c ifc lst)
   (let ((rc (cr:ctrl-comand! c ifc 'transmit)))
-    (if (zero? rc)
+    (if (eq? rc 'success)
         (cr:fetch-i2c-rx-sections! c ifc (filter integer? lst))
         rc)))
 
@@ -690,6 +703,6 @@ data from the RX framebuffer."
   (let ((n (length lst)))
     (cr:load-tx-frame-buffer! c ifc lst)
     (let ((rc (cr:ctrl-comand! c ifc 'transmit n)))
-      (if (zero? rc)
+      (if (eq? rc 'success)
           (cr:fetch-rx-frame-buffer! c ifc n)
           rc))))
