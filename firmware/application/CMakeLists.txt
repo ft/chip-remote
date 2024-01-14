@@ -7,23 +7,14 @@ initialise_toolchain()
 include(GitIntegration)
 
 set(native_boards native_posix_64)
-
-set(common_sources
-  chip-remote.c
-  peripherals.c
-  registers.c)
-
-set(board_common_sources
-  heartbeat.c)
-
-set(native_common_sources
-  native-instrumentation.c
-  resizable-buffer.c)
+set(common_sources main.c chip-remote.c peripherals.c registers.c)
+set(board_common_sources heartbeat.c)
+set(native_common_sources native-instrumentation.c resizable-buffer.c)
 
 if (${BOARD} IN_LIST native_boards)
-  target_sources(app PRIVATE ${common_sources} ${native_common_sources} main.c)
+  target_sources(app PRIVATE ${common_sources} ${native_common_sources})
 else()
-  target_sources(app PRIVATE ${common_sources} ${board_common_sources} main.c)
+  target_sources(app PRIVATE ${common_sources} ${board_common_sources})
 endif()
 
 target_link_libraries(app PRIVATE ufw ufw-zephyr)
