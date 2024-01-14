@@ -233,10 +233,11 @@ papi_i2c_transmit(struct peripheral_control *ctrl)
     }
 
     pos = 0u;
+    bool prev_was_write = false;
     for (;;) {
         const bool iswrite = fbtx[pos] & PAPI_I2C_WRITE_MASK;
         const bool islast = fbtx[pos] & PAPI_I2C_END_MASK;
-        msg[nmsg].flags = iswrite ? I2C_MSG_WRITE : 0u;
+        msg[nmsg].flags = iswrite ? I2C_MSG_WRITE : I2C_MSG_READ;
         msg[nmsg].flags |= use10bitaddr ? I2C_MSG_ADDR_10_BITS : 0u;
         msg[nmsg].flags |= islast ? I2C_MSG_STOP : 0u;
         size_t len = fbtx[pos] & PAPI_I2C_LENGTH_MASK;
@@ -246,6 +247,10 @@ papi_i2c_transmit(struct peripheral_control *ctrl)
             len |= fbtx[pos];
         }
         msg[nmsg].len = len;
+        if (nmsg == 0 || prev_was_write == !iswrite) {
+            msg[nmsg].flags |= I2C_MSG_RESTART;
+        }
+        prev_was_write = iswrite;
         if (iswrite) {
             printk("i2c: Write of %zu octets.\n", len);
             msg[nmsg].buf = fbtx + txoffset;
