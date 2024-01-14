@@ -6,19 +6,24 @@ initialise_toolchain()
 
 include(GitIntegration)
 
-set(native_boards native_posix_64)
-set(common_sources main.c chip-remote.c peripherals.c registers.c)
-set(board_common_sources heartbeat.c)
-set(native_common_sources native-instrumentation.c resizable-buffer.c)
+set(sources main.c chip-remote.c peripherals.c registers.c)
 
-if (${BOARD} IN_LIST native_boards)
-  target_sources(app PRIVATE ${common_sources} ${native_common_sources})
-else()
-  target_sources(app PRIVATE ${common_sources} ${board_common_sources})
+dt_has_chosen(with_heartbeat PROPERTY "chipremote,heartbeat")
+if ("${with_heartbeat}" STREQUAL TRUE)
+  message(STATUS "Heartbeat LED found in devicetree")
+  list(APPEND sources heartbeat.c)
 endif()
 
+dt_has_chosen(with_instrumentation PROPERTY "chipremote,instr-ifc")
+if ("${with_instrumentation}" STREQUAL TRUE)
+  message(STATUS "Instrumentation interface found in devicetree")
+  list(APPEND sources native-instrumentation.c resizable-buffer.c)
+endif()
+
+target_sources(app PRIVATE ${sources})
 target_link_libraries(app PRIVATE ufw ufw-zephyr)
-if (${BOARD} MATCHES "^native")
+
+if ("${with_instrumentation}" STREQUAL TRUE)
   target_link_libraries(app PRIVATE ufw-sx)
 endif()
 

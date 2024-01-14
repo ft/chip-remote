@@ -4,24 +4,35 @@
  * Terms for redistribution and use can be found in LICENCE.
  */
 
+/**
+ * @file heartbeat.c
+ * @brief Heartbeat thread for chip-remote boards.
+ *
+ * If the "chipremote,heartbeat" node is set in the "chosen" subtree of the
+ * devicetree of a target board, this file is compiled using that node as the
+ * GPIO device to heartbeat blink that LED.
+ *
+ * If this file is not compiled, the thread does not exist.
+ */
+
 #include <zephyr/kernel.h>
 
 #include <zephyr/drivers/gpio.h>
 
 #include <ufw/compiler.h>
 
-#define LED0_NODE DT_ALIAS(led0)
-static const struct gpio_dt_spec led0 = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
+#define HEARTBEAT_NODE DT_CHOSEN(chipremote_heartbeat)
+static const struct gpio_dt_spec hb = GPIO_DT_SPEC_GET(HEARTBEAT_NODE, gpios);
 
 static void
-led0_heartbeat(UNUSED void *p1, UNUSED void *p2, UNUSED void *p3)
+cr_heartbeat(UNUSED void *p1, UNUSED void *p2, UNUSED void *p3)
 {
-    if (device_is_ready(led0.port) == false) {
+    if (device_is_ready(hb.port) == false) {
         printk("Could not access heartbeat LED.\n");
         return;
     }
 
-    int ret = gpio_pin_configure_dt(&led0, GPIO_OUTPUT_ACTIVE);
+    int ret = gpio_pin_configure_dt(&hb, GPIO_OUTPUT_ACTIVE);
     if (ret < 0) {
         printk("Could not configure LED pin.\n");
         return;
@@ -36,23 +47,23 @@ led0_heartbeat(UNUSED void *p1, UNUSED void *p2, UNUSED void *p3)
         switch (state) {
         case OFF:
             k_msleep(offtimes[n & 1u]);
-            gpio_pin_set_dt(&led0, 0);
+            gpio_pin_set_dt(&hb, 0);
             state = ON;
             n++;
             break;
         case ON:
             k_msleep(ontime);
-            gpio_pin_set_dt(&led0, 1);
+            gpio_pin_set_dt(&hb, 1);
             state = OFF;
             break;
         }
     }
 }
 
-#define LED0_HEARTBEAT_STACKSIZE 128
-#define LED0_HEARTBEAT_PRIORITY   12
+#define CR_HEARTBEAT_STACKSIZE 128
+#define CR_HEARTBEAT_PRIORITY   12
 
-K_THREAD_DEFINE(led0_headerbeat_thread,
-                LED0_HEARTBEAT_STACKSIZE,
-                led0_heartbeat, NULL, NULL, NULL,
-                LED0_HEARTBEAT_PRIORITY, 0, 0);
+K_THREAD_DEFINE(cr_headerbeat_thread,
+                CR_HEARTBEAT_STACKSIZE,
+                cr_heartbeat, NULL, NULL, NULL,
+                CR_HEARTBEAT_PRIORITY, 0, 0);
