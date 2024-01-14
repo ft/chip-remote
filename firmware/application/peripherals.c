@@ -283,11 +283,13 @@ papi_i2c_transmit(struct peripheral_control *ctrl)
     RegisterValue address;
     register_get(&registers, ctrl->backend.i2c.ctrl.address, &address);
     const int rc = i2c_transfer(ctrl->dev, msg, nmsg, address.value.u16);
+    printk("error: %d %s\n", -rc, strerror(-rc));
 
     update_u32(ctrl->cmdstatus,
-               (rc < 0)
-               ? PSTATUS_INTERNAL_ERROR
-               : PSTATUS_SUCCESS);
+               (rc == 0)       ? PSTATUS_SUCCESS
+             : (rc == -EIO)    ? PSTATUS_IO_ERROR
+             : (rc == -EINVAL) ? PSTATUS_INVALID_VALUE
+             :                   PSTATUS_INTERNAL_ERROR);
 }
 
 #define PAPI(var, ucmd, lcmd)                                           \
