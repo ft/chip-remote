@@ -54,7 +54,9 @@ update_u32(const RegisterHandle r, const uint32_t value)
 #define PSTATUS_INVALID_CONFIG   2ul
 #define PSTATUS_TX_OVERFLOW      3ul
 #define PSTATUS_RX_OVERFLOW      4ul
-#define PSTATUS_INTERNAL_ERROR   5ul
+#define PSTATUS_IO_ERROR         5ul
+#define PSTATUS_INVALID_VALUE    6ul
+#define PSTATUS_INTERNAL_ERROR   7ul
 #define PSTATUS_INVALID_COMMAND  UINT32_MAX
 
 struct peripheral_api {
