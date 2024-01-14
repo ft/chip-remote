@@ -282,6 +282,7 @@ papi_i2c_transmit(struct peripheral_control *ctrl)
 
     RegisterValue address;
     register_get(&registers, ctrl->backend.i2c.ctrl.address, &address);
+    printk("addrss: 0x%04x\n", address.value.u16);
     const int rc = i2c_transfer(ctrl->dev, msg, nmsg, address.value.u16);
     printk("error: %d %s\n", -rc, strerror(-rc));
 
@@ -379,7 +380,8 @@ peripheral_check(void)
         .type = PERIPH_TYPE_I2C,                                \
         .dev = PAPI_I2C(ID),                                    \
         .backend.i2c.ctrl = {                                   \
-            .config = R_I2C##ID##_CONFIG                        \
+            .address = R_I2C##ID##_CHIP_ADDRESS,                \
+            .config  = R_I2C##ID##_CONFIG                       \
         },                                                      \
         .cmd         = R_I2C##ID##_CMD,                         \
         .cmdarg      = R_I2C##ID##_CMDARG,                      \
