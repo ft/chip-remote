@@ -255,11 +255,11 @@ papi_i2c_transmit(struct peripheral_control *ctrl)
             msg[nmsg].buf = fbrx + rxoffset;
             rxoffset += len;
         }
+        nmsg++;
         if (islast) {
             printk("i2c: End spec found.\n");
             break;
         }
-        nmsg++;
         pos++;
         if (nmsg >= CONFIG_CR_MAX_I2C_SECTIONS) {
             update_u32(ctrl->cmdstatus, PSTATUS_ARG_OUT_OF_RANGE);
