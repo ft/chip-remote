@@ -43,7 +43,7 @@ endif()
 
 target_link_libraries(app PRIVATE ufw ufw-zephyr)
 if (${BOARD} MATCHES "^native")
-  target_link_libraries(app PRIVATE sx-parser)
+  target_link_libraries(app PRIVATE ufw-sx)
 endif()
 
 if (${BOARD} MATCHES "^native")

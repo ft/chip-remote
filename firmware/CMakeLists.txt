@@ -18,7 +18,3 @@ setup_ufw(libraries/ufw)
 
 ufw_subtree_build()
 message(STATUS "BOARD: ${BOARD}")
-if ("${BOARD}" MATCHES "^native")
-  add_subdirectory(libraries/libsx-parser)
-  add_subdirectory(tests)
-endif()

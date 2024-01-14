@@ -11,7 +11,7 @@
 
 #include <string.h>
 
-#include <sx-parser.h>
+#include <ufw/sx.h>
 
 #include "native-instrumentation.h"
 #include "resizable-buffer.h"

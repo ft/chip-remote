@@ -14,7 +14,7 @@
 #include <chip-remote.h>
 #include <cr-port.h>
 #include <cr-utilities.h>
-#include <sx-parser.h>
+#include <ufw/sx.h>
 
 #include "spi.h"
 

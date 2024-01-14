@@ -9,7 +9,7 @@
 
 #include <zephyr/device.h>
 
-#include <sx-parser.h>
+#include <ufw/sx.h>
 
 #include "resizable-buffer.h"
 
