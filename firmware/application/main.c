@@ -29,7 +29,7 @@
  *                           useful with the native firmware builds.
  *
  * Ports must choose "chipremote,proto-ifc". There are more nodes in the
- * "chip-remote" subtree, that the firmware uses, but those are used by the
+ * "chosen" subtree, that the firmware uses, but those are used by the
  * peripheral access code an the "interfaces.h" file. Thus they are not
  * discussed here.
  */
