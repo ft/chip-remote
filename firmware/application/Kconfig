@@ -47,16 +47,18 @@ config CR_MAX_I2C_SECTIONS
 
 endmenu
 
-# This is from zephyr-3.0.0, but without the (toolchain = zephyr) check. I
-# think this is a bug in zephyr. The intend from the comment in 0e0f878ddc
-# seems to be to avoid trying to use picolibc with clang, and to only enable
-# support for GNU based toolchains. "gnuarmemb" is one of those however. So
-# that check is too restrictive. Luckily it is possible to override this be-
-# haviour in the application's Kconfig file. That's what we'll do for now.
+# This is from zephyr-3.5.0, but adding the || (ZEPHYR_PICOLIBC_MODULE). I
+# think this is a bug in zephyr. This allows us to use picolibc form a module
+# without patching the kernel. That's what we'll do for now. I should probably
+# see if this can be fixed upstream.
 config PICOLIBC_SUPPORTED
     bool
     depends on !NATIVE_APPLICATION
-    depends on !(CPP && "$(ZEPHYR_TOOLCHAIN_VARIANT)" = "zephyr")
+    depends on ("$(TOOLCHAIN_HAS_PICOLIBC)" = "y") || (NATIVE_LIBRARY) || (ZEPHYR_PICOLIBC_MODULE)
+    depends on !REQUIRES_FULL_LIBCPP || ("$(TOOLCHAIN_HAS_PICOLIBC)" = "y")
     default y
+    select FULL_LIBC_SUPPORTED
+    help
+      Selected when the target has support for picolibc.
 
 source "Kconfig.zephyr"
