@@ -82,7 +82,7 @@
 
 #ifdef CONFIG_CR_INTERFACE_SIMPLE_SERIAL
 struct uart_config uart_cfg = {
-    .baudrate  = 921600u,
+    .baudrate  = CONFIG_CR_PROTOCOL_SERIAL_BAUDRATE,
     .parity    = UART_CFG_PARITY_NONE,
     .stop_bits = UART_CFG_STOP_BITS_1,
     .flow_ctrl = UART_CFG_FLOW_CTRL_NONE,

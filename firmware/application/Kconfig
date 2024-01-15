@@ -2,10 +2,6 @@ mainmenu "Chip Remote Firmware"
 
 menu "Firmware Specific Build Configuration"
 
-config CR_MAX_I2C_SECTIONS
-    int "Maximum number of sections in an I2C message"
-    default 8
-
 choice CR_INTERFACE_TYPE
        prompt "Control Interface Type"
        default CR_INTERFACE_NONE
@@ -31,6 +27,23 @@ config CR_INTERFACE_NONE
          configuration file.
 
 endchoice # CR_INTERFACE_TYPE
+
+config CR_PROTOCOL_SERIAL_BAUDRATE
+       int "Serial Port Symbolrate"
+       depends on CR_INTERFACE_SIMPLE_SERIAL
+       default 921600
+       help
+         Configure the symbolrate used by the chip-remote control interface
+         running on a simple serial port. Note that oftentimes serial ports
+         only support a fixed set of symbolrates. Most serial ports support:
+         50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4800, 9600,
+         19200, 38400, 57600, 115200, 230400, 460800, 500000, 576000, 921600.
+         Some ports also support: 1000000, 1152000, 1500000, 2000000, 2500000,
+         3000000, 3500000, 4000000.
+
+config CR_MAX_I2C_SECTIONS
+    int "Maximum number of sections in an I2C message"
+    default 8
 
 endmenu
 
