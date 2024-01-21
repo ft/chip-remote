@@ -6,7 +6,6 @@
 
 (use-modules (test tap)
              (test chip-remote)
-             (chip-remote io)
              (chip-remote protocol)
              (chip-remote utilities))
 

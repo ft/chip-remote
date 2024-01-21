@@ -9,7 +9,6 @@
   #:use-module (ice-9 rdelim)
   #:use-module (srfi srfi-9)
   #:use-module (test tap)
-  #:use-module (chip-remote io)
   #:use-module (chip-remote protocol)
   #:use-module (chip-remote utilities)
   #:export (init-connection

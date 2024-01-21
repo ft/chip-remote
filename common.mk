@@ -27,7 +27,6 @@ MODULES_CORE += $(CR)/interpreter.scm
 MODULES_CORE += $(CR)/item.scm
 MODULES_CORE += $(CR)/item/access.scm
 MODULES_CORE += $(CR)/item/builder.scm
-MODULES_CORE += $(CR)/io.scm
 MODULES_CORE += $(CR)/manufacturer.scm
 MODULES_CORE += $(CR)/modify.scm
 MODULES_CORE += $(CR)/named-value.scm

@@ -16,7 +16,6 @@
   #:use-module (chip-remote frontend)
   #:use-module (chip-remote named-value)
   #:use-module (chip-remote page-map)
-  #:use-module (chip-remote io)
   #:use-module (chip-remote modify)
   #:use-module (chip-remote protocol)
   #:use-module (chip-remote semantics)
@@ -164,7 +163,7 @@ Commands without further arguments are called *\"simple commands\"*. They are:
 - ‘reset!’ → Resets the register memory to the value supplied at construction
   time.
 
-- ‘trace!’ → Toggles tracing in the ‘(chip-remote io)’ module.
+- ‘trace!’ → Toggles tracing or a connection.
 
 - ‘push!’ → Transmits the entire register memory into the device via RCCEP.
   This order transformations contained in a device description into account in
