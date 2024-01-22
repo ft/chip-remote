@@ -101,8 +101,9 @@
 (define tty #f)
 
 (when s
-  (set! cr (make-cr-connection! #:serial s))
-  (set! c  (cr-low-level cr)))
+  (set! cr  (make-cr-connection! #:serial s))
+  (set! c   (cr-low-level cr))
+  (set! tty (regp:port c)))
 
 (define (ignore x) (if #f #t))
 (define (pp obj) (pretty-print obj #:width 80 #:max-expr-width 100))
