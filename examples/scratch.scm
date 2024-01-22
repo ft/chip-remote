@@ -96,18 +96,13 @@
 
 (define s (getenv "CR_SERIAL_DEVICE"))
 (define c #f)
+(define cr #f)
 (define tty #f)
 
 (when s
-  (set! tty (open-io-file s))
-  (let ((ts (make-termios-struct)))
-    (cf-make-raw! ts)
-    (cf-set-speed! ts termios-B921600)
-    (tc-set-attr tty ts))
-  (setvbuf tty 'none)
-  (set! c (regp:serial-connection tty #:word-size-16? #t)))
+  (set! cr (make-cr-connection! #:serial s))
+  (set! c  (cr-low-level cr)))
 
-(define cr (and c (make-cr-connection! #:from c)))
 (define (ignore x) (if #f #t))
 (define (pp obj) (pretty-print obj #:width 80 #:max-expr-width 100))
 
