@@ -91,8 +91,9 @@
              (chip-remote devices texas-instruments lmh6517))
 
 ;; Set up a serial connection if CR_SERIAL_DEVICE is set in the execution
-;; environment. ‘s’ will be the name of the device, ‘c’ is the associated
-;; chip-remote connection object.
+;; environment. ‘s’ will be the name of the device, ‘cr’ is the associated
+;; chip-remote connection object and ‘c’ will be the underlying ufw-regp
+;; connection object.
 
 (define s (getenv "CR_SERIAL_DEVICE"))
 (define c #f)
