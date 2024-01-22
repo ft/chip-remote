@@ -51,6 +51,8 @@
   #:use-module (rnrs bytevectors gnu)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
+  #:use-module (termios)
+  #:use-module (termios system)
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote modify)
@@ -301,7 +303,7 @@
   (interfaces cr-interfaces  set-cr-interfaces!)
   (access     cr-access      set-cr-access!))
 
-(define* (make-cr-connection! #:key from (type 'serial))
+(define* (make-cr-connection! #:key from serial tcp port baudrate)
   "Make a new chip-remote connection.
 
 If the #:from parameter is used, its value must be a ufw-regp connection as
@@ -323,7 +325,15 @@ Examples:
                        #:port 9999)
 
 Use #:from if you need more control."
-  (let ((ll (if from from (throw 'not-implemented-yet))))
+  (let ((ll (cond (from from)
+                  (serial (let ((tty (open-io-file serial))
+                                (ts (make-termios-struct)))
+                            (cf-make-raw! ts)
+                            (cf-set-speed! ts (or baudrate termios-B921600))
+                            (tc-set-attr tty ts)
+                            (setvbuf tty 'none)
+                            (regp:serial-connection tty #:word-size-16? #t)))
+                  (else (throw 'not-implemented-yet)))))
     (make-cr-connection* ll #f #f #f #f)))
 
 (define (proto-ref bv offset reg)

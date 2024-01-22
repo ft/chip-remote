@@ -11,6 +11,7 @@
   #:use-module (test tap)
   #:use-module (chip-remote protocol)
   #:use-module (chip-remote utilities)
+  #:use-module (protocol ufw-regp)
   #:export (init-connection
             close-connection
             test-with-tag
@@ -97,10 +98,10 @@
   (set-tio-parameters! tio (cons p (tio-parameters tio))))
 
 (define (tio-got-param? tio p)
-  (member p (tio-parameters tio)))
+  (!! (member p (tio-parameters tio))))
 
 (define (connect-test-io! io)
-  (set-tio-connection! io (chip-remote-open! #:uri (tio-terminal io)))
+  (set-tio-connection! io (make-cr-connection! #:serial (tio-terminal io)))
   (set-tio-iconnection! io (open-file (tio-instrumentation io) "r+l")))
 
 (define (handle-xread-timeout tio rv)
@@ -114,7 +115,7 @@
 
 (define (trace-read sel tio tag . args)
   (let ((exp (apply xread (cons (sel tio) args))))
-    (when (tio-got-param? tio 'trace)
+    (when (tio-got-param? tio 'trace?)
       (format #t "# tio:~a:read: ~s~%" tag exp))
     exp))
 
@@ -162,7 +163,7 @@
   (format #t "# Booting native firmware: ~a~%" (native-fw))
   (set-tio-fw-port! tio (open-pipe* OPEN_READ (native-fw)))
   (let loop ((line (read-line (tio-fw-port tio) 'trim)))
-    (when (tio-got-param? tio 'trace)
+    (when (tio-got-param? tio 'trace?)
       (format #t "# tio:inst:read: ~s~%" line))
     (unless (string= line *s-exp-boot-tag*)
       (let ((lst (string-split line #\space)))
@@ -180,7 +181,9 @@
         (format #t "# Instrumentation Terminal at: ~a~%"
                 (tio-instrumentation tio))
         (format #t "# S-Expression Interface up.~%")
-        (connect-test-io! tio))
+        (connect-test-io! tio)
+        (regp:change-param (cr-low-level (tio-connection tio))
+                           'trace? (tio-got-param? tio 'trace?)))
       (tio-unknown!))
 
   ;; The firmware should indicate its PID first thing in s-exp mode.
@@ -193,7 +196,7 @@
     (when suspend-execution? (debug-fw! tio))))
 
 (define (instrument! tio exp)
-  (when (tio-got-param? tio 'trace)
+  (when (tio-got-param? tio 'trace?)
     (format #t "# tio:inst:write: ~s~%" exp))
   (format (tio-iconnection tio) "~a~%" exp)
   ;; The instrumentation request needs to return an ‘ok’ on the instrumentation

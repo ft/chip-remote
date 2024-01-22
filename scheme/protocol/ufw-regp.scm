@@ -6,6 +6,7 @@
 
 (define-module (protocol ufw-regp)
   #:use-module (ice-9 match)
+  #:use-module (ice-9 pretty-print)
   #:use-module (rnrs bytevectors)
   #:use-module (rnrs bytevectors gnu)
   #:use-module ((scheme base) #:select (bytevector-append))
@@ -27,6 +28,8 @@
             regp:frame-valid?           ; Frame type query
             regp:acknowledge?           ; Frame type query
             regp:valid-ack?             ; Frame type query
+            regp:change-param           ; Connection parameters
+            regp:ref-param              ; Connection parameters
             regp:tcp-connection         ; Connection generator
             regp:serial-connection      ; Connection generator
             regp:connection?            ; Connection predicate
@@ -38,6 +41,9 @@
             regp:with-payload-crc?      ; Connection query
             regp:send                   ; Connection primitive
             regp:recv))                 ; Connection primitive
+
+(define (pp obj)
+  (pretty-print obj #:per-line-prefix "# "))
 
 ;;; Checksumming
 
@@ -431,11 +437,13 @@ it impossible to parse."
 ;;; Register Protocol Connection Type
 
 (define-record-type <regp:connection>
-  (make-regp-connection* port framing-algorithm framing-state
+  (make-regp-connection* port parameters
+                         framing-algorithm framing-state
                          sequence-number word-size-16?
                          with-header-crc? with-payload-crc?)
   regp:connection?
   (port regp:port regp:set-port!)
+  (parameters regp:get-parameters regp:set-parameters!)
   (framing-algorithm regp:framing)
   (framing-state regp:framing-state)
   (sequence-number regp:seqno regp:set-seqno!)
@@ -450,7 +458,7 @@ it impossible to parse."
                               word-size-16? with-checksums?)
   (unless (member framing-algorithm framing-algorithms)
     (throw 'invalid-framing-algorithm framing-algorithm framing-algorithms))
-  (make-regp-connection* port framing-algorithm framing-state 0
+  (make-regp-connection* port '() framing-algorithm framing-state 0
                          word-size-16?
                          with-checksums? with-checksums?))
 
@@ -463,23 +471,37 @@ it impossible to parse."
                         (cons (make-slip-state) (make-slip-state))
                         word-size-16? #t))
 
+(define (regp:change-param c p v)
+  (let ((ps (regp:get-parameters c)))
+    (regp:set-parameters! c (assq-change ps p v))))
+
+(define (regp:ref-param c p)
+  (assq-ref (regp:get-parameters c) p))
+
 ;;; Register Protocol Connection Based Operations
 
 (define (regp:recv con)
   (unless (regp:connection? con)
     (throw 'invalid-parameter con))
-  (regp:decode (case (regp:framing con)
-                 ((varint-length-prefix)
-                  (recv-bytevector (regp:port con)))
-                 ((classic-slip)
-                  (slip-recv (cdr (regp:framing-state con)) (regp:port con)))
-                 (else 'invalid-framing-algorithm
-                       (regp:framing con)
-                       framing-algorithms))))
+  (let ((response
+         (regp:decode
+          (case (regp:framing con)
+            ((varint-length-prefix)
+             (recv-bytevector (regp:port con)))
+            ((classic-slip)
+             (slip-recv (cdr (regp:framing-state con)) (regp:port con)))
+            (else 'invalid-framing-algorithm
+                  (regp:framing con)
+                  framing-algorithms)))))
+    (when (regp:ref-param con 'trace?)
+      (pp response))
+    response))
 
 (define (regp:send con data)
   (unless (regp:connection? con)
     (throw 'invalid-parameter con))
+  (when (regp:ref-param con 'trace?)
+    (pp (regp:decode data)))
   (case (regp:framing con)
     ((varint-length-prefix)
      (send-bytevector (regp:port con) data))

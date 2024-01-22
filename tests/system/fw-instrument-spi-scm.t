@@ -24,8 +24,7 @@
   (fw-expect! tio `(spi-tx ,tx) `(spi-rx ,rx)))
 
 (when verbose?
-  (io-opt/set 'trace #t)
-  (tio-push-parm! tio 'trace))
+  (tio-push-parm! tio 'trace?))
 
 (with-test-bundle skip (chip-remote firmware instrumentation spi)
   (require (native-firmware-built?))
