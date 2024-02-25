@@ -9,8 +9,6 @@ ufw_toplevel(
   ARTIFACTS ${CMAKE_BINARY_DIR}/artifacts)
 
 enable_language(C)
-enable_language(CXX)
-enable_language(ASM)
 include(InitialiseToolchain)
 initialise_toolchain()
 
