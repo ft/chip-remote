@@ -1,7 +1,7 @@
 name: chip-remote
 
 common:
-  build-configs: [ release, debug ]
+  build-configs: [ debug ]
   build-tool: ninja
   zephyr-kernel: '${system}/zephyr/kernel'
   zephyr-module-path: [ '${system}/zephyr/modules' ]
