@@ -90,6 +90,7 @@ MODULES_PROTO += $(CRP)/saleae-spi.scm
 MODULES_PROTO += $(CRP)/ufw-regp.scm
 
 MODULES_DATASTRUCT = $(CRDS)/loadable-fifo.scm
+MODULES_DATASTRUCT += $(CRDS)/records.scm
 MODULES_DATASTRUCT += $(CRDS)/sized-stack.scm
 MODULES_DATASTRUCT += $(CRDS)/variable-width-integer.scm
 
