@@ -9,10 +9,12 @@
   #:use-module ((chip-remote item access) #:prefix item:)
   #:export (read-write read-only write-only none))
 
-(define (register-access reg access)
-  (replace-register-items reg (map (lambda (item)
-                                     (new-item-access item (access)))
-                                   (register-items reg))))
+(define (register-access reg access-fnc)
+  (register (inherit reg)
+            (items (map (lambda (i)
+                          (item (inherit i)
+                                (access (access-fnc))))
+                        (register-items reg)))))
 
 (define (read-write reg)
   (register-access reg item:rw))

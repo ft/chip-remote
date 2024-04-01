@@ -56,6 +56,7 @@
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote decode)
   #:use-module (chip-remote modify)
+  #:use-module (chip-remote item)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote register)
   #:use-module (chip-remote register common)
@@ -132,52 +133,51 @@
 ;; ry). Crucially  important however  is the  interface-index-address register.
 ;; Its value specifies  the entry-point inside of the remote  memory to perform
 ;; the service discovery process.
-(define-register-map crfw-static
-  #:table*
-  ;; The semantics version must match between the remote and local sides.
-  (#x0000 (generate-u16-register register-semantics-version))
-  ;; This is the important register to start service discovery.
-  (#x0001 (generate-u32-register interface-index-address))
-  ;; The rest is just versions of the remote firmware an some of its most
-  ;; important components.
-  (#x0010 (generate-u16-register firmware-version-major))
-  (#x0011 (generate-u16-register firmware-version-minor))
-  (#x0012 (generate-u16-register firmware-version-patch))
-  (#x0013 (generate-u16-register firmware-git-increment))
-  (#x0014 (generate-register #:contents
-                             (git-candidate-level   0 8)
-                             (git-pre-release-level 8 8)))
-  (#x0015 (generate-register #:contents
-                             (with-git-version?   0 1)
-                             (git-dirty?          1 1)
-                             (git-is-candidata?   2 1)
-                             (git-is-pre-release? 3 1)
-                             (git-clean-release?  4 1)))
-  (#x0016 (generate-u16-register zephyr-version-major))
-  (#x0017 (generate-u16-register zephyr-version-minor))
-  (#x0018 (generate-u16-register zephyr-version-patch))
-  (#x0019 (generate-u16-register ufw-version-major))
-  (#x001a (generate-u16-register ufw-version-minor))
-  (#x001b (generate-u16-register ufw-version-patch)))
+(define crfw-static
+  (rm→ (table
+        (↔
+         ;; The semantics version must match between the remote and local sides.
+         (#x0000 (generate-u16-register register-semantics-version))
+         ;; This is the important register to start service discovery.
+         (#x0001 (generate-u32-register interface-index-address))
+         ;; The rest is just versions of the remote firmware an some of its most
+         ;; important components.
+         (#x0010 (generate-u16-register firmware-version-major))
+         (#x0011 (generate-u16-register firmware-version-minor))
+         (#x0012 (generate-u16-register firmware-version-patch))
+         (#x0013 (generate-u16-register firmware-git-increment))
+         (#x0014 († (‣ git-candidate-level   0 8)
+                    (‣ git-pre-release-level 8 8)))
+         (#x0015 († (‣ with-git-version?     0 1)
+                    (‣ git-dirty?            1 1)
+                    (‣ git-is-candidata?     2 1)
+                    (‣ git-is-pre-release?   3 1)
+                    (‣ git-clean-release?    4 1)))
+         (#x0016 (generate-u16-register zephyr-version-major))
+         (#x0017 (generate-u16-register zephyr-version-minor))
+         (#x0018 (generate-u16-register zephyr-version-patch))
+         (#x0019 (generate-u16-register ufw-version-major))
+         (#x001a (generate-u16-register ufw-version-minor))
+         (#x001b (generate-u16-register ufw-version-patch))))))
 
 ;; This is are the registers types needed to build the interface index.
 (define-u16-register interface-index-size)
 (define-u32-register interface-index-address)
 
-(define-semantics interface-type lookup '((spi . 0)
-                                          (i2c . 1)))
+(define-semantics interface-type
+  (range (table-lookup '((spi . 0)
+                         (i2c . 1))))
+  (default (static 'spi)))
 
-(define-register interface-type-register
-  #:contents (type 0 16 #:semantics* interface-type))
+(define interface-type-register († (‣ type 0 16 (semantics interface-type))))
 
 (define (make-index-table size)
-  (make-register-map #:table
-                     `((0 . ,interface-index-size)
-                       . ,(unfold-right (lambda (n) (< n 1))
-                                        (lambda (n)
-                                          (cons n interface-index-address))
-                                        (lambda (n) (- n 2))
-                                        (1+ (* 2 (1- size)))))))
+  (rm→ (table `((0 . ,interface-index-size)
+                . ,(unfold-right (lambda (n) (< n 1))
+                                 (lambda (n)
+                                   (cons n interface-index-address))
+                                 (lambda (n) (- n 2))
+                                 (1+ (* 2 (1- size))))))))
 
 (define control-table-header (list interface-type-register))
 (define control-table-footer (list
@@ -200,7 +200,7 @@
                       (+ address (proto-register-width reg 16))))))))
 
 (define-syntax-rule (define-control-block name exp ...)
-  (define name (make-register-map #:table (generate-control-table exp ...))))
+  (define name (rm→ (table (generate-control-table exp ...)))))
 
 (define (interface-size rm)
   (let* ((table (register-map-table:sorted rm))
@@ -215,28 +215,29 @@
                                   (length control-table-header))
                             (length control-table-footer)))
          (start (caar table))
-         (new (make-register-map #:table (map (lambda (e)
-                                                (cons (- (car e) start)
-                                                      (cdr e)))
-                                              table))))
+         (new (rm→ (table (map (lambda (e)
+                                 (cons (- (car e) start)
+                                       (cdr e)))
+                               table)))))
     (list start (interface-size new) new)))
 
 ;; This is the interface control block for SPI peripherals.
 (define-control-block ifc:spi
   (generate-u16-register frame-length)
   (generate-u32-register clock-rate)
-  (generate-register #:contents
-                     (cs-active-low?       0 1 #:default #t)
-                     (bit-order-msb-first? 1 1 #:default #t)
-                     (clock-idle-low?      2 1 #:default #t)
-                     (clock-phase-delay?   3 1 #:default #f)))
+  († (‣ cs-active-low?       0 1 (default #t))
+     (‣ bit-order-msb-first? 1 1 (default #t))
+     (‣ clock-idle-low?      2 1 (default #t))
+     (‣ clock-phase-delay?   3 1 (default #f))))
 
 ;; This is the interface control block for I²C peripherals.
-(define-semantics i2c-speed-grade lookup '((standard  . 0)
-                                           (fast      . 1)
-                                           (fast-plus . 2)
-                                           (high      . 3)
-                                           (ultra     . 4)))
+(define-semantics i2c-speed-grade
+  (range '((standard  . 0)
+           (fast      . 1)
+           (fast-plus . 2)
+           (high      . 3)
+           (ultra     . 4)))
+  (default (static 'standard)))
 
 ;; I2C messages are (potentially) made of multiple sections, that can be either
 ;; read or write accesses. A message can have an arbitrary amount of these.
@@ -281,11 +282,8 @@
 ;; will limit the maximum number of sections in a message.)
 
 (define-control-block ifc:i2c
-  (generate-register #:contents
-                     (speed 0 3
-                            #:semantics* i2c-speed-grade
-                            #:default 'standard)
-                     (address-10-bit? 3 1 #:default #f))
+  († (‣ speed           0 3 (semantics i2c-speed-grade))
+     (‣ address-10-bit? 3 1 (default #f)))
   (generate-u16-register chip-address))
 
 

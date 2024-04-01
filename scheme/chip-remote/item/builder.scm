@@ -14,18 +14,18 @@
                (>= width 0))
     (throw 'invalid-width width))
   (lambda (addr)
-    (generate-item #:name 'address
-                   #:offset offset
-                   #:width width
-                   #:access* access
-                   #:default addr)))
+    (item (name 'address)
+          (offset offset)
+          (width width)
+          (access access)
+          (default addr))))
 
 (define (res o w d)
-  (generate-item #:name 'reserved
-                 #:offset o
-                 #:width w
-                 #:access ro
-                 #:default d))
+  (item (name 'reserved)
+        (offset o)
+        (width w)
+        (access ro)
+        (default d)))
 
 (define* (reserved offset width #:key (default 0))
   (res offset width default))
