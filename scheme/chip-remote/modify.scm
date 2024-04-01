@@ -16,7 +16,6 @@
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote simplify)
   #:use-module (chip-remote utilities)
-  #:use-module (chip-remote validate)
   #:export (chain-modify
             chain-modify*
             xchain-modify

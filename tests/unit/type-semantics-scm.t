@@ -12,29 +12,40 @@
 (init-test-tap!)
 
 (with-fs-test-bundle
-    (plan 8)
+  (plan 11)
 
-  (let ((sem (generate-semantics interpreter
-                                 #:decode '(lambda (x) (increment x 2))
-                                 #:encode '(lambda (x) (decrement x 2)))))
-    (define-test "interpreter codec type checks out"
-      (pass-if-eq? (semantics-type sem) 'interpreter))
+  (let ((s (semantics (decode (make-evaluation
+                               '(lambda (w x) (increment x 2))))
+                      (encode (make-evaluation
+                               '(lambda (w x) (decrement x 2))))
+                      (range (lambda (s w) '(range 0 8)))
+                      (default 0))))
     (define-test "interpreter decoder works"
-      (pass-if-= 8 ((evaluation-value (semantics-decode sem)) 6)))
+      (pass-if-= 8 (semantics-decode s 'width 6)))
     (define-test "interpreter encoder works"
-      (pass-if-= 6 ((evaluation-value (semantics-encode sem)) 8))))
+      (pass-if-= 6 (semantics-encode s 'width 8)))
+    (define-test "semantics-in-range? 8 → #t"
+      (pass-if-true (semantics-in-range? s 5 8)))
+    (define-test "semantics-in-range? 9 → #f"
+      (pass-if-false (semantics-in-range? s 5 9))))
 
-  (let* ((s (generate-semantics lookup '((something . 3)
-                                         (more . 5)
-                                         (stuff . 23)))))
-    (define-test "table lookup semantics type checks out"
-      (pass-if-eq? (semantics-type s) 'table-lookup))
+  (let* ((table '((something . 3)
+                  (more . 5)
+                  (stuff . 23)))
+         (s (semantics (range (table-lookup table)) (default 'something))))
+    (define-test "table lookup range is correct"
+      (pass-if-equal? (semantics-range s 5)
+                      `(table ,table)))
     (define-test "table decoding works"
-      (pass-if-eq? (s:decode s 4 3) 'something))
+      (pass-if-eq? (semantics-decode s 4 3) 'something))
     (define-test "table decoding works (undefined)"
-      (pass-if-eq? (s:decode s 4 42) 'chip-remote:undefined))
+      (pass-if-eq? (semantics-decode s 4 42) 'chip-remote:undefined))
     (define-test "table encoding works"
-      (pass-if-= (s:encode s 4 'more) 5))
+      (pass-if-= (semantics-encode s 4 'more) 5))
     (define-test "table encoding works (undefined)"
       (pass-if-exception 'cr/undefined
-                         (s:encode s 4 'does-not-exist)))))
+                         (semantics-encode s 4 'does-not-exist)))
+    (define-test "semantics-in-range? more → #t"
+      (pass-if-true (semantics-in-range? s 5 'more)))
+    (define-test "semantics-in-range? does-not-exist → #f"
+      (pass-if-false (semantics-in-range? s 5 'does-not-exist)))))

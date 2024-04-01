@@ -5,18 +5,20 @@
 (define-module (chip-remote register)
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
-  #:use-module (ice-9 pretty-print)
   #:use-module (srfi srfi-1)
-  #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote item)
-  #:use-module (chip-remote process-plist)
   #:use-module (chip-remote utilities)
-  #:export (generate-register              ;; Register creation
+  #:use-module (data-structures records)
+  #:use-module (data-structures records utilities)
+  #:export (†                              ;; Register creation
+            register
             make-register
             define-register
             register?                      ;; Register type API
-            register-meta
+            register-name
             register-items
+            register-description
+            register-width*
             register-items:sorted          ;; Register utilities
             register-default
             register-width
@@ -35,53 +37,27 @@
             replace-register-items
             register->alist))
 
-(define-immutable-record-type <register>
-  (make-register meta items)
-  register?
-  (meta register-meta)
-  (items register-items replace-register-items))
+(define-record-type* <register>
+  register make-register register? this-register
+  (name         register-name (default #f))
+  (description  register-description (default #f))
+  (width        register-width* (default #f))
+  (items        register-items))
 
-(define-syntax expand-content
-  (lambda (x)
-    (syntax-case x (=>)
-      ((_ => expr) #'expr)
-      ((_ exps ...) #'(generate-item exps ...)))))
+;; Short hand for defining registers on the fly. This does not support
+;; "inherit"!
+(define-syntax †
+  (lambda (s)
+    (syntax-case s (name)
+      ((_ (name n) e* ...) #'(register (name n) (items (list e* ...))))
+      ((_ e* ...)          #'(register (items (list e* ...)))))))
 
-(define group:contents
-  (group 'contents
-         #:type 'list
-         #:predicate (lambda (x)
-                       (memq x '(#:contents #:contents*)))
-         #:transformer (lambda (e)
-                         (syntax-case e ()
-                           ((#:contents (exps ...) ...)
-                            #'((expand-content exps ...) ...))
-                           ((#:contents* e0 e* ...)
-                            #'(e0 e* ...))))))
-
-(define-syntax generate-register
-  (lambda (x)
-    (syntax-case x ()
-      ((kw exp0 expn ...)
-       (is-kw? #'exp0)
-       (with-syntax (((((contents ...) ...) ((key value) ...))
-                      (process-plist #'(exp0 expn ...)
-                                     group:contents
-                                     (group 'meta))))
-         #'(make-register (list (cons key value) ...)
-                          (list contents ... ...)))))))
-
-(define-syntax-rule (define-register binding e0 e* ...)
-  (define binding (generate-register e0 e* ...)))
+(new-record-definer define-register register)
 
 (define (register-default reg)
-  (let ((default (assq #:default (register-meta reg))))
-    (if default
-        (cdr default)
-        (fold (lambda (x acc)
-                (item-set x acc (item-default x)))
-              0
-              (register-items reg)))))
+  (fold (lambda (x acc) (item-set x acc (item-default-raw x)))
+        0
+        (register-items reg)))
 
 (define (register-width reg)
   (let* ((items (register-items reg))
@@ -218,20 +194,22 @@
   (define (change fnc x lst) (fnc (if (list? x) x (list x)) lst))
   (define (ins x lst) (change insert-items x lst))
   (define (rem x lst) (change remove-items x lst))
-  (replace-register-items reg (ins insert (rem remove (register-items reg)))))
+  (register (inherit reg) (items (ins insert
+                                      (rem remove
+                                           (register-items reg))))))
 
 (define (register->alist reg)
-  (map item->list (register-items reg)))
+  (map item->list (register-items:sorted reg)))
+
+(define (rename-register reg fnc)
+  (register (inherit reg) (items (map fnc (register-items reg)))))
 
 (define (prefix-register reg prefix)
   (rename-register reg
-                   (lambda (item)
-                     (new-item-name item
-                                    (symbol-append prefix
-                                                   (item-name item))))))
-
-(define (rename-register reg fnc)
-  (replace-register-items reg (map fnc (register-items reg))))
+                   (lambda (entry)
+                     (item (inherit entry)
+                           (name (symbol-append prefix
+                                                (item-name entry)))))))
 
 (define (register-diff r a b)
   (fold (lambda (x acc)

@@ -21,13 +21,9 @@
 ;; Therefore, this module adds one test per register from a device that is
 ;; touched by at least one width annotation.
 
-(define (get-width data meta)
-  (assq-ref (meta data) #:register-width))
-
 (define (title n rm-addr reg ann act)
-  (let* ((meta (register-meta (cdr reg)))
-         (addr (car reg))
-         (desc (assq-ref meta #:description)))
+  (let ((addr (car reg))
+        (desc (register-description (cdr reg))))
     (format #f "Register #~a width annotation (~a) matches actual width ~a (address: ~a/~a, description: ~a)"
             n ann act rm-addr addr desc)))
 
@@ -39,36 +35,37 @@
 
 (define (complete-registers/check dev cfg)
   (let loop-rm ((rms (page-map-table (device-page-map dev)))
-                (width-dev (get-width dev device-meta))
+                (width-dev (or (page-map-width (device-page-map dev))
+                               (device-register-width dev)))
                 (n 0))
     (unless (null? rms)
       (let loop-reg ((rm-addr (caar rms))
                      (regs (register-map-table (cdar rms)))
-                     (width-rm (get-width (cdar rms) register-map-meta))
+                     (width-rm (register-map-width (cdar rms)))
                      (n n))
         (if (null? regs)
             (loop-rm (cdr rms) width-dev n)
             (begin (test-register n rm-addr (car regs)
-                                  (or (get-width (cdar regs) register-meta)
+                                  (or (register-width* (cdar regs))
                                       width-rm
                                       width-dev))
                    (loop-reg rm-addr (cdr regs) width-rm (+ 1 n))))))))
 
 (define (maybe-count data meta registers)
-  (and (get-width data meta)
+  (and (meta data)
        (length (registers data))))
 
 (define (one-up reg) '(one-thing))
 
 (define (count-register reg)
-  (or (maybe-count reg register-meta one-up)
+  (or (maybe-count reg register-width* one-up)
       0))
 
 (define (count-register-map rm)
-  (or (maybe-count rm register-map-meta register-map-registers)
+  (or (maybe-count rm register-map-width register-map-registers)
       (apply + (map count-register (register-map-registers rm)))))
 
 (define (complete-registers/count dev cfg)
-  (or (maybe-count dev device-meta device-registers)
+  (or (maybe-count dev device-register-width device-registers)
       (apply + (map count-register-map
                     (page-map-register-maps (device-page-map dev))))))

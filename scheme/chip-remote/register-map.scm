@@ -5,15 +5,18 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 pretty-print)
-  #:use-module (chip-remote process-plist)
   #:use-module (chip-remote item)
   #:use-module (chip-remote register)
   #:use-module (chip-remote utilities)
-  #:export (generate-register-map           ;; RegisterMap creation
+  #:use-module (data-structures records)
+  #:use-module (data-structures records utilities)
+  #:export (register-map                    ;; RegisterMap creation
+            rm→
             make-register-map
             define-register-map
             register-map?                   ;; RegisterMap type API
-            register-map-meta
+            register-map-name
+            register-map-width
             register-map-table
             register-map-table:sorted       ;; RegisterMap utilities
             register-map-registers
@@ -28,59 +31,27 @@
             register-map-address
             register-map-address:register))
 
-(define-record-type <register-map>
-  (make-register-map* meta table)
-  register-map?
-  (meta register-map-meta)
-  (table register-map-table))
+(define-record-type* <register-map>
+  register-map make-register-map register-map? this-register-map
+  (name  register-map-name (default #f))
+  (width register-map-width (default #f))
+  (table register-map-table
+         (sanitize (need 'table
+                         (lambda (tab)
+                           (every (lambda (x)
+                                    (match x
+                                      ((a . r) (and (index? a)
+                                                    (register? r)))
+                                      (_ #f)))
+                                  tab))))))
+
+(define-syntax-rule (rm→ e* ...) (register-map e* ...))
+
+(new-record-definer define-register-map register-map)
 
 (define (register-map-table:sorted rm)
   (sort (register-map-table rm)
         (lambda (a b) (index< (car a) (car b)))))
-
-(define (reasonable-entry? entry)
-  (let ((address (car entry))
-        (reg (cdr entry)))
-    (and (integer? address)
-         (or (zero? address)
-             (positive? address))
-         (register? reg))))
-
-(define (ensure-register-map! tab)
-  (when (null? tab)
-    (throw 'cr/empty-register-table tab))
-  (for-each (lambda (entry)
-              (unless (reasonable-entry? entry)
-                (throw 'cr/not-a-register-table-entry entry)))
-            tab)
-  tab)
-
-(define* (make-register-map #:key (meta '()) (table '()))
-  (make-register-map* meta (ensure-register-map! table)))
-
-(define group:table
-  (group 'table
-         #:type 'list
-         #:predicate (lambda (x)
-                       (memq x '(#:table #:table*)))
-         #:transformer (lambda (e)
-                         (syntax-case e ()
-                           ((#:table (addr (exps ...)) ...)
-                            #'((cons addr (generate-register exps ...)) ...))
-                           ((#:table* (addr exp) ...)
-                            #'((cons addr exp) ...))))))
-
-(define-syntax generate-register-map
-  (lambda (x)
-    (syntax-case x ()
-      ((kw exp0 expn ...)
-       (is-kw? #'exp0)
-       (with-syntax (((((table ...) ...) (meta ...))
-                      (process-plist #'(exp0 expn ...)
-                                     group:table
-                                     (group 'meta))))
-         #'(make-register-map* (list meta ...)
-                               (list table ... ...)))))))
 
 (define (register-map-default rm)
   (map (lambda (x) (cons (car x) (register-default (cdr x))))
@@ -88,9 +59,6 @@
 
 (define (register-map-item-names rm)
   (flatten (map register-item-names (register-map-registers rm))))
-
-(define-syntax-rule (define-register-map binding e0 e* ...)
-  (define binding (generate-register-map e0 e* ...)))
 
 (define (register-map-registers rm)
   (map cdr (register-map-table rm)))

@@ -34,17 +34,17 @@
   (if width
       (if (zero? n)
           1
-          (let* ((encoded (s:encode s width n))
+          (let* ((encoded (semantics-encode s width n))
                  (idx (inexact->exact (floor (1+ (log2 encoded))))))
             (varint-bits->chunks idx)))
-      (let ((select (if (negative? n) car cdr))
+      (let ((select (if (negative? n) cadr caddr))
             (compare (if (negative? n) >= <=))
-            (lower1 (car (s:range s 1))))
+            (lower1 (cadr (semantics-range s 1))))
         (when (and (negative? n) (zero? lower1))
           (throw 'invalid-integer-type n 'unsigned-semantics))
         (let loop ((width *value-bits-per-octet*)
                    (chunks 1))
-          (let ((limit (select (s:range s width))))
+          (let ((limit (select (semantics-range s width))))
             (if (compare n limit)
                 chunks
                 (loop (+ *value-bits-per-octet* width) (1+ chunks))))))))
@@ -65,7 +65,7 @@
                         buffer width
                         (offset 0)
                         (semantics unsigned-integer))
-  (when (and width (not (s:in-range? semantics width value)))
+  (when (and width (not (semantics-in-range? semantics width value)))
     (throw 'value-out-of-range value))
   (let* ((min-octets (varint-min-chunks value semantics #:width width))
          (octets (if width
@@ -74,7 +74,7 @@
          (bits (or width (* *value-bits-per-octet* octets)))
          (bv (or buffer (make-u8vector octets 0)))
          (last (1- octets))
-         (encoded (s:encode semantics bits value)))
+         (encoded (semantics-encode semantics bits value)))
     (let loop ((i 0))
       (if (= i octets)
           (if return-used?
@@ -97,7 +97,7 @@
   (let* ((octets (varint-length bv offset))
          (bits (or width (* *value-bits-per-octet* octets)))
          (value (varint-extract bv offset octets))
-         (return-value (s:decode semantics bits value)))
+         (return-value (semantics-decode semantics bits value)))
     (if return-consumed?
         (cons octets return-value)
         return-value)))

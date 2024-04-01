@@ -14,7 +14,9 @@
 
 (with-fs-test-bundle
  (plan 15)
- (let* ((reg (generate-register #:contents (foo 0 3) (start? 3 1) (bar 4 4)))
+ (let* ((reg (register (items (list (‣ foo 0 3)
+                                    (‣ start? 3 1)
+                                    (‣ bar 4 4)))))
         (win00 (make-register-window reg 3 5))
         (win01 (make-register-window reg 2 6))
         (win02 (make-register-window reg 3 4))

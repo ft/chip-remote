@@ -11,15 +11,14 @@
              (chip-remote item)
              (chip-remote register)
              (chip-remote register-map)
+             (chip-remote page-map)
              (chip-remote device)
-             (chip-remote devices bosch bno055)
              (chip-remote devices microchip mcp4351)
              (chip-remote devices linear-technology ltc6603)
-             (chip-remote devices texas-instruments cdce72010)
              (chip-remote decode)
              (chip-remote decode to-text)
              (chip-remote semantics)
-             (chip-remote validate)
+             (chip-remote utilities)
              (chip-remote modify))
 
 (init-test-tap!)
@@ -31,20 +30,28 @@
 (with-fs-test-bundle
   (plan 29)
 
-  (let* ((dev (generate-device
-               #:page-map
-               (0 #:table
-                  (0 (#:default 128
-                                #:contents (thing 0 4) (fish 4 4)))
-                  (1 (#:contents (more 0 4) (stuff 4 4))))
-               (1 #:table
-                  (0 (#:contents (thing* 0 4) (fish* 4 4)))
-                  (1 (#:contents (more* 0 4) (stuff* 4 4)))
-                  (2 (#:contents (stuff 0 8 #:default 111))))
-               (10 #:table
-                   (8    (#:contents (there 0 4) (really 4 4)))
-                   (200  (#:contents (is 0 4) (lots 4 4)))
-                   (1025 (#:contents (more-things 0 8 #:default 101))))))
+  (let* ((dev (device
+               (page-map
+                (pm→
+                 (table
+                  (↔ ( 0 (rm→
+                          (table
+                           (↔ (   0 († (‣ thing 0 4)
+                                       (‣ fish 4 4 (default 8))))
+                              (   1 († (‣ more 0 4)
+                                       (‣ stuff 4 4)))))))
+                     ( 1 (rm→
+                          (table (↔ (   0 († (‣ thing* 0 4)
+                                             (‣ fish* 4 4)))
+                                    (   1 († (‣ more* 0 4)
+                                             (‣ stuff* 4 4)))
+                                    (   2 († (‣ stuff 0 8 (default 111))))))))
+                     (10 (rm→
+                          (table (↔ (   8 († (‣ there 0 4)
+                                             (‣ really 4 4)))
+                                    ( 200 († (‣ is 0 4)
+                                             (‣ lots 4 4)))
+                                    (1025 († (‣ more-things 0 8 (default 101))))))))))))))
          (dev-default (device-default dev)))
     (define-test "Extract value by page-address"
       (pass-if-equal? (value-at-address dev-default 1)

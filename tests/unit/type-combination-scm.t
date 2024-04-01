@@ -12,26 +12,37 @@
              (chip-remote item)
              (chip-remote page-map)
              (chip-remote semantics)
+             (chip-remote register)
              (chip-remote register-map)
+             (chip-remote utilities)
              (chip-remote combination))
 
 (init-test-tap!)
 
 (define-device thingy
-  #:register-map (#:table (#x0 (#:contents (thing-mid 0 8 #:default #b10110001)
-                                           (foo? 8 1)
-                                           (bar? 9 1)
-                                           (stuff-low 10 6  #:default #b101100)))
-                          (#x1 (#:contents (stuff-high 0 2 #:default #b10)
-                                           (boofar 2 6)))
-                          (#x2 (#:contents (thing-low 0 4 #:default #b1001)
-                                           (foobar 4 2)
-                                           (thing-high 6 2 #:default #b10)))))
+  (page-map
+   (pm→
+    (table
+     (↔ (#f (rm→
+             (table
+              (↔ (#x0 († (‣ thing-mid   0 8 (default #b10110001))
+                         (‣ foo?        8 1)
+                         (‣ bar?        9 1)
+                         (‣ stuff-low  10 6 (default #b101100))))
+                 (#x1 († (‣ stuff-high  0 2 (default #b10))
+                         (‣ boofar      2 6)))
+                 (#x2 († (‣ thing-low   0 4 (default #b1001))
+                         (‣ foobar      4 2)
+                         (‣ thing-high  6 2 (default #b10)))))))))))))
 
-(with-fs-test-bundle (no-plan)
+(with-fs-test-bundle
+  (no-plan)
 
   (define-test "thingy is a device"
     (pass-if-true (device? thingy)))
+
+  (define-test "thingy has a default value"
+    (pass-if-no-exception (device-default thingy)))
 
   (define-test "Empty spec returns default combination"
     (pass-if-equal? (make-default-combination thingy '())
@@ -42,8 +53,9 @@
                                  thingy '(concatenate stuff-high stuff-low)))))
 
   (define-test "Raw value of 'stuff' combination checks out"
-    (pass-if-eqv? (c:raw (combination-assemble
-                          thingy '(concatenate stuff-high stuff-low)))
+    (pass-if-eqv? (c:raw (combination-assemble thingy
+                                               '(concatenate stuff-high
+                                                             stuff-low)))
                   #b10101100))
 
   (define-test "Raw value of 'thing' combination checks out"

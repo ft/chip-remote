@@ -69,13 +69,13 @@
            (pass-if-exception 'invalid-integer-type
                               (varint-min-chunks value semantics)))))))
 
-(define tc32-range (s:range twos-complement 32))
-(define tc32-min (car tc32-range))
-(define tc32-max (cdr tc32-range))
+(define tc32-range (semantics-range twos-complement 32))
+(define tc32-min (cadr tc32-range))
+(define tc32-max (caddr tc32-range))
 
-(define zz32-range (s:range zig-zag 32))
-(define zz32-min (car zz32-range))
-(define zz32-max (cdr zz32-range))
+(define zz32-range (semantics-range zig-zag 32))
+(define zz32-min (cadr zz32-range))
+(define zz32-max (caddr zz32-range))
 
 (define max-width-tests
   ;; width     value   byte-vector                       semantics

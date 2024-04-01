@@ -1,40 +1,43 @@
 (define-module (chip-remote device)
   #:use-module (srfi srfi-1)
-  #:use-module (srfi srfi-9 gnu)
   #:use-module (srfi srfi-11)
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 pretty-print)
   #:use-module (chip-remote decode)
-  #:use-module (chip-remote device access)
+  ;; #:use-module (chip-remote device access)
   #:use-module (chip-remote device transmit)
   #:use-module (chip-remote device spi)
   #:use-module (chip-remote item)
   #:use-module (chip-remote modify)
-  #:use-module (chip-remote process-plist)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote page-map)
   #:use-module (chip-remote utilities)
   #:use-module (data-structures sized-stack)
-  #:export (generate-device          ;; Device creation
+  #:use-module (data-structures records)
+  #:use-module (data-structures records utilities)
+  #:export (device                   ;; Device creation
             make-device
             define-device
             device?                  ;; Device type API
-            device-value-suitable?
-            device-meta
+            device-name
+            device-manufacturer
+            device-homepage
+            device-datasheet
+            device-keywords
+            device-register-width
             device-page-map
             device-combinations
             device-access
             device-state
-            new-device-state
             current-device-state     ;; Device utilities
             push-device-state
             reset-device-state
+            device-value-suitable?
             device-default
             device-diff
             device-history
-            device-name
             device-registers
             device-item-names
             device-canonical
@@ -44,139 +47,34 @@
             device-address-map
             device-extract))
 
-(define-immutable-record-type <device>
-  (make-device* meta page-map combinations access state)
-  device?
-  (meta device-meta)
-  (page-map device-page-map)
-  (combinations device-combinations)
-  (access device-access)
-  (state device-state new-device-state))
+(define-record-type* <device>
+  device make-device device? this-device
+  (name           device-name (default #f))
+  (manufacturer   device-manufacturer (default #f))
+  (homepage       device-homepage (default #f))
+  (datasheet      device-datasheet (default #f))
+  (keywords       device-keywords (default '()))
+  (register-width device-register-width (default #f))
+  (page-map       device-page-map (sanitize (need 'page-map page-map?)))
+  (combinations   device-combinations (default '()))
+  (access         device-access (default 'access))
+  (state          device-state (default 'state)))
 
-(define (current-device-state device)
-  (let ((state (device-state device)))
+(new-record-definer define-device device)
+
+(define (current-device-state dev)
+  (let ((state (device-state dev)))
     (if (sized-stack-empty? state)
-        (device-default device)
+        (device-default dev)
         (cdr (sized-stack-peek state)))))
 
-(define (push-device-state device annotation value)
-  (new-device-state device (sized-stack-push (device-state device)
-                                             (cons annotation value))))
+(define (push-device-state dev annotation value)
+  (device (inherit dev)
+          (state (sized-stack-push (device-state dev)
+                                   (cons annotation value)))))
 
-(define (reset-device-state device)
-  (push-device-state device 'default (device-default device)))
-
-(define* (make-device meta page-map combinations access
-                      #:key (state (make-sized-stack 1024)))
-  (reset-device-state
-   (make-device* meta page-map combinations access state)))
-
-(define group:page
-  (group 'pages
-         #:type 'list
-         #:predicate
-         (lambda (x)
-           (memq x '(#:page-map
-                     #:page-map*
-                     #:register-map
-                     #:register-map*
-                     #:register)))
-         #:transformer
-         (lambda (e)
-           (syntax-case e ()
-             ((#:page-map* exp)
-              #'exp)
-             ((#:page-map (e0 e* ...) ...)
-              #'(list (generate-page-map (e0 e* ...)) ...))
-             ((#:register-map* expr)
-              #'(list (generate-page-map (#f expr))))
-             ((#:register-map (e0 e* ...))
-              #'(list (generate-page-map (#f (generate-register-map e0 e* ...)))))
-             ((#:register (e0 e* ...))
-              #'(list (generate-page-map (#f (generate-register-map
-                                              #:table (#f (e0 e* ...)))))))))))
-
-(define (prefix-syn prefix syn)
-  (datum->syntax #'generate-device (symbol-append prefix (syntax->datum syn))))
-
-(define group:access
-  (group 'access
-         #:type 'list
-         #:predicate (lambda (x) (memq x '(#:bus #:read #:write)))
-         #:transformer
-         (lambda (e)
-           (syntax-case e ()
-             ((#:bus (type e* ...))
-              (with-syntax ((make-type (prefix-syn 'make-device-access- #'type)))
-                #'(#:bus (make-type e* ...))))
-             (else e)))))
-
-(define group:combinations
-  (group 'combinations
-         #:type 'list
-         #:predicate (lambda (x) (eq? x #:combinations))
-         #:transformer (lambda (e)
-                         (syntax-case e ()
-                           ((#:combinations e0 e* ...)  #'(list e0 e* ...))))))
-
-(define group:transmit
-  (group 'transmit
-         #:type 'list
-         #:predicate (lambda (x) (memq x '(#:transmit)))
-         #:transformer
-         (lambda (e)
-           (syntax-case e ()
-             ((#:transmit (type var transf))
-              #'(make-device-transmit #:type 'type #:variant 'var
-                                      #:transform transf))
-             ((#:transmit (type var))
-              #'(make-device-transmit #:type 'type #:variant 'var))
-             ((#:transmit (type))
-              #'(make-device-transmit #:type 'type))
-             ((#:transmit type)
-              #'(make-device-transmit #:type 'type))))))
-
-(define (make-combinations-script x)
-  (match x
-    ((name e0 e* ...) (cons* name e0 e*))
-    (_ (throw 'cr/empty-combination-definition x))))
-
-(define (elaborate-combinations . lst)
-  (if (null? lst)
-      lst
-      (map make-combinations-script (car lst))))
-
-(define-syntax generate-device
-  (lambda (x)
-    (syntax-case x ()
-      ((_ pl ...)
-       (with-syntax ((((mp ...)
-                       (cmb ...)
-                       ((acc-key acc-value) ...)
-                       (transf ...)
-                       ((key value) ...))
-                      (process-plist #'(pl ...)
-                                     group:page
-                                     group:combinations
-                                     group:access
-                                     group:transmit
-                                     (group 'meta))))
-         #`(make-device
-            (list (cons key value) ...)
-            (page-map-merge (list mp ...))
-            (elaborate-combinations cmb ...)
-            (make-device-access #,@(zip-syms #'(acc-key ...)
-                                             #'(acc-value ...))
-                                #,@(if (null? #'(transf ...)) #'()
-                                       #'(#:transmit transf ...)))))))))
-
-(define-syntax-rule (define-device binding e0 e* ...)
-  (define binding (generate-device #:name 'binding e0 e* ...)))
-
-(define (device-name dev)
-  (let* ((meta (device-meta dev))
-         (name (assq-ref meta #:name)))
-    (if name name '*unnamed-device*)))
+(define (reset-device-state dev)
+  (push-device-state dev 'default (device-default dev)))
 
 (define (device-default dev)
   (page-map-default (device-page-map dev)))
@@ -249,8 +147,8 @@
     ((addr kv ...) (cons addr
                          (fe1 (map minimise-diff/register kv))))))
 
-(define (minimise-diff/device device)
-  (fe1 (map minimise-diff/page device)))
+(define (minimise-diff/device dev)
+  (fe1 (map minimise-diff/page dev)))
 
 (define (minimise-diff data)
   (match data

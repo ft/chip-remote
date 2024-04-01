@@ -37,7 +37,9 @@
    (let ((tableitem (fourth items)))
      (define-test (format #f "Device'e first item is a table-lookup (~a)"
                           (item-name tableitem))
-       (pass-if-eq? (semantics-type (item-semantics tableitem)) 'table-lookup))
+       (pass-if-eq? (car (semantics-range (item-semantics tableitem)
+                                          (item-width tableitem)))
+                    'table))
      (define-test "Decoding a lookup item works (div-by-32)"
        (pass-if-equal? (decode tableitem 1) '(low-pass-cfg . div-by-32)))
      (define-test "Decoding a lookup item works (div-by-512)"

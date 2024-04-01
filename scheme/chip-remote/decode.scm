@@ -286,7 +286,7 @@
                            (raw (c:raw data))
                            (w (c:width data))
                            (s (c:semantics data))
-                           (decoded (s:decode s w raw)))
+                           (decoded (semantics-decode s w raw)))
                       (make-combination/decoder (car c) data decoded c)))
                   cs)
              cs))

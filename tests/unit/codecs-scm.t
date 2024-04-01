@@ -18,9 +18,9 @@
 
   (for-each (lambda (n)
               (define-test (format #f "32-bit unsigned-integer ~a → ~a" n n)
-                (pass-if-= n (s:encode unsigned-integer 32 n)))
+                (pass-if-= n (semantics-encode unsigned-integer 32 n)))
               (define-test (format #f "32-bit unsigned-integer ~a ← ~a" n n)
-                (pass-if-= n (s:decode unsigned-integer 32 n))))
+                (pass-if-= n (semantics-decode unsigned-integer 32 n))))
             '(0 1 2 1024 1025 4000000000))
 
   (for-each (lambda (c)
@@ -28,10 +28,10 @@
                     (e (cdr c)))
                 (define-test (format #f "32-bit two's-complement ~a → ~8,'0x"
                                      n e)
-                  (pass-if-= e (s:encode twos-complement 32 n)))
+                  (pass-if-= e (semantics-encode twos-complement 32 n)))
                 (define-test (format #f "32-bit two's-complement ~a ← ~8,'0x"
                                      n e)
-                  (pass-if-= n (s:decode twos-complement 32 e)))))
+                  (pass-if-= n (semantics-decode twos-complement 32 e)))))
             '((          0 . #x00000000)
               (          1 . #x00000001)
               (         -1 . #xffffffff)
@@ -47,10 +47,10 @@
                     (e (cdr c)))
                 (define-test (format #f "32-bit one's-complement ~a → ~8,'0x"
                                      n e)
-                  (pass-if-= e (s:encode ones-complement 32 n)))
+                  (pass-if-= e (semantics-encode ones-complement 32 n)))
                 (define-test (format #f "32-bit one's-complement ~a ← ~8,'0x"
                                      n e)
-                  (pass-if-= n (s:decode ones-complement 32 e)))))
+                  (pass-if-= n (semantics-decode ones-complement 32 e)))))
             '((          0 . #x00000000)
               (          1 . #x00000001)
               (         -1 . #xfffffffe)
@@ -62,17 +62,17 @@
               (-2000000000 . #x88ca6bff)))
 
   (define-test "one's complement's negative zero decodes to zero"
-    (pass-if-= 0 (s:decode ones-complement 8 #xff)))
+    (pass-if-= 0 (semantics-decode ones-complement 8 #xff)))
 
   (for-each (lambda (c)
               (let ((n (car c))
                     (e (cdr c)))
                 (define-test (format #f "32-bit signed-magnitude ~a → ~8,'0x"
                                      n e)
-                  (pass-if-= e (s:encode signed-magnitude 32 n)))
+                  (pass-if-= e (semantics-encode signed-magnitude 32 n)))
                 (define-test (format #f "32-bit signed-magnitude ~a ← ~8,'0x"
                                      n e)
-                  (pass-if-= n (s:decode signed-magnitude 32 e)))))
+                  (pass-if-= n (semantics-decode signed-magnitude 32 e)))))
             '((          0 . #x80000000)
               (          1 . #x80000001)
               (         -1 . #x00000001)
@@ -84,17 +84,17 @@
               (-2000000000 . #x77359400)))
 
   (define-test "signed magnitude's negative zero decodes to zero"
-    (pass-if-= 0 (s:decode signed-magnitude 8 #x00)))
+    (pass-if-= 0 (semantics-decode signed-magnitude 8 #x00)))
 
   (for-each (lambda (c)
               (let ((n (car c))
                     (e (cdr c)))
                 (define-test (format #f "32-bit offset-binary ~a → ~8,'0x"
                                      n e)
-                  (pass-if-= e (s:encode offset-binary 32 n)))
+                  (pass-if-= e (semantics-encode offset-binary 32 n)))
                 (define-test (format #f "32-bit offset-binary ~a ← ~8,'0x"
                                      n e)
-                  (pass-if-= n (s:decode offset-binary 32 e)))))
+                  (pass-if-= n (semantics-decode offset-binary 32 e)))))
             '((          0 . #x80000000)
               (          1 . #x80000001)
               (         -1 . #x7fffffff)
@@ -105,32 +105,31 @@
               ( 2000000000 . #xf7359400)
               (-2000000000 . #x08ca6c00)))
 
-  (let* ((zig-zag32-range (s:range zig-zag 32))
-         (zz32-min (car zig-zag32-range))
-         (zz32-max (cdr zig-zag32-range)))
-    (for-each (lambda (c)
-                (let ((n (car c))
-                      (e (cdr c)))
-                  (define-test (format #f "32-bit zig-zag ~a → ~8,'0x" n e)
-                    (pass-if-= e (s:encode zig-zag 32 n)))
-                  (define-test (format #f "32-bit zig-zag ~a ← ~8,'0x" n e)
-                    (pass-if-= n (s:decode zig-zag 32 e)))))
-              `((         0 . #x00000000)
-                (        -1 . #x00000001)
-                (         1 . #x00000002)
-                (        -2 . #x00000003)
-                (         2 . #x00000004)
-                ( ,zz32-max . #xfffffffe)
-                ( ,zz32-min . #xffffffff))))
+  (match (semantics-range zig-zag 32)
+    ((range zz32-min zz32-max)
+     (for-each (lambda (c)
+                 (let ((n (car c))
+                       (e (cdr c)))
+                   (define-test (format #f "32-bit zig-zag ~a → ~8,'0x" n e)
+                     (pass-if-= e (semantics-encode zig-zag 32 n)))
+                   (define-test (format #f "32-bit zig-zag ~a ← ~8,'0x" n e)
+                     (pass-if-= n (semantics-decode zig-zag 32 e)))))
+               `((         0 . #x00000000)
+                 (        -1 . #x00000001)
+                 (         1 . #x00000002)
+                 (        -2 . #x00000003)
+                 (         2 . #x00000004)
+                 ( ,zz32-max . #xfffffffe)
+                 ( ,zz32-min . #xffffffff)))))
 
   (for-each (lambda (c)
               (let ((n (car c))
                     (e (cdr c)))
                 (define-test (format #f "boolean ~a → ~a" n e)
-                  (pass-if-= e (s:encode boolean 1 n)))
+                  (pass-if-= e (semantics-encode boolean 1 n)))
                 (let ((expect (if (boolean-true? n) 'enabled 'disabled)))
                   (define-test (format #f "boolean ~a ← ~a" n expect)
-                    (pass-if-eq? expect (s:decode boolean 1 e))))))
+                    (pass-if-eq? expect (semantics-decode boolean 1 e))))))
             '((      #t . 1)
               (       1 . 1)
               (      on . 1)
@@ -148,10 +147,10 @@
               (let ((n (car c))
                     (e (cdr c)))
                 (define-test (format #f "boolean/active-low ~a → ~a" n e)
-                  (pass-if-= e (s:encode boolean/active-low 1 n)))
+                  (pass-if-= e (semantics-encode boolean/active-low 1 n)))
                 (let ((expect (if (boolean-true? n) 'enabled 'disabled)))
                   (define-test (format #f "boolean/active-low ~a ← ~a" n expect)
-                    (pass-if-eq? expect (s:decode boolean/active-low 1 e))))))
+                    (pass-if-eq? expect (semantics-decode boolean/active-low 1 e))))))
             '((      #t . 0)
               (       1 . 0)
               (      on . 0)
@@ -169,12 +168,12 @@
               (match c
                 ((number encoded epsilon)
                  (define-test (format #f "ieee-754-single ~12a → ~8,'0x" number encoded)
-                   (pass-if-= encoded (s:encode ieee-754-single 32 number)))
+                   (pass-if-= encoded (semantics-encode ieee-754-single 32 number)))
                  (define-test (format #f "ieee-754-single ~12a ← ~8,'0x (epsilon: ~a)"
                                       number encoded epsilon)
                    (if (zero? epsilon)
-                       (pass-if-= number (s:decode ieee-754-single 32 encoded))
-                       (pass-if-~= number (s:decode ieee-754-single 32 encoded) epsilon))))))
+                       (pass-if-= number (semantics-decode ieee-754-single 32 encoded))
+                       (pass-if-~= number (semantics-decode ieee-754-single 32 encoded) epsilon))))))
             '((  0.0e+0     #x00000000  0)
               ( -0.0e+0     #x80000000  0)
               (  0.1e+0     #x3dcccccd  1.5e-9)
@@ -194,12 +193,12 @@
               (match c
                 ((number encoded epsilon)
                  (define-test (format #f "ieee-754-double ~12a → ~16,'0x" number encoded)
-                   (pass-if-= encoded (s:encode ieee-754-double 64 number)))
+                   (pass-if-= encoded (semantics-encode ieee-754-double 64 number)))
                  (define-test (format #f "ieee-754-double ~12a ← ~16,'0x (epsilon: ~a)"
                                       number encoded epsilon)
                    (if (zero? epsilon)
-                       (pass-if-= number (s:decode ieee-754-double 64 encoded))
-                       (pass-if-~= number (s:decode ieee-754-double 64 encoded) epsilon))))))
+                       (pass-if-= number (semantics-decode ieee-754-double 64 encoded))
+                       (pass-if-~= number (semantics-decode ieee-754-double 64 encoded) epsilon))))))
             ;; Precision was approximated by using data from:
             ;;
             ;;   https://baseconvert.com/ieee-754-floating-point
@@ -228,6 +227,4 @@
                  'boolean))
   (define-test "default semantics for width 2.. work (unsigned-integer)"
     (pass-if-eq? (semantics-name (deduce-semantics 2 #f))
-                 'unsigned-integer))
-
-  )
+                 'unsigned-integer)))

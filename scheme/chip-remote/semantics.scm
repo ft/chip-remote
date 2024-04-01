@@ -4,79 +4,63 @@
 
 (define-module (chip-remote semantics)
   #:use-module (ice-9 match)
-  #:use-module (ice-9 optargs)
-  #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote interpreter)
   #:use-module (chip-remote named-value)
-  #:export (make-semantics
-            generate-semantics
+  #:use-module (chip-remote utilities)
+  #:use-module (data-structures records)
+  #:use-module (data-structures records utilities)
+  #:export (semantics
+            make-semantics
             define-semantics
             semantics?
             semantics-name
-            semantics-type
-            semantics-data
+            semantics-default
+            semantics-default*
+            semantics-range
+            semantics-range*
+            semantics-decoder
+            semantics-encoder
+            semantics-compose
             semantics-decode
             semantics-encode
-            s:encode
-            s:decode
-            s:range
-            s:in-range?))
+            semantics-in-range?
+            table-lookup
+            static))
 
-(define-immutable-record-type <semantics>
-  (make-semantics name type data range decode encode)
-  semantics?
-  (name semantics-name identify-semantics)
-  (type semantics-type)
-  (data semantics-data)
-  (range semantics-range)
-  (decode semantics-decode amend-decoder)
-  (encode semantics-encode amend-encoder))
+(define-record-type* <semantics>
+  semantics make-semantics semantics? this-semantics
+  (name   semantics-name (default 'none) (sanitize (need 'name symbol?)))
+  ;; This is a function that takes a semantics datum and an item width and
+  ;; produces an encoding of the range of values that are valid for the im-
+  ;; plemented semantics.
+  ;;
+  ;; The value returned is one of:
+  ;;
+  ;;  (none)
+  ;;  (range <minimum> <maximum>)
+  ;;  (enumeration <list-of-values>)
+  ;;  (table <association-list/named-value>)
+  ;;
+  ;; This is consumed by semantics-in-range?.
+  (range   semantics-range* (default (lambda (s w) '(none))))
+  (default semantics-default*)
+  ;; The default decoder/encoder pair is able to look at range, and if that
+  ;; looks like a table lookup, use that table to the their work. That way, you
+  ;; don't have to specify these functions for table lookup semantics.
+  (decode  semantics-decoder (thunked)
+           (default (lambda (w v)
+                     (default-decode this-semantics w v))))
+  (encode  semantics-encoder (thunked)
+           (default (lambda (w v)
+                     (default-encode this-semantics w v)))))
 
-(define (default-range s w)
-  ;; Possible return values of range generators:
-  ;;   - #f: Don't make any stipulation upon semantics' input range.
-  ;;   - (MIN . MAX) a pair of minimum/maximum values
-  ;;   - (a b c ...) a set of allowed input values
-  #f)
+(new-record-definer define-semantics semantics)
 
-(define (lookup-range s w)
-  (let ((tab (semantics-data s)))
-    (map car (if (named-value? tab)
-                 (value-data tab)
-                 tab))))
+(define (table-lookup table)
+  (lambda (s w) (list 'table table)))
 
-;; With derived semantics, the new semantics sit between their parent and the
-;; encoded value. This allows easier use of the interpreter language.
-(define (call x)
-  (cond ((evaluation? x) (evaluation-value x))
-        (else x)))
-
-(define (derived-encoder parent enc)
-  (if parent
-      (lambda (w v) ((call enc) w (s:encode parent w v)))
-      enc))
-
-(define (derived-decoder parent dec)
-  (if parent
-      (lambda (w v) (s:decode parent w ((call dec) w v)))
-      dec))
-
-(define (derived-range parent r)
-  (if parent
-      (semantics-range parent)
-      r))
-
-(define (eval-processor type proc)
-  (case type
-    ((interpreter) (make-evaluation proc))
-    (else proc)))
-
-(define* (gensem type #:key encode decode derive-from (range default-range))
-  (unless encode (throw 'cr/required-keyword-argument #:encode))
-  (unless decode (throw 'cr/required-keyword-argument #:decode))
-  (make-semantics #f type #f (derived-range derive-from range)
-                  (derived-decoder derive-from (eval-processor type decode))
-                  (derived-encoder derive-from (eval-processor type encode))))
+(define (static value)
+  (lambda (s w) value))
 
 (define (decode-with-table table value)
   (let loop ((rest (if (named-value? table) (value-data table) table)))
@@ -88,9 +72,6 @@
               k
               (loop (cdr rest)))))))
 
-(define (make-table-decoder table)
-  (lambda (w x) (decode-with-table table x)))
-
 (define (encode-with-table table key)
   (let ((value (assoc key (if (named-value? table)
                               (value-data table)
@@ -99,43 +80,50 @@
         (cdr value)
         (throw 'cr/undefined key table))))
 
-(define (make-table-encoder table)
-  (lambda (w x) (encode-with-table table x)))
-
-(define* (gensem:lookup table #:key derive-from (range lookup-range))
-  (make-semantics #f 'table-lookup table (derived-range derive-from range)
-                  (derived-decoder derive-from (make-table-decoder table))
-                  (derived-encoder derive-from (make-table-encoder table))))
-
-(define-syntax generate-semantics
-  (lambda (x)
-    (syntax-case x (lookup interpreter scheme)
-      ((_ interpreter exp ...) #'(gensem 'interpreter exp ...))
-      ((_ scheme exp ...) #'(gensem 'scheme exp ...))
-      ((_ lookup exp ...) #'(gensem:lookup exp ...))
-      (_ (error "Invalid semantics generation")))))
-
-(define-syntax-rule (define-semantics binding e* ...)
-  (define binding (identify-semantics (generate-semantics e* ...)
-                                      'binding)))
-
 (define (codec a s w v)
   (let ((f (a s)))
     (cond ((procedure? f) (f w v))
-          ((evaluation? f) ((evaluation-value f) w v))
-          (else (throw 'cr/unknown-codec-type f)))))
+         ((evaluation? f) ((evaluation-value f) w v))
+          (else (throw 'cr/unknown-semantics-type f)))))
 
-(define (s:encode s w v)
-  (codec semantics-encode s w v))
+(define (semantics-encode s w v)
+  (codec semantics-encoder s w v))
 
-(define (s:decode s w v)
-  (codec semantics-decode s w v))
+(define (semantics-decode s w v)
+  (codec semantics-decoder s w v))
 
-(define (s:range s w)
-  ((semantics-range s) s w))
+(define (semantics-range s w)
+  ((semantics-range* s) s w))
 
-(define (s:in-range? s w v)
-  (match (s:range s w)
-    ((minimum . maximum)
+(define (semantics-default s w)
+  ((semantics-default* s) s w))
+
+(define (semantics-in-range? s w v)
+  (match (semantics-range s w)
+    (('none) #t)
+    (('range minimum maximum)
      (and (>= v minimum)
-          (<= v maximum)))))
+          (<= v maximum)))
+    (('table table)
+     (!! (memq v (map car
+                      (if (named-value? table)
+                          (value-data table)
+                          table)))))
+    (('enumeration . lst) (!! (memq v lst)))
+    (_ #f)))
+
+(define (semantics-compose a b)
+  (lambda (w x)
+    (a w (b w x))))
+
+(define (default-codec f s w x)
+  (let ((range (semantics-range s w)))
+    (match range
+      (('table table) (f table x))
+      (_ x))))
+
+(define (default-encode s w x)
+  (default-codec encode-with-table s w x))
+
+(define (default-decode s w x)
+  (default-codec decode-with-table s w x))

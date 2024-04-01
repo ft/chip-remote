@@ -5,7 +5,8 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (srfi srfi-11)
-  #:export (!!
+  #:export (↔
+            !!
             2e
             non-negative-integer?
             addr=
@@ -48,6 +49,8 @@
             xread
             xselect
             zip2))
+
+(define-syntax-rule (↔ (a v) ...) `((,a . ,v) ...))
 
 (define-syntax-rule (cat str ...)
   (string-concatenate (list str ...)))

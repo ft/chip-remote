@@ -28,7 +28,7 @@
 
 (define (perform-test item)
   (let ((default (catch #t
-                   (lambda () (item-default item))
+                   (lambda () (item-default-raw item))
                    (lambda (k . a)
                      (cons* 'exception k a)))))
     (define-test (format #f "default for item ~a encodes to ~a"

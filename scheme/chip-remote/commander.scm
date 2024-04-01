@@ -19,7 +19,6 @@
   #:use-module (chip-remote modify)
   #:use-module (chip-remote protocol)
   #:use-module (chip-remote semantics)
-  #:use-module (chip-remote validate)
   #:export (make-commander))
 
 (define (pp obj . args)

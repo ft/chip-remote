@@ -3,15 +3,19 @@
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
-  #:use-module (ice-9 pretty-print)
-  #:use-module (chip-remote process-plist)
+  #:use-module (ice-9 optargs)
   #:use-module (chip-remote item)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote utilities)
-  #:export (generate-page-map          ;; PageMap creation
+  #:use-module (data-structures records)
+  #:use-module (data-structures records utilities)
+  #:export (page-map                   ;; PageMap creation
+            pm→
             make-page-map
             define-page-map
             page-map?                  ;; PageMap type API
+            page-map-name
+            page-map-width
             page-map-table
             page-map-table:sorted      ;; PageMap utilities
             page-map-register-maps
@@ -33,33 +37,30 @@
 ;; between possibly different registers. That would be the more general
 ;; solution.
 
-(define-record-type <page-map>
-  (make-page-map table)
-  page-map?
-  (table page-map-table))
+(define-record-type* <page-map>
+  page-map make-page-map page-map? this-page-map
+  (name  page-map-name (default #f))
+  (width page-map-width (default #f))
+  (table page-map-table
+         (sanitize (need 'table
+                         (lambda (tab)
+                           (every (lambda (x)
+                                    (match x
+                                      ((a . r) (and (index? a)
+                                                    (register-map? r)))
+                                      (_ #f)))
+                                  tab))))))
 
-(define (page-map-register-maps pm)
-  (map cdr (page-map-table pm)))
+(define-syntax-rule (pm→ e* ...) (page-map e* ...))
+
+(new-record-definer define-page-map page-map)
 
 (define (page-map-table:sorted rm)
   (sort (page-map-table rm)
         (lambda (a b) (index< (car a) (car b)))))
 
-(define-syntax generate-page-map
-  (lambda (x)
-    ;; Like *this* you can't *mix* the two cases. This needs to be recursive in
-    ;; order to enable this. And we want this, obviously.
-    (syntax-case x ()
-      ;; Here, if exp0 is a #:keyword, explode into (generate-register-map ...),
-      ;; otherwise (expn ...) should be empty and exp0 should be inserted
-      ;; verbatim, so the expression will be evaluated at run-time.
-      ((kw (addr exp0 expn ...) ...)
-       (is-kw? (car #'(exp0 ...)))
-       #'(make-page-map (list (cons addr
-                                    (generate-register-map exp0 expn ...))
-                              ...)))
-      ((kw (addr exp) ...)
-       #'(make-page-map (list (cons addr exp) ...))))))
+(define (page-map-register-maps pm)
+  (map cdr (page-map-table pm)))
 
 (define (page-map-default rm)
   (map (lambda (x) (cons (car x) (register-map-default (cdr x))))
@@ -69,11 +70,9 @@
   (flatten (map (lambda (x) (register-map-item-names (cdr x)))
                 (page-map-table rm))))
 
-(define-syntax-rule (define-page-map binding e0 e* ...)
-  (define binding (generate-page-map e0 e* ...)))
-
-(define (page-map-merge lst)
-  (make-page-map (apply append (map page-map-table (flatten lst)))))
+(define* (page-map-merge lst #:key name)
+  (page-map (name name)
+            (table (apply append (map page-map-table (flatten lst))))))
 
 (define (page-map-fold fnc init pm)
   (fold (lambda (page acc)

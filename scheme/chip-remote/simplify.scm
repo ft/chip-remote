@@ -13,8 +13,7 @@
         ((pair? spec) (cons (pp:simplify (car (spec)))
                             (pp:simplify (cdr (spec)))))
         ((semantics? spec)
-         (format #f "#<semantics ~a ~a>"
-                 (semantics-type spec)
+         (format #f "#<semantics ~a>"
                  (semantics-name spec)))
         ((item? spec)
          (format #f "#<item ~a ~a ~a>"

@@ -250,18 +250,16 @@
 (define (pp:semantics sem)
   (d:item:highlight:semantics
    (if (semantics? sem)
-       (let ((type (semantics-type sem))
+       (let ((range (semantics-range sem 1))
              (sname (semantics-name sem)))
-         (if (eq? 'table-lookup type)
-             (let* ((data (semantics-data sem))
+         (if (eq? 'table (car range))
+             (let* ((data (cdr range))
                     (tname (if (named-value? data)
                                (value-name data)
                                "*unnamed-table*")))
-               (string-concatenate
-                (list (maybe-string type)
-                      ": "
-                      (or sname (maybe-string tname)))))
-             (maybe-string (or sname "*unnamed-semantics*"))))
+               (or (maybe-string sname) (maybe-string tname)))
+             (maybe-string (or (maybe-string sname)
+                               "*unnamed-semantics*"))))
        "*unknown-semantics*")))
 
 (define (d:item-value proc state d:item)
@@ -395,16 +393,15 @@
 
 (define (d:device proc state d:device)
   (let* ((dev (decoder-device-description d:device))
-         (meta (device-meta dev))
-         (name (assq-ref meta #:name))
-         (man (assq-ref meta #:manufacturer))
+         (name (device-name dev))
+         (man (device-manufacturer dev))
          (man-name (and man (manufacturer-name man)))
          (man-hp (and man (manufacturer-homepage man)))
          (man-wp (and man (manufacturer-wikipedia man)))
          (level (d:indent state 'device))
-         (hp (assq-ref meta #:homepage))
-         (ds (assq-ref meta #:datasheet))
-         (kw (assq-ref meta #:keywords)))
+         (hp (device-homepage dev))
+         (ds (device-datasheet dev))
+         (kw (device-keywords dev)))
     (append
      (list (if name
                (cat (d:device:highlight:title "Decoding Device ")
