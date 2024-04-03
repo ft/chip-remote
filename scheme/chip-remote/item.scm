@@ -42,6 +42,7 @@
             item-set
             item->list
             item-named?
+            item-range
             validate-item-value))
 
 (define-record-type* <item>
@@ -81,6 +82,10 @@
 
 (define (item-set item register-value item-value)
   (set-bits register-value item-value (item-width item) (item-offset item)))
+
+(define (item-range item)
+  (semantics-range (item-semantics item)
+                   (item-width item)))
 
 (define (item->list item)
   (list (item-name item)
