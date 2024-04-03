@@ -17,7 +17,8 @@ GENERATE_TOOL_SECTION = $(DOCC) tool
 GENERATE_FINAL_MARKDOWN = $(DOCC) combine
 
 PANDOC = pandoc
-PANDOC_FLAGS = --self-contained --number-sections --toc
+PANDOC_FLAGS =  --embed-resources --standalone --number-sections --toc
+PANDOC_FLAGS += -f markdown
 MARKDOWN2PDF = $(PANDOC) $(PANDOC_FLAGS) --template template.latex
 MARKDOWN2MAN = $(PANDOC) $(PANDOC_FLAGS) -t man --template template.man
 
