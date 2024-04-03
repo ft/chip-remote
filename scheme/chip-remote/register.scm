@@ -16,6 +16,7 @@
             define-register
             register?                      ;; Register type API
             register-name
+            register-address
             register-items
             register-description
             register-width*
@@ -40,6 +41,7 @@
 (define-record-type* <register>
   register make-register register? this-register
   (name         register-name (default #f))
+  (address      register-address (default #f))
   (description  register-description (default #f))
   (width        register-width* (default #f))
   (items        register-items))

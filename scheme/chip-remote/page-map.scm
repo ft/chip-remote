@@ -42,14 +42,24 @@
   (name  page-map-name (default #f))
   (width page-map-width (default #f))
   (table page-map-table
-         (sanitize (need 'table
-                         (lambda (tab)
-                           (every (lambda (x)
-                                    (match x
-                                      ((a . r) (and (index? a)
-                                                    (register-map? r)))
-                                      (_ #f)))
-                                  tab))))))
+         (sanitize
+          (need 'table
+                (lambda (tab)
+                  (let ((err (lambda (desc obj)
+                               (format (current-error-port)
+                                       "# field error (pm), ~a: ~a~%"
+                                       desc obj))))
+                    (every (lambda (x)
+                             (match x
+                               ((a . r)
+                                (let ((address-ok? (index? a))
+                                      (rmap-ok? (register-map? r)))
+                                  (unless address-ok?  (err 'address x))
+                                  (unless rmap-ok? (err 'register-map x))
+                                  (and address-ok? rmap-ok?)))
+                               (_ (err "key-value" x)
+                                  #f)))
+                           tab)))))))
 
 (define-syntax-rule (pm→ e* ...) (page-map e* ...))
 

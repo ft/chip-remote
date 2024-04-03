@@ -5,9 +5,14 @@
 (define-module (chip-remote devices texas-instruments ads4149)
   #:use-module (chip-remote codecs)
   #:use-module (chip-remote device)
+  #:use-module (chip-remote item)
   #:use-module (chip-remote item builder)
   #:use-module (chip-remote manufacturer texas-instruments)
+  #:use-module (chip-remote page-map)
+  #:use-module (chip-remote semantics)
+  #:use-module (chip-remote register)
   #:use-module (chip-remote register-map)
+  #:use-module (chip-remote utilities)
   #:export (ads4149))
 
 (define lvds-swing-map ;; mV
@@ -111,69 +116,61 @@
     (enabled  . #b11)))
 
 (define-register-map ads4149-register-map
-  #:table
-  (#x0 (#:contents (serial-readout? 0 1)
-                   (device-reset! 1 1)
-                   (=> (reserved 2 6))))
-  (#x1 (#:contents (=> (reserved 0 2))
-                   (lvds-swing 2 6 #:semantics lookup lvds-swing-map)))
-  (#x3 (#:contents (high-performance-mode-1
-                    0 2 #:semantics lookup high-performace-mode-map)
-                   (=> (reserved 2 6))))
-  (#x25 (#:contents (test-pattern 0 3
-                                  #:semantics lookup test-pattern-map)
-                    (disable-gain? 3 1)
-                    (gain 4 4 #:semantics lookup gain-map)))
-  (#x26 (#:contents (lvds-data-strength
-                     0 1 #:semantics lookup lvds-strength-map)
-                    (lvds-clkout-strength
-                     1 1 #:semantics lookup lvds-strength-map)
-                    (=> (reserved 2 6))))
-  (#x3d (#:contents (=> (reserved 0 5))
-                    (enable-offset-correction? 5 1)
-                    (data-format 6 2
-                                 #:semantics lookup data-format-map)))
-  (#x3f (#:contents (custom-pattern-high 0 8)))
-  (#x40 (#:contents (=> (reserved 0 2))
-                    (custom-pattern-low 2 6)))
-  (#x41 (#:contents (enable-clkout-fall 0 1)
-                    (clkout-rise-posn 1 2)
-                    (enable-clkout-rise 3 1)
-                    (cmos-clkout-strength
-                     4 2 #:semantics lookup lvds-strength-map)
-                    (lvds-cmos 6 2
-                               #:semantics lookup lvds-cmos-select-map)))
-  (#x42 (#:contents (=> (reserved 0 2))
-                    (standby? 2 1)
-                    (disable-low-latency? 3 1)
-                    (=> (reserved 4 2))
-                    (clkout-fall-posn 6 2)))
-  (#x43 (#:contents (enable-lvds-swing
-                     0 2 #:semantics lookup lvds-swing-control-map)
-                    (=> (reserved 2 2))
-                    (power-down-outputs? 4 1)
-                    (=> (reserved 5 1))
-                    (power-down-global? 6 1)
-                    (=> (reserved 7 1))))
-  (#x4a (#:contents (high-performance-mode-2 0 1)
-                    (=> (reserved 1 7))))
-  (#xbf (#:contents (=> (reserved 0 2))
-                    (offset-pedestal 2 6
-                                     #:semantics* twos-complement)))
-  (#xcf (#:contents (=> (reserved 0 2))
-                    (offset-correction-time-constant
-                     2 4 #:semantics lookup correction-time-map)
-                    (=> (reserved 6 1))
-                    (freeze-offset-correction 7 1)))
-  (#xdf (#:contents (=> (reserved 0 4))
-                    (low-speed 4 2
-                               #:semantics lookup low-speed-map)
-                    (=> (reserved 6 2)))))
+  (table
+   (↔
+    (#x00 († (‣ serial-readout? 0 1)
+             (‣ device-reset! 1 1)
+             (reserved 2 6)))
+    (#x01 († (reserved 0 2)
+             (‣ lvds-swing 2 6 (semantics (tbl lvds-swing-map)))))
+    (#x03 († (‣ high-performance-mode-1
+                0 2 (semantics (tbl high-performace-mode-map)))
+             (reserved 2 6)))
+    (#x25 († (‣ test-pattern 0 3 (semantics (tbl test-pattern-map)))
+             (‣ disable-gain? 3 1)
+             (‣ gain 4 4 (semantics (tbl gain-map)))))
+    (#x26 († (‣ lvds-data-strength 0 1 (semantics (tbl lvds-strength-map)))
+             (‣ lvds-clkout-strength 1 1 (semantics (tbl lvds-strength-map)))
+             (reserved 2 6)))
+    (#x3d († (reserved 0 5)
+             (‣ enable-offset-correction? 5 1)
+             (‣ data-format 6 2 (semantics (tbl data-format-map)))))
+    (#x3f († (‣ custom-pattern-high 0 8)))
+    (#x40 († (reserved 0 2)
+             (‣ custom-pattern-low 2 6)))
+    (#x41 († (‣ enable-clkout-fall 0 1)
+             (‣ clkout-rise-posn 1 2)
+             (‣ enable-clkout-rise 3 1)
+             (‣ cmos-clkout-strength 4 2 (semantics (tbl lvds-strength-map)))
+             (‣ lvds-cmos 6 2 (semantics (tbl lvds-cmos-select-map)))))
+    (#x42 († (reserved 0 2)
+             (‣ standby? 2 1)
+             (‣ disable-low-latency? 3 1)
+             (reserved 4 2)
+             (‣ clkout-fall-posn 6 2)))
+    (#x43 († (‣ enable-lvds-swing 0 2 (semantics (tbl lvds-swing-control-map)))
+             (reserved 2 2)
+             (‣ power-down-outputs? 4 1)
+             (reserved 5 1)
+             (‣ power-down-global? 6 1)
+             (reserved 7 1)))
+    (#x4a († (‣ high-performance-mode-2 0 1)
+             (reserved 1 7)))
+    (#xbf († (reserved 0 2)
+             (‣ offset-pedestal 2 6 (semantics twos-complement))))
+    (#xcf († (reserved 0 2)
+             (‣ offset-correction-time-constant
+                2 4 (semantics (tbl correction-time-map)))
+             (reserved 6 1)
+             (‣ freeze-offset-correction 7 1)))
+    (#xdf († (reserved 0 4)
+             (‣ low-speed 4 2 (semantics (tbl low-speed-map)))
+             (reserved 6 2))))))
 
 (define-device ads4149
-  #:manufacturer texas-instruments
-  #:homepage "http://www.ti.com/product/ADS4149"
-  #:datasheet "http://www.ti.com/lit/ds/symlink/ads4149.pdf"
-  #:keywords '(14bit 250MS/s analog-to-digital converter)
-  #:register-width 8
-  #:register-map* ads4149-register-map)
+  (manufacturer texas-instruments)
+  (homepage "http://www.ti.com/product/ADS4149")
+  (datasheet "http://www.ti.com/lit/ds/symlink/ads4149.pdf")
+  (keywords '(14bit 250MS/s analog-to-digital converter))
+  (register-width 8)
+  (page-map (pm→ (table (↔ (#f ads4149-register-map))))))

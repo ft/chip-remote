@@ -4,17 +4,22 @@
 
 (define-module (chip-remote devices decawave dw1000)
   #:use-module (chip-remote device)
-  #:use-module (chip-remote register)
+  #:use-module (chip-remote register-map)
+  #:use-module (chip-remote page-map)
   #:use-module (chip-remote manufacturer decawave)
+  #:use-module (chip-remote utilities)
   #:use-module (chip-remote devices decawave dw1000 registers)
   #:export (dw1000))
 
 (define-device dw1000
-  #:manufacturer decawave
-  #:homepage "https://www.decawave.com/products/dw1000"
-  #:datasheet "https://www.decawave.com/sites/default/files/DW1000-Datasheet-V2.15.pdf"
-  #:keywords '(uwb tranceiver ieee802.15.4-2011 positioning location)
-  #:register-map (#:table* (#x00 reg:device-id)
+  (manufacturer decawave)
+  (homepage "https://www.decawave.com/products/dw1000")
+  (datasheet "https://www.decawave.com/sites/default/files/DW1000-Datasheet-V2.15.pdf")
+  (keywords '(uwb tranceiver ieee802.15.4-2011 positioning location))
+  (page-map
+   (pm→
+    (table
+     (↔ (#f (rm→ (table (↔ (#x00 reg:device-id)
                            (#x01 reg:ieee-eui)
                            (#x03 reg:pan-id/short-address)
                            (#x04 reg:system-cfg)
@@ -52,4 +57,4 @@
                            (#x2d reg:otp-interface)
                            (#x2e reg:leading-edge-detect-ctrl)
                            (#x2f reg:digital-diagnostics)
-                           (#x36 reg:power-management-ctrl)))
+                           (#x36 reg:power-management-ctrl))))))))))

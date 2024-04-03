@@ -10,16 +10,20 @@
   #:use-module (chip-remote manufacturer bosch)
   #:use-module (chip-remote modify)
   #:use-module (chip-remote named-value)
+  #:use-module (chip-remote page-map)
   #:use-module (chip-remote protocol)
   #:use-module (chip-remote register)
   #:use-module (chip-remote register common)
   #:use-module (chip-remote register-map)
+  #:use-module (chip-remote utilities)
   #:export (bme280 bme280-reset-key bme280-chip-id))
 
 (define bme280-reset-key #xb6)
 (define bme280-chip-id #x60)
 
-(define-register ctrl-frame #:contents (read? 15 1) (address 8 7) (data 0 8))
+(define-register ctrl-frame (items (list (‣ read? 15 1)
+                                         (‣ address 8 7)
+                                         (‣ data 0 8))))
 
 (define (encode-ctrl read? address data)
   ;; In SPI mode, only 7 bits of the register addresses are used; the
@@ -40,13 +44,22 @@
   (item-get (register-ref ctrl-frame 'data)
             (transmit c (encode-ctrl #t n 0))))
 
+(define (bscom str)
+  (format #f "https://www.bosch-sensortec.com/~a" str))
+
+(define (bscomds str)
+  (bscom (format #f "media/boschsensortec/downloads/datasheets/~a" str)))
+
 (define-device bme280
-  #:manufacturer bosch
-  #:homepage "https://www.bosch-sensortec.com/bst/products/all_products/bme280"
-  #:datasheet "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
-  #:keywords '(digital humidity pressure temperature sensor)
-  #:register-width 8
-  #:register-map (#:table* (#xfe humidity-lsb)
+  (manufacturer bosch)
+  (homepage (bscom "bst/products/all_products/bme280"))
+  (datasheet (bscomds "bst-bme280-ds002.pdf"))
+  (keywords '(digital humidity pressure temperature sensor))
+  (register-width 8)
+  (page-map
+   (pm→
+    (table
+     (↔ (#f (rm→ (table (↔ (#xfe humidity-lsb)
                            (#xfd humidity-msb)
                            (#xfc temperature-xlsb)
                            (#xfb temperature-lsb)
@@ -59,11 +72,12 @@
                            (#xf3 status)
                            (#xf2 control-b)
                            (#xe0 reset)
-                           (#xd0 chip-id))
-  #:combinations
-  '(humidity    . (concatenate    humidity-msb    humidity-lsb))
-  '(temperature . (concatenate temperature-msb temperature-lsb temperature-xlsb))
-  '(pressure    . (concatenate    pressure-msb    pressure-lsb    pressure-xlsb))
-  #:bus (spi #:frame-width 16)
-  #:read read-register
-  #:write write-register)
+                           (#xd0 chip-id)))))))))
+  (combinations
+   (list '(humidity    . (concatenate    humidity-msb    humidity-lsb))
+         '(temperature . (concatenate temperature-msb temperature-lsb temperature-xlsb))
+         '(pressure    . (concatenate    pressure-msb    pressure-lsb    pressure-xlsb))))
+  ;; #:bus (spi #:frame-width 16)
+  ;; #:read read-register
+  ;; #:write write-register
+  )

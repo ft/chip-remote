@@ -36,14 +36,24 @@
   (name  register-map-name (default #f))
   (width register-map-width (default #f))
   (table register-map-table
-         (sanitize (need 'table
-                         (lambda (tab)
-                           (every (lambda (x)
-                                    (match x
-                                      ((a . r) (and (index? a)
-                                                    (register? r)))
-                                      (_ #f)))
-                                  tab))))))
+         (sanitize
+          (need 'table
+                (lambda (tab)
+                  (let ((err (lambda (desc obj)
+                               (format (current-error-port)
+                                       "# field error (rm), ~a: ~a~%"
+                                       desc obj))))
+                    (every (lambda (x)
+                             (match x
+                               ((a . r)
+                                (let ((address-ok? (index? a))
+                                      (register-ok? (register? r)))
+                                  (unless address-ok?  (err 'address x))
+                                  (unless register-ok? (err 'register x))
+                                  (and address-ok? register-ok?)))
+                               (_ (err "key-value" x)
+                                  #f)))
+                           tab)))))))
 
 (define-syntax-rule (rm→ e* ...) (register-map e* ...))
 

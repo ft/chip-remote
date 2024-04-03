@@ -40,7 +40,6 @@
              (chip-remote modify)
              (chip-remote named-value)
              (chip-remote page-map)
-             (chip-remote process-plist)
              (chip-remote protocol)
              (chip-remote register)
              (chip-remote register common)
@@ -54,7 +53,6 @@
              (chip-remote type-operations)
              ;;(chip-remote units)
              (chip-remote utilities)
-             (chip-remote validate)
              ;; Analog Devices
              (chip-remote devices analog-devices adf4158)
              ((chip-remote devices analog-devices adf4158 registers) #:prefix adf4158:)

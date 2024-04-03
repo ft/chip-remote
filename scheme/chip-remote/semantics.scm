@@ -4,6 +4,7 @@
 
 (define-module (chip-remote semantics)
   #:use-module (ice-9 match)
+  #:use-module (ice-9 optargs)
   #:use-module (chip-remote interpreter)
   #:use-module (chip-remote named-value)
   #:use-module (chip-remote utilities)
@@ -20,11 +21,13 @@
             semantics-range*
             semantics-decoder
             semantics-encoder
+            semantics-allow
             semantics-compose
             semantics-decode
             semantics-encode
             semantics-in-range?
             table-lookup
+            tbl
             static))
 
 (define-record-type* <semantics>
@@ -52,12 +55,26 @@
                      (default-decode this-semantics w v))))
   (encode  semantics-encoder (thunked)
            (default (lambda (w v)
-                     (default-encode this-semantics w v)))))
+                     (default-encode this-semantics w v))))
+  ;; Allow users to specify a function that allows values into the encoding
+  ;; function. This is used in semantics-encode.
+  (allow   semantics-allow (default (lambda (w v) #t))))
 
 (new-record-definer define-semantics semantics)
 
 (define (table-lookup table)
   (lambda (s w) (list 'table table)))
+
+(define* (tbl t #:key default without)
+  (semantics (range (table-lookup t))
+             (allow (if without
+                        (lambda (w v) (not (member v without)))
+                        (lambda (w v) #t)))
+             (default (if default
+                          (static default)
+                          (static (caar (if (named-value? t)
+                                            (value-data t)
+                                            t)))))))
 
 (define (static value)
   (lambda (s w) value))
@@ -87,6 +104,8 @@
           (else (throw 'cr/unknown-semantics-type f)))))
 
 (define (semantics-encode s w v)
+  (unless ((semantics-allow s) w v)
+    (throw 'invalid-semantics-encoder-input v w s))
   (codec semantics-encoder s w v))
 
 (define (semantics-decode s w v)
