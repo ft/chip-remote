@@ -84,124 +84,206 @@ of instances of such specifications.
 
 ## Core Modules
 
-### `(chip-remote protocol)`
+### `(chip-remote bit-operations)`
 
-@include scheme/chip-remote/protocol.mdwn@
-
-### `(chip-remote item)`
-
-@include scheme/chip-remote/item.mdwn@
-
-### `(chip-remote item builder)`
-
-@include scheme/chip-remote/item/builder.mdwn@
-
-### `(chip-remote commander)`
-
-@include scheme/chip-remote/commander.mdwn@
-
-### `(chip-remote units)`
-
-@include scheme/chip-remote/units.mdwn@
-
-### `(chip-remote register)`
-
-@include scheme/chip-remote/register.mdwn@
-
-### `(chip-remote decode to-c-values)`
-
-@include scheme/chip-remote/decode/to-c-values.mdwn@
-
-### `(chip-remote decode types)`
-
-@include scheme/chip-remote/decode/types.mdwn@
-
-### `(chip-remote decode to-text)`
-
-@include scheme/chip-remote/decode/to-text.mdwn@
-
-### `(chip-remote interpreter)`
-
-@include scheme/chip-remote/interpreter.mdwn@
+@include scheme/chip-remote/bit-operations.mdwn@
 
 ### `(chip-remote codecs)`
 
 @include scheme/chip-remote/codecs.mdwn@
 
-### `(chip-remote process-plist)`
+### `(chip-remote combination)`
 
-@include scheme/chip-remote/process-plist.mdwn@
+@include scheme/chip-remote/combination.mdwn@
 
-### `(chip-remote register-window)`
+### `(chip-remote commander)`
 
-@include scheme/chip-remote/register-window.mdwn@
-
-### `(chip-remote device)`
-
-@include scheme/chip-remote/device.mdwn@
+@include scheme/chip-remote/commander.mdwn@
 
 ### `(chip-remote decode)`
 
 @include scheme/chip-remote/decode.mdwn@
 
-### `(chip-remote combination)`
+### `(chip-remote decode to-c-values)`
 
-@include scheme/chip-remote/combination.mdwn@
+@include scheme/chip-remote/decode/to-c-values.mdwn@
 
-### `(chip-remote bit-operations)`
+### `(chip-remote decode to-text)`
 
-@include scheme/chip-remote/bit-operations.mdwn@
+@include scheme/chip-remote/decode/to-text.mdwn@
 
-### `(chip-remote named-value)`
+### `(chip-remote decode types)`
 
-@include scheme/chip-remote/named-value.mdwn@
-
-### `(chip-remote device transfer)`
-
-@include scheme/chip-remote/device/transfer.mdwn@
+@include scheme/chip-remote/decode/types.mdwn@
 
 ### `(chip-remote device access)`
 
 @include scheme/chip-remote/device/access.mdwn@
 
+### `(chip-remote device)`
+
+@include scheme/chip-remote/device.mdwn@
+
 ### `(chip-remote device spi)`
 
 @include scheme/chip-remote/device/spi.mdwn@
 
-### `(chip-remote semantics)`
+### `(chip-remote device transmit)`
 
-@include scheme/chip-remote/semantics.mdwn@
+@include scheme/chip-remote/device/transmit.mdwn@
 
-### `(chip-remote modify)`
+### `(chip-remote frontend)`
 
-@include scheme/chip-remote/modify.mdwn@
+@include scheme/chip-remote/frontend.mdwn@
 
-### `(chip-remote io)`
+### `(chip-remote interact)`
 
-@include scheme/chip-remote/io.mdwn@
+@include scheme/chip-remote/interact.mdwn@
 
-### `(chip-remote register-map)`
+### `(chip-remote interpreter)`
 
-@include scheme/chip-remote/register-map.mdwn@
+@include scheme/chip-remote/interpreter.mdwn@
+
+### `(chip-remote item access)`
+
+@include scheme/chip-remote/item/access.mdwn@
+
+### `(chip-remote item builder)`
+
+@include scheme/chip-remote/item/builder.mdwn@
+
+### `(chip-remote item)`
+
+@include scheme/chip-remote/item.mdwn@
 
 ### `(chip-remote manufacturer)`
 
 @include scheme/chip-remote/manufacturer.mdwn@
 
-### `(chip-remote validate)`
+### `(chip-remote modify)`
 
-@include scheme/chip-remote/validate.mdwn@
+@include scheme/chip-remote/modify.mdwn@
+
+### `(chip-remote named-value)`
+
+@include scheme/chip-remote/named-value.mdwn@
 
 ### `(chip-remote page-map)`
 
 @include scheme/chip-remote/page-map.mdwn@
+
+### `(chip-remote protocol)`
+
+@include scheme/chip-remote/protocol.mdwn@
+
+### `(chip-remote register common)`
+
+@include scheme/chip-remote/register/common.mdwn@
+
+### `(chip-remote register-map)`
+
+@include scheme/chip-remote/register-map.mdwn@
+
+### `(chip-remote register-map utilities)`
+
+@include scheme/chip-remote/register-map/utilities.mdwn@
+
+### `(chip-remote register)`
+
+@include scheme/chip-remote/register.mdwn@
+
+### `(chip-remote register modifiers)`
+
+@include scheme/chip-remote/register/modifiers.mdwn@
+
+### `(chip-remote register predicates)`
+
+@include scheme/chip-remote/register/predicates.mdwn@
+
+### `(chip-remote register-window)`
+
+@include scheme/chip-remote/register-window.mdwn@
+
+### `(chip-remote semantics)`
+
+@include scheme/chip-remote/semantics.mdwn@
+
+### `(chip-remote simplify)`
+
+@include scheme/chip-remote/simplify.mdwn@
+
+### `(chip-remote type-operations)`
+
+@include scheme/chip-remote/type-operations.mdwn@
+
+### `(chip-remote units)`
+
+@include scheme/chip-remote/units.mdwn@
 
 ### `(chip-remote utilities)`
 
 @include scheme/chip-remote/utilities.mdwn@
 
 
+## Data Structures
+
+### `(data-structures records)`
+
+@include scheme/data-structures/records.mdwn@
+
+### `(data-structures loadable-fifo)`
+
+@include scheme/data-structures/loadable-fifo.mdwn@
+
+### `(data-structures sized-stack)`
+
+@include scheme/data-structures/sized-stack.mdwn@
+
+### `(data-structures records utilities)`
+
+@include scheme/data-structures/records/utilities.mdwn@
+
+### `(data-structures variable-width-integer)`
+
+@include scheme/data-structures/variable-width-integer.mdwn@
+
+
+## Protocol Implementations
+
+### `(protocol csv)`
+
+@include scheme/protocol/csv.mdwn@
+
+### `(protocol length-prefix)`
+
+@include scheme/protocol/length-prefix.mdwn@
+
+### `(protocol saleae-spi)`
+
+@include scheme/protocol/saleae-spi.mdwn@
+
+### `(protocol slip)`
+
+@include scheme/protocol/slip.mdwn@
+
+### `(protocol ufw-regp)`
+
+@include scheme/protocol/ufw-regp.mdwn@
+
+
 ## Device Support Modules
+
+### `(chip-remote devices analog-devices ad9262 tables)`
+
+@include scheme/chip-remote/devices/analog-devices/ad9262/tables.mdwn@
+
+### `(chip-remote devices analog-devices ad9262 registers)`
+
+@include scheme/chip-remote/devices/analog-devices/ad9262/registers.mdwn@
+
+### `(chip-remote devices analog-devices ad9262)`
+
+@include scheme/chip-remote/devices/analog-devices/ad9262.mdwn@
 
 ### `(chip-remote devices analog-devices adf4158 tables)`
 
@@ -227,9 +309,65 @@ of instances of such specifications.
 
 @include scheme/chip-remote/devices/analog-devices/adf4169.mdwn@
 
+### `(chip-remote devices bosch bme280)`
+
+@include scheme/chip-remote/devices/bosch/bme280.mdwn@
+
+### `(chip-remote devices bosch bme280 registers)`
+
+@include scheme/chip-remote/devices/bosch/bme280/registers.mdwn@
+
+### `(chip-remote devices bosch bme280 tables)`
+
+@include scheme/chip-remote/devices/bosch/bme280/tables.mdwn@
+
 ### `(chip-remote devices bosch bno055)`
 
 @include scheme/chip-remote/devices/bosch/bno055.mdwn@
+
+### `(chip-remote devices decawave dw1000)`
+
+@include scheme/chip-remote/devices/decawave/dw1000.mdwn@
+
+### `(chip-remote devices decawave dw1000 registers)`
+
+@include scheme/chip-remote/devices/decawave/dw1000/registers.mdwn@
+
+### `(chip-remote devices decawave dw1000 tables)`
+
+@include scheme/chip-remote/devices/decawave/dw1000/tables.mdwn@
+
+### `(chip-remote devices decawave dw3000)`
+
+@include scheme/chip-remote/devices/decawave/dw3000.mdwn@
+
+### `(chip-remote devices decawave dw3000 commands)`
+
+@include scheme/chip-remote/devices/decawave/dw3000/commands.mdwn@
+
+### `(chip-remote devices decawave dw3000 tables)`
+
+@include scheme/chip-remote/devices/decawave/dw3000/tables.mdwn@
+
+### `(chip-remote devices decawave dw3000 registers)`
+
+@include scheme/chip-remote/devices/decawave/dw3000/registers.mdwn@
+
+### `(chip-remote devices invensense icm-20602)`
+
+@include scheme/chip-remote/devices/invensense/icm-20602.mdwn@
+
+### `(chip-remote devices microchip mcp4351)`
+
+@include scheme/chip-remote/devices/microchip/mcp4351.mdwn@
+
+### `(chip-remote devices microchip mcp4351 registers)`
+
+@include scheme/chip-remote/devices/microchip/mcp4351/registers.mdwn@
+
+### `(chip-remote devices texas-instruments lmh6517)`
+
+@include scheme/chip-remote/devices/texas-instruments/lmh6517.mdwn@
 
 ### `(chip-remote devices linear-technology ltc6603)`
 
@@ -243,20 +381,12 @@ of instances of such specifications.
 
 @include scheme/chip-remote/devices/texas-instruments/ads4149.mdwn@
 
-### `(chip-remote devices decawave dw1000 tables)`
-
-@include scheme/chip-remote/devices/decawave/dw1000/tables.mdwn@
-
-### `(chip-remote devices decawave dw1000 registers)`
-
-@include scheme/chip-remote/devices/decawave/dw1000/registers.mdwn@
-
-### `(chip-remote devices decawave dw1000)`
-
-@include scheme/chip-remote/devices/decawave/dw1000.mdwn@
-
 
 ## Manufacturer Definition Modules
+
+### `(chip-remote manufacturer analog-devices)`
+
+@include scheme/chip-remote/manufacturer/analog-devices.mdwn@
 
 ### `(chip-remote manufacturer bosch)`
 
@@ -266,17 +396,22 @@ of instances of such specifications.
 
 @include scheme/chip-remote/manufacturer/decawave.mdwn@
 
-### `(chip-remote manufacturer analog-devices)`
+### `(chip-remote manufacturer invensense)`
 
-@include scheme/chip-remote/manufacturer/analog-devices.mdwn@
+@include scheme/chip-remote/manufacturer/invensense.mdwn@
+
+### `(chip-remote manufacturer linear-technology)`
+
+@include scheme/chip-remote/manufacturer/linear-technology.mdwn@
+
+### `(chip-remote manufacturer microchip)`
+
+@include scheme/chip-remote/manufacturer/microchip.mdwn@
 
 ### `(chip-remote manufacturer texas-instruments)`
 
 @include scheme/chip-remote/manufacturer/texas-instruments.mdwn@
 
-### `(chip-remote manufacturer linear-technology)`
-
-@include scheme/chip-remote/manufacturer/linear-technology.mdwn@
 
 
 ## Documentation Generation Modules
