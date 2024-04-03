@@ -19,7 +19,8 @@ GENERATE_FINAL_MARKDOWN = $(DOCC) combine
 PANDOC = pandoc
 PANDOC_FLAGS =  --embed-resources --standalone --number-sections --toc
 PANDOC_FLAGS += -f markdown
-MARKDOWN2PDF = $(PANDOC) $(PANDOC_FLAGS) --template template.latex
+MARKDOWN2PDF =  $(PANDOC) $(PANDOC_FLAGS) --template template.latex
+MARKDOWN2PDF += --pdf-engine=lualatex
 MARKDOWN2MAN = $(PANDOC) $(PANDOC_FLAGS) -t man --template template.man
 
 ORGEXPORT = sh $(TOPDIR)/tools/org-export
