@@ -58,7 +58,8 @@
   (page-map       device-page-map (sanitize (need 'page-map page-map?)))
   (combinations   device-combinations (default '()))
   (access         device-access (default 'access))
-  (state          device-state (default 'state)))
+  (state          device-state (thunked)
+                  (default (make-sized-stack 1024))))
 
 (new-record-definer define-device device)
 
