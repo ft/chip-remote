@@ -46,7 +46,7 @@ compile: $(OBJECTS)
 native-fw:
 	(cd firmware && mmh -d ../native-fw system -s build zephyr/native_posix_64/chip-remote/host/debug)
 
-happiness: native-fw compile doc test
+happiness: native-fw compile doc strict-test
 
 clean:
 	find scheme -name "*.go"      -exec rm -f '{}' +
@@ -62,11 +62,20 @@ doc:
 install:
 	$(INSTALL)
 
+strict-test: $(OBJECTS)
+	$(MAKE) test
+
 test:
 	$(RUNTESTS)
 
+strict-test-verbose: $(OBJECTS)
+	$(MAKE) test-verbose
+
 test-verbose:
 	$(RUNTESTS) -verbose
+
+strict-test-debug: $(OBJECTS)
+	$(MAKE) test-debug
 
 test-debug:
 	$(RUNTESTS) -verbose -dispatch-verbose -debug
@@ -82,3 +91,4 @@ standalone:
 .PHONY: native-fw
 .PHONY: standalone
 .PHONY: test test-debug test-verbose
+.PHONY: strict-test strict-test-debug strict-test-verbose
