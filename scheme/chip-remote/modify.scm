@@ -157,19 +157,25 @@ default value that can be derived for ‘target’."
                (list reg p r i v item)))))
 
 (define (chain-modify-script device . lst)
-  (fold (lambda (av acc)
-          (match av
-            ((#:load . rest) (append acc (list av)))
-            ((addr value)
-             (let* ((full-addr (apply device-canonical ((if (list? addr) cons list) device addr)))
-                    (description (apply device-ref (cons device full-addr))))
-               (match full-addr
-                 (('combinations name)
-                  (append acc (combination-partition device description value)))
-                 (else
-                  (append acc (list (make-item-mod-expr device full-addr value)))))))))
-        '()
-        lst))
+  (fold
+   (lambda (av acc)
+     (match av
+       ((#:load . rest) (append acc (list av)))
+       ((addr value)
+        (let* ((full-addr (apply device-canonical
+                                 ((if (list? addr) cons list)
+                                  device addr)))
+               (description (and full-addr
+                                 (apply device-ref (cons device full-addr)))))
+          (match full-addr
+            (#f (throw 'unresolvable-address addr))
+            (('combinations name)
+             (append acc (combination-partition device description value)))
+            (_ (append acc (list (make-item-mod-expr device
+                                                     full-addr
+                                                     value)))))))))
+   '()
+   lst))
 
 (define (iterate-to-index idx data cb)
   (let loop ((i 0) (rest data))
