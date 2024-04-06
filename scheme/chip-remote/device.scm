@@ -1,5 +1,6 @@
 (define-module (chip-remote device)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (srfi srfi-11)
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
@@ -62,6 +63,13 @@
                   (default (make-sized-stack 1024))))
 
 (new-record-definer define-device device)
+
+(set-record-type-printer! <device>
+  (lambda (dev port)
+    (simple-format port "#<device name: ~a maps: ~a states: ~a>"
+                   (device-name dev)
+                   (length (page-map-table (device-page-map dev)))
+                   (sized-stack-used (device-state dev)))))
 
 (define (current-device-state dev)
   (let ((state (device-state dev)))

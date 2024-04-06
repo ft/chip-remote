@@ -1,4 +1,4 @@
-;; Copyright (c) 2021 chip-remote workers, All rights reserved.
+;; Copyright (c) 2021-2024 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 

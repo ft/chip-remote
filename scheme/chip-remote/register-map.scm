@@ -1,6 +1,6 @@
 (define-module (chip-remote register-map)
   #:use-module (srfi srfi-1)
-  #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
@@ -58,6 +58,12 @@
 (define-syntax-rule (rm→ e* ...) (register-map e* ...))
 
 (new-record-definer define-register-map register-map)
+
+(set-record-type-printer! <register-map>
+  (lambda (rm port)
+    (simple-format port "#<register-map name: ~a registers: ~a>"
+                   (register-map-name rm)
+                   (length (register-map-table rm)))))
 
 (define (register-map-table:sorted rm)
   (sort (register-map-table rm)

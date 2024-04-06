@@ -6,6 +6,7 @@
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote item)
   #:use-module (chip-remote utilities)
   #:use-module (data-structures records)
@@ -55,6 +56,12 @@
       ((_ e* ...)          #'(register (items (list e* ...)))))))
 
 (new-record-definer define-register register)
+
+(set-record-type-printer! <register>
+  (lambda (reg port)
+    (simple-format port "#<register name: ~a items: ~a>"
+                   (register-name reg)
+                   (length (register-items reg)))))
 
 (define (register-default reg)
   (fold (lambda (x acc) (item-set x acc (item-default-raw x)))

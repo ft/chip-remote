@@ -1,6 +1,6 @@
 (define-module (chip-remote page-map)
   #:use-module (srfi srfi-1)
-  #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
@@ -64,6 +64,12 @@
 (define-syntax-rule (pm→ e* ...) (page-map e* ...))
 
 (new-record-definer define-page-map page-map)
+
+(set-record-type-printer! <page-map>
+  (lambda (pm port)
+    (simple-format port "#<page-map name: ~a maps: ~a>"
+                   (page-map-name pm)
+                   (length (page-map-table pm)))))
 
 (define (page-map-table:sorted rm)
   (sort (page-map-table rm)

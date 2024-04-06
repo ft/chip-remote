@@ -18,6 +18,7 @@
 ;; of 4.
 
 (define-module (chip-remote item)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote codecs)
   #:use-module (chip-remote item access)
@@ -67,6 +68,15 @@
 (define-syntax ‣
   (syntax-rules ()
     ((_ n o w e* ...) (item (name 'n) (offset o) (width w) e* ...))))
+
+(set-record-type-printer! <item>
+  (lambda (it port)
+    (simple-format port "#<item name: ~a offset: ~a width: ~a semantics: ~a default: ~a>"
+                   (item-name it)
+                   (item-offset it)
+                   (item-width it)
+                   (semantics-name (item-semantics it))
+                   (item-default it))))
 
 (define (item-default-raw item)
   (item-encode item (item-default item)))
