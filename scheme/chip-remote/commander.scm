@@ -1,4 +1,4 @@
-;; Copyright (c) 2018-2021 chip-remote workers, All rights reserved.
+;; Copyright (c) 2018-2024 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
@@ -43,6 +43,8 @@
   (let ((device (get-device state)))
     (show state device (current-device-state device))))
 
+(define *void* (if #f #f))
+
 (define (must-be-connected state)
   (let* ((conn (get-connection state))
          (io-port (cr-connection-port conn)))
@@ -59,8 +61,6 @@
         (write-data (da-write (device-access dev))))
     (transmit c (write-data (first addr) (second addr) value))))
 
-(define *void* (if #f #f))
-
 (define (make-args c? s args)
   (if c?
       (cons* (get-connection s) (get-device s) args)
@@ -70,29 +70,6 @@
   (when c? (must-be-connected s))
   (update-device! s (apply f (make-args c? s args)))
   *void*)
-
-(define* (pp-validator validator #:key (per-line-prefix ""))
-  (let ((type (validator-type validator)))
-    (format #t "~aType: ~a~%" per-line-prefix type)
-    (display per-line-prefix)
-    (case type
-      ((range)
-       (format #t "Range: ~a~%~%" (validator-expression validator)))
-      ((element-of not-element-of)
-       (format #t "Data:~%~%")
-       (pp (validator-expression validator)
-           #:per-line-prefix per-line-prefix)
-       (newline))
-      ((interpreter)
-       (format #t "Expression:~%~%")
-       (pp (validator-expression validator)
-           #:per-line-prefix per-line-prefix)
-       (newline))
-      ((scheme)
-       (format #t "Scheme Procedure: ~a~%~%" (validator-predicate validator)))
-      (else
-       (write validator)
-       (newline)))))
 
 (define* (make-commander #:key
                          device connection default (decode cr:decode)
@@ -265,27 +242,27 @@ memory copy."
 
         (('load! datum)    (update! #t state cr:load '()))
         (('set! kv ...)
-         (catch #t
+         (catch 'cr/invalid-value-for-item
            (lambda () (update! #f state cr:set kv))
            (lambda args
              (match args
                (('cr/invalid-value-for-item value item)
                 (format #t "set!: Invalid value: ~a~%~%" value)
-                (cond
-                 ((eq? 'table-lookup (semantics-type (item-semantics item)))
-                  (format #t "Key Value Table:~%~%")
-                  (let ((table (semantics-data (item-semantics item))))
-                    (pp (if (named-value? table)
-                            (value-data table)
-                            table)
-                        #:per-line-prefix "    "))
-                  (newline))
-                 (else
-                  (format #t "Validator:~%~%")
-                  (pp-validator (item-validator item)
-                                #:per-line-prefix "    "))))
-               (else
-                (apply throw args)))
+                (match (item-range item)
+                  (('none)
+                   (format #t "Failed update with ‘none’ range?~%")
+                   (format #t "This sounds like a bug in chip-remote!~%"))
+                  (('range a b)
+                   (format #t "Value out of range: (>= ~a) (<= ~a)~%" a b))
+                  (('enumeration . lst)
+                   (format #t "Allowed values: ~a~%" lst))
+                  (('table table)
+                   (format #t "Key Value Table:~%~%")
+                   (pp (if (named-value? table)
+                           (value-data table)
+                           table)
+                       #:per-line-prefix "    "))))
+               (_ (apply throw args)))
              *void*)))
         (('change! kv ...) (update! #t state cr:change! kv))
 
