@@ -33,6 +33,7 @@
             device-access
             device-state
             current-device-state     ;; Device utilities
+            make-default-device-state
             push-device-state
             reset-device-state
             device-value-suitable?
@@ -60,7 +61,7 @@
   (combinations   device-combinations (default '()))
   (access         device-access (default 'access))
   (state          device-state (thunked)
-                  (default (make-sized-stack 1024))))
+                  (default (make-default-device-state this-device))))
 
 (new-record-definer define-device device)
 
@@ -70,6 +71,9 @@
                    (device-name dev)
                    (length (page-map-table (device-page-map dev)))
                    (sized-stack-used (device-state dev)))))
+
+(define* (make-default-device-state dev #:key (stack-size 1024))
+  (make-sized-stack stack-size #:preload `((init . ,(device-default dev)))))
 
 (define (current-device-state dev)
   (let ((state (device-state dev)))
