@@ -1,4 +1,4 @@
-;; Copyright (c) 2017-2021 chip-remote workers, All rights reserved.
+;; Copyright (c) 2017-2024 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
@@ -68,6 +68,8 @@
 (define-syntax ‣
   (syntax-rules ()
     ((_ n o w e* ...) (item (name 'n) (offset o) (width w) e* ...))))
+
+(new-record-definer define-item item)
 
 (set-record-type-printer! <item>
   (lambda (it port)
