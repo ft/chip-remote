@@ -14,7 +14,7 @@
 (init-test-tap!)
 
 (with-fs-test-bundle
-  (plan 206)
+  (plan 204)
 
   (for-each (lambda (n)
               (define-test (format #f "32-bit unsigned-integer ~a → ~a" n n)
@@ -220,11 +220,4 @@
               (123.123e+3   #x40fe0f3000000000  0)
               (123.123e-3   #x3fbf84fd2a62aa19  7e-18)
               (123.123e+12  #x42dbfeb3ab6f8000  0)
-              (123.123e-12  #x3de0ec0164d2cb80  2e-26)))
-
-  (define-test "default semantics for width 1 work (boolean)"
-    (pass-if-eq? (semantics-name (deduce-semantics 1 #f))
-                 'boolean))
-  (define-test "default semantics for width 2.. work (unsigned-integer)"
-    (pass-if-eq? (semantics-name (deduce-semantics 2 #f))
-                 'unsigned-integer)))
+              (123.123e-12  #x3de0ec0164d2cb80  2e-26))))

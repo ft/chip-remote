@@ -8,23 +8,18 @@
   #:use-module (chip-remote semantics)
   #:use-module (chip-remote utilities)
   #:use-module (rnrs bytevectors)
-  #:export (boolean                  ;; boolean semantics
+  #:export (boolean                     ; boolean semantics
             boolean/active-low
-            unsigned-integer         ;; integer semantics
+            unsigned-integer            ; integer semantics
             ones-complement
             twos-complement
             signed-magnitude
             offset-binary
             zig-zag
-            ieee-754-single          ;; floating point semantics
+            ieee-754-single             ; floating point semantics
             ieee-754-double
-            ;; utilities
-            boolean-false?
-            boolean-true?
-            deduce-semantics))
-
-(define (deduce-semantics w s)
-  (or s (if (= w 1) boolean unsigned-integer)))
+            boolean-false?              ; utilities
+            boolean-true?))
 
 ;; Boolean codecs
 
