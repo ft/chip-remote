@@ -70,6 +70,7 @@
             cr-interfaces
             cr-access
             cr-low-level
+            proto-connected?
             proto-engage!
             proto-get-ifc-ctrl!
             proto-interfaces
@@ -333,6 +334,14 @@ Use #:from if you need more control."
                             (regp:serial-connection tty #:word-size-16? #t)))
                   (else (throw 'not-implemented-yet)))))
     (make-cr-connection* ll #f #f #f #f)))
+
+(define (proto-connected? c)
+  (and (cr-connection? c)
+       (let ((llcon (cr-low-level c)))
+         (regp:connection? llcon)
+         (let ((p (regp:port llcon)))
+           (and (port? p)
+                (not (port-closed? p)))))))
 
 (define (proto-ref bv offset reg)
   (bytevector-uint-ref bv offset 'big (proto-register-width reg 8)))
@@ -701,7 +710,7 @@ data from the RX framebuffer."
   (let ((rc (cr:ctrl-comand! c ifc 'transmit)))
     (if (eq? rc 'success)
         (cr:fetch-i2c-rx-sections! c ifc (filter integer? lst))
-        rc)))
+        (throw 'protocol-status rc))))
 
 (define (cr:spi-transceive! c ifc lst)
   "Perform a full SPI transaction.
@@ -713,4 +722,4 @@ data from the RX framebuffer."
     (let ((rc (cr:ctrl-comand! c ifc 'transmit n)))
       (if (eq? rc 'success)
           (cr:fetch-rx-frame-buffer! c ifc n)
-          rc))))
+          (throw 'protocol-status rc)))))

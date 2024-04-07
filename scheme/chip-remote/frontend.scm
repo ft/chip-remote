@@ -31,7 +31,7 @@
         lst))
 
 (define (read-register-values c d lst)
-  (let ((read-reg (da-read (device-access d))))
+  (let ((read-reg (device-read (device-access d))))
     (map-in-order (lambda (a) (cons a (match a ((p r) (read-reg c p r)))))
                   (sort lst addr<))))
 
@@ -57,16 +57,16 @@
                     (regs (register-map-table (cdr p))))
                 (for-each (lambda (r rv)
                             (let ((ra (car r)))
-                              (f pa ra rv)))
+                              (f pa ra (cdr rv))))
                           regs
-                          pv)))
+                          (cdr pv))))
             (page-map-table (device-page-map d))
             v))
 
 (define (run-modify-script! c d state script)
   (let* ((mini (minimise-modify-script script))
          (lst (values-for-minimised-script d mini state))
-         (reg-write (da-write (device-access d))))
+         (reg-write (device-write (device-access d))))
     (for-each (lambda (av)
                 (match av
                   ((p r v) (reg-write c p r v))))
@@ -98,14 +98,14 @@ This function returns an updated device."
          (next (apply chain-modify (cons* d state kv))))
     (push-device-state d 'set next)))
 
-(define (cr:push! c d)
+(define (cr:push! c ifc d)
   "Transfer the complete register table into device D via connection C.
 
 This returns a new device, with an updated device value, reflecting the
 register updated register table value."
   (let* ((state (current-device-state d))
-         (write-reg (da-write (device-access d)))
-         (tx (lambda (p r v) (write-reg c p r v))))
+         (write-reg (device-write (device-access d)))
+         (tx (lambda (p r v) (write-reg c ifc p r v))))
     (device-register-value-for-each tx d state)
     (push-device-state d 'push state)))
 
@@ -142,6 +142,7 @@ This function returns an updated device."
     (run-modify-script! c d state script)
     (push-device-state d 'change next)))
 
+;; Obsolete?
 (define (cr:setup-port! c n d)
   "Setup port N via connection C to accommodate device D.
 

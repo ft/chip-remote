@@ -3,8 +3,10 @@
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (chip-remote devices texas-instruments cdce72010)
+  #:use-module (srfi srfi-1)
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote device)
+  #:use-module (chip-remote device access)
   #:use-module (chip-remote interact)
   #:use-module (chip-remote item)
   #:use-module (chip-remote item access)
@@ -225,49 +227,90 @@
          (‣ secondary-ref-clk-present 30 1)
          (‣ reserved 31 1))))
 
-(define (write-register c p n v)
+(define (word->octets word)
+  (list (extract-octet word 3)
+        (extract-octet word 2)
+        (extract-octet word 1)
+        (extract-octet word 0)))
+
+(define (octets->word lst)
+  (unless (list? lst)
+    (throw 'not-a-list lst))
+  (cdr (fold (lambda (x state)
+               (let ((idx (car state))
+                     (value (cdr state)))
+                 (cons (- idx 1) (put-octet value x idx))))
+             (cons (length lst) 0)
+             lst)))
+
+(define (transceive! c ifc value)
+  (octets->word (cr:spi-transceive! c ifc (word->octets value))))
+
+(define (setup-spi c ifc)
+  (apply cr:setup-spi!
+         (cons* c ifc
+                '((bit-order-msb-first? #t)
+                  (cs-active-low?       #t)
+                  (clock-idle-low?      #t)
+                  (clock-phase-delay?   #f)
+                  ;; The chip supports 20MHz at most, 10 should be safe.
+                  ;; Also when using chip-remote, performance is not the
+                  ;; chief concern.
+                  (clock-rate       #e10e6)
+                  ;; The frames to the chip have width of 32 bits. If we
+                  ;; transmit four octets per chip-select cycle, that
+                  ;; should work. And eight bit word width is a very
+                  ;; commonly supported frame size in SPI controllers.
+                  (frame-length          8)))))
+
+(define (write-register c ifc p r v)
   ;; The registers are setup in a way such that transmitting them in a 32-bit
   ;; word will write their value to RAM. So there is nothing fancy to do here.
-  (transmit c v))
+  (transceive! c ifc v))
 
 (define-register ctrl-frame (items (list (‣ control 0  4)
                                          (‣ data    4 28))))
 
-(define (cdce72010-read-bugfix n v)
-  (set-bits v n 4 0))
+(define (cdce72010-read-bugfix r v)
+  (set-bits v r 4 0))
 
 (define *cdce72010-read*         #b1110)
 (define *cdce72010-eeprom*       #b1111)
 (define *cdce72010-eeprom-write*   #b01)
 (define *cdce72010-eeprom-lock*    #b11)
 
-(define (read-register c p n)
+(define (read-register c ifc p r)
   ;; Reading is done in two transmissions, first you send a control word with
   ;; the data set to the register you want to read, then you transmit whatever
   ;; you like and in return get the register's value. Note that the cdce72010
   ;; has a hardware bug that causes the LSB of the address that the chip re-
   ;; turns to be stuck to zero. We're working around this issue by setting the
   ;; address bits to the register we requested.
-  (transmit c (control-data-frame:encode ctrl-frame *cdce72010-read* n))
-  (cdce72010-read-bugfix n (transmit c 0)))
+  (let ((ctrl (control-data-frame:encode ctrl-frame *cdce72010-read* r)))
+    (transceive! c ifc ctrl))
+  (cdce72010-read-bugfix r (transceive! c ifc 0)))
 
-(define (eeprom-cmd c cmd)
-  (transmit c (control-data-frame:encode ctrl-frame *cdce72010-eeprom* cmd)))
+(define cdce72010-access
+  (make-device-access #:setup setup-spi
+                      #:read  read-register
+                      #:write write-register))
 
-(define (cdce72010-write-eeprom c)
-  (eeprom-cmd c *cdce72010-eeprom-write*))
+(define (eeprom-cmd c ifc cmd)
+  (let ((data (control-data-frame:encode ctrl-frame *cdce72010-eeprom* cmd)))
+    (transceive! c ifc data)))
 
-(define (cdce72010-lock-eeprom c)
-  (eeprom-cmd c *cdce72010-eeprom-lock*))
+(define (cdce72010-write-eeprom c ifc)
+  (eeprom-cmd c ifc *cdce72010-eeprom-write*))
+
+(define (cdce72010-lock-eeprom c ifc)
+  (eeprom-cmd c ifc *cdce72010-eeprom-lock*))
 
 (define-device cdce72010
   (manufacturer texas-instruments)
   (homepage "http://www.ti.com/product/cdce72010")
   (datasheet "http://www.ti.com/lit/ds/symlink/cdce72010.pdf")
   (keywords '(clock distribution synchonisation pll jitter cleaner))
-  ;; #:bus (spi #:frame-width 32)
-  ;; #:read read-register
-  ;; #:write write-register
+  (access cdce72010-access)
   (register-width 32)
   (page-map
    (pm→

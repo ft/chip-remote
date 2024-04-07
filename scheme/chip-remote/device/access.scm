@@ -1,68 +1,69 @@
-;; Copyright (c) 2018-2021 chip-remote workers, All rights reserved.
+;; Copyright (c) 2018-2024 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in doc/LICENCE.
 
+;; Device access abstraction. Reading and writing registers to devices is a job
+;; that requires access to the peripheral bus a chip is connected to. In Chip
+;; remote, this access is implemented by its firmware component, which exposes
+;; these peripheral busses via a register table interface. The protocol used to
+;; interact with this register table is ufw's register protocol, as implemented
+;; in (protocol ufw-regp). This protocol is minimal memory transfer protocol,
+;; that can be used in many channels like UART, USB, and TCP. Chip remote's
+;; custom register semantics on top of this low-level protocol is implemented
+;; in (chip-remote protocol).
+;;
+;; The (chip-remote protocol) module exposes primitives to perform transactions
+;; in the peripheral busses it supports. This module implements a data-type and
+;; associated functions that allow chip specifications to implement register
+;; read and write accesses in a uniform way, that can be used by very high
+;; level modules such as (chip-remote commander) to perform these accesses as
+;; it needs.
+;;
+;; The low level access function in (chip-remote protocol) need a connection
+;; object, and a symbol identifying the peripheral bus that the chip to talk to
+;; is connected to.
+;;
+;; This governs the API for the read, write, and setup function types:
+;;
+;;   - `(read  CONNECTION INTERFACE PAGE-ADDRESS REGISTER-ADDRESS)`
+;;   - `(write CONNECTION INTERFACE PAGE-ADDRESS REGISTER-ADDRESS VALUE)`
+;;   - `(setup CONNECTION INTERFACE)`
+;;
+;; The ‘data’ slot in `<device-access>` can be used freely by implementations
+;; to store any sort of additional data they need.
+
+
 (define-module (chip-remote device access)
-  #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 optargs)
   #:use-module (chip-remote protocol)
-  #:export (access-bus->proc
-            make-device-access
+  #:export (make-device-access
             device-access?
-            da-bus
-            da-transmit
-            da-read
-            da-write))
+            device-access-data
+            device-setup
+            device-read
+            device-write))
 
-(define (default-read c p r)
-  (if (not c)
-      0
-      (transmit c r)))
-
-(define (default-write c p r v)
-  (if (not c)
-      0
-      (transmit c v)))
-
-(define-record-type <device-access>
-  (make-device-access* bus transmit read write)
+(define-immutable-record-type <device-access>
+  (make-device-access* data setup read write)
   device-access?
-  (bus da-bus)
-  (transmit da-transmit)
-  ;; These shoud be interpreter script or scheme procedures too. If they are
-  ;; scheme procedures, they take four arguments: connection, page-address,
-  ;; register-address and value. They directly call the protocol primitives
-  ;; that talk to a device.
-  ;;
-  ;; The interpreter script variant isn't implemented yet. The plan is to put
-  ;; the connection into the interpreter's environment and then only take the
-  ;; three latter arguments that the scheme functions do.
-  (read da-read)
-  (write da-write))
+  (data   device-access-data)
+  (setup  device-setup)
+  (read   device-read)
+  (write  device-write))
+
+(define (default-setup c ifc)
+  (throw 'not-implemented 'device-access-setup))
+
+(define (default-read c ifc p r)
+  (throw 'not-implemented 'device-access-read))
+
+(define (default-write c ifc p r v)
+  (throw 'not-implemented 'device-access-write))
 
 (define* (make-device-access #:key
-                             (bus (make-device-access-spi))
-                             (transmit (make-device-transmit))
+                             (data #f)
+                             (setup default-setup)
                              (read default-read)
                              (write default-write))
-  (make-device-access* bus transmit read write))
-
-(define (maybe-set c n k v)
-  (catch #t
-    (lambda () (set c n k v))
-    (lambda (excp . a)
-      (format #t "Failed to set ~a → ~a: ~a ~a~%"
-              k v excp a))))
-
-(define (access-bus->proc bus)
-  (cond ((device-access-spi? bus)
-         (lambda (conn port-idx)
-           (let ((set* (lambda (k v) (maybe-set conn port-idx k v))))
-             (set* 'frame-length (spi-frame-width bus))
-             (set* 'bit-order (spi-bit-order bus))
-             (set* 'rate (spi-bit-rate bus))
-             (set* 'clk-phase-delay (spi-clk-phase-delay bus))
-             (set* 'clk-polarity (spi-clk-polarity bus))
-             (set* 'cs-polarity (spi-cs-polarity bus)))
-           (init conn port-idx)))
-        (else (throw 'unknown-bus-description bus))))
+  (make-device-access* data setup read write))

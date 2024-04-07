@@ -1,6 +1,8 @@
-;; Copyright (c) 2021 chip-remote workers, All rights reserved.
+;; Copyright (c) 2021-2024 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
+
+;; TODO: Should this just be part of (chip-remote device access)?
 
 (define-module (chip-remote interact)
   #:use-module (chip-remote item)
@@ -23,7 +25,7 @@
 ;; Its aim is to implement common access patterns used by chips in the wild so
 ;; that a device description can use them when specifying the transmission
 ;; scheme that the device employs.
-
+;;
 ;; One common approach is to use a command structure, where a series of bits
 ;; determines the details of the access in question. This might implement
 ;; distinction between read/write access and also control the register address
@@ -43,19 +45,17 @@
 ;; ring its register table to its on-chip-eeprom and locking down that eeprom
 ;; for further write access using the [1111] command word with [0…001] and
 ;; [0…011] as its data word respectively.
-
+;;
 ;; The two most important access schemes that chip-remote cares about for basi-
 ;; cally all the chips it supports is reading and writing registers. Special
 ;; accesses like the eeprom interactions of the cdce72010 are out of scope for
 ;; this module. Chip support modules may implement them, if they so choose.
-
-;; So an interaction implementation therefore has to take a register address, a
-;; method and possibly a value (for the write method) and turn that into a
-;; bit-string that can be transferred to the chip in question using RCCEP's
-;; TRANSMIT request.
-
-;; In order to specify the format of a serial frame, we'll reuse the register
-;; facility.
+;;
+;; While the pattern is very common, the specific format of the messages vary
+;; largely from chip to chip. To specify the exact format, we'll reuse the
+;; register facility. This fits since frame definitions are very similar to
+;; register specifications, and for the latter chip-remote has excellent
+;; tooling.
 
 (define (get-with-spec spec field frame)
   (item-get (register-ref spec field) frame))

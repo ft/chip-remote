@@ -26,13 +26,13 @@
 (define-record-type <cmdr-state>
   (make-cmdr-state device connection port address default decode open-hook)
   cmdr-state?
-  (device get-device update-device!)
+  (device     get-device     update-device!)
   (connection get-connection)
-  (port get-port)
-  (address get-address)
-  (default get-default)
-  (decode get-decoder set-decoder!)
-  (open-hook get-open-hook))
+  (port       get-port       update-port!)
+  (address    get-address)
+  (default    get-default)
+  (decode     get-decoder    set-decoder!)
+  (open-hook  get-open-hook))
 
 (define (show cmdr spec value)
   (let ((run-decoder (get-decoder cmdr)))
@@ -45,11 +45,8 @@
 (define *void* (if #f #f))
 
 (define (must-be-connected state)
-  (let* ((conn (get-connection state))
-         (io-port (cr-connection-port conn)))
-    (unless (and io-port
-                 (port? io-port)
-                 (not (port-closed? io-port)))
+  (let ((conn (get-connection state)))
+    (unless (proto-connected? conn)
       (throw 'connection-not-opened conn)))
   *void*)
 
@@ -62,7 +59,10 @@
 
 (define (make-args c? s args)
   (if c?
-      (cons* (get-connection s) (get-device s) args)
+      (cons* (get-connection s)
+             (get-port s)
+             (get-device s)
+             args)
       (cons (get-device s) args)))
 
 (define (update! c? s f args)
@@ -211,24 +211,18 @@ memory copy."
     (lambda args
       (match args
         (() (commander:decode-all state))
-        (('open!) (let ((c (get-connection state)))
-                    (io-open c)
-                    ((get-open-hook state)
-                     (get-connection state)
-                     (get-port state))))
-
-        (('close!) (begin
+        ;; TODO: Set address for I2C ports in ‘setup’?
+        (('setup!) (begin
                      (must-be-connected state)
-                     (io-close (get-connection state))))
-
-        (('focus!) (begin
-                     (must-be-connected state)
-                     (let ((c (get-connection state))
-                           (port (get-port state))
-                           (addr (get-address state)))
-                       (cr:setup-port! c port (get-device state))
-                       ;;(focus c port)
-                       (when addr (address c addr)))))
+                     (let ((c (get-connection state)))
+                       (unless (cr-access c)
+                         (proto-engage! c))
+                       (let ((access (device-access device)))
+                         (when access
+                           ((device-setup access) c (get-port state))))
+                       ((get-open-hook state)
+                        (get-connection state)
+                        (get-port state)))))
 
         (('decoder! f) (set-decoder! state f))
 
