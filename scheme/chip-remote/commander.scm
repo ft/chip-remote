@@ -12,7 +12,6 @@
   #:use-module (chip-remote item)
   #:use-module (chip-remote device)
   #:use-module (chip-remote device access)
-  #:use-module (chip-remote device transmit)
   #:use-module (chip-remote frontend)
   #:use-module (chip-remote named-value)
   #:use-module (chip-remote page-map)

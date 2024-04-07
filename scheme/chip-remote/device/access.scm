@@ -5,8 +5,6 @@
 (define-module (chip-remote device access)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 optargs)
-  #:use-module (chip-remote device spi)
-  #:use-module (chip-remote device transmit)
   #:use-module (chip-remote protocol)
   #:export (access-bus->proc
             make-device-access

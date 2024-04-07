@@ -21,8 +21,6 @@
              (chip-remote decode types)
              (chip-remote device)
              (chip-remote device access)
-             (chip-remote device spi)
-             (chip-remote device transmit)
              (chip-remote frontend)
              (chip-remote interact)
              (chip-remote interpreter)
