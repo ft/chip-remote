@@ -20,7 +20,7 @@
 (define lmh6517-attenuation-max 31.5)
 
 (define-semantics lmh6517-gain
-  (default (static 0))
+  (default (const 0))
   (range (lambda (s w) `(range ,(- lmh6517-fixed-gain
                                    lmh6517-attenuation-max)
                                ,lmh6517-fixed-gain)))

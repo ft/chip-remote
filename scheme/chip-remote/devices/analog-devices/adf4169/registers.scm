@@ -25,7 +25,7 @@
 (define-semantics div-integer
   (inherit unsigned-integer)
   (range (lambda (s w) `(range 23 4095)))
-  (default (static 1024)))
+  (default (const 1024)))
 
 (define-register reg:frac/int
   (items
@@ -47,7 +47,7 @@
 
 (define-semantics unsigned-zero-is-32
   (range (lambda (s w) '(range 1 32)))
-  (default (static 4))
+  (default (const 4))
   (encode (make-evaluation '(lambda (w x) (if (x = 32) 0 x))))
   (decode (make-evaluation '(lambda (w x) (if (x = 0) 32 x)))))
 

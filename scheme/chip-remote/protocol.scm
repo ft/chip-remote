@@ -167,7 +167,7 @@
 (define-semantics interface-type
   (range (table-lookup '((spi . 0)
                          (i2c . 1))))
-  (default (static 'spi)))
+  (default (const 'spi)))
 
 (define interface-type-register († (‣ type 0 16 (semantics interface-type))))
 
@@ -237,7 +237,7 @@
            (fast-plus . 2)
            (high      . 3)
            (ultra     . 4)))
-  (default (static 'standard)))
+  (default (const 'standard)))
 
 ;; I2C messages are (potentially) made of multiple sections, that can be either
 ;; read or write accesses. A message can have an arbitrary amount of these.

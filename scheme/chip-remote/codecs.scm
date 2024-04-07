@@ -48,7 +48,7 @@
 
 (define-semantics boolean
   (range boolean-range)
-  (default (static #f))
+  (default (const #f))
   (encode boolean-encode)
   (decode boolean-decode))
 
@@ -56,7 +56,7 @@
 
 (define-semantics boolean/active-low
   (inherit boolean)
-  (default (static #t))
+  (default (const #t))
   (encode (semantics-compose invert-bit boolean-encode))
   (decode (semantics-compose boolean-decode invert-bit)))
 
@@ -92,7 +92,7 @@
 (define-semantics unsigned-integer
   (range (lambda (s w) `(range ,(unsigned-integer-min w)
                                ,(unsigned-integer-max w))))
-  (default (static 0))
+  (default (const 0))
   (encode uint-codec)
   (decode uint-codec))
 
@@ -102,7 +102,7 @@
 (define-semantics twos-complement
   (range (lambda (s w) `(range ,(twos-complement-min w)
                                ,(twos-complement-max w))))
-  (default (static 0))
+  (default (const 0))
   (encode (~ '(lambda (w x)
                 (if (x >= 0)
                     (bit-mask (decrement w) x)
@@ -119,7 +119,7 @@
 (define-semantics ones-complement
   (range (lambda (s w) `(range ,(ones-complement-limit w)
                                ,(ones-complement-limit w))))
-  (default (static 0))
+  (default (const 0))
   (encode (~ '(lambda (w x)
                 (if (x >= 0)
                     (bit-mask (decrement w) x)
@@ -136,7 +136,7 @@
 (define-semantics signed-magnitude
   (range (lambda (s w) `(range ,(signed-magnitude-limit w)
                                ,(signed-magnitude-limit w))))
-  (default (static 0))
+  (default (const 0))
   (encode (~ '(lambda (w x)
                 (let (n (decrement w))
                   (if (x < 0)
@@ -156,7 +156,7 @@
 (define-semantics offset-binary
   (range (lambda (s w) `(range ,(offset-binary-min w)
                                ,(offset-binary-max w))))
-  (default (static 0))
+  (default (const 0))
   (encode (~ '(lambda (w x)
                 (let (half (left-shift 1 (decrement w)))
                   (bit-mask w (increment x half))))))
@@ -170,7 +170,7 @@
 (define-semantics zig-zag
   (range (lambda (s w) `(range ,(offset-binary-min w)
                                ,(offset-binary-max w))))
-  (default (static 0))
+  (default (const 0))
   (encode (~ '(lambda (w x)
                 (bit-mask w (bit-xor (right-shift x (decrement w))
                                      (left-shift x 1))))))
@@ -200,7 +200,7 @@
 (define-semantics ieee-754-single
   (range (lambda (s w) `(range ,ieee-754-single-min
                                ,ieee-754-single-max)))
-  (default (static 0))
+  (default (const 0))
   (encode encode-ieee-754-single)
   (decode decode-ieee-754-single))
 
@@ -222,6 +222,6 @@
 (define-semantics ieee-754-double
   (range (lambda (s w) `(range ,ieee-754-double-min
                                ,ieee-754-double-max)))
-  (default (static 0))
+  (default (const 0))
   (encode encode-ieee-754-double)
   (decode decode-ieee-754-double))

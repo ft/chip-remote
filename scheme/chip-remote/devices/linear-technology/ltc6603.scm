@@ -35,11 +35,11 @@
 
 (define-semantics low-pass
   (range (table-lookup low-pass-cfg))
-  (default (static 'div-by-32)))
+  (default (const 'div-by-32)))
 
 (define-semantics gain
   (range (table-lookup gain-cfg))
-  (default (static '0dB)))
+  (default (const '0dB)))
 
 (define-device ltc6603
   (manufacturer linear-technology)

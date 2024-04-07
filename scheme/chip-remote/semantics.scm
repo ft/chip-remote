@@ -56,8 +56,7 @@
 ;;   - `(semantics-in-range? SEMANTICS WIDTH VALUE)`
 ;;   - `(semantics-compose FUNCTION FUNCTION)`
 ;;   - `(table-lookup ASSOC-LIST-VALUE)`
-;;   - `(tbl ASSOC-LIST-VALUE [#:default STATIC-DEFAULT #:without LIST)`
-;;   - `(static VALUE)`
+;;   - `(tbl ASSOC-LIST-VALUE [#:default CONST-DEFAULT #:without LIST)`
 ;;
 ;; See their API documentation for details. For example implementations of the
 ;; semantic behaviour based on this module see the `(chip-remote codecs)`
@@ -89,8 +88,7 @@
             semantics-encode
             semantics-in-range?
             table-lookup
-            tbl
-            static))
+            tbl))
 
 (define-record-type* <semantics>
   semantics make-semantics semantics? this-semantics
@@ -223,7 +221,7 @@ into a bit-string and decodes a bit-string back to one of those keys.
 
 The `#:default` parameter can be used to name any key from the table as a the
 default behaviour of the semantics datum. Note that this value does not have to
-be wrapped in `(static ...)`. This is done internally. If this parameter is not
+be wrapped in `(const ...)`. This is done internally. If this parameter is not
 used, the semantics will use the first key in the lookup table as the default.
 
 The `#:without` parameter can be used to supply a list of keys from the lookup
@@ -234,20 +232,8 @@ uses of \"reserved\" keys and the like."
                         (lambda (w v) (not (member v without)))
                         (lambda (w v) #t)))
              (default (if default
-                          (static default)
-                          (static (caar (table-value t)))))))
-
-(define (static value)
-  "Return a function that encodes a static value for use in ‘default’.
-
-This is a binary version of the ‘const’ function. It can be used if the default
-value of a semantics should be a single static value, which is very common.
-
-Example:
-
-    (define foo (static 'bar))
-    (foo 'abc 'def) → bar"
-  (lambda (s w) value))
+                          (const default)
+                          (const (caar (table-value t)))))))
 
 ;; Utilities
 

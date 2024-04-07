@@ -43,19 +43,19 @@
 
 (define-semantics stand-by-time
   (range (table-lookup stand-by-map))
-  (default (static (caar (value-data stand-by-map)))))
+  (default (const (caar (value-data stand-by-map)))))
 
 (define-semantics filter-coefficient
   (range (table-lookup filter-coefficient-map))
-  (default (static (caar (value-data filter-coefficient-map)))))
+  (default (const (caar (value-data filter-coefficient-map)))))
 
 (define-semantics oversampling
   (range (table-lookup oversampling-map))
-  (default (static (caar (value-data oversampling-map)))))
+  (default (const (caar (value-data oversampling-map)))))
 
 (define-semantics mode
   (range (table-lookup mode-map))
-  (default (static (caar (value-data mode-map)))))
+  (default (const (caar (value-data mode-map)))))
 
 (define-register config
   (items (list
