@@ -6,24 +6,8 @@ GUILE_WARN_DEPRECATED=detailed
 GUILE_LOAD_PATH="$PWD/scheme${GUILE_LOAD_PATH:+:}$GUILE_LOAD_PATH"
 GUILE_LOAD_COMPILED_PATH="$PWD/scheme${GUILE_LOAD_COMPILED_PATH:+:}$GUILE_LOAD_COMPILED_PATH"
 
-if test -d standalone; then
-    while read _type _url _subdir _loadpath; do
-        case "$_type" in
-        \#*)   continue ;;
-        host:) continue ;;
-        '')    continue ;;
-        esac
-        case "$_type" in
-        scm:)
-            GUILE_LOAD_PATH="$PWD/standalone/${_subdir}/${_loadpath}:$GUILE_LOAD_PATH"
-            GUILE_LOAD_COMPILED_PATH="$PWD/standalone/${_subdir}/${_loadpath}:$GUILE_LOAD_COMPILED_PATH"
-            ;;
-        bin:)
-            PATH="$PWD/standalone/${_subdir}/${_loadpath}:$PATH"
-            ;;
-        *) printf 'WARNING: Unknown type (%s)\n' "$_type" ;;
-        esac
-    done < ".standalone"
+if test -f standalone/environ.sh; then
+    . ./standalone/environ.sh
     export PATH
 fi
 
