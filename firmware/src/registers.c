@@ -5,7 +5,7 @@
  */
 
 /* A bit of a generic name there zephyr, but alright. */
-#include <version.h>
+#include <zephyr/version.h>
 
 #ifdef CONFIG_ARCH_POSIX
 #define REGISTER_TABLE_WITH_NAMES
