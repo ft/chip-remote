@@ -12,7 +12,7 @@ zephyr-aliases:
 
 zephyr:
   - application: chip-remote
-    source: ${system}/application
+    source: ${system}/src
     build:
       - toolchains:
           - name: gnuarmemb
