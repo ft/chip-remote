@@ -28,4 +28,5 @@ zephyr:
       - toolchains: [ host ]
         boards: [ native-sim ]
         modules:
+          - picolibc
           - ufw
