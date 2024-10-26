@@ -44,7 +44,7 @@ all:
 compile: $(OBJECTS)
 
 native-fw:
-	(cd firmware && mmh -d ../native-fw system -s build zephyr/native_posix_64/chip-remote/host/debug)
+	(cd firmware && mmh -l -P -d ../native-fw system -s build zephyr/native-posix/chip-remote/host/debug)
 
 happiness: native-fw compile doc strict-test
 
