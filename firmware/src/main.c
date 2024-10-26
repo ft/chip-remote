@@ -36,9 +36,9 @@
 
 #include <zephyr/kernel.h>
 
-#ifdef CONFIG_BOARD_NATIVE_POSIX
+#ifdef CONFIG_BOARD_NATIVE_SIM
 #include <zephyr/drivers/console/posix_arch_console.h>
-#endif /* CONFIG_BOARD_NATIVE_POSIX */
+#endif /* CONFIG_BOARD_NATIVE_SIM */
 
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/gpio.h>
@@ -47,9 +47,9 @@
 
 #include <stdlib.h>
 
-#ifdef CONFIG_BOARD_NATIVE_POSIX
+#ifdef CONFIG_BOARD_NATIVE_SIM
 #include <unistd.h>
-#endif /* CONFIG_BOARD_NATIVE_POSIX */
+#endif /* CONFIG_BOARD_NATIVE_SIM */
 
 #include <ufw/compiler.h>
 #include <ufw/endpoints.h>
@@ -158,13 +158,13 @@ main(void)
 
     printk("ChipRemoteFirmware running on %s\n", CONFIG_BOARD);
 
-#ifdef CONFIG_BOARD_NATIVE_POSIX
+#ifdef CONFIG_BOARD_NATIVE_SIM
     printk("(activated!)\n");
     printk("(firmware-pid %u)\n", getpid());
     posix_flush_stdout();
     /* Disable stderr output */
     close(STDERR_FILENO);
-#endif /* CONFIG_BOARD_NATIVE_POSIX */
+#endif /* CONFIG_BOARD_NATIVE_SIM */
 
     for (;;) {
         const int rc0 = chip_remote_process(&protocol);

@@ -8,7 +8,7 @@ common:
   install: ufw-git-install
 
 zephyr-aliases:
-  native-posix: native_posix/native/64
+  native-sim: native_sim/native/64
 
 zephyr:
   - application: chip-remote
@@ -26,6 +26,6 @@ zephyr:
           - hal-stm32
           - ufw
       - toolchains: [ host ]
-        boards: [ native-posix ]
+        boards: [ native-sim ]
         modules:
           - ufw
