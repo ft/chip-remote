@@ -233,11 +233,11 @@
 
 ;; This is the interface control block for I²C peripherals.
 (define-semantics i2c-speed-grade
-  (range '((standard  . 0)
-           (fast      . 1)
-           (fast-plus . 2)
-           (high      . 3)
-           (ultra     . 4)))
+  (range (table-lookup '((standard  . 0)
+                         (fast      . 1)
+                         (fast-plus . 2)
+                         (high      . 3)
+                         (ultra     . 4))))
   (default (const 'standard)))
 
 ;; I2C messages are (potentially) made of multiple sections, that can be either

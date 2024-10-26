@@ -16,7 +16,7 @@
 
 (with-test-bundle (chip-remote firmware hi/bye)
   (require (native-firmware-built?))
-  (plan 4)
+  (plan 6)
   (boot-fw! tio)
   (define-test "Running proto-engange works"
     (pass-if-no-exception (proto-engage! ($ tio))))
@@ -29,4 +29,8 @@
     (define-test "Native firmware offers two i2c busses"
       (pass-if-true (and (memq 'i2c-0 ifcs)
                          (memq 'i2c-1 ifcs)))))
+  (define-test "proto-get-ifc-ctrl! spi-0"
+    (pass-if-true (list? (proto-get-ifc-ctrl! ($ tio) 'spi-0))))
+  (define-test "proto-get-ifc-ctrl! i2c-0"
+    (pass-if-true (list? (proto-get-ifc-ctrl! ($ tio) 'i2c-0))))
   (kill-fw! tio))
