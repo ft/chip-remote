@@ -7,6 +7,9 @@ common:
   zephyr-module-path: [ '${system}/zephyr/modules' ]
   install: ufw-git-install
 
+zephyr-aliases:
+  native-posix: native_posix/native/64
+
 zephyr:
   - application: chip-remote
     source: ${system}/application
@@ -21,8 +24,8 @@ zephyr:
           - picolibc
           - cmsis
           - hal-stm32
-          - ufwz
+          - ufw
       - toolchains: [ host ]
-        boards: [ native_posix_64 ]
+        boards: [ native-posix ]
         modules:
-          - ufwz
+          - ufw
