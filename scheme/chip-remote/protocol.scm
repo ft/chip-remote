@@ -64,6 +64,7 @@
   #:use-module (chip-remote utilities)
   #:use-module (protocol ufw-regp)
   #:export (make-cr-connection!
+            make-cr-connection!/dwim
             cr-connection?
             cr-static-info
             cr-index
@@ -339,6 +340,37 @@ Use #:from if you need more control."
                          (regp:tcp-connection s #:word-size-16? #t)))
                   (else (throw 'not-implemented-yet)))))
     (make-cr-connection* ll #f #f #f #f)))
+
+(define (make-cr-connection!/dwim target)
+  "High level frontend for making chip-remote connections
+
+This tries to detect the intended type of a connection from a string and makes
+the appropriate connection object. Targets that are a file will yield serial
+connections using the default baudrate. Strings that are hostnames or addresses
+or pairs of \"HOST:PORT\" will create TCP connections. Empty hosts default to
+localhost, empty ports default the 1234."
+  (define (tcp-ish? str)
+    (let* ((parts (string-split str #\:))
+           (n (length parts)))
+      (and (or (= 2 n) (= 1 n))
+           (or (= 1 n) (or (string-null? (cadr parts))
+                           (string->number (cadr parts)))))))
+  (define (host lst)
+    (let ((name (car lst)))
+      (if (string-null? name) "localhost" name)))
+  (define (port lst)
+    (let ((n (length lst)))
+      (if (= n 1)
+          1234
+          (let ((str (cadr lst)))
+            (if (string-null? str)
+                1234
+                (string->number str))))))
+  (cond ((file-exists? target) (make-cr-connection! #:serial target))
+        ((tcp-ish? target) (let ((parts (string-split target #\:)))
+                             (make-cr-connection! #:tcp  (host parts)
+                                                  #:port (port parts))))
+        (else (throw 'invalid-target-spec target))))
 
 (define (proto-connected? c)
   (and (cr-connection? c)
