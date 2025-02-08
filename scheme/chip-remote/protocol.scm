@@ -302,7 +302,7 @@
   (interfaces cr-interfaces  set-cr-interfaces!)
   (access     cr-access      set-cr-access!))
 
-(define* (make-cr-connection! #:key from serial tcp port baudrate)
+(define* (make-cr-connection! #:key from serial tcp (port 1234) baudrate)
   "Make a new chip-remote connection.
 
 If the #:from parameter is used, its value must be a ufw-regp connection as
@@ -313,7 +313,7 @@ If #:from is not used, one of #:serial #:and #:tcp is considered. When both are
 used, the result is unspecified. With #:serial (specifying the serial device
 file), #:baudrate can be used optionally with a value from the termios library.
 The default is termios-B115200. With #:tcp, the #:port keyword can be used
-optionally. Its default is 9999.
+optionally. Its default is 1234.
 
 Examples:
 
@@ -321,7 +321,7 @@ Examples:
                        #:baudrate termios-B921600)
 
   (make-cr-connection! #:tcp  \"192.168.22.1\"
-                       #:port 9999)
+                       #:port 1234)
 
 Use #:from if you need more control."
   (let ((ll (cond (from from)
@@ -332,6 +332,11 @@ Use #:from if you need more control."
                             (tc-set-attr tty ts)
                             (setvbuf tty 'none)
                             (regp:serial-connection tty #:word-size-16? #t)))
+                  (tcp (let* ((s (socket PF_INET SOCK_STREAM 0))
+                              (host (gethostbyname tcp))
+                              (ip (car (hostent:addr-list host))))
+                         (connect s AF_INET ip port)
+                         (regp:tcp-connection s #:word-size-16? #t)))
                   (else (throw 'not-implemented-yet)))))
     (make-cr-connection* ll #f #f #f #f)))
 
