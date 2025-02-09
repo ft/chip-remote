@@ -8,6 +8,7 @@ CR   = $(LOAD_PATH)/chip-remote
 CRD  = $(LOAD_PATH)/documentation
 CRDS = $(LOAD_PATH)/data-structures
 CRP  = $(LOAD_PATH)/protocol
+CRT  = $(LOAD_PATH)/test
 
 MODULES_CORE =  $(CR)/bit-operations.scm
 MODULES_CORE += $(CR)/codecs.scm
@@ -96,5 +97,18 @@ MODULES_DOC += $(CRD)/module.scm
 MODULES_DOC += $(CRD)/more.scm
 MODULES_DOC += $(CRD)/render-markdown.scm
 
+MODULES_TEST =  $(CRT)/chip-remote.scm
+MODULES_TEST += $(CRT)/setup.scm
+MODULES_TEST += $(CRT)/validate/complete-registers.scm
+MODULES_TEST += $(CRT)/validate/has-register.scm
+MODULES_TEST += $(CRT)/validate/item-defaults-work.scm
+MODULES_TEST += $(CRT)/validate/items-dont-overlap.scm
+MODULES_TEST += $(CRT)/validate/items-no-holes-and-overlap.scm
+MODULES_TEST += $(CRT)/validate/items-no-holes.scm
+MODULES_TEST += $(CRT)/validate/registers-have-content.scm
+MODULES_TEST += $(CRT)/validate/unique-items.scm
+MODULES_TEST += $(CRT)/validate-device.scm
+
 MODULES =  $(MODULES_CORE) $(MODULES_MANUFACTURERS) $(MODULES_DEVICES)
 MODULES += $(MODULES_DOC) $(MODULES_PROTO) $(MODULES_DATASTRUCT)
+MODULES += $(MODULES_TEST)
