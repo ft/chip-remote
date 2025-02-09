@@ -7,8 +7,8 @@ RUNTESTS += -strip-roots -dispatch-root "$(TEST_PATH)"
 INSTALL = sh ./tools/install
 ORG_EXPORT = sh ./tools/org-export
 
-# These results in lots of warnings from record-type definitions, so I'm
 CFLAGS = -O3 -Wunsupported-warning
+# These result in lots of warnings from record-type definitions, so I'm
 # turning them off for now:
 #CFLAGS += -Wunused-variable -Wunused-toplevel
 CFLAGS += -Wunbound-variable -Warity-mismatch -Wduplicate-case-datum
