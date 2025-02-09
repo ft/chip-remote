@@ -13,6 +13,10 @@
   #:use-module (srfi srfi-9)
   #:use-module (srfi srfi-9 gnu)
   #:export (make-slip-encoding
+            slip:default-encoding
+            slip:eof slip:esc-eof
+            slip:esc slip:esc-esc
+            slip:sof slip:esc-sof
             make-slip-state
             slip-decode!
             slip-encode
@@ -21,25 +25,28 @@
 
 ;; RFC-1055 suggests the use of EOF to mark starts of frames as well. So that's
 ;; what we're doing by default, if with-sof? is set.
-(define *slip-default-encoding*
+(define slip:default-encoding
   '((escape         #xdb . #xdd)
     (start-of-frame #xc0 . #xdc)
     (end-of-frame   #xc0 . #xdc)))
 
 (define-immutable-record-type <slip-encoding>
-  (make-slip-encoding* esc esc-esc sof esc-sof eof esc-eof with-sof?)
+  (make-slip-encoding* slip:esc slip:esc-esc
+                       slip:sof slip:esc-sof
+                       slip:eof slip:esc-eof
+                       with-sof?)
   slip-encoding?
-  (esc esc) (esc-esc esc-esc)
-  (sof sof) (esc-sof esc-sof)
-  (eof eof) (esc-eof esc-eof)
+  (slip:esc slip:esc) (slip:esc-esc slip:esc-esc)
+  (slip:sof slip:sof) (slip:esc-sof slip:esc-sof)
+  (slip:eof slip:eof) (slip:esc-eof slip:esc-eof)
   (with-sof? with-sof?))
 
 (define* (make-slip-encoding #:key
-                             (escape (assq-ref *slip-default-encoding*
+                             (escape (assq-ref slip:default-encoding
                                                'escape))
-                             (end-of-frame (assq-ref *slip-default-encoding*
+                             (end-of-frame (assq-ref slip:default-encoding
                                                      'end-of-frame))
-                             (start-of-frame (assq-ref *slip-default-encoding*
+                             (start-of-frame (assq-ref slip:default-encoding
                                                        'start-of-frame))
                              (with-sof? #f))
   (make-slip-encoding* (car escape)
@@ -115,19 +122,19 @@
                   (else 'find-sof)))))
 
 (define (decode-escaped enc octet)
-  (cond ((= octet (esc-eof enc)) (eof enc))
-        ((= octet (esc-esc enc)) (esc enc))
-        ((and (with-sof? enc) (= octet (esc-sof enc))) (sof enc))
+  (cond ((= octet (slip:esc-eof enc)) (slip:eof enc))
+        ((= octet (slip:esc-esc enc)) (slip:esc enc))
+        ((and (with-sof? enc) (= octet (slip:esc-sof enc))) (slip:sof enc))
         (else #f)))
 
 (define (process-octet state enc octet)
   (case state
-    ((normal) (cond ((= octet (eof enc)) 'end)
-                    ((= octet (esc enc)) 'escape)
-                    ((and (with-sof? enc) (= octet (sof enc))) 'lost-end)
+    ((normal) (cond ((= octet (slip:eof enc)) 'end)
+                    ((= octet (slip:esc enc)) 'escape)
+                    ((and (with-sof? enc) (= octet (slip:sof enc))) 'lost-end)
                     (else octet)))
     ((escape) (or (decode-escaped enc octet) 'bogus-escape))
-    ((find-sof) (if (= octet (sof enc)) 'normal 'ignore))))
+    ((find-sof) (if (= octet (slip:sof enc)) 'normal 'ignore))))
 
 (define (process-buffer! state buffer)
   (define (proc s o)
@@ -169,17 +176,17 @@
 
 (define (encode-octet state octet)
   (let ((enc (slip-encoding state)))
-    (cond ((= octet (eof enc)) (list (esc enc) (esc-eof enc)))
-          ((= octet (esc enc)) (list (esc enc) (esc-esc enc)))
-          ((and (with-sof? enc) (= octet (sof enc)))
-           (list (esc enc) (esc-sof enc)))
+    (cond ((= octet (slip:eof enc)) (list (slip:esc enc) (slip:esc-eof enc)))
+          ((= octet (slip:esc enc)) (list (slip:esc enc) (slip:esc-esc enc)))
+          ((and (with-sof? enc) (= octet (slip:sof enc)))
+           (list (slip:esc enc) (slip:esc-sof enc)))
           (else (list octet)))))
 
 (define (enclose! state data)
   (let* ((enc (slip-encoding state))
-         (with-eof (append! data (list (eof enc)))))
+         (with-eof (append! data (list (slip:eof enc)))))
     (if (with-sof? enc)
-        (cons (sof enc) with-eof)
+        (cons (slip:sof enc) with-eof)
         with-eof)))
 
 (define (slip-encode-bv state data)

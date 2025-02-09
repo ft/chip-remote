@@ -12,11 +12,6 @@
 
 (init-test-tap!)
 
-(force-import (protocol slip)
-              *slip-default-encoding*
-              esc eof sof
-              esc-esc esc-eof esc-sof)
-
 (define extended-slip (make-slip-encoding #:escape         '(#xda . #xdd)
                                           #:start-of-frame '(#xb0 . #xdb)
                                           #:end-of-frame   '(#xc0 . #xdc)
@@ -28,7 +23,7 @@
          (decoder (make-slip-state))
          (data '(1 2 3 4 5 6 7 8 9 0))
          (trivial (u8-list->bytevector data))
-         (end-of-frame (car (assq-ref *slip-default-encoding* 'end-of-frame)))
+         (end-of-frame (car (assq-ref slip:default-encoding 'end-of-frame)))
          (encoded (u8-list->bytevector (append data (list end-of-frame)))))
     (define-test "slip,default: Trivial octet-stream only gets EOF"
       (pass-if-equal? (slip-encode encoder trivial) encoded))
@@ -39,12 +34,12 @@
          (decoder (make-slip-state #:encoding extended-slip))
          (data '(1 2 3 4 5 6 7 8 9 0))
          (trivial (u8-list->bytevector data))
-         (escape (esc extended-slip))
-         (esc-escape (esc-esc extended-slip))
-         (start-of-frame (sof extended-slip))
-         (esc-start-of-frame (esc-sof extended-slip))
-         (end-of-frame (eof extended-slip) )
-         (esc-end-of-frame (esc-eof extended-slip) )
+         (escape (slip:esc extended-slip))
+         (esc-escape (slip:esc-esc extended-slip))
+         (start-of-frame (slip:sof extended-slip))
+         (esc-start-of-frame (slip:esc-sof extended-slip))
+         (end-of-frame (slip:eof extended-slip) )
+         (esc-end-of-frame (slip:esc-eof extended-slip) )
          (encoded (u8-list->bytevector (append (list start-of-frame)
                                                data
                                                (list end-of-frame))))
