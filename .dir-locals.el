@@ -8,6 +8,7 @@
   (eval . (put 'for-each-test            'scheme-indent-function 1))
   (eval . (put 'with-test-bundle         'scheme-indent-function 1))
   (eval . (put 'with-fs-test-bundle      'scheme-indent-function 0))
+  (eval . (put 'with-fw-test-bundle      'scheme-indent-function 2))
   (eval . (put 'with-ellipsis            'scheme-indent-function 1))
   (eval . (put 'set-record-type-printer! 'scheme-indent-function 1))
   (eval . (put 'define-test              'scheme-indent-function 1))))

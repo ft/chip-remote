@@ -10,9 +10,12 @@
 #include <ufw/endpoints.h>
 #include <ufw/register-protocol.h>
 
+#include "server.h"
+
 int chip_remote_init(RegP *protocol,
                      Source source, Sink sink,
                      RegisterTable *registers);
 int chip_remote_process(RegP *protocol);
+int chip_remote_tcp_boot(struct cr_tcp_server *srv);
 
 #endif /* INC_CHIP_REMOTE_H_54e96e01 */

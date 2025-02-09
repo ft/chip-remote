@@ -17,7 +17,7 @@ endif()
 dt_has_chosen(with_instrumentation PROPERTY "chipremote,instr-ifc")
 if ("${with_instrumentation}" STREQUAL TRUE)
   message(STATUS "Instrumentation interface found in devicetree")
-  list(APPEND sources native-instrumentation.c resizable-buffer.c)
+  list(APPEND sources native-instrumentation.c server.c)
 endif()
 
 target_sources(app PRIVATE ${sources})

@@ -51,15 +51,19 @@
 #include <unistd.h>
 #endif /* CONFIG_BOARD_NATIVE_SIM */
 
+#include <ufw/byte-buffer.h>
 #include <ufw/compiler.h>
 #include <ufw/endpoints.h>
 #include <ufw/register-protocol.h>
 #include <ufwz/endpoint-uart-poll.h>
 #include <ufwz/endpoint-uart-fifo.h>
+#include <ufwz/shell-addons.h>
 
 #include "chip-remote.h"
 #include "peripherals.h"
 #include "registers.h"
+
+#include "server.h"
 
 #ifdef CONFIG_CR_INTERFACE_NONE
 #error Specify the chip-remote interface type in zephyr config of board!
@@ -69,7 +73,6 @@
 #define CR_PROTO_IFC  DEVICE_DT_GET(CR_PROTO_NODE)
 
 #if DT_NODE_EXISTS(DT_CHOSEN(chipremote_instr_ifc))
-#include "native-instrumentation.h"
 #define CR_INSTRUMENTATION_NODE DT_CHOSEN(chipremote_instr_ifc)
 #define CR_INSTRUMENTATION_IFC  DEVICE_DT_GET(CR_INSTRUMENTATION_NODE)
 #endif /* DT_NODE_EXISTS(DT_CHOSEN(chipremote_instr_ifc)) */
@@ -93,6 +96,7 @@ struct uart_config uart_cfg = {
 int
 main(void)
 {
+#if 0
     const struct device *pifc = CR_PROTO_IFC;
     if (pifc == NULL || device_is_ready(pifc) == false) {
         printk("Could not access protocol interface. Giving up.\n");
@@ -158,14 +162,6 @@ main(void)
 
     printk("ChipRemoteFirmware running on %s\n", CONFIG_BOARD);
 
-#ifdef CONFIG_BOARD_NATIVE_SIM
-    printk("(activated!)\n");
-    printk("(firmware-pid %u)\n", getpid());
-    posix_flush_stdout();
-    /* Disable stderr output */
-    close(STDERR_FILENO);
-#endif /* CONFIG_BOARD_NATIVE_SIM */
-
     for (;;) {
         const int rc0 = chip_remote_process(&protocol);
 
@@ -185,5 +181,28 @@ main(void)
     }
 
     /* NOTREACHED */
+#endif
+
+    ufw_shell_reg_init(&registers);
+
+    struct cr_tcp_server srv;
+    {
+        const int rc = chip_remote_tcp_boot(&srv);
+        if (rc < 0) {
+            return EXIT_FAILURE;
+        }
+    }
+
+#ifdef CONFIG_BOARD_NATIVE_SIM
+    printk("(activated!)\n");
+    printk("(firmware-pid %u)\n", getpid());
+    printk("(cr-server-port %d)\n", srv.port);
+    posix_flush_stdout();
+    /* Disable stderr output */
+    close(STDERR_FILENO);
+#endif /* CONFIG_BOARD_NATIVE_SIM */
+
+    crs_run(&srv);
+
     return EXIT_SUCCESS;
 }

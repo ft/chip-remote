@@ -14,8 +14,7 @@
 (when verbose?
   (tio-push-parm! tio 'trace?))
 
-(with-test-bundle (chip-remote firmware hi/bye)
-  (require (native-firmware-built?))
+(with-fw-test-bundle tio (chip-remote firmware engage)
   (plan 6)
   (boot-fw! tio)
   (define-test "Running proto-engange works"
@@ -32,5 +31,4 @@
   (define-test "proto-get-ifc-ctrl! spi-0"
     (pass-if-true (list? (proto-get-ifc-ctrl! ($ tio) 'spi-0))))
   (define-test "proto-get-ifc-ctrl! i2c-0"
-    (pass-if-true (list? (proto-get-ifc-ctrl! ($ tio) 'i2c-0))))
-  (kill-fw! tio))
+    (pass-if-true (list? (proto-get-ifc-ctrl! ($ tio) 'i2c-0)))))

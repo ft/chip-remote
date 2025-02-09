@@ -12,12 +12,9 @@
   #:use-module (chip-remote protocol)
   #:use-module (chip-remote utilities)
   #:use-module (protocol ufw-regp)
-  #:export (init-connection
-            close-connection
-            test-with-tag
+  #:export (with-fw-test-bundle
             native-firmware-built?
             make-test-io
-            tio-unknown!
             tio-connection
             tio-iconnection
             tio-instrumentation
@@ -35,6 +32,7 @@
             set-tio-parameters!
             set-tio-timeout!
             connect-test-io!
+            flush-stdin!
             handle-stdin!
             kill-fw!
             boot-fw!
@@ -42,41 +40,6 @@
             $
             instrument!
             fw-expect!))
-
-(define* (init-connection #:key (device (getenv "CR_BOARD_DEVICE")))
-  (let ((c (make-cr-connection device)))
-    (test-open c)
-    (test-hi c)
-    c))
-
-(define (close-connection c)
-  (test-bye c)
-  (test-close c))
-
-(define (test-with-tag tag value)
-  (unless value
-    (format #t "# FAIL with-tag: ~a~%" tag)
-    (quit 1)))
-
-(define (test-open c)
-  (unless (io-open c)
-    (format #t "# FAIL Establishing serial connection failed.~%")
-    (quit 1)))
-
-(define (test-close c)
-  (unless (io-close c)
-    (format #t "# FAIL Closing serial connection failed.~%")
-    (quit 1)))
-
-(define (test-hi c)
-  (unless (hi c)
-    (format #t "# FAIL Protocol HI failed.~%")
-    (quit 1)))
-
-(define (test-bye c)
-  (unless (bye c)
-    (format #t "# FAIL Protocol BYE failed.~%")
-    (quit 1)))
 
 (define-record-type <test-io>
   (make-test-io* fw-port terminal instrumentation connection iconnection pid
@@ -101,16 +64,17 @@
   (!! (member p (tio-parameters tio))))
 
 (define (connect-test-io! io)
-  (set-tio-connection! io (make-cr-connection! #:serial (tio-terminal io)))
-  (set-tio-iconnection! io (open-file (tio-instrumentation io) "r+l")))
+  (set-tio-connection! io (make-cr-connection! #:tcp "127.0.0.1"
+                                               #:port (tio-terminal io)))
+  (set-tio-iconnection! io
+                        (let ((sock (socket PF_INET SOCK_STREAM 0)))
+                          (connect sock AF_INET (inet-pton AF_INET "127.0.0.1")
+                                   (tio-instrumentation io))
+                          sock)))
 
 (define (handle-xread-timeout tio rv)
   (format #t "# xread timeout from firmware. Giving up!~%")
   (kill-fw! tio)
-  (quit 1))
-
-(define (tio-unknown!)
-  (format #t "# Could not determine chip-remote terminal. Giving up.~%")
   (quit 1))
 
 (define (trace-read sel tio tag . args)
@@ -119,18 +83,36 @@
       (format #t "# tio:~a:read: ~s~%" tag exp))
     exp))
 
+(define (init-done? tio)
+  (and (tio-terminal tio)
+       (tio-instrumentation tio)))
+
+(define (flush-stdin! tio)
+  (when (has-data? (tio-fw-port tio))
+    (let loop ((input (read-line (tio-fw-port tio) 'trim)))
+      (unless (eof-object? input)
+        (when (tio-got-param? tio 'trace?)
+          (format #t "# tio:inst:read: ~s~%" input))
+        (when (has-data? (tio-fw-port tio))
+          (loop (read-line (tio-fw-port tio) 'trim)))))))
+
 (define (handle-stdin! tio)
   (match (trace-read tio-fw-port tio 'inst
                      #:timeout (tio-timeout tio)
                      #:handle-timeout (lambda (x)
                                         (handle-xread-timeout tio x)))
+    (('booted!) #f)
+    (('cr-server-port port)
+     (format #t "# Chip Remote Server Port: ~a~%" port)
+     (set-tio-terminal! tio port))
+    (('ni-server-port port)
+     (format #t "# Chip Remote Instrumentation Port: ~a~%" port)
+     (set-tio-instrumentation! tio port))
     (('firmware-pid pid)
-     (unless tio
-       (kill pid SIGINT)
-       (tio-unknown!))
      (format #t "# Registering firmware PID: ~a~%" pid)
      (set-tio-pid! tio pid))
-    (x (format #t "# Unhandled firmware message: ~s~%" x))))
+    (x (format #t "# Unhandled firmware message: ~s~%" x)))
+  (init-done? tio))
 
 (define (kill-fw! tio)
   (let ((pid (tio-pid tio)))
@@ -150,8 +132,7 @@
   (file-exists? (native-fw)))
 
 (define *s-exp-boot-tag* "(activated!)")
-(define *cr-terminal* "uart")
-(define *cr-instrumentation* "uart_1")
+(define *cr-shell* "uart")
 
 (define (debug-fw! tio)
   (format #t "# Debug Mode (PID: ~a): Press ENTER to continue!"
@@ -160,38 +141,41 @@
   (read-line))
 
 (define* (boot-fw! tio #:key (suspend-execution? #t))
+  (define shell #f)
   (format #t "# Booting native firmware: ~a~%" (native-fw))
-  (set-tio-fw-port! tio (open-pipe* OPEN_READ (native-fw)))
+  (set-tio-fw-port! tio (open-pipe* OPEN_READ (native-fw) "-no-color"))
   (let loop ((line (read-line (tio-fw-port tio) 'trim)))
     (when (tio-got-param? tio 'trace?)
       (format #t "# tio:inst:read: ~s~%" line))
     (unless (string= line *s-exp-boot-tag*)
       (let ((lst (string-split line #\space)))
         (cond ((and (not (null? lst))
-                    (string= (car lst) *cr-terminal*))
-               (set-tio-terminal! tio (car (reverse lst))))
-              ((and (not (null? lst))
-                    (string= (car lst) *cr-instrumentation*))
-               (set-tio-instrumentation! tio (car (reverse lst))))))
+                    (string= (car lst) *cr-shell*))
+               (set! shell (car (reverse lst))))))
       (loop (read-line (tio-fw-port tio) 'trim))))
 
-  (if tio
-      (begin
-        (format #t "# Chip-Remote Terminal at: ~a~%" (tio-terminal tio))
-        (format #t "# Instrumentation Terminal at: ~a~%"
-                (tio-instrumentation tio))
-        (format #t "# S-Expression Interface up.~%")
-        (connect-test-io! tio)
-        (regp:change-param (cr-low-level (tio-connection tio))
-                           'trace? (tio-got-param? tio 'trace?)))
-      (tio-unknown!))
+  (when shell
+    (format #t "# Firmware shell at: ~a~%" shell))
+  (format #t "# S-Expression Interface up.~%")
 
-  ;; The firmware should indicate its PID first thing in s-exp mode.
-  (handle-stdin! tio)
+  (format #t "# Gathering connectivity information...~%")
+  (let loop ()
+    ;; This will block operation until all vital information from the
+    ;; native-sim firmware was collected. If this fails to arrive, the
+    ;; underlying read operation will time out, and the run will be
+    ;; aborted.
+    (unless (handle-stdin! tio) (loop)))
+
+  (format #t "# Connecting to native-sim build of firmware...~%")
+  (connect-test-io! tio)
+  (regp:change-param (cr-low-level (tio-connection tio))
+                     'trace? (tio-got-param? tio 'trace?))
+
+  (format #t "# Connection established.~%")
   (when (and (> (length (command-line)) 1)
              (string= "--debug" (cadr (command-line))))
     (set-tio-timeout! tio #f)
-    (io-opt/set 'serial-timeout #f)
+    ;;(io-opt/set 'serial-timeout #f)
     (tio-push-parm! tio 'dont-kill)
     (when suspend-execution? (debug-fw! tio))))
 
@@ -218,3 +202,48 @@
                         (trace-read tio-fw-port tio 'inst
                                     #:timeout (tio-timeout tio))))
       (loop (cdr rest)))))
+
+;; The "with-fw-test-bundle" macro is a wrapper around with-test-bundle, which
+;; does a couple of jobs for convenience:
+;;
+;;   - A (require (native-firmware-built?)) expression is added at the start.
+;;   - …looks for a call to "boot-fw!", after which every expression will be
+;;     followed up by (flush-stdin! tio).
+;;   - A (kill-fw! tio) expression is added at the very end.
+;;
+;; The macro is meant to be used in the "system" tests of the test-suite. This
+;; should ensure that test firmwares to not block because they can't write
+;; stdout anymore, because it will be drained regularly.
+
+(define-syntax with-fw-test-bundle/scan-for-boot
+  (lambda (ctx)
+    (define (is-build-fw? syn)
+      (let ((expr (syntax->datum syn)))
+        (and (list? expr)
+             (not (null? expr))
+             (eq? 'boot-fw! (car expr)))))
+    (syntax-case ctx ()
+      ((_ io) #'(kill-fw! io))
+      ((_ io exp rest ...)
+       (if (is-build-fw? #'exp)
+           #'(with-fw-test-bundle/post-flush io exp rest ...)
+           #'(begin exp
+                    (with-fw-test-bundle/scan-for-boot io rest ...)))))))
+
+(define-syntax with-fw-test-bundle/post-flush
+  (lambda (ctx)
+    (syntax-case ctx ()
+      ((_ io) #'(kill-fw! io))
+      ((_ io exp rest ...)
+       #'(begin exp
+                (flush-stdin! io)
+                (with-fw-test-bundle/post-flush io rest ...))))))
+
+(define-syntax with-fw-test-bundle
+  (lambda (ctx)
+    (syntax-case ctx ()
+      ((_ io bundle exp ...)
+       #'(let ((_io io))
+           (with-test-bundle bundle
+             (require (native-firmware-built?))
+             (with-fw-test-bundle/scan-for-boot _io exp ...)))))))

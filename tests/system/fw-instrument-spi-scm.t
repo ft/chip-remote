@@ -10,7 +10,7 @@
              (chip-remote utilities))
 
 ;; Set to #t to get verbose tracing output.
-(define verbose? #f)
+(define verbose? #t)
 
 (define tio (make-test-io))
 
@@ -26,8 +26,8 @@
 (when verbose?
   (tio-push-parm! tio 'trace?))
 
-(with-test-bundle skip (chip-remote firmware instrumentation spi)
-  (require (native-firmware-built?))
+(with-fw-test-bundle tio (chip-remote firmware instrumentation spi)
+  (require #f)
   (plan 39)
   (boot-fw! tio)
 
@@ -57,6 +57,4 @@
 
   (tap/comment "SPI RX list should be depleted again, generation resumes at 3")
   (spi-test tio 321 3)
-  (spi-test tio 321 4)
-
-  (kill-fw! tio))
+  (spi-test tio 321 4))

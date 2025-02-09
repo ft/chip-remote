@@ -8,13 +8,17 @@
 
 #include <stdbool.h>
 
+#include <ufw/compat/errno.h>
 #include <ufw/endpoints.h>
+#include <ufw/hexdump.h>
 #include <ufw/register-protocol.h>
 #include <ufw/register-table.h>
 #include <ufw/register-utilities.h>
 #include <ufwz/slab-allocator.h>
 
 #include "peripherals.h"
+#include "registers.h"
+#include "server.h"
 
 #define PROTO_SLAB_SLOTS 4u
 #define PROTO_SLAB_SIZE  (128u + sizeof(RPFrame))
@@ -102,6 +106,105 @@ chip_remote_init(RegP *protocol,
     regp_use_allocator(protocol, &palloc);
     regp_use_memory16(protocol, regread, regwrite);
     regp_use_channel(protocol, RP_EP_SERIAL, source, sink);
+
+    return 0;
+}
+
+/*
+ * TCP Server Setup
+ */
+
+struct cr_multi {
+    RegP regp;
+};
+
+static struct cr_multi client_data[CR_MAX_CLIENTS];
+
+static int
+process_init(struct cr_tcp_client *client, const size_t n)
+{
+    if (n >= CR_MAX_CLIENTS) {
+        return -EINVAL;
+    }
+
+    Source src;
+    Sink snk;
+    struct cr_multi *cd = client_data + n;
+
+    byte_buffer_reset(&client->rx);
+    byte_buffer_reset(&client->tx);
+
+    source_from_buffer(&src, &client->rx);
+    sink_to_buffer(&snk, &client->tx);
+
+    regp_init(&cd->regp);
+    regp_use_allocator(&cd->regp, &palloc);
+    regp_use_memory16(&cd->regp, regread, regwrite);
+    regp_use_channel(&cd->regp, RP_EP_TCP, src, snk);
+
+    client->data = cd;
+
+    return 0;
+}
+
+static int
+process(struct cr_tcp_server *srv,
+        struct cr_tcp_client *client)
+{
+    printk("cr: Processing %zu bytes of data...\n",
+           byte_buffer_rest(&client->rx));
+
+    hexdump_stdout(byte_buffer_readptr(&client->rx),
+                   byte_buffer_rest(&client->rx), 0);
+
+    struct cr_multi *cd = client->data;
+    size_t rest = 0;
+    do {
+        ByteBufferPos pos;
+        byte_buffer_getpos(&client->rx, &pos);
+        const int rc = chip_remote_process(&cd->regp);
+        if (rc == -ENODATA) {
+            printk("Not enough data, resetting position.\n");
+            byte_buffer_setpos(&client->rx, &pos);
+            break;
+        } else if (rc < 0) {
+            process_init(client, 0);
+            return rc;
+        } else {
+            byte_buffer_rewind(&client->rx);
+        }
+        rest = byte_buffer_rest(&client->rx);
+    } while (rest > 0);
+
+    return 0;
+}
+
+int
+chip_remote_tcp_boot(struct cr_tcp_server *srv)
+{
+    register_make_bigendian(&registers, true);
+    const RegisterInit regtabrc = register_init(&registers);
+
+    if (regtabrc.code != REG_INIT_SUCCESS) {
+        register_table_print(stdout, "# ", &registers);
+        printf("#\n");
+        register_init_print(stdout, "# ", regtabrc);
+        return -EINVAL;
+    }
+
+    const int irc = crs_init(srv, 1234, process, process_init);
+    if (irc < 0) {
+        printk("Initialising TCP server failed: %s (%d)\n",
+               strerror(-irc), -irc);
+        return irc;
+    }
+
+    const int src = crs_setup(srv);
+    if (src < 0) {
+        printk("Setting up TCP server failed: %s (%d)\n",
+               strerror(-src), -src);
+        return src;
+    }
 
     return 0;
 }

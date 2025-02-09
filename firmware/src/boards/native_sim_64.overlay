@@ -36,6 +36,7 @@
         };
 
         chosen {
+                zephyr,shell-uart = &uart0;
                 chipremote,proto-ifc = &uart0;
                 chipremote,instr-ifc = &uart1;
                 chipremote,spi0 = &spi_text_0;
