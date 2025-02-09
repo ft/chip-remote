@@ -67,14 +67,7 @@
   (usage 1))
 
 (define target (car (arguments)))
-(define tty (open-io-file target))
-(let ((ts (make-termios-struct)))
-  (cf-make-raw! ts)
-  (cf-set-speed! ts termios-B921600)
-  (tc-set-attr tty ts))
-(setvbuf tty 'none)
-(define regp-connection (regp:serial-connection tty #:word-size-16? #t))
-(define connection (make-cr-connection regp-connection))
+(define connection (make-cr-connection!/dwim target))
 
 (proto-engage! connection)
 (pp (cr-static-info connection))
