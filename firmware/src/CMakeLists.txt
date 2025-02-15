@@ -9,23 +9,25 @@ include(GitIntegration)
 set(sources main.c chip-remote.c peripherals.c registers.c)
 
 dt_has_chosen(with_heartbeat PROPERTY "chipremote,heartbeat")
+
 if ("${with_heartbeat}" STREQUAL TRUE)
-  message(STATUS "Heartbeat LED found in devicetree")
+  message(STATUS "Enabling Heartbeat LED")
   list(APPEND sources heartbeat.c)
 endif()
 
-dt_has_chosen(with_instrumentation PROPERTY "chipremote,instr-ifc")
-if ("${with_instrumentation}" STREQUAL TRUE)
-  message(STATUS "Instrumentation interface found in devicetree")
-  list(APPEND sources native-instrumentation.c server.c)
+if (CONFIG_CR_INTERFACE_TCPIP OR CONFIG_INSTRUMENTATION_INTERFACE)
+  message(STATUS "Enabling TCP/IP Server Implementation")
+  list(APPEND sources server.c)
+endif()
+
+if (CONFIG_INSTRUMENTATION_INTERFACE)
+  message(STATUS "Enabling Instrumentation Interface")
+  list(APPEND sources native-instrumentation.c)
+  target_link_libraries(app PRIVATE ufw-sx)
 endif()
 
 target_sources(app PRIVATE ${sources})
 target_link_libraries(app PRIVATE ufw ufw-zephyr)
-
-if ("${with_instrumentation}" STREQUAL TRUE)
-  target_link_libraries(app PRIVATE ufw-sx)
-endif()
 
 if (${BOARD} MATCHES "^native")
   gitint_install(

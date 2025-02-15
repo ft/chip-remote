@@ -2,63 +2,97 @@ mainmenu "Chip Remote Firmware"
 
 menu "Firmware Specific Build Configuration"
 
+menu "Chip Remote Control Interface"
+
 choice CR_INTERFACE_TYPE
-       prompt "Control Interface Type"
-       default CR_INTERFACE_NONE
+	prompt "Control Interface Type"
+	default CR_INTERFACE_NONE
 
 config CR_INTERFACE_SIMPLE_SERIAL
-       bool "Simple Serial Interface"
-       help
-         This is the right choice for serial interfaces such as UART.
+	bool "Simple Serial Interface"
+	help
+	  This is the right choice for serial interfaces such as UART.
 
 config CR_INTERFACE_SMART_SERIAL
-       bool "Smart Serial Interface"
-       help
-         This is for serial interfaces such as USB CDC ACM for native
-         POSIX build serial ports.
+	bool "Smart Serial Interface"
+	help
+	  This is for serial interfaces such as USB CDC ACM for native
+	  POSIX build serial ports.
 
 config CR_INTERFACE_TCPIP
-       bool "Networking interface using TCP/IP"
+	bool "Networking interface using TCP/IP"
 
 config CR_INTERFACE_NONE
-       bool "None (Default, but invalid - see help)"
-       help
-         Every board port must specify this type in their board specific
-         configuration file.
+	bool "None (Default, but invalid - see help)"
+	help
+	  Every board port must specify this type in their board specific
+	  configuration file.
 
 endchoice # CR_INTERFACE_TYPE
 
+config CR_PROTOCOL_SERIAL_PORT
+	string "Serial peripheral port name for use by control interface"
+	default ""
+	depends on (CR_INTERFACE_SIMPLE_SERIAL || CR_INTERFACE_SMART_SERIAL)
+
 config CR_PROTOCOL_SERIAL_BAUDRATE
-       int "Serial Port Symbolrate"
-       depends on CR_INTERFACE_SIMPLE_SERIAL
-       default 921600
-       help
-         Configure the symbolrate used by the chip-remote control interface
-         running on a simple serial port. Note that oftentimes serial ports
-         only support a fixed set of symbolrates. Most serial ports support:
-         50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4800, 9600,
-         19200, 38400, 57600, 115200, 230400, 460800, 500000, 576000, 921600.
-         Some ports also support: 1000000, 1152000, 1500000, 2000000, 2500000,
-         3000000, 3500000, 4000000.
+	int "Serial Port Symbolrate"
+	depends on CR_INTERFACE_SIMPLE_SERIAL
+	default 9600
+	help
+	  Configure the symbolrate used by the chip-remote control interface
+	  running on a simple serial port. Note that oftentimes serial ports
+	  only support a fixed set of symbolrates. Most serial ports support:
+	  50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4800, 9600,
+	  19200, 38400, 57600, 115200, 230400, 460800, 500000, 576000, 921600.
+	  Some ports also support: 1000000, 1152000, 1500000, 2000000, 2500000,
+	  3000000, 3500000, 4000000.
+
+config CR_PROTOCOL_TCP_PORT
+	int "TCP port name for use by control interface"
+	default 1234
+	depends on CR_INTERFACE_TCPIP
+
+endmenu # Chip Remote Control Interface
+
+menuconfig INSTRUMENTATION_INTERFACE
+	bool "Firmware Intrumentation Interface"
+	help
+	  This is only really useful with testing firmwares, that are built
+	  for native-sim, for automatic system tests. The interface allows
+	  the user to specify the behaviour of the system at runtime.
+
+if INSTRUMENTATION_INTERFACE
+
+config CR_II_TCP_PORT
+	int "TCP Port to run the instrumentation interface on"
+	default 12345
+
+endif # INSTRUMENTATION_INTERFACE
 
 config CR_MAX_I2C_SECTIONS
-    int "Maximum number of sections in an I2C message"
-    default 8
+	int "Maximum number of sections in an I2C message"
+	default 8
+	help
+	  In I2C messages, it is possible to have multiple sections of byte
+	  read and write sections. This is the maximum that is possible to
+	  use with chip-remote's control interface. The higher the number,
+	  the more stack space some ofthe I2C processing requires.
 
-endmenu
+endmenu # Firmware Specific Build Configuration
 
 # This is from zephyr-3.5.0, but adding the || (ZEPHYR_PICOLIBC_MODULE). I
 # think this is a bug in zephyr. This allows us to use picolibc form a module
 # without patching the kernel. That's what we'll do for now. I should probably
 # see if this can be fixed upstream.
 config PICOLIBC_SUPPORTED
-    bool
-    depends on !NATIVE_APPLICATION
-    depends on ("$(TOOLCHAIN_HAS_PICOLIBC)" = "y") || (NATIVE_LIBRARY) || (ZEPHYR_PICOLIBC_MODULE)
-    depends on !REQUIRES_FULL_LIBCPP || ("$(TOOLCHAIN_HAS_PICOLIBC)" = "y")
-    default y
-    select FULL_LIBC_SUPPORTED
-    help
-      Selected when the target has support for picolibc.
+	bool
+	depends on !NATIVE_APPLICATION
+	depends on ("$(TOOLCHAIN_HAS_PICOLIBC)" = "y") || (NATIVE_LIBRARY) || (ZEPHYR_PICOLIBC_MODULE)
+	depends on !REQUIRES_FULL_LIBCPP || ("$(TOOLCHAIN_HAS_PICOLIBC)" = "y")
+	default y
+	select FULL_LIBC_SUPPORTED
+	help
+	  Selected when the target has support for picolibc.
 
 source "Kconfig.zephyr"
