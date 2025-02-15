@@ -22,16 +22,22 @@
  * In devicetree, the code uses the "chipremote" namespace in the "chosen"
  * subtree. The following nodes are used:
  *
- *   - chipremote,proto-ifc: Selects the device to use for control protocol
- *                           communication.
- *   - chipremote,instr-ifc: Selects the device to use for firmware
- *                           instrumentation communication. This is only
- *                           useful with the native firmware builds.
+ *   - chipremote,proto,serial:
+ *        Selects the device to use for control protocol communication,
+ *        if CR_INTERFACE_TYPE is one of the serial device types.
  *
- * Ports must choose "chipremote,proto-ifc". There are more nodes in the
- * "chosen" subtree, that the firmware uses, but those are used by the
- * peripheral access code an the "interfaces.h" file. Thus they are not
- * discussed here.
+ *  - chipremote,spi[0-9]+:
+ *       Assigns a SPI port for chip-remote to use.
+ *
+ *  - chipremote,i2c[0-9]+:
+ *       Assigns a I2C port for chip-remote to use.
+ *
+ *  - chipremote,heartbeat:
+ *       Selects a GPIO to use as its heartbeat LED.
+ *
+ * When a TCP port is used for the protocol, the firmware ignores any peri-
+ * pheral selections done in the chosen node. In fact, these peripherals are
+ * free and can be used for other purposes.
  */
 
 #include <zephyr/kernel.h>
@@ -69,13 +75,8 @@
 #error Specify the chip-remote interface type in zephyr config of board!
 #endif
 
-#define CR_PROTO_NODE DT_CHOSEN(chipremote_proto_ifc)
+#define CR_PROTO_NODE DT_CHOSEN(chipremote_proto_serial)
 #define CR_PROTO_IFC  DEVICE_DT_GET(CR_PROTO_NODE)
-
-#if DT_NODE_EXISTS(DT_CHOSEN(chipremote_instr_ifc))
-#define CR_INSTRUMENTATION_NODE DT_CHOSEN(chipremote_instr_ifc)
-#define CR_INSTRUMENTATION_IFC  DEVICE_DT_GET(CR_INSTRUMENTATION_NODE)
-#endif /* DT_NODE_EXISTS(DT_CHOSEN(chipremote_instr_ifc)) */
 
 #ifdef CONFIG_CR_INTERFACE_SMART_SERIAL
 #if DT_NODE_HAS_COMPAT(CR_PROTO_NODE, zephyr_cdc_acm_uart) == 1
@@ -96,37 +97,35 @@ struct uart_config uart_cfg = {
 int
 main(void)
 {
-#if 0
+    if (peripheral_check() < 0) {
+        printk("System perpherals could not be initialised.\n");
+        return EXIT_FAILURE;
+    }
+    printk("System perpherals online.\n");
+
+#ifdef CONFIG_CR_WITH_SERIAL
     const struct device *pifc = CR_PROTO_IFC;
     if (pifc == NULL || device_is_ready(pifc) == false) {
         printk("Could not access protocol interface. Giving up.\n");
         return EXIT_FAILURE;
     }
+    printk("Control protocol interface online.\n");
+#endif /* CONFIG_CR_WITH_SERIAL */
 
 #ifdef CR_DO_ENABLE_USB
     if (usb_enable(NULL) != 0) {
         printk("Could not enable usb. Giving up.\n");
         return EXIT_FAILURE;
     }
+    printk("USB interface online.\n");
 #endif /* CR_DO_ENABLE_USB */
-
-#ifdef CR_INSTRUMENTATION_IFC
-    const struct device *instrifc = CR_INSTRUMENTATION_IFC;
-    if (instrifc == NULL || device_is_ready(instrifc) == false) {
-        printk("Could not access protocol interface. Giving up.\n");
-        return EXIT_FAILURE;
-    }
-#endif /* CR_INSTRUMENTATION_IFC */
-
-    if (peripheral_check() < 0) {
-        return EXIT_FAILURE;
-    }
 
 #ifdef CONFIG_CR_INTERFACE_SIMPLE_SERIAL
     if (uart_configure(pifc, &uart_cfg) < 0) {
         printk("Could not configure %s. Giving up.\n", pifc->name);
         return EXIT_FAILURE;
     }
+    printk("Serial device configured: %s\n", pifc->name);
 
     DEFINE_UART_FIFO_SOURCE_DATA(pifcdata, 128u);
 
@@ -144,45 +143,31 @@ main(void)
     Sink regpsink = UFWZ_UART_POLL_SINK(pifc);
 #endif /* CONFIG_CR_INTERFACE_SMART_SERIAL */
 
-#ifdef CONFIG_CR_INTERFACE_TCPIP
-#error The tcp/ip based interface type is not implemented yet.
-#endif /* CONFIG_CR_INTERFACE_TCPIP */
-
+#ifdef CONFIG_CR_WITH_SERIAL
     RegP protocol;
 
     if (chip_remote_init(&protocol, regpsource, regpsink, &registers) < 0) {
         printk("Could not setup chip-remote processor. Giving up.\n");
         return EXIT_FAILURE;
     }
+#endif /* CONFIG_CR_WITH_SERIAL */
 
-#ifdef CR_INSTRUMENTATION_IFC
-    struct resizeable_buffer nirb;
-    rb_init(&nirb);
-#endif /* CR_INSTRUMENTATION_IFC */
+    printk("(activated!)\n");
+    printk("(board %s)\n", CONFIG_BOARD);
+#ifdef CONFIG_BOARD_NATIVE_SIM
+    printk("(firmware-pid %u)\n", getpid());
+#endif /* CONFIG_BOARD_NATIVE_SIM */
 
-    printk("ChipRemoteFirmware running on %s\n", CONFIG_BOARD);
-
+#ifdef CONFIG_CR_WITH_SERIAL
     for (;;) {
-        const int rc0 = chip_remote_process(&protocol);
-
-#ifdef CR_INSTRUMENTATION_IFC
-        char ch1;
-        const int rc1 = uart_poll_in(instrifc, &ch1);
-        if (rc1 == 0) {
-            ni_toplevel(&nirb, ch1, instrifc);
-        }
-#else
-        const int rc1 = -1;
-#endif /* CR_INSTRUMENTATION_IFC */
-
-        if (rc1 != 0 && rc0 < 0) {
+        const int rc = chip_remote_process(&protocol);
+        if (rc < 0) {
             k_usleep(1000);
         }
     }
+#endif /* CONFIG_CR_WITH_SERIAL */
 
-    /* NOTREACHED */
-#endif
-
+#ifdef CONFIG_CR_INTERFACE_TCPIP
     ufw_shell_reg_init(&registers);
 
     struct cr_tcp_server srv;
@@ -192,17 +177,17 @@ main(void)
             return EXIT_FAILURE;
         }
     }
+#endif /* CONFIG_CR_INTERFACE_TCPIP */
 
 #ifdef CONFIG_BOARD_NATIVE_SIM
-    printk("(activated!)\n");
-    printk("(firmware-pid %u)\n", getpid());
-    printk("(cr-server-port %d)\n", srv.port);
     posix_flush_stdout();
-    /* Disable stderr output */
     close(STDERR_FILENO);
 #endif /* CONFIG_BOARD_NATIVE_SIM */
 
+#ifdef CONFIG_CR_INTERFACE_TCPIP
+    printk("(cr-server-port %d)\n", srv.port);
     crs_run(&srv);
+#endif /* CONFIG_CR_INTERFACE_TCPIP */
 
     return EXIT_SUCCESS;
 }

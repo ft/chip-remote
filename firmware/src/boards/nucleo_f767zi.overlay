@@ -1,7 +1,9 @@
 / {
         chosen {
+                zephyr,console = &usart3;
+                zephyr,shell-uart = &usart3;
                 chipremote,heartbeat = &green_led;
-                chipremote,proto-ifc = &cdc_acm_uart0;
+                chipremote,proto,serial = &cdc_acm_uart0;
                 chipremote,spi0 = &spi1;
                 chipremote,i2c0 = &i2c1;
                 chipremote,i2c0 = &i2c2;

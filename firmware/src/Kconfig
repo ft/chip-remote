@@ -30,10 +30,14 @@ config CR_INTERFACE_NONE
 
 endchoice # CR_INTERFACE_TYPE
 
+config CR_WITH_SERIAL
+	bool
+	default (CR_INTERFACE_SIMPLE_SERIAL || CR_INTERFACE_SMART_SERIAL)
+
 config CR_PROTOCOL_SERIAL_PORT
 	string "Serial peripheral port name for use by control interface"
-	default ""
-	depends on (CR_INTERFACE_SIMPLE_SERIAL || CR_INTERFACE_SMART_SERIAL)
+	default "foo"
+	depends on CR_WITH_SERIAL
 
 config CR_PROTOCOL_SERIAL_BAUDRATE
 	int "Serial Port Symbolrate"
