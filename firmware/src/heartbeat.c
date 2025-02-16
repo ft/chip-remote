@@ -39,7 +39,7 @@ cr_heartbeat(UNUSED void *p1, UNUSED void *p2, UNUSED void *p3)
     }
 
     enum { ON, OFF } state = OFF;
-    const unsigned int offtimes[] = { 100, 500 };
+    const unsigned int offtimes[] = { 200, 700 };
     const unsigned int ontime = 100;
     unsigned int n = 0u;
 

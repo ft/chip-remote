@@ -20,6 +20,7 @@ zephyr:
         boards:
           - nucleo_f767zi
           - nucleo_l476rg
+          - maplemini
         modules:
           - picolibc
           - cmsis

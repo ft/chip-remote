@@ -1,0 +1,17 @@
+/ {
+	chosen {
+		zephyr,console = &usart1;
+		chipremote,heartbeat = &led;
+		chipremote,proto,serial = &cdc_acm_uart0;
+		chipremote,spi0 = &spi1;
+		chipremote,spi1 = &spi2;
+		chipremote,i2c0 = &i2c1;
+		chipremote,i2c1 = &i2c2;
+	};
+};
+
+&zephyr_udc0 {
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
+};

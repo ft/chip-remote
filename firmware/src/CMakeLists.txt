@@ -13,6 +13,8 @@ dt_has_chosen(with_heartbeat PROPERTY "chipremote,heartbeat")
 if ("${with_heartbeat}" STREQUAL TRUE)
   message(STATUS "Enabling Heartbeat LED")
   list(APPEND sources heartbeat.c)
+else()
+  message(STATUS "No Heartbeat LED in hardware description!")
 endif()
 
 if (CONFIG_CR_INTERFACE_TCPIP OR CONFIG_INSTRUMENTATION_INTERFACE)
