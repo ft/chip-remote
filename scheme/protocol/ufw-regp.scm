@@ -501,6 +501,7 @@ it impossible to parse."
   (unless (regp:connection? con)
     (throw 'invalid-parameter con))
   (when (regp:ref-param con 'trace?)
+    (format #t "# Trace from reg:send: ~a~%" data)
     (pp (regp:decode data)))
   (case (regp:framing con)
     ((varint-length-prefix)
