@@ -282,7 +282,7 @@ papi_i2c_transmit(struct peripheral_control *ctrl)
 
     RegisterValue address;
     register_get(&registers, ctrl->backend.i2c.ctrl.address, &address);
-    printk("addrss: 0x%04x\n", address.value.u16);
+    printk("address: 0x%04x\n", address.value.u16);
     const int rc = i2c_transfer(ctrl->dev, msg, nmsg, address.value.u16);
     printk("error: %d %s\n", -rc, strerror(-rc));
 
