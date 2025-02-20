@@ -185,8 +185,8 @@
 (define control-table-footer (list
                               (generate-u16-register tx-frame-buffer-size)
                               (generate-u32-register tx-frame-buffer-address)
-                              (generate-u16-register tx-frame-buffer-size)
-                              (generate-u32-register tx-frame-buffer-address)
+                              (generate-u16-register rx-frame-buffer-size)
+                              (generate-u32-register rx-frame-buffer-address)
                               (generate-u16-register command)
                               (generate-u32-register command-argument)
                               (generate-u32-register command-status)))
