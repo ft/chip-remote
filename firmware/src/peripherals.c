@@ -216,8 +216,9 @@ papi_i2c_transmit(struct peripheral_control *ctrl)
     unsigned char *fbrx = (void*)registers.area[REG_AREA_FBRX].mem;
 
     for (;;) {
+        const size_t extoff = (fbtx[pos] & PAPI_I2C_EXTENDED_MASK) ? 1u : 0u;
         if (fbtx[pos] & PAPI_I2C_END_MASK) {
-            txoffset = pos + (fbtx[pos] & PAPI_I2C_END_MASK ? 1u : 0u);
+            txoffset = pos + extoff + (fbtx[pos] & PAPI_I2C_END_MASK ? 1u : 0u);
             break;
         }
         pos++;
