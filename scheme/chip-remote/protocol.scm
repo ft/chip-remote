@@ -303,7 +303,7 @@
   (interfaces cr-interfaces  set-cr-interfaces!)
   (access     cr-access      set-cr-access!))
 
-(define* (make-cr-connection! #:key from serial tcp (port 1234) baudrate)
+(define* (make-cr-connection! #:key from serial tcp (port 1234) baudrate trace?)
   "Make a new chip-remote connection.
 
 If the #:from parameter is used, its value must be a ufw-regp connection as
@@ -339,6 +339,7 @@ Use #:from if you need more control."
                          (connect s AF_INET ip port)
                          (regp:tcp-connection s #:word-size-16? #t)))
                   (else (throw 'not-implemented-yet)))))
+    (when trace? (regp:change-param ll 'trace? #t))
     (make-cr-connection* ll #f #f #f #f)))
 
 (define (rate->termios n)
