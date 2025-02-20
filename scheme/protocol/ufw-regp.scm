@@ -47,8 +47,8 @@
 
 ;;; Checksumming
 
-(define *iserial-crc-polynomial* #x8005)
-(define *iserial-crc-initial* #x0000)
+(define *ufw-regp-crc-polynomial* #x8005)
+(define *ufw-regp-crc-initial* #x0000)
 
 (define (reflect-bits data width)
   (let ((data (logand data (1- (ash 1 width)))))
@@ -85,10 +85,10 @@
                 16))
 
 (define (checksum-more previous data n)
-  (crc-16 *iserial-crc-polynomial* (reflect-bits previous 16) data n))
+  (crc-16 *ufw-regp-crc-polynomial* (reflect-bits previous 16) data n))
 
 (define (checksum data n)
-  (checksum-more *iserial-crc-initial* data n))
+  (checksum-more *ufw-regp-crc-initial* data n))
 
 (define (checksum-all data)
   (checksum data (bytevector-length data)))
