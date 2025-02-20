@@ -157,7 +157,7 @@
   (case frame-type
     ((read-response write-response)
      (assv-ref-reverse response-table bits))
-    ((meta)
+    ((meta-message)
      (assv-ref-reverse meta-meta-table bits))
     (else (if (zero? bits)
               'valid
