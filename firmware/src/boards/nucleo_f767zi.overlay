@@ -6,7 +6,7 @@
                 chipremote,proto,serial = &cdc_acm_uart0;
                 chipremote,spi0 = &spi1;
                 chipremote,i2c0 = &i2c1;
-                chipremote,i2c0 = &i2c2;
+                chipremote,i2c1 = &i2c2;
         };
 };
 
