@@ -24,7 +24,7 @@ endif()
 
 if (CONFIG_INSTRUMENTATION_INTERFACE)
   message(STATUS "Enabling Instrumentation Interface")
-  list(APPEND sources native-instrumentation.c)
+  list(APPEND sources instrumentation.c)
   target_link_libraries(app PRIVATE ufw-sx)
 endif()
 
