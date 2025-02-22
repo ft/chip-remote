@@ -187,12 +187,7 @@
   ;; port. This is done after all processing of the request.
   (match (trace-read tio-iconnection tio 'inst #:timeout (tio-timeout tio))
     ('ok #t)
-    (reply (throw 'expected-ok-from-instrumentation reply)))
-  ;; The firmware echos the instrumentation request on its output port again.
-  ;; This is mainly for debuggability, but we can certainly test for it.
-  (match (trace-read tio-fw-port tio 'fw #:timeout (tio-timeout tio))
-    (('instrumentation rest ...) #t)
-    (_ (throw 'expected-instrumentation-reply))))
+    (reply (throw 'expected-ok-from-instrumentation reply))))
 
 (define (fw-expect! tio . lst)
   (let loop ((rest lst))

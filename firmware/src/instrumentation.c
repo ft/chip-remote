@@ -13,19 +13,44 @@
 
 #include <ufw/compiler.h>
 #include <ufw/sx.h>
+#include <ufwz/spi-text.h>
 
 #include "server.h"
 
 struct sx_node *rxring = NULL;
 
-static void
-cr_spi_text_load(struct sx_node *node)
+static ssize_t
+ni_send(struct cr_tcp_client *client, const void *buf, const size_t n)
 {
-    if (rxring == NULL) {
-        rxring = node;
-    } else {
-        rxring = sx_append(rxring, node);
+    if (n > SSIZE_MAX) {
+        return -EINVAL;
     }
+
+    const unsigned char *src = buf;
+    size_t rest = n;
+
+    while (rest > 0) {
+        const size_t offset = n - rest;
+        const ssize_t done = zsock_send(client->socket, src + offset, rest, 0);
+        if (done < 0) {
+            switch (errno) {
+            case EAGAIN:
+            case EINTR:
+                continue;
+            default:
+                return done;
+            }
+        }
+        rest -= done;
+    }
+
+    return n;
+}
+
+static int
+ni_dispatch_spi(const size_t idx, struct sx_node *node)
+{
+    return 0;
 }
 
 static int
@@ -33,18 +58,24 @@ ni_dispatch(struct cr_tcp_client *client, struct sx_node *node)
 {
     printk("Processing expression from client %d: %d...\n",
            client->socket, node->type);
-    if (sx_is_list(node)) {
-        if (sx_is_the_symbol(sx_car(node), "load-spi")) {
-            struct sx_node *car = sx_pop(&node);
-            sx_destroy(&car);
-            if (sx_is_list(node))
-                cr_spi_text_load(node);
-            else
-                sx_destroy(&node);
-        }
-    } else {
-        sx_destroy(&node);
+
+    if (sx_is_list(node) == false) {
+        goto done;
     }
+
+    if (sx_is_the_symbol(sx_car(node), "load-spi")) {
+        struct sx_node *car = sx_pop(&node);
+        sx_destroy(&car);
+        if (sx_is_the_symbol(sx_car(node), "spi-0")) {
+            car = sx_pop(&node);
+            sx_destroy(&car);
+            ni_dispatch_spi(0, node);
+            goto done;
+        }
+    }
+
+done:
+    sx_destroy(&node);
     return 0;
 }
 
@@ -67,10 +98,10 @@ ni_process(struct cr_tcp_server *srv,
             const bool withnode = pr.node != NULL;
             if (withnode) {
                 const int drc = ni_dispatch(client, pr.node);
-                sx_destroy(&pr.node);
                 if (drc < 0) {
                     return drc;
                 }
+                ni_send(client, "ok\n", 3);
             }
             const int mrc = byte_buffer_markread(&client->rx, pr.position);
             byte_buffer_rewind(&client->rx);
