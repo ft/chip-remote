@@ -38,9 +38,14 @@ config CR_WITH_SERIAL
 	bool
 	default (CR_INTERFACE_SERIAL_POLL || CR_INTERFACE_SERIAL_FIFO)
 
+config CR_WITH_SERIAL_BAUDRATE
+	bool "Set a specific baud-rate for the chip-remote interface"
+	depends on CR_WITH_SERIAL
+	default n
+
 config CR_PROTOCOL_SERIAL_BAUDRATE
 	int "Serial Port Symbolrate"
-	depends on CR_WITH_SERIAL
+	depends on CR_WITH_SERIAL_BAUDRATE
 	default 9600
 	help
 	  Configure the symbolrate used by the chip-remote control interface

@@ -75,6 +75,12 @@
 #error Specify the chip-remote interface type in zephyr config of board!
 #endif
 
+#ifdef CONFIG_BOARD_NATIVE_SIM
+#ifndef CONFIG_UART_NATIVE_POSIX_PORT_1_ENABLE
+#error native-sim: Need UART_NATIVE_POSIX_PORT_1_ENABLE for serial port cr!
+#endif /* !CONFIG_UART_NATIVE_POSIX_PORT_1_ENABLE */
+#endif /* CONFIG_BOARD_NATIVE_SIM) */
+
 #define CR_PROTO_NODE DT_CHOSEN(chipremote_proto_serial)
 #define CR_PROTO_IFC  DEVICE_DT_GET(CR_PROTO_NODE)
 
@@ -84,7 +90,7 @@
 #endif /* chipremote_proto_ifc is type zephyr_cdc_acm_uart */
 #endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
 
-#if defined(CR_DO_ENABLE_USB) && !defined(CONFIG_CR_INTERFACE_TCPIP)
+#ifdef CONFIG_CR_WITH_SERIAL_BAUDRATE
 struct uart_config uart_cfg = {
     .baudrate  = CONFIG_CR_PROTOCOL_SERIAL_BAUDRATE,
     .parity    = UART_CFG_PARITY_NONE,
@@ -92,7 +98,7 @@ struct uart_config uart_cfg = {
     .flow_ctrl = UART_CFG_FLOW_CTRL_NONE,
     .data_bits = UART_CFG_DATA_BITS_8
 };
-#endif /* !CR_DO_ENABLE_USB */
+#endif /* CONFIG_CR_WITH_SERIAL_BAUDRATE */
 
 int
 main(void)
@@ -120,13 +126,15 @@ main(void)
     printk("USB interface online.\n");
 #endif /* CR_DO_ENABLE_USB */
 
-#ifdef CONFIG_CR_INTERFACE_SERIAL_POLL
+#ifdef CONFIG_CR_WITH_SERIAL_BAUDRATE
     if (uart_configure(pifc, &uart_cfg) < 0) {
         printk("Could not configure %s. Giving up.\n", pifc->name);
         return EXIT_FAILURE;
     }
     printk("Serial device configured: %s\n", pifc->name);
+#endif /* CONFIG_CR_WITH_SERIAL_BAUDRATE */
 
+#ifdef CONFIG_CR_INTERFACE_SERIAL_FIFO
     DEFINE_UART_FIFO_SOURCE_DATA(pifcdata, 128u);
 
     if (ufwz_uart_fifo_source_init(pifc, &pifcdata) < 0) {
@@ -136,12 +144,12 @@ main(void)
 
     Source regpsource = UFWZ_UART_FIFO_SOURCE(&pifcdata);
     Sink regpsink = UFWZ_UART_POLL_SINK(pifc);
-#endif /* CONFIG_CR_INTERFACE_SERIAL_POLL */
+#endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
 
-#ifdef CONFIG_CR_INTERFACE_SERIAL_FIFO
+#ifdef CONFIG_CR_INTERFACE_SERIAL_POLL
     Source regpsource = UFWZ_UART_POLL_SOURCE(pifc);
     Sink regpsink = UFWZ_UART_POLL_SINK(pifc);
-#endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
+#endif /* CONFIG_CR_INTERFACE_SERIAL_POLL */
 
 #ifdef CONFIG_CR_WITH_SERIAL
     RegP protocol;
