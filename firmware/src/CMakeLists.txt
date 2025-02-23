@@ -17,7 +17,7 @@ else()
   message(STATUS "No Heartbeat LED in hardware description!")
 endif()
 
-if (CONFIG_CR_INTERFACE_TCPIP OR CONFIG_INSTRUMENTATION_INTERFACE)
+if (CONFIG_NET_TCP)
   message(STATUS "Enabling TCP/IP Server Implementation")
   list(APPEND sources server.c)
 endif()

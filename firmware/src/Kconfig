@@ -10,17 +10,20 @@ choice CR_INTERFACE_TYPE
 
 config CR_INTERFACE_SIMPLE_SERIAL
 	bool "Simple Serial Interface"
+	depends on UFW_ENDPOINT_UART_FIFO
 	help
 	  This is the right choice for serial interfaces such as UART.
 
 config CR_INTERFACE_SMART_SERIAL
 	bool "Smart Serial Interface"
+	depends on UFW_ENDPOINT_UART_POLL
 	help
 	  This is for serial interfaces such as USB CDC ACM for native
 	  POSIX build serial ports.
 
 config CR_INTERFACE_TCPIP
 	bool "Networking interface using TCP/IP"
+	depends on NET_TCP
 
 config CR_INTERFACE_NONE
 	bool "None (Default, but invalid - see help)"
@@ -56,6 +59,7 @@ endmenu # Chip Remote Control Interface
 
 menuconfig INSTRUMENTATION_INTERFACE
 	bool "Firmware Intrumentation Interface"
+	depends on NET_TCP
 	help
 	  This is only really useful with testing firmwares, that are built
 	  for native-sim, for automatic system tests. The interface allows
