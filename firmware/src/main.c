@@ -78,13 +78,13 @@
 #define CR_PROTO_NODE DT_CHOSEN(chipremote_proto_serial)
 #define CR_PROTO_IFC  DEVICE_DT_GET(CR_PROTO_NODE)
 
-#ifdef CONFIG_CR_INTERFACE_SMART_SERIAL
+#ifdef CONFIG_CR_INTERFACE_SERIAL_FIFO
 #if DT_NODE_HAS_COMPAT(CR_PROTO_NODE, zephyr_cdc_acm_uart) == 1
 #define CR_DO_ENABLE_USB 1
 #endif /* chipremote_proto_ifc is type zephyr_cdc_acm_uart */
-#endif /* CONFIG_CR_INTERFACE_SMART_SERIAL */
+#endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
 
-#ifdef CONFIG_CR_INTERFACE_SIMPLE_SERIAL
+#if defined(CR_DO_ENABLE_USB) && !defined(CONFIG_CR_INTERFACE_TCPIP)
 struct uart_config uart_cfg = {
     .baudrate  = CONFIG_CR_PROTOCOL_SERIAL_BAUDRATE,
     .parity    = UART_CFG_PARITY_NONE,
@@ -92,7 +92,7 @@ struct uart_config uart_cfg = {
     .flow_ctrl = UART_CFG_FLOW_CTRL_NONE,
     .data_bits = UART_CFG_DATA_BITS_8
 };
-#endif /* CONFIG_CR_INTERFACE_SIMPLE_SERIAL */
+#endif /* !CR_DO_ENABLE_USB */
 
 int
 main(void)
@@ -120,7 +120,7 @@ main(void)
     printk("USB interface online.\n");
 #endif /* CR_DO_ENABLE_USB */
 
-#ifdef CONFIG_CR_INTERFACE_SIMPLE_SERIAL
+#ifdef CONFIG_CR_INTERFACE_SERIAL_POLL
     if (uart_configure(pifc, &uart_cfg) < 0) {
         printk("Could not configure %s. Giving up.\n", pifc->name);
         return EXIT_FAILURE;
@@ -136,12 +136,12 @@ main(void)
 
     Source regpsource = UFWZ_UART_FIFO_SOURCE(&pifcdata);
     Sink regpsink = UFWZ_UART_POLL_SINK(pifc);
-#endif /* CONFIG_CR_INTERFACE_SIMPLE_SERIAL */
+#endif /* CONFIG_CR_INTERFACE_SERIAL_POLL */
 
-#ifdef CONFIG_CR_INTERFACE_SMART_SERIAL
+#ifdef CONFIG_CR_INTERFACE_SERIAL_FIFO
     Source regpsource = UFWZ_UART_POLL_SOURCE(pifc);
     Sink regpsink = UFWZ_UART_POLL_SINK(pifc);
-#endif /* CONFIG_CR_INTERFACE_SMART_SERIAL */
+#endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
 
 #ifdef CONFIG_CR_WITH_SERIAL
     RegP protocol;

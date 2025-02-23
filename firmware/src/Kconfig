@@ -8,18 +8,19 @@ choice CR_INTERFACE_TYPE
 	prompt "Control Interface Type"
 	default CR_INTERFACE_NONE
 
-config CR_INTERFACE_SIMPLE_SERIAL
+config CR_INTERFACE_SERIAL_FIFO
 	bool "Simple Serial Interface"
 	depends on UFW_ENDPOINT_UART_FIFO
 	help
-	  This is the right choice for serial interfaces such as UART.
+	  This is the right choice for almost all serial interfaces.
 
-config CR_INTERFACE_SMART_SERIAL
-	bool "Smart Serial Interface"
+config CR_INTERFACE_SERIAL_POLL
+	bool "Serial processing using polling operation"
 	depends on UFW_ENDPOINT_UART_POLL
 	help
-	  This is for serial interfaces such as USB CDC ACM for native
-	  POSIX build serial ports.
+	  This is for serial interfaces that do not allow using the interrupt
+	  based FIFO approach of CR_INTERFACE_SERIAL_FIFO, such as the serial
+	  ports of the native simulator port.
 
 config CR_INTERFACE_TCPIP
 	bool "Networking interface using TCP/IP"
@@ -35,11 +36,11 @@ endchoice # CR_INTERFACE_TYPE
 
 config CR_WITH_SERIAL
 	bool
-	default (CR_INTERFACE_SIMPLE_SERIAL || CR_INTERFACE_SMART_SERIAL)
+	default (CR_INTERFACE_SERIAL_POLL || CR_INTERFACE_SERIAL_FIFO)
 
 config CR_PROTOCOL_SERIAL_BAUDRATE
 	int "Serial Port Symbolrate"
-	depends on CR_INTERFACE_SIMPLE_SERIAL
+	depends on CR_WITH_SERIAL
 	default 9600
 	help
 	  Configure the symbolrate used by the chip-remote control interface
