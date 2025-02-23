@@ -37,6 +37,7 @@
 
         chosen {
                 zephyr,shell-uart = &uart0;
+                chipremote,proto,serial = &uart1;
                 chipremote,spi0 = &spi_text_0;
                 chipremote,spi1 = &spi_text_1;
                 chipremote,i2c0 = &i2c_text_0;
