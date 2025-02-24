@@ -100,6 +100,14 @@ struct uart_config uart_cfg = {
 };
 #endif /* CONFIG_CR_WITH_SERIAL_BAUDRATE */
 
+#ifdef CONFIG_CR_WITH_SERIAL
+const struct device *pifc = CR_PROTO_IFC;
+
+#ifdef CONFIG_CR_INTERFACE_SERIAL_POLL
+UFWZ_UART_POLL_THREAD_DELAYABLE(cr_uart, CR_PROTO_IFC, 128u, 1u);
+#endif /* CONFIG_CR_INTERFACE_SERIAL_POLL */
+#endif /* CONFIG_CR_WITH_SERIAL */
+
 int
 main(void)
 {
@@ -110,7 +118,6 @@ main(void)
     printk("System perpherals online.\n");
 
 #ifdef CONFIG_CR_WITH_SERIAL
-    const struct device *pifc = CR_PROTO_IFC;
     if (pifc == NULL || device_is_ready(pifc) == false) {
         printk("Could not access protocol interface. Giving up.\n");
         return EXIT_FAILURE;
@@ -147,7 +154,7 @@ main(void)
 #endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
 
 #ifdef CONFIG_CR_INTERFACE_SERIAL_POLL
-    Source regpsource = UFWZ_UART_POLL_SOURCE(pifc);
+    Source regpsource = UFWZ_UART_POLL_SOURCE(cr_uart);
     Sink regpsink = UFWZ_UART_POLL_SINK(pifc);
 #endif /* CONFIG_CR_INTERFACE_SERIAL_POLL */
 
@@ -167,6 +174,9 @@ main(void)
 #endif /* CONFIG_BOARD_NATIVE_SIM */
 
 #ifdef CONFIG_CR_WITH_SERIAL
+#ifdef CONFIG_CR_INTERFACE_SERIAL_POLL
+    UFWZ_UART_POLL_THREAD_START(cr_uart);
+#endif /* CONFIG_CR_INTERFACE_SERIAL_POLL */
     for (;;) {
         const int rc = chip_remote_process(&protocol);
         if (rc < 0) {
