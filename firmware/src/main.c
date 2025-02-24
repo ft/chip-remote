@@ -76,9 +76,11 @@
 #endif
 
 #ifdef CONFIG_BOARD_NATIVE_SIM
+#ifndef CONFIG_CR_INTERFACE_TCPIP
 #ifndef CONFIG_UART_NATIVE_POSIX_PORT_1_ENABLE
 #error native-sim: Need UART_NATIVE_POSIX_PORT_1_ENABLE for serial port cr!
 #endif /* !CONFIG_UART_NATIVE_POSIX_PORT_1_ENABLE */
+#endif /* !CONFIG_CR_INTERFACE_TCPIP */
 #endif /* CONFIG_BOARD_NATIVE_SIM) */
 
 #define CR_PROTO_NODE DT_CHOSEN(chipremote_proto_serial)
@@ -106,6 +108,9 @@ const struct device *pifc = CR_PROTO_IFC;
 #ifdef CONFIG_CR_INTERFACE_SERIAL_POLL
 UFWZ_UART_POLL_THREAD_DELAYABLE(cr_uart, CR_PROTO_IFC, 128u, 1u);
 #endif /* CONFIG_CR_INTERFACE_SERIAL_POLL */
+#ifdef CONFIG_CR_INTERFACE_SERIAL_FIFO
+K_PIPE_DEFINE(cr_uart_rx_pipe, 128u, 4u);
+#endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
 #endif /* CONFIG_CR_WITH_SERIAL */
 
 int
@@ -142,14 +147,12 @@ main(void)
 #endif /* CONFIG_CR_WITH_SERIAL_BAUDRATE */
 
 #ifdef CONFIG_CR_INTERFACE_SERIAL_FIFO
-    DEFINE_UART_FIFO_SOURCE_DATA(pifcdata, 128u);
-
-    if (ufwz_uart_fifo_source_init(pifc, &pifcdata) < 0) {
+    if (ufwz_uart_fifo_source_init(pifc, &cr_uart_rx_pipe) < 0) {
         printk("Could not setup %s fifo. Giving up.\n", pifc->name);
         return EXIT_FAILURE;
     }
 
-    Source regpsource = UFWZ_UART_FIFO_SOURCE(&pifcdata);
+    Source regpsource = UFWZ_UART_FIFO_SOURCE(&cr_uart_rx_pipe);
     Sink regpsink = UFWZ_UART_POLL_SINK(pifc);
 #endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
 
@@ -178,10 +181,7 @@ main(void)
     UFWZ_UART_POLL_THREAD_START(cr_uart);
 #endif /* CONFIG_CR_INTERFACE_SERIAL_POLL */
     for (;;) {
-        const int rc = chip_remote_process(&protocol);
-        if (rc < 0) {
-            k_usleep(1000);
-        }
+        chip_remote_process(&protocol);
     }
 #endif /* CONFIG_CR_WITH_SERIAL */
 
