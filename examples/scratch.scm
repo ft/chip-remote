@@ -97,7 +97,7 @@
 (define tty #f)
 
 (when s
-  (set! cr  (make-cr-connection! #:serial s))
+  (set! cr  (make-cr-connection!/dwim s))
   (set! c   (cr-low-level cr))
   (set! tty (regp:port c)))
 
