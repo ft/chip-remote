@@ -11,5 +11,5 @@
 
 &usart2 {
         fifo-enable;
-        current-speed = <9600>;
+        current-speed = <115200>;
 };
