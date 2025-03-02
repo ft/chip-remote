@@ -109,7 +109,7 @@ const struct device *pifc = CR_PROTO_IFC;
 UFWZ_UART_POLL_THREAD_DELAYABLE(cr_uart, CR_PROTO_IFC, 128u, 1u);
 #endif /* CONFIG_CR_INTERFACE_SERIAL_POLL */
 #ifdef CONFIG_CR_INTERFACE_SERIAL_FIFO
-K_PIPE_DEFINE(cr_uart_rx_pipe, 128u, 4u);
+UFWZ_DEFINE_UART_FIFO_DATA(cr_uart_rx, 128u, K_FOREVER);
 #endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
 #endif /* CONFIG_CR_WITH_SERIAL */
 
@@ -147,12 +147,12 @@ main(void)
 #endif /* CONFIG_CR_WITH_SERIAL_BAUDRATE */
 
 #ifdef CONFIG_CR_INTERFACE_SERIAL_FIFO
-    if (ufwz_uart_fifo_source_init(pifc, &cr_uart_rx_pipe) < 0) {
+    if (ufwz_uart_fifo_source_init(pifc, &cr_uart_rx) < 0) {
         printk("Could not setup %s fifo. Giving up.\n", pifc->name);
         return EXIT_FAILURE;
     }
 
-    Source regpsource = UFWZ_UART_FIFO_SOURCE(&cr_uart_rx_pipe);
+    Source regpsource = UFWZ_UART_FIFO_SOURCE(&cr_uart_rx);
     Sink regpsink = UFWZ_UART_POLL_SINK(pifc);
 #endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
 
