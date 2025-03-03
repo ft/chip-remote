@@ -1,0 +1,24 @@
+/ {
+        chosen {
+                zephyr,console = &usart1;
+                chipremote,heartbeat = &green_led_2;
+                chipremote,proto,serial = &usart2;
+                chipremote,spi0 = &spi2;
+                chipremote,i2c0 = &i2c1;
+        };
+};
+
+&usart2 {
+        fifo-enable;
+        current-speed = <115200>;
+};
+
+/* Let's use cs-gpios instead of the peripheral's nss pin. */
+&spi2 {
+        status = "okay";
+        pinctrl-0 = <&spi2_sck_pb13
+                     &spi2_miso_pb14
+                     &spi2_mosi_pb15>;
+        pinctrl-names = "default";
+        cs-gpios = <&gpiob 12 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+};

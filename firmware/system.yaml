@@ -18,6 +18,7 @@ zephyr:
           - name: gnuarmemb
             path: /usr
         boards:
+          - nucleo_f302r8
           - nucleo_f767zi
           - nucleo_l476rg
           - maplemini
