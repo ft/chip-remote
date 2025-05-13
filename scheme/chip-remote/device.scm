@@ -57,7 +57,7 @@
   (register-width device-register-width (default #f))
   (page-map       device-page-map (sanitize (need 'page-map page-map?)))
   (combinations   device-combinations (default '()))
-  (access         device-access (default 'access))
+  (access         device-access (default (make-device-access)))
   (state          device-state (thunked)
                   (default (make-default-device-state this-device))))
 

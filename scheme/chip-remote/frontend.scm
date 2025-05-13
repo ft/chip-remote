@@ -30,9 +30,9 @@
         '()
         lst))
 
-(define (read-register-values c d lst)
+(define (read-register-values c ifc d lst)
   (let ((read-reg (device-read (device-access d))))
-    (map-in-order (lambda (a) (cons a (match a ((p r) (read-reg c p r)))))
+    (map-in-order (lambda (a) (cons a (match a ((p r) (read-reg c ifc p r)))))
                   (sort lst addr<))))
 
 (define (replace-register-values d lst)
@@ -109,13 +109,13 @@ register updated register table value."
     (device-register-value-for-each tx d state)
     (push-device-state d 'push state)))
 
-(define (cr:pull! c d)
+(define (cr:pull! c ifc d)
   "Read the complete register table for device D via connection C.
 
 This returns a new device, with an updated device value, reflecting the
 register updated register table value."
   (let* ((addresses (all-device-addresses d))
-         (av (read-register-values c d addresses))
+         (av (read-register-values c ifc d addresses))
          (next (replace-register-values d av)))
     (push-device-state d 'pull next)))
 
@@ -150,6 +150,5 @@ It does not setup a port's mode, since that may well not be configurable for a
 given port. To configure a port for a SPI device, make sure the port at index N
 is a SPI port."
   (let* ((d:access (device-access d))
-         (d:bus (da-bus d:access))
-         (setup (access-bus->proc d:bus)))
+         (setup (device-setup d:access)))
     (setup c n)))

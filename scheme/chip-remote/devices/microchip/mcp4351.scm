@@ -5,10 +5,12 @@
 (define-module (chip-remote devices microchip mcp4351)
   #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote device)
+  #:use-module (chip-remote device access)
   #:use-module (chip-remote manufacturer microchip)
   #:use-module (chip-remote devices microchip mcp4351 registers)
   #:use-module (chip-remote item)
   #:use-module (chip-remote page-map)
+  #:use-module (chip-remote protocol)
   #:use-module (chip-remote register)
   #:use-module (chip-remote register-map)
   #:use-module (chip-remote semantics)
@@ -27,12 +29,24 @@
 (define (register-read pa ra)
   (register-access #b11 ra 0))
 
+(define (register-write! c ifc p r v)
+  (cr:spi-transceive! c ifc (list (register-write p r v))))
+
+(define (register-read! c ifc p r)
+  (cr:spi-transceive! c ifc (list (register-read p r))))
+
+(define (mcp-setup! c ifc)
+  (cr:setup-spi! c ifc '(frame-length 16) '(clock-rate 2000000)))
+
 (define-device mcp4351
   (manufacturer microchip)
   (homepage "https://www.microchip.com/wwwproducts/en/MCP4351")
   (datasheet "http://ww1.microchip.com/downloads/en/DeviceDoc/22242A.pdf")
   (keywords '(digital potentiometer spi))
   (register-width 9)
+  (access (make-device-access #:setup mcp-setup!
+                              #:read  register-read!
+                              #:write register-write!))
   ;; #:bus (spi #:frame-width 16
   ;;            #:bit-order 'msb-first)
   ;; #:write register-write
