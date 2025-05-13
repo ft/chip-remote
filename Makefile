@@ -48,13 +48,17 @@ native-fw:
 
 happiness: native-fw compile doc strict-test
 
-clean:
+clean-go:
 	find scheme -name "*.go"      -exec rm -f '{}' +
+
+clean: clean-go
 	find scheme -name "*.mdwn"    -exec rm -f '{}' +
 	find .      -name "*~"        -exec rm -f '{}' +
 	find .      -name "*.failure" -exec rm -f '{}' +
 	$(MAKE) -C doc clean
 	rm -Rf $(NATIVE_DIR)
+
+recompile: clean-go compile
 
 doc:
 	(cd doc/ && $(MAKE) all;)
@@ -84,7 +88,7 @@ standalone:
 	@$(TOPDIR)/tools/make-standalone "$(TOPDIR)"
 
 .PHONY: all
-.PHONY: compile clean
+.PHONY: compile clean clean-go recompile
 .PHONY: doc
 .PHONY: happiness
 .PHONY: install
