@@ -7,6 +7,7 @@
 #include <zephyr/kernel.h>
 
 #include <stdbool.h>
+#include <string.h>
 
 #include <ufw/compat/errno.h>
 #include <ufw/endpoints.h>
@@ -40,7 +41,7 @@ chip_remote_process(RegP *protocol)
     bool normal_processing = true;
     RPMaybeFrame mf;
     const int recvrc = regp_recv(protocol, &mf);
-    if (recvrc < 0 && recvrc != -EAGAIN) {
+    if (recvrc < 0 && recvrc != -EAGAIN && recvrc != -ENODATA) {
         printk("# Error in regp_recv(): %d\n", recvrc);
     }
 
@@ -74,7 +75,8 @@ chip_remote_process(RegP *protocol)
     if (normal_processing) {
         const int procrc = regp_process(protocol, &mf);
         if (procrc < 0) {
-            printk("# Error in regp_process(): %d\n", procrc);
+            printk("# Error in regp_process(): %d (%s)\n",
+                   procrc, strerror(-procrc));
         }
     } else {
         /* Writes to command registers are not processed regularly. We're
@@ -151,8 +153,10 @@ static int
 process(struct cr_tcp_server *srv,
         struct cr_tcp_client *client)
 {
+#if 0
     printk("cr: Processing %zu bytes of data...\n",
            byte_buffer_rest(&client->rx));
+#endif
 
     hexdump_stdout(byte_buffer_readptr(&client->rx),
                    byte_buffer_rest(&client->rx), 0);
@@ -164,7 +168,9 @@ process(struct cr_tcp_server *srv,
         byte_buffer_getpos(&client->rx, &pos);
         const int rc = chip_remote_process(&cd->regp);
         if (rc == -ENODATA) {
+#if 0
             printk("Not enough data, resetting position.\n");
+#endif
             byte_buffer_setpos(&client->rx, &pos);
             break;
         } else if (rc < 0) {
