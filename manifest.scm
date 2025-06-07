@@ -10,6 +10,7 @@
 
 (use-modules (gnu packages base)
              (gnu packages bash)
+             (gnu packages bootloaders)
              (gnu packages certs)
              (gnu packages cmake)
              (gnu packages gcc)
@@ -57,6 +58,7 @@
 ;; The firmware is based on Zephyr RTOS. These are needed at a minimum.
 (define *firmware-packages*
   (list cmake
+        dtc
         python-packaging
         python-pyelftools
         python-pykwalify
