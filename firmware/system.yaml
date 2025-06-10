@@ -5,7 +5,9 @@ common:
   build-tool: ninja
   zephyr-kernel: '${system}/zephyr/kernel'
   zephyr-module-path: [ '${system}/zephyr/modules' ]
-  install: ufw-git-install
+  install: False
+
+manifest: manifest.py
 
 zephyr-aliases:
   native-sim: native_sim/native/64

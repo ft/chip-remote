@@ -1,0 +1,3 @@
+The firmware of the chip-remote system implements the remote-controller, that
+is the bridge between common desktop computer interfaces (like UART, USB and
+ethernet) and low level interfaces like SPI, and I2C.
