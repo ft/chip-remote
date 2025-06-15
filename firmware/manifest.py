@@ -31,3 +31,10 @@ m.manifest(list(chipRemoteInstances),
            m.file('README')            .rename('README.firmware'),
            m.file('README',  root = sd).rename('README.chip-remote'),
            m.file('LICENCE', root = sd))
+
+def adjustInstall(infile, outfile):
+    if re.match(r'^.*\.exe$', str(outfile)):
+        outfile.chmod(0o755)
+
+m.manifest.subdir('chip-remote-' + sd.vcs.version())
+m.manifest.withInstallCallback(adjustInstall)
