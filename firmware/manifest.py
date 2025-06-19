@@ -1,20 +1,22 @@
 import makemehappy.manifest as m
 import makemehappy.git as git
+import makemehappy.pathlike as p
 import makemehappy.utilities as mmh
 
-# bd = m.BuildDirectory(
+# bd = p.BuildDirectory(
 #     build_prefix,
 #     'zephyr/nucleo_f302r8/chip-remote/gnuarmemb/debug',
 #     logging)
 # mmh.pp(bd.cmake())
 
-sd = m.SourceDirectory(git.toplevel('.'))
+sd = p.SourceDirectory(git.toplevel('.'))
 
 def chipRemote(prefix, log, vcs):
     import makemehappy.manifest as m
+    import makemehappy.pathlike as p
     def _generate(instance):
         (kind, board, app, tc, cfg) = instance.split('/')
-        bd = m.BuildDirectory(prefix, instance, log)
+        bd = p.BuildDirectory(prefix, instance, log)
         return (m.zephyr(bd, 'chip-remote')
                 .filter(m.remove(r'/autoconf\.h$'))
                 .transform(m.withVersion(vcs))
