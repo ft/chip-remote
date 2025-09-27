@@ -78,7 +78,7 @@
 
 (define* (cr:reset d #:optional v)
   "Load the device's default value."
-  (when (and v(not (device-value-suitable? d v)))
+  (when (and v (not (device-value-suitable? d v)))
     (throw 'value-not-suitable-for-device (device-name d) v))
   (push-device-state d 'reset (or v (device-default d))))
 
