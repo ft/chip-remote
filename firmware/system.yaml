@@ -26,7 +26,7 @@ zephyr:
           - maplemini
         modules:
           - picolibc
-          - cmsis
+          - cmsis_6
           - hal-stm32
           - ufw
       - toolchains: [ host ]
