@@ -31,6 +31,7 @@ build-*/
 native-fw/
 firmware/build/
 firmware/build-*/
+firmware/deploy/
 doc/*.pdf
 doc/*.tex
 doc/*.txt
