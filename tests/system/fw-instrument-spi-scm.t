@@ -26,7 +26,7 @@
 (define (spi-test tio tx rx)
   (define-test (format #f "spi transmission test: ~a → ~a" tx rx)
     (pass-if-= (transmit ($ tio) tx) rx))
-  (fw-expect! tio 'spi-text `(spi-tx ,tx) `(spi-rx ,rx)))
+  (fw-expect! tio 'spi-text #:expect `((spi-tx ,tx) (spi-rx ,rx))))
 
 (when verbose?
   (tio-push-parm! tio 'trace?))

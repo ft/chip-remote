@@ -113,6 +113,9 @@ UFWZ_DEFINE_UART_FIFO_DATA(cr_uart_rx, 128u, K_FOREVER);
 #endif /* CONFIG_CR_INTERFACE_SERIAL_FIFO */
 #endif /* CONFIG_CR_WITH_SERIAL */
 
+#define print(fmt, ...) printk("\x1b[0mcr-init: " fmt, __VA_ARGS__)
+#define print0(str) printk("\x1b[0mcr-init: " str)
+
 int
 main(void)
 {
@@ -170,10 +173,10 @@ main(void)
     }
 #endif /* CONFIG_CR_WITH_SERIAL */
 
-    printk("(activated!)\n");
-    printk("(board %s)\n", CONFIG_BOARD);
+    print0("(activated!)\n");
+    print("(board %s)\n", CONFIG_BOARD);
 #ifdef CONFIG_BOARD_NATIVE_SIM
-    printk("(firmware-pid %u)\n", getpid());
+    print("(firmware-pid %u)\n", getpid());
 #endif /* CONFIG_BOARD_NATIVE_SIM */
 
 #ifdef CONFIG_CR_WITH_SERIAL
@@ -203,7 +206,7 @@ main(void)
 #endif /* CONFIG_BOARD_NATIVE_SIM */
 
 #ifdef CONFIG_CR_INTERFACE_TCPIP
-    printk("(cr-server-port %d)\n", srv.port);
+    print("(cr-server-port %d)\n", srv.port);
     crs_run(&srv);
 #endif /* CONFIG_CR_INTERFACE_TCPIP */
 

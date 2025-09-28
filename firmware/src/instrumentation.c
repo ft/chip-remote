@@ -120,6 +120,7 @@ ni_process(struct cr_tcp_server *srv,
 }
 
 #define CR_NATIVE_INSTRUMENTATION_TCP_PORT 12345u
+#define print(fmt, ...) printk("\x1b[0mcr-init: " fmt, __VA_ARGS__)
 
 void
 ni_thread_cb(UNUSED void *a, UNUSED void *b, UNUSED void *c)
@@ -132,7 +133,7 @@ ni_thread_cb(UNUSED void *a, UNUSED void *b, UNUSED void *c)
                strerror(-rc), -rc);
         return;
     }
-    printk("(ni-server-port %d)\n", CR_NATIVE_INSTRUMENTATION_TCP_PORT);
+    print("(ni-server-port %d)\n", CR_NATIVE_INSTRUMENTATION_TCP_PORT);
     for (;;) {
         crs_run(&srv);
     }

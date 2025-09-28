@@ -1,14 +1,16 @@
-;; Copyright (c) 2011-2021 chip-remote workers, All rights reserved.
+;; Copyright (c) 2011-2025 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in LICENCE.
 
 (define-module (test chip-remote)
+  #:use-module (ice-9 control)
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 popen)
   #:use-module (ice-9 ports)
   #:use-module (ice-9 rdelim)
   #:use-module (srfi srfi-9)
+  #:use-module (rnrs io ports)
   #:use-module (test tap)
   #:use-module (chip-remote protocol)
   #:use-module (chip-remote utilities)
@@ -34,7 +36,6 @@
             set-tio-timeout!
             connect-test-io!
             flush-stdin!
-            handle-stdin!
             kill-fw!
             boot-fw!
             debug-fw!
@@ -42,18 +43,66 @@
             instrument!
             fw-expect!))
 
+;; The <test-io> type encapsulates information to interact with a native-build
+;; firmware build. These channels are available:
+;;
+;;   - Firmware stdio
+;;   - Firmware chip-remote protocol channel
+;;   - Firmware instrumentation protocol channel
+;;
+;; The firmware start up (boot-fw!) has a number of phases:
+;;
+;;   - Early boot-up: Here the test runner runs the native-build executable,
+;;     and connects to its stdio. Then it waits for messages suitable for
+;;     fw-expect! until tio-booted? is satisfied.
+;;
+;;   - When this point is reached, the firmware has its TCP servers up and
+;;     running, so the boot process will connect to them and register the
+;;     resulting ports with the tio object.
+;;
+;; After this point the firmware is fully up and running, ready to be tested.
+;; It is still advisable to add a plausibility test like this:
+;;
+;;   (with-fw-test-bundle tio (chip-remote firmware foobar)
+;;     (plan …)
+;;     (boot-fw! tio)
+;;
+;;     (define-test "Running proto-engange works"
+;;       (pass-if-no-exception (proto-engage! ($ tio))))
+;;
+;;     …)
+;;
+;; Now everything is up and running.
 (define-record-type <test-io>
   (make-test-io* fw-port terminal instrumentation connection iconnection pid
                  timeout parameters)
   test-io?
+  ;; Port to interact with the native-build's stdio.
   (fw-port tio-fw-port set-tio-fw-port!)
+  ;; TCP Port for the chip-remote protocol. Read from fw-port at boot-time.
   (terminal tio-terminal set-tio-terminal!)
+  ;; TCP Port for the instrumentation channel. Read from fw-port at boot-time.
   (instrumentation tio-instrumentation set-tio-instrumentation!)
+  ;; Port to interact with the firmware via the chip-remote protocol.
   (connection tio-connection set-tio-connection!)
+  ;; Port to interact with the firmware via the instrumentation side-channel.
   (iconnection tio-iconnection set-tio-iconnection!)
+  ;; PID of the firmware. Read from fw-port at boot-time.
   (pid tio-pid set-tio-pid!)
+  ;; IO time out parameter for the test-io instance.
   (timeout tio-timeout set-tio-timeout!)
+  ;; Miscellaneous parameters for the test-io instance.
   (parameters tio-parameters set-tio-parameters!))
+
+(define (tio-booted? tio)
+  "Predicate for all essential boot-up message
+
+Then this returns true, all essential information from tio's fw-port have been
+read, and the test-runner can enter its next phase."
+  (and (tio-fw-port tio)
+       (tio-terminal tio)
+       (tio-instrumentation tio)
+       (tio-pid tio)))
 
 (define* (make-test-io #:key terminal instrumentation (timeout 2))
   (make-test-io* #f terminal instrumentation #f #f #f timeout '()))
@@ -73,10 +122,10 @@
                                    (tio-instrumentation io))
                           sock)))
 
-(define (handle-xread-timeout tio rv)
-  (format #t "# xread timeout from firmware. Giving up!~%")
+(define (handle-error tio type rv)
+  (format #t "# ~a from firmware. Giving up!~%" type)
   (kill-fw! tio)
-  (quit 1))
+  (quit rv))
 
 (define (trace-read sel tio tag . args)
   (let ((exp (apply xread (cons (sel tio) args))))
@@ -84,46 +133,27 @@
       (format #t "# tio:~a:read: ~s~%" tag exp))
     exp))
 
-(define (init-done? tio)
-  (and (tio-terminal tio)
-       (tio-instrumentation tio)))
-
 (define (flush-stdin! tio)
   (when (has-data? (tio-fw-port tio))
     (let loop ((input (read-line (tio-fw-port tio) 'trim)))
       (unless (eof-object? input)
         (when (tio-got-param? tio 'trace?)
-          (format #t "# tio:inst:read: ~s~%" input))
+          (format #t "# tio:stdio:read: ~s~%" input))
         (when (has-data? (tio-fw-port tio))
           (loop (read-line (tio-fw-port tio) 'trim)))))))
-
-(define (handle-stdin! tio)
-  (match (trace-read tio-fw-port tio 'inst
-                     #:timeout (tio-timeout tio)
-                     #:handle-timeout (lambda (x)
-                                        (handle-xread-timeout tio x)))
-    (('booted!) #f)
-    (('cr-server-port port)
-     (format #t "# Chip Remote Server Port: ~a~%" port)
-     (set-tio-terminal! tio port))
-    (('ni-server-port port)
-     (format #t "# Chip Remote Instrumentation Port: ~a~%" port)
-     (set-tio-instrumentation! tio port))
-    (('firmware-pid pid)
-     (format #t "# Registering firmware PID: ~a~%" pid)
-     (set-tio-pid! tio pid))
-    (x (format #t "# Unhandled firmware message: ~s~%" x)))
-  (init-done? tio))
 
 (define (kill-fw! tio)
   (let ((pid (tio-pid tio)))
     (if (tio-got-param? tio 'dont-kill)
         (format #t "# Not terminating firmware (PID: ~a), as requested.~%" pid)
-        (when pid
-          (format #t "# Terminating firmware PID as indicated by itself: ~a~%" pid)
-          (kill pid SIGINT)))))
+        (if pid
+            (begin
+              (format #t "# Terminating firmware PID: ~a~%" pid)
+              (kill pid SIGINT))
+            (format #t "# kill-fw!: Firmware PID unknown!~%")))))
 
 (define ($ tio)
+  "Shorthand for tio-connection, which is very commonly used."
   (tio-connection tio))
 
 (define (native-fw)
@@ -132,7 +162,6 @@
 (define (native-firmware-built?)
   (file-exists? (native-fw)))
 
-(define *s-exp-boot-tag* "(activated!)")
 (define *cr-shell* "uart")
 
 (define (debug-fw! tio)
@@ -149,7 +178,7 @@
 ;;
 ;; This function can be used to await such messages.
 ;;
-;;   (fw-expact! tio 'spi-text '(spi-tx #x23) '(spi-rx #x42))
+;;   (fw-expect! tio 'spi-text #:expect '((spi-tx #x23) (spi-rx #x42)))
 ;;
 ;; This will wait for two messages tagged "spi-text", and register tests for
 ;; their s-expressions being equal to the two additional parameters passed. If
@@ -159,21 +188,39 @@
 ;; tagged "spi-text" and return its s-expression, without registering a test.
 ;; This can be used to perform arbitrary actions on such messages, not just
 ;; perform tests in terms of (test tap).
-(define (fw-expect! tio tag . lst)
+(define* (fw-expect! tio tag #:key unhandled other (expect '()))
+  (define attroff "\x1b[0m")
+  (define strprefix (string-append attroff (symbol->string tag) ": "))
+
+  (define (tag-split s)
+    (call/ec (lambda (return)
+               (let ((colon (string-index s #\:)))
+                 (unless colon (return #f))
+                 (let ((tag (substring s (string-length attroff) colon))
+                       (rest (string-trim (substring s (1+ colon)))))
+                   (list tag (string->sexp rest)))))))
+
   (define (read-tag)
-    (let loop ((strprefix (string-append "\x1b[0m"
-                                         (symbol->string tag)
-                                         ": ")))
+    (flush-all-ports)
+    (let loop ()
       (let ((data (read-line/timeout (tio-fw-port tio) (tio-timeout tio))))
+        (when (and data (tio-got-param? tio 'trace?))
+          (format #t "# tio:stdio:read: ~s~%" data))
         (cond ((not data) (throw 'fw-expect-timeout tio tag))
               ((eof-object? data) (throw 'fw-expect-eof tio tag))
               ((string-prefix? strprefix data)
                (string->sexp (substring data (string-length strprefix))))
-              (else (loop strprefix))))))
+              (else
+               (let ((parts (and unhandled
+                                 (string-prefix? attroff data)
+                                 (tag-split data))))
+                 (cond (parts (apply unhandled parts))
+                       (other (other data))))
+               (loop))))))
 
-  (if (null? lst)
+  (if (null? expect)
       (read-tag)
-      (let loop ((rest lst))
+      (let loop ((rest expect))
         (unless (null? rest)
           (let ((this (car rest)))
             (if (procedure? this)
@@ -183,31 +230,107 @@
                   (pass-if-equal? this (read-tag)))))
           (loop (cdr rest))))))
 
+(define* (fw-expect/internal tio tag #:key unhandled other (expect '()))
+  (catch #t
+    (lambda () (fw-expect! tio tag
+                           #:unhandled unhandled
+                           #:other other
+                           #:expect expect))
+    (lambda (k . a)
+      (cond ((eq? k 'fw-expect-timeout) (handle-error tio k 1))
+            ((eq? k 'fw-expect-eof)     (handle-error tio k 1))
+            (else (apply throw k a))))))
+
 (define* (boot-fw! tio #:key (suspend-execution? #t))
   (define shell #f)
-  (format #t "# Booting native firmware: ~a~%" (native-fw))
-  (set-tio-fw-port! tio (open-pipe* OPEN_READ (native-fw) "-no-color"))
-  (let loop ((line (read-line (tio-fw-port tio) 'trim)))
-    (when (tio-got-param? tio 'trace?)
-      (format #t "# tio:inst:read: ~s~%" line))
-    (unless (string= line *s-exp-boot-tag*)
+
+  (define (find-shell line)
+    (unless shell
       (let ((lst (string-split line #\space)))
-        (cond ((and (not (null? lst))
-                    (string= (car lst) *cr-shell*))
-               (set! shell (car (reverse lst))))))
-      (loop (read-line (tio-fw-port tio) 'trim))))
+        (when (and (not (null? lst))
+                   (string= (car lst) *cr-shell*))
+          (set! shell (car (reverse lst)))))))
+
+  (define (boot-fw/phase-one)
+    (let loop ()
+      (let ((data (fw-expect/internal tio 'cr-init #:other find-shell)))
+        (match data
+          (('activated!) (format #t "# Firmware boot-up tag recognised.\n"))
+          (('board board) (format #t "# Firmware platform is ~a.~%" board))
+          (('firmware-pid pid)
+           (let ((realpid (tio-pid tio)))
+             (if (= realpid pid)
+                 (format #t "# Firmware reports consistent PID (~a).~%" pid)
+                 (format #t "# Firmware reports inconsistent PID (~a vs ~a).~%"
+                         pid realpid))))
+          (('cr-server-port port)
+           (format #t "# Firmware chip-remote port: ~a~%" port)
+           (set-tio-terminal! tio port))
+          (('ni-server-port port)
+           (format #t "# Firmware instrumentation port: ~a~%" port)
+           (set-tio-instrumentation! tio port))
+          (_ (format #t "# Unhandled boot-up message: ~s~%" data)))
+        (unless (tio-booted? tio)
+          (loop)))))
+
+  ;; This should work, but it doesn't sometimes. Oh no!
+  ;;
+  ;; This somehow has to do with the value for #:input, which seems to
+  ;; something like:
+  ;;
+  ;;   #:input #<input: custom-port 7efe9e0a23f0>
+  ;;
+  ;; …which turns into…
+  ;;
+  ;;   #<input: string 7efe9e0a23f0>
+  ;;
+  ;; When I run this in tap-harness, which also uses "spawn" to run this. When
+  ;; I run it just in guile, I get #<input: file /dev/pts/16> and then things
+  ;; are fine.
+  ;;
+  ;; From within tap-harness, that gets me:
+  ;;
+  ;;   In procedure spawn: Wrong type argument in position 3 (expecting
+  ;;     open file port): #<input: string 7efe9e0a23f0>
+  ;;
+  ;; …in guile 3.0.10. In 3.0.9 this just segfaults. Meh. I don't have the
+  ;; energy to debug this today. There is still a bunch of experiments down
+  ;; there.
+  ;;
+  ;; (let ((fw (native-fw)))
+  ;;   (format #t "# Booting native firmware: ~a~%" fw)
+  ;;   (flush-all-ports)
+  ;;   (let* ((input&output (pipe))
+  ;;          (pid (begin
+  ;;                 (format #t "# DEBUG: ~a ~a ~a ~a~%"
+  ;;                         (current-input-port)
+  ;;                         (current-output-port)
+  ;;                         (current-error-port)
+  ;;                         (port-mode (current-input-port)))
+  ;;                 (spawn fw (list fw "-no-color")
+  ;;                        #:search-path? #f
+  ;;                        #:input (%make-void-port "r")
+  ;;                        #:error (cdr input&output)
+  ;;                        #:output (cdr input&output)))))
+  ;;     (close-port (cdr input&output))
+  ;;     (format #t "# Firmware PID: ~a~%" pid)
+  ;;     (flush-all-ports)
+  ;;     (set-tio-fw-port! tio (car input&output))
+  ;;     (set-tio-pid! tio pid)))
+
+  ;; This is a hacky alternative, using an internal function of the popen
+  ;; module. Not cool.
+  (let* ((p (open-pipe* OPEN_READ (native-fw) "-no-color"))
+         (pp (%port-property p 'popen-pipe-info))
+         (pid ((@ (ice-9 popen) pipe-info-pid) pp)))
+    (format #t "# Firmware started with PID ~a~%" pid)
+    (set-tio-fw-port! tio p)
+    (set-tio-pid! tio pid))
+
+  (boot-fw/phase-one)
 
   (when shell
     (format #t "# Firmware shell at: ~a~%" shell))
-  (format #t "# S-Expression Interface up.~%")
-
-  (format #t "# Gathering connectivity information...~%")
-  (let loop ()
-    ;; This will block operation until all vital information from the
-    ;; native-sim firmware was collected. If this fails to arrive, the
-    ;; underlying read operation will time out, and the run will be
-    ;; aborted.
-    (unless (handle-stdin! tio) (loop)))
 
   (format #t "# Connecting to native-sim build of firmware...~%")
   (connect-test-io! tio)
@@ -218,7 +341,6 @@
   (when (and (> (length (command-line)) 1)
              (string= "--debug" (cadr (command-line))))
     (set-tio-timeout! tio #f)
-    ;;(io-opt/set 'serial-timeout #f)
     (tio-push-parm! tio 'dont-kill)
     (when suspend-execution? (debug-fw! tio))))
 
