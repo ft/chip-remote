@@ -295,7 +295,8 @@ read, and the test-runner can enter its next phase."
   ;;
   ;; …in guile 3.0.10. In 3.0.9 this just segfaults. Meh. I don't have the
   ;; energy to debug this today. There is still a bunch of experiments down
-  ;; there.
+  ;; there. With "prove" this works. It might not use "spawn" to run its
+  ;; subprocesses…
   ;;
   ;; (let ((fw (native-fw)))
   ;;   (format #t "# Booting native firmware: ~a~%" fw)
@@ -309,7 +310,6 @@ read, and the test-runner can enter its next phase."
   ;;                         (port-mode (current-input-port)))
   ;;                 (spawn fw (list fw "-no-color")
   ;;                        #:search-path? #f
-  ;;                        #:input (%make-void-port "r")
   ;;                        #:error (cdr input&output)
   ;;                        #:output (cdr input&output)))))
   ;;     (close-port (cdr input&output))
