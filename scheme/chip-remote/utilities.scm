@@ -2,6 +2,8 @@
   #:use-module (ice-9 binary-ports)
   #:use-module (ice-9 control)
   #:use-module (ice-9 match)
+  #:use-module (ice-9 ports)
+  #:use-module (ice-9 rdelim)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (srfi srfi-11)
@@ -46,6 +48,8 @@
             whitespace?
             has-data?
             drain-whitespace
+            read-line/timeout
+            string->sexp
             xread
             xselect
             zip2))
@@ -287,9 +291,12 @@ calls. It returns the empty list for empty and singleton lists."
         octet
         (array-ref octet  0))))
 
-(define (has-data? port)
-  (let ((rv (select (list port) '() '() 0 0)))
-    (not (null? (car rv)))))
+(define* (has-data? port #:optional timeout)
+  (let-values (((s us) (if timeout
+                           (timeout->select timeout)
+                           (values 0 0))))
+    (let ((rv (select (list port) '() '() s us)))
+      (not (null? (car rv))))))
 
 (define (drain-whitespace port)
   (let loop ()
@@ -319,6 +326,20 @@ calls. It returns the empty list for empty and singleton lists."
             (handle-timeout rv)
             (throw 'xread-timeout rv))
         (do-read port))))
+
+(define* (read-line/timeout #:optional port timeout)
+  "Read a line from PORT with TIMEOUT.
+
+If the timeout is reached #f is returned. If end-of-file is reached, the
+eof-object is returned. Otherwise the line read is returned."
+  (and (has-data? port timeout)
+       (match (read-line port 'split)
+         ((? eof-object? eof) eof)
+         ((str . _) str))))
+
+(define (string->sexp str)
+  (with-input-from-string str
+    (lambda () (read))))
 
 (define (now!)
   (let ((now (gettimeofday)))

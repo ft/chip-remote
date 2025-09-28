@@ -156,10 +156,10 @@ process(struct cr_tcp_server *srv,
 #if 0
     printk("cr: Processing %zu bytes of data...\n",
            byte_buffer_rest(&client->rx));
-#endif
 
     hexdump_stdout(byte_buffer_readptr(&client->rx),
                    byte_buffer_rest(&client->rx), 0);
+#endif
 
     struct cr_multi *cd = client->data;
     size_t rest = 0;

@@ -11,7 +11,7 @@
              (chip-remote utilities))
 
 ;; Set to #t to get verbose tracing output.
-(define verbose? #t)
+(define verbose? #f)
 
 (define tio (make-test-io))
 
@@ -21,37 +21,32 @@
 
 (define (transmit c . tx)
   (let ((lst (cr:spi-transceive! c 'spi-0 tx)))
-    (format #t "# DEBUG,lst: ~a~%" lst)
-    (car ls)))
+    (car lst)))
 
 (define (spi-test tio tx rx)
   (define-test (format #f "spi transmission test: ~a → ~a" tx rx)
     (pass-if-= (transmit ($ tio) tx) rx))
-  ;;(fw-expect! tio `(spi-tx ,tx) `(spi-rx ,rx))
-  )
+  (fw-expect! tio 'spi-text `(spi-tx ,tx) `(spi-rx ,rx)))
 
 (when verbose?
   (tio-push-parm! tio 'trace?))
 
 (with-fw-test-bundle tio (chip-remote firmware instrumentation spi)
-  (require #f)
   (no-plan)
   (boot-fw! tio)
 
   (define-test "Running proto-engange works"
     (pass-if-no-exception (proto-engage! ($ tio))))
 
-  (pretty-print (proto-get-ifc-ctrl! ($ tio) 'spi-0))
-  (pretty-print (cr:spi-transceive! ($ tio) 'spi-0 '(0 1 2 3 4)))
-
   (tap/comment "SPI RX list empty, generating from 0 onward")
   (spi-test tio 123 0)
   (spi-test tio 21 1)
+  (spi-test tio 42 2)
 
-  ;; (tap/comment "Loading first-set into SPI RX list")
-  ;; (instrument! tio (cons 'load-spi first-set))
+  (tap/comment "Loading first-set into SPI RX list")
+  (instrument! tio (cons 'load-spi first-set))
 
-  ;; (spi-test tio #xabc (car first-set))
+  ;;(spi-test tio #xabc (car first-set))
 
   ;; (tap/comment "Loading second-set into SPI RX list")
   ;; (instrument! tio (cons 'load-spi second-set))

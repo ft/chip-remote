@@ -141,6 +141,48 @@
   (force-output (current-output-port))
   (read-line))
 
+;; Output that is interesting for chip-remote on the stdout of a Zephyr native-
+;; build binary starts with "\x1b[0m", which is an ANSI terminal code for "turn
+;; off all attributes", followed by a tag (a limited symbol), followed by a co-
+;; lon character and space characters. Finally a single s-expression carrying
+;; arbitrary information will follow.
+;;
+;; This function can be used to await such messages.
+;;
+;;   (fw-expact! tio 'spi-text '(spi-tx #x23) '(spi-rx #x42))
+;;
+;; This will wait for two messages tagged "spi-text", and register tests for
+;; their s-expressions being equal to the two additional parameters passed. If
+;; one of the parameters satisfies procedure?, it is assumed to work as a pre-
+;; dicate. The read s-expression is fed into it and the result is used in a
+;; test in terms of pass-if-true. If LST is empty, it will wait for one message
+;; tagged "spi-text" and return its s-expression, without registering a test.
+;; This can be used to perform arbitrary actions on such messages, not just
+;; perform tests in terms of (test tap).
+(define (fw-expect! tio tag . lst)
+  (define (read-tag)
+    (let loop ((strprefix (string-append "\x1b[0m"
+                                         (symbol->string tag)
+                                         ": ")))
+      (let ((data (read-line/timeout (tio-fw-port tio) (tio-timeout tio))))
+        (cond ((not data) (throw 'fw-expect-timeout tio tag))
+              ((eof-object? data) (throw 'fw-expect-eof tio tag))
+              ((string-prefix? strprefix data)
+               (string->sexp (substring data (string-length strprefix))))
+              (else (loop strprefix))))))
+
+  (if (null? lst)
+      (read-tag)
+      (let loop ((rest lst))
+        (unless (null? rest)
+          (let ((this (car rest)))
+            (if (procedure? this)
+                (define-test (format #f "firmware expect (~a): ~a" tag this)
+                  (pass-if-true (this (read-tag))))
+                (define-test (format #f "firmware expect (~a): ~a" tag this)
+                  (pass-if-equal? this (read-tag)))))
+          (loop (cdr rest))))))
+
 (define* (boot-fw! tio #:key (suspend-execution? #t))
   (define shell #f)
   (format #t "# Booting native firmware: ~a~%" (native-fw))
@@ -189,15 +231,6 @@
   (match (trace-read tio-iconnection tio 'inst #:timeout (tio-timeout tio))
     ('ok #t)
     (reply (throw 'expected-ok-from-instrumentation reply))))
-
-(define (fw-expect! tio . lst)
-  (let loop ((rest lst))
-    (unless (null? rest)
-      (define-test (format #f "firmware expect: ~a" (car rest))
-        (pass-if-equal? (car rest)
-                        (trace-read tio-fw-port tio 'inst
-                                    #:timeout (tio-timeout tio))))
-      (loop (cdr rest)))))
 
 ;; The "with-fw-test-bundle" macro is a wrapper around with-test-bundle, which
 ;; does a couple of jobs for convenience:
