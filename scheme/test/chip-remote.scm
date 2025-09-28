@@ -6,6 +6,7 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 popen)
+  #:use-module (ice-9 ports)
   #:use-module (ice-9 rdelim)
   #:use-module (srfi srfi-9)
   #:use-module (test tap)
@@ -232,6 +233,7 @@
       ((_ io exp rest ...)
        #'(begin exp
                 (flush-stdin! io)
+                (flush-all-ports)
                 (with-fw-test-bundle/post-flush io rest ...))))))
 
 (define-syntax with-fw-test-bundle
