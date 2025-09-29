@@ -253,17 +253,14 @@ papi_i2c_transmit(struct peripheral_control *ctrl)
         }
         prev_was_write = iswrite;
         if (iswrite) {
-            printk("i2c: Write of %zu octets.\n", len);
             msg[nmsg].buf = fbtx + txoffset;
             txoffset += len;
         } else {
-            printk("i2c: Read of %zu octets.\n", len);
             msg[nmsg].buf = fbrx + rxoffset;
             rxoffset += len;
         }
         nmsg++;
         if (islast) {
-            printk("i2c: End spec found.\n");
             break;
         }
         pos++;
@@ -283,9 +280,10 @@ papi_i2c_transmit(struct peripheral_control *ctrl)
 
     RegisterValue address;
     register_get(&registers, ctrl->backend.i2c.ctrl.address, &address);
-    printk("address: 0x%04x\n", address.value.u16);
     const int rc = i2c_transfer(ctrl->dev, msg, nmsg, address.value.u16);
-    printk("error: %d %s\n", -rc, strerror(-rc));
+    if (rc < 0) {
+        printk("error: %d %s\n", -rc, strerror(-rc));
+    }
 
     update_u32(ctrl->cmdstatus,
                (rc == 0)       ? PSTATUS_SUCCESS
