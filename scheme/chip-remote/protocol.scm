@@ -76,7 +76,7 @@
             proto-get-ifc-ctrl!
             proto-interfaces
             cr:setup-interface!
-            cr:ctrl-comand!
+            cr:ctrl-command!
             cr:load-tx-frame-buffer!
             cr:fetch-rx-frame-buffer!
             cr:load-i2c-message!
@@ -660,7 +660,7 @@ localhost, empty ports default the 1234."
                 code)
       code))
 
-(define* (cr:ctrl-comand! c ifc cmd #:optional arg)
+(define* (cr:ctrl-command! c ifc cmd #:optional arg)
   (and arg (proto-write-register! c ifc 'command-argument arg))
   (proto-write-register! c ifc 'command (assq-ref ctrl-commands cmd))
   ;; The protocol implementation guarantees, that when an ack for a command
@@ -795,7 +795,7 @@ The read back data will be available in the RX frame buffer afterwards."
 This loads the TX framebuffer, performs a transaction and then retrieves the
 data from the RX framebuffer."
   (cr:load-i2c-message! c ifc lst)
-  (let ((rc (cr:ctrl-comand! c ifc 'transmit)))
+  (let ((rc (cr:ctrl-command! c ifc 'transmit)))
     (if (eq? rc 'success)
         (cr:fetch-i2c-rx-sections! c ifc (filter integer? lst))
         (throw 'protocol-status rc))))
@@ -807,7 +807,7 @@ This loads the TX framebuffer, performs a transaction and then retrieves the
 data from the RX framebuffer."
   (let ((n (length lst)))
     (cr:load-tx-frame-buffer! c ifc lst)
-    (let ((rc (cr:ctrl-comand! c ifc 'transmit n)))
+    (let ((rc (cr:ctrl-command! c ifc 'transmit n)))
       (if (eq? rc 'success)
           (cr:fetch-rx-frame-buffer! c ifc n)
           (throw 'protocol-status rc)))))
