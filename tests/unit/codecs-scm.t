@@ -14,7 +14,23 @@
 (init-test-tap!)
 
 (with-fs-test-bundle
-  (plan 204)
+  (plan 211)
+
+  ;; Straight up from doc-string examples:
+  (define-test "unsigned integer decoder w:8 v:255 → 255"
+    (pass-if-= 255 (semantics-decode unsigned-integer 8 255)))
+  (define-test "two's complement integer encoder w:8 v:-2 → 254"
+    (pass-if-= 254 (semantics-encode twos-complement 8 -2)))
+  (define-test "two's complement integer default → 0"
+    (pass-if-= 0 (semantics-default twos-complement 8)))
+  (define-test "two's complement range w:4 v:-8 → yes"
+    (pass-if-true (semantics-in-range? twos-complement 4 -8)))
+  (define-test "two's complement range w:4 v:-9 → no"
+    (pass-if-false (semantics-in-range? twos-complement 4 -9)))
+  (define-test "two's complement range w:4 v:7 → yes"
+    (pass-if-true (semantics-in-range? twos-complement 4 7)))
+  (define-test "two's complement range w:4 v:8 → no"
+    (pass-if-false (semantics-in-range? twos-complement 4 8)))
 
   (for-each (lambda (n)
               (define-test (format #f "32-bit unsigned-integer ~a → ~a" n n)
