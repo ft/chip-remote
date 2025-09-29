@@ -149,7 +149,6 @@ papi_spi_transmit(struct peripheral_control *ctrl)
     } else {
         ctrl->backend.spi.flags |= 1u;
         update_u32(ctrl->cmdstatus, PSTATUS_SUCCESS);
-        printk("ok.\n");
     }
 }
 
