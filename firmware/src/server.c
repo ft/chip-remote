@@ -223,6 +223,7 @@ crs_process(struct cr_tcp_server *srv, struct zsock_pollfd *fds)
                 byte_buffer_markread(&srv->client[i].tx, src);
                 output = byte_buffer_rest(&srv->client[i].tx);
             }
+            byte_buffer_rewind(&srv->client[i].tx);
         }
     }
 }
