@@ -75,7 +75,7 @@
             proto-engage!
             proto-get-ifc-ctrl!
             proto-interfaces
-            cr:setup-spi!
+            cr:setup-interface!
             cr:ctrl-comand!
             cr:load-tx-frame-buffer!
             cr:fetch-rx-frame-buffer!
@@ -590,8 +590,8 @@ localhost, empty ports default the 1234."
            (throw 'protocol-error response))
          (block-decode spec (assq-ref response 'payload)))))))
 
-(define (cr:setup-spi! c spi-n . lst)
-  (let ((access (proto-get-ifc-access c spi-n)))
+(define (cr:setup-interface! c ifc . lst)
+  (let ((access (proto-get-ifc-access c ifc)))
     (match access
       ((address size spec)
        (match (make-config-rm spec)
