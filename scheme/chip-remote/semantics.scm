@@ -110,13 +110,13 @@
 (define (semantics-decode s w v)
   "Invoke a semantics' decoder function.
 
-Given a semantics datum S, a field with W, and a bit-string value V (as an
+Given a semantics datum S, a field width W, and a bit-string value V (as an
 unsigned integer) that is corresponds to width W, this produces a human
 readable value according to the behaviour encoded in the provided semantics.
 
 Example:
 
-    (semantics-decode unsigned-integer 8 255) → -1
+    (semantics-decode unsigned-integer 8 255) → 255
 
 The `unsigned-integer` semantics is defined in (chip-remote codecs)."
   (codec semantics-decoder s w v))
