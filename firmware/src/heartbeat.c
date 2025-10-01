@@ -60,7 +60,7 @@ cr_heartbeat(UNUSED void *p1, UNUSED void *p2, UNUSED void *p3)
     }
 }
 
-#define CR_HEARTBEAT_STACKSIZE 128
+#define CR_HEARTBEAT_STACKSIZE 256
 #define CR_HEARTBEAT_PRIORITY   12
 
 K_THREAD_DEFINE(cr_heartbeat_thread,
