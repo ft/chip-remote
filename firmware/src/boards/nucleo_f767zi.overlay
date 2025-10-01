@@ -1,24 +1,24 @@
 / {
-        chosen {
-                zephyr,console = &usart3;
-                zephyr,shell-uart = &usart3;
-                chipremote,heartbeat = &green_led;
-                chipremote,proto,serial = &cdc_acm_uart0;
-                chipremote,spi0 = &spi1;
-                chipremote,i2c0 = &i2c1;
-                chipremote,i2c1 = &i2c2;
-        };
+	chosen {
+		zephyr,console = &usart3;
+		zephyr,shell-uart = &usart3;
+		chipremote,heartbeat = &green_led;
+		chipremote,proto,serial = &cdc_acm_uart0;
+		chipremote,spi0 = &spi1;
+		chipremote,i2c0 = &i2c1;
+		chipremote,i2c1 = &i2c2;
+	};
 };
 
 &zephyr_udc0 {
-        cdc_acm_uart0: cdc_acm_uart0 {
-                compatible = "zephyr,cdc-acm-uart";
-        };
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
 };
 
 &i2c2 {
-        pinctrl-0 = < &i2c2_scl_pf1 &i2c2_sda_pf0 >;
-        pinctrl-names = "default";
-        status = "okay";
+	pinctrl-0 = < &i2c2_scl_pf1 &i2c2_sda_pf0 >;
+	pinctrl-names = "default";
+	status = "okay";
 	clock-frequency = <I2C_BITRATE_STANDARD>;
 };
