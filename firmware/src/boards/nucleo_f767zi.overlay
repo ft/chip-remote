@@ -22,3 +22,13 @@
 	status = "okay";
 	clock-frequency = <I2C_BITRATE_STANDARD>;
 };
+
+&spi1 {
+	/* Moving SPI1 to other pins to avoid the conflict with PA7 and
+	 * the ethernet peripheral. This is on CN7, the ZIO header in the
+	 * top right corner of the board, */
+	pinctrl-0 = <&spi1_sck_pb3 &spi1_miso_pb4 &spi1_mosi_pb5>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpioa 4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+	status = "okay";
+};
