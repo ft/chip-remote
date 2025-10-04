@@ -65,7 +65,7 @@
                           '(write-op? #f)
                           '(sub-address? #f)
                           `(register-address ,(cadr addr)))
-           (make-list width 0))))
+           (make-list (min width 60) 0))))
 
 (define (read-parse dev addr data)
   (let* ((bytes (cdr data))
