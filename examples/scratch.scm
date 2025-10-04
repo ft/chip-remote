@@ -92,7 +92,8 @@
 ;; connection object.
 
 (define s (getenv "CR_SERIAL_DEVICE"))
-(define c #f)
+(define b fake-spi)
+(define c 'connection)
 (define cr #f)
 (define tty #f)
 
