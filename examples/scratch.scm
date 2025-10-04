@@ -109,18 +109,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define dw #f)
+;; Example setup for interfacing with a DW1000 evaluation board:
+;;
+;; (define dw #f)
+;;
+;; (when cr
+;;   (set! dw (make-commander #:device     dw1000
+;;                            #:connection cr
+;;                            #:interface  (make-spi 'spi-0)))
+;;   (proto-engage! cr)
+;;   (dw 'setup!)
+;;   (dw 'pull!)
+;;   (dw 'change!
+;;       '(mode-select-gpio-2    gpio)
+;;       '(gpio-2-direction      output)
+;;       '(gpio-2-direction-mask #t)
+;;       '(gpio-2-output-mask    #t)
+;;       '(gpio-2-output-value   #t)))
 
 (when cr
-  (set! dw (make-commander #:device     dw1000
-                           #:connection cr
-                           #:interface  (make-spi 'spi-0)))
-  (proto-engage! cr)
-  (dw 'setup!)
-  (dw 'pull!)
-  (dw 'change!
-      '(mode-select-gpio-2    gpio)
-      '(gpio-2-direction      output)
-      '(gpio-2-direction-mask #t)
-      '(gpio-2-output-mask    #t)
-      '(gpio-2-output-value   #t)))
+  (proto-engage! cr))
