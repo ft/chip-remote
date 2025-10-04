@@ -30,10 +30,10 @@
         '()
         lst))
 
-(define (read-register-values c ifc d lst)
-  (let ((read-reg (device-read (device-access d))))
-    (map-in-order (lambda (a) (cons a (match a ((p r) (read-reg c ifc p r)))))
-                  (sort lst addr<))))
+(define (read-register-values c bus dev lst)
+  (map-in-order (lambda (addr) (cons (take addr 2)
+                                     (device-read! c bus dev addr)))
+                (sort lst addr<)))
 
 (define (replace-register-values d lst)
   (fold (lambda (entry previous)
@@ -63,13 +63,12 @@
             (page-map-table (device-page-map d))
             v))
 
-(define (run-modify-script! c d state script)
+(define (run-modify-script! c bus d state script)
   (let* ((mini (minimise-modify-script script))
-         (lst (values-for-minimised-script d mini state))
-         (reg-write (device-write (device-access d))))
+         (lst (values-for-minimised-script d mini state)))
     (for-each (lambda (av)
                 (match av
-                  ((p r v) (reg-write c p r v))))
+                  ((p r v) (device-write! c bus d (list p r) v))))
               (merge-minimised-script mini lst))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -98,40 +97,38 @@ This function returns an updated device."
          (next (apply chain-modify (cons* d state kv))))
     (push-device-state d 'set next)))
 
-(define (cr:push! c ifc d)
+(define (cr:push! c bus d)
   "Transfer the complete register table into device D via connection C.
 
 This returns a new device, with an updated device value, reflecting the
 register updated register table value."
   (let* ((state (current-device-state d))
-         (write-reg (device-write (device-access d)))
-         (tx (lambda (p r v) (write-reg c ifc p r v))))
+         (tx (lambda (p r v) (device-write! c bus d (list p r) v))))
     (device-register-value-for-each tx d state)
     (push-device-state d 'push state)))
 
-(define (cr:pull! c ifc d)
+(define (cr:pull! c bus d)
   "Read the complete register table for device D via connection C.
 
 This returns a new device, with an updated device value, reflecting the
 register updated register table value."
   (let* ((addresses (all-device-addresses d))
-         (av (read-register-values c ifc d addresses))
+         (av (read-register-values c bus d addresses))
          (next (replace-register-values d av)))
     (push-device-state d 'pull next)))
 
-(define (cr:read-registers! c d . regref)
+(define (cr:read-registers! c bus d . regref)
   "Read register addressed by the REGREF list for device D via connection C.
 
 This returns a new device, with an updated device value, reflecting the
 register value that was just read. Note that if REGREF refers to a combination
 value, that the system may update more than one register value."
   (let* ((faddr (lambda (x) (device-canonical d x)))
-         (p+r (lambda (a) (take a 2)))
-         (addresses (drop-dupes (map (compose p+r faddr) regref)))
-         (av (read-register-values c d addresses)))
-    (replace-register-values d av)))
+         (addresses (drop-dupes (map faddr regref)))
+         (av (read-register-values c bus d addresses)))
+    (push-device-state d 'read (replace-register-values d av))))
 
-(define (cr:change! c d . kv)
+(define (cr:change! c bus d . kv)
   "Similar to cr:set, but as a side-effect transfers the required changes to a
 connected device via connection C.
 
@@ -139,16 +136,5 @@ This function returns an updated device."
   (let* ((state (current-device-state d))
          (script (apply chain-modify-script (cons d kv)))
          (next (apply-modify-script d state script)))
-    (run-modify-script! c d state script)
+    (run-modify-script! c bus d state script)
     (push-device-state d 'change next)))
-
-;; Obsolete?
-(define (cr:setup-port! c n d)
-  "Setup port N via connection C to accommodate device D.
-
-It does not setup a port's mode, since that may well not be configurable for a
-given port. To configure a port for a SPI device, make sure the port at index N
-is a SPI port."
-  (let* ((d:access (device-access d))
-         (setup (device-setup d:access)))
-    (setup c n)))
