@@ -63,6 +63,40 @@
   (update-device! s (apply f (make-args c? s args)))
   *void*)
 
+(define commander-help
+  (case-lambda
+    ((dev) (display "Chip Commander Object
+
+These objects accept messages in there parameter lists in order to perform
+various common action upon the device connected to the object. You have
+accessed this help by issuing:
+
+  (foobar 'help)
+
+It is possible to get information on various sub-commands like this as well:
+
+  (foobar 'help 'pull!)
+
+Additionally available topics: pull!, push!.
+"))
+
+    ((dev subject)
+     (case subject
+       ((pull!) (display
+                 "Update local state of with data from connected device 
+
+This command downloads all data from a connected device and updates its device
+object's internal state with this data. This is useful to do often after
+connecting to a chip-remote firmware in order to synchronise with the actual
+hip state.
+"))
+       ((push!) (display "Transfer object state into connected device
+
+The commander objects carries a device object, keeping track of its state. This
+state can be modified locally only, without transmitting changes to the device
+in question. This command transfers the local state into the connected device.
+"))))))
+
 (define* (make-commander #:key
                          device connection default (decode cr:decode)
                          interface address (open-hook (lambda (c ifc dev) #t)))
@@ -106,87 +140,7 @@ The constructor takes a number of keyword arguments:
 
 Objects returned by this constructor are designed for interactive use in a
 Scheme REPL. The objects implement a command interface to interact with the
-connected device. Example:
-
-    (define pll (make-commander #:device adf4169
-                                #:connection my-connection))
-    (pll)
-    (pll 'push!)
-    (pll 'set! '(ramp-enabled #t))
-
-As these examples suggest, the object can be called with zero or more
-arguments. The first word in an argument list serves as a *command designator*.
-Commands without further arguments are called *\"simple commands\"*. They are:
-
-- ‘open!’ → Opens the objects connection and initialises the RCCEP
-  conversation. This calls the *open-hook* afterwards.
-
-- ‘close!’ → Closes the objects connection.
-
-- ‘focus!’ → Focus port and address of the device that the object is connected
-  to via RCCEP. The operation also initialises the port to the bus logic as
-  described in the referenced device description.
-
-- ‘reset!’ → Resets the register memory to the value supplied at construction
-  time.
-
-- ‘push!’ → Transmits the entire register memory into the device via RCCEP.
-  This order transformations contained in a device description into account in
-  order to transfer the all registers in a manner suitable for the connected
-  device.
-
-- ‘decode’ → Decode the entire register memory using the configured decoder
-  frontend.
-
-- ‘data’ → Return the current state of the register memory.
-
-- ‘device’ → Return the device description that was supplied at construction
-  time.
-
-Commands that accept additional arguments are called *\"complex commands\"*.
-Some of them are specialised forms of \"simple commands\":
-
-- ‘`decode ADDRESS`’ → Decode part of the register memory.
-
-- ‘`set! KEY-VALUE-SPEC ...`’ → Change parts of the object's register memory.
-  The ‘KEY-VALUE-SPEC’ list uses the same format as with ‘chain-modify’.
-
-- ‘`transmit! ADDRESS`’ → Transmit the register that gets touched by the part
-  referenced by ‘ADDRESS’.
-
-- ‘`change! KEY-VALUE-SPEC ...`’ → This is like ‘set!’, except that when it is
-  done mutating the register memory, it uses ‘`transmit! ADDRESS`’ for all
-  registers that where touched by the changes made to the register memory.
-
-- ‘`load! VALUE`’ → Override the register memory using ‘VALUE’. This only
-  changes the local memory. Use ‘transmit!’ to transfer the data into the
-  connected device. ‘VALUE’ has to be a datum suitable for the device
-  referenced by the object. Note that this does *not* override the initial
-  value supplied via ‘#:data’ at construction time. The ‘reset!’ operation will
-  reset to that initial value, not to a value specified by ‘load!’
-
-Calling the commander object without arguments is equivalent to calling it with
-the \"simple command\" ‘decode’: All its register memory will be decoded. Note
-that with the default decoder, it might be useful to ask the Guile REPL to
-pretty print the result:
-
-    ,pp (pll)
-
-Examples:
-
-    ;; Just decode the ramp-enabled? item
-    ,pp (pll 'decode 'ramp-enabled?)
-    ;; Decode register number 3. This short-hand works, because
-    ;; the ADF4169 only has one single memory page.
-    ,pp (pll 'decode 3)
-    ;; Set a couple of value in the local register memory:
-    (pll 'set! '(power-down? #f)
-               '(reference-div-by-2? #t)
-               '(ramp-mode triangular))
-    ;; Transmit the local register memory into the device, while
-    ;; respecting the proper order in which the registers need to
-    ;; be transferred as specified in the ADF4169's description.
-    (pll 'push!)
+connected device.
 
 Note that these objects, unlike most of the rest of the library perform lots of
 mutations: On connected device of course, and also on their local register
@@ -202,6 +156,8 @@ memory copy."
     (lambda args
       (match args
         (() (commander:decode-all state))
+        (('help)         (commander-help (get-device state)))
+        (('help subject) (commander-help (get-device state) subject))
         ;; TODO: Set address for I2C ports in ‘setup’?
         (('setup!) (begin
                      (must-be-connected state)
