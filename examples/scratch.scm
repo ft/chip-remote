@@ -93,11 +93,12 @@
 
 (define s (getenv "CR_SERIAL_DEVICE"))
 (define b fake-spi)
-(define c 'connection)
-(define cr #f)
+(define c #f)
+(define cr 'connection)
 (define tty #f)
 
 (when s
+  (set! b   (make-spi 'spi-0))
   (set! cr  (make-cr-connection!/dwim s))
   (set! c   (cr-low-level cr))
   (set! tty (regp:port c)))
@@ -108,5 +109,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define this #f)
+
 (when cr
-  (proto-engage! cr))
+  (proto-engage! cr)
+  (device-setup! cr b dw1000)
+  (set! this (cr:pull! cr b dw1000))
+  (set! this (cr:change! cr b this
+                         '(mode-select-gpio-2    gpio)
+                         '(gpio-2-direction      output)
+                         '(gpio-2-direction-mask #t)
+                         '(gpio-2-output-mask    #t)
+                         '(gpio-2-output-value   #t))))
