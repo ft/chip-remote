@@ -290,10 +290,10 @@
     (transceive! c ifc ctrl))
   (cdce72010-read-bugfix r (transceive! c ifc 0)))
 
-(define cdce72010-access
-  (make-device-access #:setup setup-spi
-                      #:read  read-register
-                      #:write write-register))
+;; (define cdce72010-access
+;;   (make-device-access #:setup setup-spi
+;;                       #:read  read-register
+;;                       #:write write-register))
 
 (define (eeprom-cmd c ifc cmd)
   (let ((data (control-data-frame:encode ctrl-frame *cdce72010-eeprom* cmd)))
@@ -310,7 +310,7 @@
   (homepage "http://www.ti.com/product/cdce72010")
   (datasheet "http://www.ti.com/lit/ds/symlink/cdce72010.pdf")
   (keywords '(clock distribution synchonisation pll jitter cleaner))
-  (access cdce72010-access)
+  ;; (access cdce72010-access)
   (register-width 32)
   (page-map
    (pm→

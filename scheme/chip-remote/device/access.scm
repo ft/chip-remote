@@ -1,69 +1,79 @@
-;; Copyright (c) 2018-2024 chip-remote workers, All rights reserved.
+;; Copyright (c) 2018-2025 chip-remote workers, All rights reserved.
 ;;
 ;; Terms for redistribution and use can be found in doc/LICENCE.
 
-;; Device access abstraction. Reading and writing registers to devices is a job
-;; that requires access to the peripheral bus a chip is connected to. In Chip
-;; remote, this access is implemented by its firmware component, which exposes
-;; these peripheral busses via a register table interface. The protocol used to
-;; interact with this register table is ufw's register protocol, as implemented
-;; in (protocol ufw-regp). This protocol is minimal memory transfer protocol,
-;; that can be used in many channels like UART, USB, and TCP. Chip remote's
-;; custom register semantics on top of this low-level protocol is implemented
-;; in (chip-remote protocol).
-;;
-;; The (chip-remote protocol) module exposes primitives to perform transactions
-;; in the peripheral busses it supports. This module implements a data-type and
-;; associated functions that allow chip specifications to implement register
-;; read and write accesses in a uniform way, that can be used by very high
-;; level modules such as (chip-remote commander) to perform these accesses as
-;; it needs.
-;;
-;; The low level access function in (chip-remote protocol) need a connection
-;; object, and a symbol identifying the peripheral bus that the chip to talk to
-;; is connected to.
-;;
-;; This governs the API for the read, write, and setup function types:
-;;
-;;   - `(read  CONNECTION INTERFACE PAGE-ADDRESS REGISTER-ADDRESS)`
-;;   - `(write CONNECTION INTERFACE PAGE-ADDRESS REGISTER-ADDRESS VALUE)`
-;;   - `(setup CONNECTION INTERFACE)`
-;;
-;; The ‘data’ slot in `<device-access>` can be used freely by implementations
-;; to store any sort of additional data they need.
-
-
 (define-module (chip-remote device access)
-  #:use-module (srfi srfi-9 gnu)
-  #:use-module (ice-9 optargs)
   #:use-module (chip-remote protocol)
-  #:export (make-device-access
-            device-access?
-            device-access-data
-            device-setup
-            device-read
-            device-write))
+  #:use-module (data-structures records)
+  #:use-module (data-structures records utilities)
+  #:export (device-operations
+            make-device-operations
+            device-operations?
+            device-operations-make-setup
+            device-operations-read
+            device-operations-read-parse
+            device-operations-write
+            device-operations-write-parse
+            access-not-implemented
+            device-bus
+            device-bus?
+            device-bus-compatible?
+            device-bus-interface
+            device-bus-type
+            device-bus-setup
+            device-bus-xfer
+            make-device-bus
+            make-i2c
+            make-spi
+            fake-spi))
 
-(define-immutable-record-type <device-access>
-  (make-device-access* data setup read write)
-  device-access?
-  (data   device-access-data)
-  (setup  device-setup)
-  (read   device-read)
-  (write  device-write))
+(define-record-type* <device-operations>
+  device-operations make-device-operations
+  device-operations? this-device-operations
+  (setup        device-operations-make-setup)
+  (read         device-operations-read)
+  (read-parse   device-operations-read-parse)
+  (write        device-operations-write)
+  (write-parse  device-operations-write-parse))
 
-(define (default-setup c ifc)
-  (throw 'not-implemented 'device-access-setup))
+(define niy (lambda _ (throw 'not-implemented-yet)))
 
-(define (default-read c ifc p r)
-  (throw 'not-implemented 'device-access-read))
+(define access-not-implemented
+  (device-operations
+   (setup        niy)
+   (read         niy)
+   (read-parse   niy)
+   (write        niy)
+   (write-parse  niy)))
 
-(define (default-write c ifc p r v)
-  (throw 'not-implemented 'device-access-write))
+(define-record-type* <device-bus>
+  device-bus make-device-bus device-bus? this-device-bus
+  (type      device-bus-type  (sanitize (need 'type symbol?)))
+  (setup     device-bus-setup (default cr:setup-interface!))
+  (xfer      device-bus-xfer)
+  (interface device-bus-interface))
 
-(define* (make-device-access #:key
-                             (data #f)
-                             (setup default-setup)
-                             (read default-read)
-                             (write default-write))
-  (make-device-access* data setup read write))
+(define (make-spi ifc)
+  (device-bus (type      'spi)
+              (xfer      cr:spi-transceive!)
+              (interface ifc)))
+
+(define (make-i2c ifc)
+  (device-bus (type      'i2c)
+              (xfer      cr:i2c-transceive!)
+              (interface ifc)))
+
+(define fake-spi
+  (device-bus
+   (type 'spi)
+   (interface 'spi-0)
+   (setup (lambda (c ifc . lst)
+            (format #t "setup: ~a~%" lst)))
+   (xfer  (lambda (c ifc lst)
+            (format #t "xfer: ~a~%" lst)
+            (make-list (length lst) 0)))))
+
+(define (device-bus-compatible? c b)
+  (let ((ctrl (proto-get-ifc-ctrl! c (device-bus-interface b))))
+    (eq? (device-bus-type b)
+         (assq-ref ctrl 'type))))

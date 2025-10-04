@@ -44,9 +44,9 @@
   (datasheet "http://ww1.microchip.com/downloads/en/DeviceDoc/22242A.pdf")
   (keywords '(digital potentiometer spi))
   (register-width 9)
-  (access (make-device-access #:setup mcp-setup!
-                              #:read  register-read!
-                              #:write register-write!))
+  ;; (access (make-device-access #:setup mcp-setup!
+  ;;                             #:read  register-read!
+  ;;                             #:write register-write!))
   ;; #:bus (spi #:frame-width 16
   ;;            #:bit-order 'msb-first)
   ;; #:write register-write
