@@ -24,11 +24,11 @@
   (apply pretty-print (cons* obj #:width 80 #:max-expr-width 100 args)))
 
 (define-record-type <cmdr-state>
-  (make-cmdr-state device connection port address default decode open-hook)
+  (make-cmdr-state device connection interface address default decode open-hook)
   cmdr-state?
   (device     get-device     update-device!)
   (connection get-connection)
-  (port       get-port       update-port!)
+  (interface  get-interface  update-interface!)
   (address    get-address)
   (default    get-default)
   (decode     get-decoder    set-decoder!)
@@ -50,17 +50,10 @@
       (throw 'connection-not-opened conn)))
   *void*)
 
-(define (transmit-data c dev data)
-  (let ((addr (assq-ref data 'address))
-        (part (assq-ref data 'part))
-        (value (assq-ref data 'value))
-        (write-data (da-write (device-access dev))))
-    (transmit c (write-data (first addr) (second addr) value))))
-
 (define (make-args c? s args)
   (if c?
       (cons* (get-connection s)
-             (get-port s)
+             (get-interface s)
              (get-device s)
              args)
       (cons (get-device s) args)))
@@ -72,7 +65,7 @@
 
 (define* (make-commander #:key
                          device connection default (decode cr:decode)
-                         (port 0) address (open-hook (lambda (c n) #t)))
+                         interface address (open-hook (lambda (c ifc dev) #t)))
   "Return a device commander object
 
 The chip-remote library provides a powerful framework to express configuration
@@ -93,8 +86,7 @@ The constructor takes a number of keyword arguments:
 
 - ‘#:connection’ → Refers to the connection the device can be accessed through.
 
-- ‘#:port’ → The port (in RCCEP terms) the device is accessible through. This
-  defaults to 0.
+- ‘#:interface’ → The peripheral interface to use with the device in question.
 
 - ‘#:address’ → Configure the address of the device within the RCCEP port, if
   applicable. Defaults to 0.
@@ -137,8 +129,6 @@ Commands without further arguments are called *\"simple commands\"*. They are:
 
 - ‘reset!’ → Resets the register memory to the value supplied at construction
   time.
-
-- ‘trace!’ → Toggles tracing or a connection.
 
 - ‘push!’ → Transmits the entire register memory into the device via RCCEP.
   This order transformations contained in a device description into account in
@@ -205,8 +195,9 @@ memory copy."
   (unless (device? device)
     (throw 'cr-missing-data 'device device))
 
-  (let ((state (make-cmdr-state device connection port address
-                                default decode open-hook)))
+  (let ((state (make-cmdr-state device connection interface
+                                address default decode
+                                open-hook)))
 
     (lambda args
       (match args
@@ -214,19 +205,18 @@ memory copy."
         ;; TODO: Set address for I2C ports in ‘setup’?
         (('setup!) (begin
                      (must-be-connected state)
-                     (let ((c (get-connection state)))
+                     (let ((c (get-connection state))
+                           (ifc (get-interface state))
+                           (dev (get-device state))
+                           (hook (get-open-hook state)))
                        (unless (cr-access c)
                          (proto-engage! c))
-                       (let ((access (device-access device)))
-                         (when access
-                           ((device-setup access) c (get-port state))))
-                       ((get-open-hook state)
-                        (get-connection state)
-                        (get-port state)))))
+                       (device-setup! c ifc device)
+                       (hook c ifc dev))))
 
         (('decoder! f) (set-decoder! state f))
 
-        (('trace!)     (assq 'trace (io-opt/set 'trace (not (io-opt/get 'trace)))))
+        (('pull!)      (update! #t state cr:pull! '()))
         (('push!)      (update! #t state cr:push! '()))
         (('reset!)     (update! #f state cr:reset (list (get-default state))))
         (('connection) (get-connection state))
@@ -258,16 +248,6 @@ memory copy."
                (_ (apply throw args)))
              *void*)))
         (('change! kv ...) (update! #t state cr:change! kv))
-
-        (('transmit! addr)
-         (begin
-           (must-be-connected state)
-           (let* ((device (get-device state))
-                  (c (get-connection state))
-                  (extr (device-extract device
-                                        (current-device-state device)
-                                        addr)))
-             (transmit-data c (get-device state) extr))))
 
         (('history . args) (apply device-history (cons (get-device state) args)))
         (('diff . args)    (apply device-diff (cons (get-device state) args)))
