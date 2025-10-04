@@ -274,7 +274,7 @@ default value that can be derived for ‘target’."
 (define (values-for-minimised-script device script value)
   (map (lambda (expr)
          (match expr
-           (((reg p r) (e ...)) (value-at-address value (list p r)))))
+           (((reg p r) (e ...)) (value-at-address value p r))))
        script))
 
 (define (apply-modify-expr device value expr)
