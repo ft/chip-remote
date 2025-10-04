@@ -45,7 +45,11 @@
             device-address
             device-address:register
             device-address-map
-            device-extract))
+            device-extract
+            device-setup!            ;; Actual interaction
+            device-xfer!
+            device-read!
+            device-write!))
 
 (define-record-type* <device>
   device make-device device? this-device
@@ -57,7 +61,7 @@
   (register-width device-register-width (default #f))
   (page-map       device-page-map (sanitize (need 'page-map page-map?)))
   (combinations   device-combinations (default '()))
-  (access         device-access (default (make-device-access)))
+  (access         device-access (default access-not-implemented))
   (state          device-state (thunked)
                   (default (make-default-device-state this-device))))
 
@@ -194,3 +198,30 @@
       (part . ,part)
       (value . ,pv)
       (item . ,(if (item? part) (item-get part pv) pv)))))
+
+;; The following are talking through actual devices via the chip-remote
+;; firmware.
+
+(define (device-setup! c bus dev)
+  (let* ((ops (device-access dev))
+         (make-setup (device-operations-make-setup ops))
+         (setup (device-bus-setup bus))
+         (ifc (device-bus-interface bus)))
+    (apply setup c ifc (make-setup dev))))
+
+(define (device-xfer! c bus data)
+  ((device-bus-xfer bus) c (device-bus-interface bus) data))
+
+(define (device-read! c bus dev addr)
+  (let* ((ops (device-access dev))
+         (read (device-operations-read ops))
+         (parse (device-operations-read-parse ops)))
+    (parse dev addr
+           (device-xfer! c bus (read dev addr)))))
+
+(define (device-write! c bus dev addr value)
+  (let* ((ops (device-access dev))
+         (write (device-operations-write ops))
+         (parse (device-operations-write-parse ops)))
+    (parse dev addr value
+           (device-xfer! c bus (write dev addr value)))))
