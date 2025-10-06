@@ -33,8 +33,10 @@
 
 (define-record-type* <register-map>
   register-map make-register-map register-map? this-register-map
-  (name  register-map-name (default #f))
-  (width register-map-width (default #f))
+  (name         register-map-name    (default #f))
+  (address      register-address     (default #f))
+  (description  register-description (default #f))
+  (width        register-map-width   (default #f))
   (table register-map-table
          (sanitize
           (need 'table
