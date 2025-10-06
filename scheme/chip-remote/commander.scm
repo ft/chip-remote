@@ -174,6 +174,7 @@ memory copy."
 
         (('pull!)      (update! #t state cr:pull! '()))
         (('push!)      (update! #t state cr:push! '()))
+        (('read! . as) (update! #t state cr:read-registers! as))
         (('reset!)     (update! #f state cr:reset (list (get-default state))))
         (('connection) (get-connection state))
         (('data)       (current-device-state (get-device state)))
