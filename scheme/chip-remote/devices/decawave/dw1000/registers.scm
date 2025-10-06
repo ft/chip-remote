@@ -64,7 +64,7 @@
 (define reg:device-id
   (register
    (name 'device-id)
-   (address 0)
+   (address #x00)
    (description "Device ID register")
    (width (octets 4))
    (items
@@ -76,7 +76,7 @@
 (define reg:ieee-eui
   (register
    (name 'ieee-eui)
-   (address 1)
+   (address #x01)
    (description "IEEE Extended Unique Identifier")
    (width (octets 8))
    (items
@@ -86,7 +86,7 @@
 (define reg:pan-id/short-address
   (register
    (name 'pan-id/short-address)
-   (address 3)
+   (address #x03)
    (description "PAN ID and Short Address")
    (width (octets 4))
    (items
@@ -96,7 +96,7 @@
 (define reg:system-cfg
   (register
    (name 'system-cfg)
-   (address 4)
+   (address #x04)
    (description "System Configuration")
    (width (octets 4))
    (items
@@ -150,7 +150,7 @@
 (define reg:system-time
   (register
    (name 'system-time)
-   (address 6)
+   (address #x06)
    (description "System Time Counter")
    (width (octets 5))
    (items
@@ -159,7 +159,7 @@
 (define reg:tx-frame-ctrl
   (register
    (name 'tx-frame-ctrl)
-   (address 8)
+   (address #x08)
    (description "Transmit Frame Control")
    (width (octets 5))
    (items
@@ -182,7 +182,7 @@
 (define reg:tx-buffer
   (register
    (name 'tx-buffer)
-   (address 9)
+   (address #x09)
    (description "Transmit Data Buffer")
    (width (octets 1024))
    (items
@@ -191,7 +191,7 @@
 (define reg:delayed-tx/rx-time
   (register
    (name 'delayed-tx/rx-time)
-   (address 10)
+   (address #x0a)
    (description "Delayed Send or Receive Time")
    (width (octets 5))
    (items
@@ -200,7 +200,7 @@
 (define reg:rx-frame-wait-timeout
   (register
    (name 'rx-frame-wait-timeout)
-   (address 12)
+   (address #x0c)
    (description "Receive Frame Wait Timeout Period")
    (width (octets 4))
    (items
@@ -210,7 +210,7 @@
 (define reg:system-ctrl
   (register
    (name 'system-ctrl)
-   (address 13)
+   (address #x0d)
    (description "System Control Register")
    (width (octets 4))
    (items
@@ -234,7 +234,7 @@
 (define reg:system-event-mask
   (register
    (name 'system-event-mask)
-   (address 14)
+   (address #x0e)
    (description "System Event Mask Register")
    (width (octets 4))
    (items
@@ -273,7 +273,7 @@
 (define reg:system-status
   (register
    (name 'system-status)
-   (address 15)
+   (address #x0f)
    (description "System event Status Register")
    (width (octets 5))
    (items
@@ -317,7 +317,7 @@
 (define reg:rx-frame-info
   (register
    (name 'rx-frame-info)
-   (address 16)
+   (address #x10)
    (description "RX Frame Information")
    (width (octets 4))
    (items
@@ -333,7 +333,7 @@
 (define reg:rx-buffer
   (register
    (name 'rx-buffer)
-   (address 17)
+   (address #x11)
    (description "Receive Data Buffer")
    (width (octets 1024))
    (items
@@ -342,7 +342,7 @@
 (define reg:rx-frame-quality-info
   (register
    (name 'rx-frame-quality-info)
-   (address 18)
+   (address #x12)
    (description "Rx Frame Quality information")
    (width (octets 8))
    (items
@@ -354,7 +354,7 @@
 (define reg:rx-time-track-interval
   (register
    (name 'rx-time-track-interval)
-   (address 19)
+   (address #x13)
    (description "Receiver Time Tracking Interval")
    (width (octets 4))
    (items
@@ -363,7 +363,7 @@
 (define reg:rx-time-track-offset
   (register
    (name 'rx-time-track-offset)
-   (address 20)
+   (address #x14)
    (description "Receiver Time Tracking Offset")
    (width (octets 5))
    (items
@@ -376,7 +376,7 @@
 (define reg:rx-time-of-arrival
   (register
    (name 'rx-time-of-arrival)
-   (address 21)
+   (address #x15)
    (description "Receive Message Time of Arrival")
    (width (octets 14))
    (items
@@ -388,7 +388,7 @@
 (define reg:tx-time-of-sending
   (register
    (name 'tx-time-of-sending)
-   (address 23)
+   (address #x17)
    (description "Transmit Message Time of Sending")
    (width (octets 10))
    (items
@@ -398,7 +398,7 @@
 (define reg:tx-antenna-delay
   (register
    (name 'tx-antenna-delay)
-   (address 24)
+   (address #x18)
    (description "16-bit Delay from Transmit to Antenna")
    (width (octets 2))
    (items
@@ -407,7 +407,7 @@
 (define reg:system-state
   (register
    (name 'system-state)
-   (address 25)
+   (address #x19)
    (description "System State information")
    (width (octets 5))
    (items
@@ -416,7 +416,7 @@
 (define reg:ack-time/response-time
   (register
    (name 'ack-time/response-time)
-   (address 26)
+   (address #x1a)
    (description "Acknowledgement Time and Response Time")
    (width (octets 4))
    (items
@@ -427,7 +427,7 @@
 (define reg:rx-sniff-mode-cfg
   (register
    (name 'rx-sniff-mode-cfg)
-   (address 29)
+   (address #x1d)
    (description "Sniff Mode Configuration")
    (width (octets 4))
    (items
@@ -439,7 +439,7 @@
 (define reg:tx-power-ctrl
   (register
    (name 'tx-power-ctrl)
-   (address 30)
+   (address #x1e)
    (description "TX Power Control")
    (width (octets 4))
    (items
@@ -451,7 +451,7 @@
 (define reg:channel-ctrl
   (register
    (name 'channel-ctrl)
-   (address 31)
+   (address #x1f)
    (description "Channel Control")
    (width (octets 4))
    (items
@@ -469,7 +469,7 @@
 (define reg:user-sfd-sequences
   (register
    (name 'user-sfd-sequences)
-   (address 33)
+   (address #x21)
    (description "User-specified short/long TX/RX SFD sequences")
    (width (octets 41))
    (items
@@ -478,7 +478,7 @@
 (define reg:agc-ctrl
   (register
    (name 'agc-ctrl)
-   (address 35)
+   (address #x23)
    (description "Automatic Gain Control configuration")
    (width (octets 32))
    (items
@@ -487,7 +487,7 @@
 (define reg:external-sync-ctrl
   (register
    (name 'external-sync-ctrl)
-   (address 36)
+   (address #x24)
    (description "External synchronisation control")
    (width (octets 12))
    (items
@@ -496,7 +496,7 @@
 (define reg:accumulator-memory
   (register
    (name 'accumulator-memory)
-   (address 37)
+   (address #x25)
    (description "Read access to accumulator data")
    (width (octets 4064))
    (items
@@ -505,7 +505,7 @@
 (define reg:gpio-ctrl
   (register
    (name 'gpio-ctrl)
-   (address 38)
+   (address #x26)
    (description "GPIO control")
    (width (octets 44))
    (items
@@ -761,7 +761,7 @@
 (define reg:digital-rx-cfg
   (register
    (name 'digital-rx-cfg)
-   (address 39)
+   (address #x27)
    (description "Digital Receiver configuration")
    (width (octets 46))
    (items
@@ -770,7 +770,7 @@
 (define reg:analog-rx-cfg
   (register
    (name 'analog-rx-cfg)
-   (address 40)
+   (address #x28)
    (description "Analog RF Configuration")
    (width (octets 53))
    (items
@@ -779,7 +779,7 @@
 (define reg:tx-calibration-cfg
   (register
    (name 'tx-calibration-cfg)
-   (address 42)
+   (address #x2a)
    (description "Transmitter calibration block")
    (width (octets 13))
    (items
@@ -788,7 +788,7 @@
 (define reg:frequency-synthesizer-ctrl
   (register
    (name 'frequency-synthesizer-ctrl)
-   (address 43)
+   (address #x2b)
    (description "Frequency synthesiser control block")
    (width (octets 21))
    (items
@@ -797,7 +797,7 @@
 (define reg:always-on-ctrl
   (register
    (name 'always-on-ctrl)
-   (address 44)
+   (address #x2c)
    (description "Always-On register set")
    (width (octets 12))
    (items
@@ -806,7 +806,7 @@
 (define reg:otp-interface
   (register
    (name 'otp-interface)
-   (address 45)
+   (address #x2d)
    (description "One Time Programmable Memory Interface")
    (width (octets 13))
    (items
@@ -815,7 +815,7 @@
 (define reg:leading-edge-detect-ctrl
   (register
    (name 'leading-edge-detect-ctrl)
-   (address 46)
+   (address #x2e)
    (description "Leading edge detection control block")
    (width (octets 10246))
    (items
@@ -824,7 +824,7 @@
 (define reg:digital-diagnostics
   (register
    (name 'digital-diagnostics)
-   (address 47)
+   (address #x2f)
    (description "Digital Diagnostics Interface")
    (width (octets 38))
    (items
@@ -863,7 +863,7 @@
 (define reg:power-management-ctrl
   (register
    (name 'power-management-ctrl)
-   (address 54)
+   (address #x36)
    (description "Power Management System Control Block")
    (width (octets 44))
    (items
