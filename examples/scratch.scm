@@ -127,5 +127,5 @@
 ;;       '(gpio-2-output-mask    #t)
 ;;       '(gpio-2-output-value   #t)))
 
-(when cr
+(when c
   (proto-engage! cr))
