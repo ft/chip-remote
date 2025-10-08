@@ -216,12 +216,12 @@
   (let* ((ops (device-access dev))
          (read (device-operations-read ops))
          (parse (device-operations-read-parse ops)))
-    (parse dev addr
-           (device-xfer! c bus (read dev addr)))))
+    (let-values (((data meta) (read dev addr)))
+      (parse dev addr (device-xfer! c bus data) meta))))
 
 (define (device-write! c bus dev addr value)
   (let* ((ops (device-access dev))
          (write (device-operations-write ops))
          (parse (device-operations-write-parse ops)))
-    (parse dev addr value
-           (device-xfer! c bus (write dev addr value)))))
+    (let-values (((data meta) (write dev addr value)))
+      (parse dev addr value (device-xfer! c bus data) meta))))

@@ -5,6 +5,7 @@
 (define-module (chip-remote devices decawave dw1000)
   #:use-module (srfi srfi-1)
   #:use-module (rnrs bytevectors)
+  #:use-module (chip-remote bit-operations)
   #:use-module (chip-remote device)
   #:use-module (chip-remote device access)
   #:use-module (chip-remote item)
@@ -39,6 +40,25 @@
 
 (define-u8-register extended-address)
 
+(define-public (make-header write? regaddr subaddr)
+  (when (> subaddr #x7fff)
+    (throw 'value-out-of-range subaddr))
+  (let* ((with-subaddr? (not (zero? subaddr)))
+         (ctrl (chain-modify* frame-ctrl
+                              `(write-op? ,write?)
+                              `(sub-address? ,with-subaddr?)
+                              `(register-address ,regaddr))))
+    (if (not with-subaddr?)
+        (list ctrl)
+        (let* ((extended? (> subaddr #x7f))
+               (sub (chain-modify* frame-sub-address
+                                   `(extended-address? ,extended?)
+                                   `(sub-address ,(bit-extract-width subaddr
+                                                                     0 7)))))
+          (if (not extended?)
+              (list ctrl sub)
+              (list ctrl sub (bit-extract-width subaddr 7 8)))))))
+
 (define (setup-spi dev)
   ;; We don't need any information about the device to determine a useable SPI
   ;; configuration. 4Mbit/s is not at the limit of the device, but should be
@@ -60,30 +80,26 @@
 ;; there is nothing to do.
 (define (read-from-spi dev addr)
   (let* ((reg (apply device-ref dev (take addr 2)))
-         (width (/ (register-width reg) 8)))
-    (cons* (chain-modify* frame-ctrl
-                          '(write-op? #f)
-                          '(sub-address? #f)
-                          `(register-address ,(cadr addr)))
-           (make-list (min width 60) 0))))
+         (width (/ (register-width reg) 8))
+         (header (make-header #f (car addr) (cadr addr))))
+    (values (append header (make-list (min width 60) 0))
+            (length header))))
 
-(define (read-parse dev addr data)
-  (let* ((bytes (cdr data))
+(define (read-parse dev addr data meta)
+  (let* ((bytes (drop data meta))
          (size (length bytes)))
     (bytevector-uint-ref (u8-list->bytevector bytes) 0 'little size)))
 
 (define (write-to-spi dev addr value)
   (let* ((reg (apply device-ref dev (take addr 2)))
          (width (/ (register-width reg) 8))
-         (bv (make-bytevector width)))
+         (bv (make-bytevector width))
+         (header (make-header #t (car addr) (cadr addr))))
     (bytevector-uint-set! bv 0 value 'little width)
-    (cons* (chain-modify* frame-ctrl
-                          '(write-op? #t)
-                          '(sub-address? #f)
-                          `(register-address ,(cadr addr)))
-           (bytevector->u8-list bv))))
+    (values (append header (bytevector->u8-list bv))
+            (length header))))
 
-(define (write-parse dev addr value data)
+(define (write-parse dev addr value data meta)
   #t)
 
 (define-device dw1000
