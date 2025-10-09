@@ -846,9 +846,7 @@
    (width (octets 2))
    (items (list (‣ adc-tune-1
                    0 (octets 2)
-                   (semantics
-                    (semantics (range (table-lookup agc-prf-tune-map))
-                               (default 'prf-16mhz))))))))
+                   (semantics (tbl agc-prf-tune-map #:default 'prf-16mhz)))))))
 
 (define-public reg:agc-tune-2
   (register
