@@ -12,7 +12,7 @@
 (init-test-tap!)
 
 (with-fs-test-bundle
-  (plan 11)
+  (plan 12)
 
   (let ((s (semantics (decode (make-evaluation
                                '(lambda (w x) (increment x 2))))
@@ -32,7 +32,7 @@
   (let* ((table '((something . 3)
                   (more . 5)
                   (stuff . 23)))
-         (s (semantics (range (table-lookup table)) (default 'something))))
+         (s (tbl table #:default 'something)))
     (define-test "table lookup range is correct"
       (pass-if-equal? (semantics-range s 5)
                       `(table ,table)))
@@ -48,4 +48,6 @@
     (define-test "semantics-in-range? more → #t"
       (pass-if-true (semantics-in-range? s 5 'more)))
     (define-test "semantics-in-range? does-not-exist → #f"
-      (pass-if-false (semantics-in-range? s 5 'does-not-exist)))))
+      (pass-if-false (semantics-in-range? s 5 'does-not-exist)))
+    (define-test "semantics-default works"
+      (pass-if-eq? 'something (semantics-default s 5)))))
