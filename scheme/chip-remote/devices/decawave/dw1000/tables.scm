@@ -4,7 +4,8 @@
 
 (define-module (chip-remote devices decawave dw1000 tables)
   #:use-module (chip-remote named-value)
-  #:export (gpio-0-modes
+  #:export (agc-prf-tune-map
+            gpio-0-modes
             gpio-1-modes
             gpio-2-modes
             gpio-3-modes
@@ -117,3 +118,6 @@
                                  (force-xti-clock . #b01)
                                  (force-pll-clock . #b10)
                                  (reserved        . #b11)))
+
+(define-value agc-prf-tune-map '((prf-16mhz . #x8870)
+                                 (prf-64mhz . #x889b)))

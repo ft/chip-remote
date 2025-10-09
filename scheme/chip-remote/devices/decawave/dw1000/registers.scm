@@ -830,12 +830,49 @@
 ;; 0x23 33octets AGC_CTRL RW
 ;; Automatic Gain Control Configuration
 
-(define-public reg:agc-ctrl-memory
+(define-public reg:agc-control
   (register
-   (name 'agc-ctrl-memory)
-   (address 0)
-   (width (octets 33))
-   (items (list (‣ agc-ctrl-memory 0 (octets 33))))))
+   (name 'agc-control)
+   (address #x02)
+   (width (octets 2))
+   (items (list (‣ enable-agc-measurement
+                   0 1 (semantics boolean/active-low) (default #f))
+                (‣ reserved 1 15)))))
+
+(define-public reg:agc-tune-1
+  (register
+   (name 'agc-tune-1)
+   (address #x04)
+   (width (octets 2))
+   (items (list (‣ adc-tune-1
+                   0 (octets 2)
+                   (semantics
+                    (semantics (range (table-lookup agc-prf-tune-map))
+                               (default 'prf-16mhz))))))))
+
+(define-public reg:agc-tune-2
+  (register
+   (name 'agc-tune-2)
+   (address #x0c)
+   (width (octets 4))
+   (items (list (‣ agc-tune-2 0 (octets 4) (default #x2502a907))))))
+
+(define-public reg:agc-tune-3
+  (register
+   (name 'agc-tune-3)
+   (address #x12)
+   (width (octets 2))
+   (items (list (‣ agc-tune-3 0 (octets 2) (default #x0035))))))
+
+(define-public reg:agc-status
+  (register
+   (name 'agc-status)
+   (address #x1e)
+   (width (octets 3))
+   (items (list (‣ reserved  0 6)
+                (‣ agc-edg1  6 5)
+                (‣ agc-edv2 11 9)
+                (‣ reserved 20 4)))))
 
 (define-public page:agc-ctrl
   (register-map
@@ -843,7 +880,11 @@
    (address #x23)
    (description "Automatic Gain Control configuration")
    (width (octets 33))
-   (table (↔ (0 reg:agc-ctrl-memory)))))
+   (table (↔ (#x02 reg:agc-control)
+             (#x04 reg:agc-tune-1)
+             (#x0c reg:agc-tune-2)
+             (#x12 reg:agc-tune-3)
+             (#x1e reg:agc-status)))))
 
 ;; 0x24 12octets EXT_SYNC RW
 ;; External Synchronisation Control
