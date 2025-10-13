@@ -67,7 +67,7 @@
 
 (set-record-type-printer! <page-map>
   (lambda (pm port)
-    (simple-format port "#<page-map name: ~a maps: ~a>"
+    (simple-format port "#<page-map name: ~a pages: ~a>"
                    (page-map-name pm)
                    (length (page-map-table pm)))))
 

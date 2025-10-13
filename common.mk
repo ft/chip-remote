@@ -30,6 +30,7 @@ MODULES_CORE += $(CR)/manufacturer.scm
 MODULES_CORE += $(CR)/modify.scm
 MODULES_CORE += $(CR)/named-value.scm
 MODULES_CORE += $(CR)/page-map.scm
+MODULES_CORE += $(CR)/pretty-print.scm
 MODULES_CORE += $(CR)/protocol.scm
 MODULES_CORE += $(CR)/register-map.scm
 MODULES_CORE += $(CR)/register-map/utilities.scm

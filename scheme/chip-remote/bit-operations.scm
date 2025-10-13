@@ -4,6 +4,8 @@
 
 (define-module (chip-remote bit-operations)
   #:export (bit-extract-width
+            bit-width
+            hex-width
             bitmask->indices
             clear-bits
             extract-octet
@@ -11,6 +13,15 @@
             put-octet
             set-bits
             logclear))
+
+(define (bit-width n)
+  (let loop ((m 1) (c 0))
+    (if (> m n)
+        c
+        (loop (ash m 1) (1+ c)))))
+
+(define (hex-width n)
+  (ceiling (/ (bit-width n) 4)))
 
 (define (one-bits width)
   "Returns an integer, that has its lower ‘width’ bits set:

@@ -38,6 +38,7 @@
              (chip-remote modify)
              (chip-remote named-value)
              (chip-remote page-map)
+             (chip-remote pretty-print)
              (chip-remote protocol)
              (chip-remote register)
              (chip-remote register common)

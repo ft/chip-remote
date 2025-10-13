@@ -69,7 +69,7 @@
 
 (set-record-type-printer! <device>
   (lambda (dev port)
-    (simple-format port "#<device name: ~a maps: ~a states: ~a>"
+    (simple-format port "#<device name: ~a pages: ~a states: ~a>"
                    (device-name dev)
                    (length (page-map-table (device-page-map dev)))
                    (sized-stack-used (device-state dev)))))
