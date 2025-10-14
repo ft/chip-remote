@@ -12,7 +12,7 @@
 (init-test-tap!)
 
 (with-fs-test-bundle
-  (plan 12)
+  (plan 24)
   (let ((width-tests '((  0 0 0)
                        (  1 1 1)
                        (  2 2 1)
