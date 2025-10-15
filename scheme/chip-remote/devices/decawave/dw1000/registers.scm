@@ -1160,20 +1160,20 @@
 ;; 0x28 58octets RF_CONF RW
 ;; Analog RF Configuration
 
-(define-public reg:analog-rx-cfg
+(define-public reg:analog-rf-cfg
   (register
-   (name 'analog-rx-cfg)
+   (name 'analog-rf-cfg)
    (address 0)
    (width (octets 58))
-   (items (list (‣ analog-rx-cfg 0 (octets 58))))))
+   (items (list (‣ analog-rf-cfg 0 (octets 58))))))
 
-(define-public page:analog-rx-cfg
+(define-public page:analog-rf-cfg
   (register-map
-   (name 'analog-rx-cfg)
+   (name 'analog-rf-cfg)
    (address #x28)
    (description "Analog RF Configuration")
    (width (octets 58))
-   (table (↔ (0 reg:analog-rx-cfg)))))
+   (table (↔ (0 reg:analog-rf-cfg)))))
 
 
 ;; 0x29 RESERVED

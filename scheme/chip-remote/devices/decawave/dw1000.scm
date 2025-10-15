@@ -144,7 +144,7 @@
                            (#x25 page:accumulator-memory)
                            (#x26 page:gpio-ctrl)
                            (#x27 page:digital-rx-cfg)
-                           (#x28 page:analog-rx-cfg)
+                           (#x28 page:analog-rf-cfg)
                            (#x2a page:tx-calibration)
                            (#x2b page:frequency-synthesizer-ctrl)
                            (#x2c page:always-on-ctrl)
