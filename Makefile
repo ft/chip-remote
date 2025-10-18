@@ -50,7 +50,7 @@ happiness:
 	$(MAKE) native-fw
 	$(MAKE) doc
 	(cd firmware && mmh -l -P)
-	$(MAKE) -j$(nproc) compile
+	$(MAKE) -j$$(nproc) compile
 	$(MAKE) strict-test
 
 clean-go:
