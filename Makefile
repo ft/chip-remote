@@ -46,7 +46,11 @@ compile: $(OBJECTS)
 native-fw:
 	(cd firmware && mmh -l -P -d ../native-fw system -s build zephyr/native-sim/chip-remote/host/debug)
 
-happiness: native-fw compile doc strict-test
+happiness:
+	$(MAKE) native-fw
+	$(MAKE) doc
+	$(MAKE) -j$(nproc) compile
+	$(MAKE) strict-test
 
 clean-go:
 	find scheme -name "*.go"      -exec rm -f '{}' +
