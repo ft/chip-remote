@@ -114,7 +114,7 @@
 ;;
 ;; (define dw #f)
 ;;
-;; (when cr
+;; (when c
 ;;   (set! dw (make-commander #:device     dw1000
 ;;                            #:connection cr
 ;;                            #:interface  (make-spi 'spi-0)))
@@ -132,7 +132,7 @@
 ;;
 ;; (define dw #f)
 ;;
-;; (when cr
+;; (when c
 ;;   (set! dw (make-commander #:device     dw3000
 ;;                            #:connection cr
 ;;                            #:interface  (make-spi 'spi-0)))
